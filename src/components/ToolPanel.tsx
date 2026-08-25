@@ -627,6 +627,29 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
 
                 {/* 3. IMAGEN DEL NODO (Insertar imagen JPG, PNG, SVG, WebP o URL) */}
                 <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                  {/* Hidden File Input for Attached Content Image Upload */}
+                  <input
+                    ref={imageFileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const result = reader.result as string;
+                        onUpdateNode(selectedNode.id, {
+                          imageUrl: result,
+                          imagePosition: selectedNode.imagePosition || 'top',
+                          imageWidth: selectedNode.imageWidth || 140,
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                      e.target.value = '';
+                    }}
+                  />
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
