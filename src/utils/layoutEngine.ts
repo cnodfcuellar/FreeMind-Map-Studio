@@ -119,7 +119,12 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
   }
 
   // Shape specific dimensions adjustments
-  if (node.shape === 'square' || node.shape === 'circle') {
+  if (node.imageUrl && node.imagePosition === 'fit') {
+    const scale = node.imageWidth || node.customWidth || 160;
+    const ratio = node.imageHeight && node.imageWidth ? node.imageHeight / node.imageWidth : 0.75;
+    width = scale;
+    height = node.customHeight || Math.round(scale * ratio);
+  } else if (node.shape === 'square' || node.shape === 'circle') {
     const dim = Math.max(width, height, node.customWidth || 0, node.customHeight || 0, 48);
     width = dim;
     height = dim;

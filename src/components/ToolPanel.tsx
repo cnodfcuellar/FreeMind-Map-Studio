@@ -674,23 +674,35 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                         </div>
                       </div>
 
-                      {/* Image Position */}
+                      {/* Image Position Selector */}
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Posición en el nodo
+                          Ajuste de la imagen
                         </label>
-                        <div className="grid grid-cols-3 gap-1">
+                        <div className="grid grid-cols-4 gap-1">
                           {[
-                            { id: 'top', label: '⬆️ Arriba' },
-                            { id: 'bottom', label: '⬇️ Abajo' },
-                            { id: 'background', label: '🎨 Fondo' },
+                            { id: 'fit', label: '🖼️ Ajustado', tip: 'El nodo toma la forma y proporción de la imagen' },
+                            { id: 'background', label: '🎨 Fondo', tip: 'Fondo completo' },
+                            { id: 'top', label: '⬆️ Arriba', tip: 'Sobre texto' },
+                            { id: 'bottom', label: '⬇️ Abajo', tip: 'Bajo texto' },
                           ].map((pos) => (
                             <button
                               key={pos.id}
                               type="button"
-                              onClick={() => onUpdateNode(selectedNode.id, { imagePosition: pos.id as any })}
-                              className={`py-1.5 px-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer ${
-                                (selectedNode.imagePosition || 'top') === pos.id
+                              title={pos.tip}
+                              onClick={() => {
+                                const newPos = pos.id as any;
+                                const scale = selectedNode.imageWidth || selectedNode.customWidth || 160;
+                                onUpdateNode(selectedNode.id, {
+                                  imagePosition: newPos,
+                                  ...(newPos === 'fit' ? {
+                                    customWidth: scale,
+                                    customHeight: Math.round(scale * 0.75),
+                                  } : {}),
+                                });
+                              }}
+                              className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer truncate ${
+                                (selectedNode.imagePosition || 'background') === pos.id
                                   ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
                                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                               }`}
@@ -701,24 +713,44 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                         </div>
                       </div>
 
-                      {/* Image Scale Slider */}
-                      {selectedNode.imagePosition !== 'background' && (
-                        <div>
-                          <div className="flex items-center justify-between text-[11px] mb-1">
-                            <span className="font-semibold text-slate-600">Ancho / Escala</span>
-                            <span className="text-slate-500 font-mono text-[10.5px]">{selectedNode.imageWidth || 140}px</span>
-                          </div>
-                          <input
-                            type="range"
-                            min="60"
-                            max="300"
-                            step="10"
-                            value={selectedNode.imageWidth || 140}
-                            onChange={(e) => onUpdateNode(selectedNode.id, { imageWidth: Number(e.target.value) })}
-                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                          />
+                      {/* Image Width / Uniform Scale Slider */}
+                      <div>
+                        <div className="flex items-center justify-between text-[11px] mb-1">
+                          <span className="font-semibold text-slate-600">
+                            {selectedNode.imagePosition === 'fit' ? 'Tamaño Uniforme del Nodo' : 'Escala / Ancho del nodo'}
+                          </span>
+                          <span className="text-purple-700 font-mono font-bold text-[10.5px] bg-purple-50 px-1.5 py-0.2 rounded">
+                            {selectedNode.imageWidth || selectedNode.customWidth || 160}px
+                          </span>
                         </div>
-                      )}
+                        <input
+                          type="range"
+                          min="60"
+                          max="400"
+                          step="10"
+                          value={selectedNode.imageWidth || selectedNode.customWidth || 160}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            if (selectedNode.imagePosition === 'fit') {
+                              onUpdateNode(selectedNode.id, {
+                                imageWidth: val,
+                                customWidth: val,
+                                customHeight: Math.round(val * 0.75),
+                              });
+                            } else {
+                              onUpdateNode(selectedNode.id, { imageWidth: val, customWidth: val });
+                            }
+                          }}
+                          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                        />
+                        {selectedNode.imagePosition === 'fit' && (
+                          <div className="flex items-center justify-between text-[9.5px] text-slate-400 font-medium px-0.5 mt-0.5">
+                            <span>Compacto (60px)</span>
+                            <span className="text-purple-600 font-semibold">Escala Proporcional 1:1</span>
+                            <span>Grande (400px)</span>
+                          </div>
+                        )}
+                      </div>
 
                       {/* Change image button */}
                       <button
@@ -996,17 +1028,29 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                               Ajuste de la imagen
                             </label>
-                            <div className="grid grid-cols-3 gap-1">
+                            <div className="grid grid-cols-4 gap-1">
                               {[
-                                { id: 'background', label: '🎨 Fondo' },
-                                { id: 'top', label: '⬆️ Arriba' },
-                                { id: 'bottom', label: '⬇️ Abajo' },
+                                { id: 'fit', label: '🖼️ Ajustado', tip: 'El nodo toma la forma y proporción de la imagen' },
+                                { id: 'background', label: '🎨 Fondo', tip: 'Fondo completo cubriendo el nodo' },
+                                { id: 'top', label: '⬆️ Arriba', tip: 'Imagen sobre el texto' },
+                                { id: 'bottom', label: '⬇️ Abajo', tip: 'Imagen bajo el texto' },
                               ].map((pos) => (
                                 <button
                                   key={pos.id}
                                   type="button"
-                                  onClick={() => onUpdateNode(selectedNode.id, { imagePosition: pos.id as any })}
-                                  className={`py-1.5 px-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer ${
+                                  title={pos.tip}
+                                  onClick={() => {
+                                    const newPos = pos.id as any;
+                                    const scale = selectedNode.imageWidth || selectedNode.customWidth || 160;
+                                    onUpdateNode(selectedNode.id, {
+                                      imagePosition: newPos,
+                                      ...(newPos === 'fit' ? {
+                                        customWidth: scale,
+                                        customHeight: Math.round(scale * 0.75),
+                                      } : {}),
+                                    });
+                                  }}
+                                  className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer truncate ${
                                     (selectedNode.imagePosition || 'background') === pos.id
                                       ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
                                       : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -1018,10 +1062,12 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                             </div>
                           </div>
 
-                          {/* Image Width / Scale Slider */}
+                          {/* Image Width / Uniform Scale Slider */}
                           <div>
                             <div className="flex items-center justify-between text-[11px] mb-1">
-                              <span className="font-semibold text-slate-600">Escala / Ancho del nodo</span>
+                              <span className="font-semibold text-slate-600">
+                                {selectedNode.imagePosition === 'fit' ? 'Tamaño Uniforme del Nodo' : 'Escala / Ancho del nodo'}
+                              </span>
                               <span className="text-purple-700 font-mono font-bold text-[10.5px] bg-purple-50 px-1.5 py-0.2 rounded">
                                 {selectedNode.imageWidth || selectedNode.customWidth || 160}px
                               </span>
@@ -1034,10 +1080,25 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                               value={selectedNode.imageWidth || selectedNode.customWidth || 160}
                               onChange={(e) => {
                                 const val = Number(e.target.value);
-                                onUpdateNode(selectedNode.id, { imageWidth: val, customWidth: val });
+                                if (selectedNode.imagePosition === 'fit') {
+                                  onUpdateNode(selectedNode.id, {
+                                    imageWidth: val,
+                                    customWidth: val,
+                                    customHeight: Math.round(val * 0.75),
+                                  });
+                                } else {
+                                  onUpdateNode(selectedNode.id, { imageWidth: val, customWidth: val });
+                                }
                               }}
                               className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
                             />
+                            {selectedNode.imagePosition === 'fit' && (
+                              <div className="flex items-center justify-between text-[9.5px] text-slate-400 font-medium px-0.5 mt-0.5">
+                                <span>Compacto (60px)</span>
+                                <span className="text-purple-600 font-semibold">Escala Proporcional 1:1</span>
+                                <span>Grande (400px)</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Change Image Button */}

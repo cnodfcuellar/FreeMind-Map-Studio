@@ -217,18 +217,37 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
 
   // Shape class generator
   const getShapeStyle = (): React.CSSProperties => {
-    // When node has an active image, it replaces the geometric shape and serves as the background
+    // When node has an active image in fit or background mode, it replaces the geometric shape and serves as the background
     if (node.imageUrl) {
-      return {
-        backgroundColor: 'transparent',
-        backgroundImage: node.imagePosition === 'background' || !node.imagePosition ? `url(${node.imageUrl})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        borderRadius: isRoot ? '16px' : '10px',
-        border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
-        boxShadow: isRoot ? '0 10px 25px -5px rgba(0,0,0,0.2)' : '0 4px 12px -2px rgba(0,0,0,0.12)',
-      };
+      if (node.imagePosition === 'fit') {
+        return {
+          backgroundColor: 'transparent',
+          backgroundImage: `url(${node.imageUrl})`,
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          borderRadius: isRoot ? '16px' : '10px',
+          border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
+          boxShadow: isRoot ? '0 10px 25px -5px rgba(0,0,0,0.2)' : '0 4px 12px -2px rgba(0,0,0,0.12)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '12px 14px',
+        };
+      }
+      if (node.imagePosition === 'background' || !node.imagePosition) {
+        return {
+          backgroundColor: 'transparent',
+          backgroundImage: `url(${node.imageUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          borderRadius: isRoot ? '16px' : '10px',
+          border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
+          boxShadow: isRoot ? '0 10px 25px -5px rgba(0,0,0,0.2)' : '0 4px 12px -2px rgba(0,0,0,0.12)',
+        };
+      }
     }
 
     const baseStyle: React.CSSProperties = {
