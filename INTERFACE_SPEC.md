@@ -314,3 +314,55 @@
 | <kbd>F5</kbd> | Iniciar **Modo Presentación** en pantalla completa |
 | <kbd>Ctrl</kbd> + <kbd>E</kbd> | Abrir modal de **Exportación e Importación** |
 | <kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Ctrl</kbd> + <kbd>Y</kbd> | Deshacer / Rehacer cambios |
+
+---
+
+## 8. Catálogo Completo de Nuevas Funciones y Opciones Avanzadas
+
+### 8.1. 10 Formas Geométricas de Nodos
+1. **Burbuja (`bubble`):** Caja con esquinas redondeadas modernas y fondo sólido o estilizado.
+2. **Horquilla (`fork`):** Línea de subrayado inferior estilo tradicional Freeplane.
+3. **Rectángulo (`rectangle`):** Bordes rectos estructurados para procesos y diagramas técnicos.
+4. **Cuadrada (`square`):** Proporción geométrica simétrica $1:1$ para tarjetas y bloques fijos.
+5. **Óvalo (`oval`):** Curvatura elíptica armónica para conceptos principales.
+6. **Circular (`circle`):** Círculo simétrico $1:1$ con texto centrado y soporte para degradados radiales.
+7. **Cápsula (`pill`):** Bordes $100\%$ redondeados para etiquetas compactas.
+8. **Hexágono (`hexagon`):** Polígono SVG de 6 caras con cortes angulares pronunciados y contorno dinámico.
+9. **Flecha (`arrow`):** Polígono SVG con punta triangular y muesca trasera para flujos y procesos.
+10. **Estrella (`star`):** Polígono SVG de 5 puntas estilizado con altura proporcional y contornos nítidos.
+
+### 8.2. Dimensiones de Forma y Auto-Ajuste de Texto
+- **Deslizador de Ancho (`customWidth`):** Rango de $50\text{px}$ a $500\text{px}$.
+- **Deslizador de Alto (`customHeight`):** Rango de $30\text{px}$ a $300\text{px}$.
+- **Sincronización $1:1$ (Cuadrado y Círculo):** Un único deslizador centrado actualiza automáticamente ambas dimensiones para mantener la simetría perfecta.
+- **Botón "Automático":** Restablece el dimensionamiento automático calculado por el contenido.
+- **Ajuste y Salto de Línea Adaptativo:** El texto se envuelve automáticamente (`break-words`, `overflowWrap`, `hyphens`) y el motor de diseño expande la altura dinámica del nodo sin desbordamiento.
+
+### 8.3. Modos Avanzados de Fondo del Nodo
+1. 🎨 **Color Sólido (`color`):** Selector de color RGB/Hex, paleta rápida y botón "Por defecto".
+2. 🚫 **Sin Color / Transparente (`transparent`):** Nodo sin relleno para un estilo limpio minimalista.
+3. 🌈 **Degradados de 2 Colores (`gradient`):** 
+   - Selector independiente para Color Inicial (1) y Color Final (2).
+   - 4 Direcciones: Horizontal ($\rightarrow$), Vertical ($\downarrow$), Diagonal ($\searrow$) y Radial ($\odot$).
+   - 6 combinaciones preconfiguradas (Océano, Atardecer, Esmeralda, Rosa Neón, Índigo, Carbón).
+4. ▦ **Tramas y Patrones (`pattern`):**
+   - 7 estilos aplicados localmente: Puntos (`dots`), Líneas (`lines`), Cuadrícula (`squares`), Rayas (`stripes`), Triángulos (`triangles`), Hexágonos (`hexagons`), Cruces (`cross`).
+   - Color base, color de trama, espaciado ($8 - 36\text{px}$) y opacidad ($10\% - 100\%$).
+
+### 8.4. Contornos y Bordes del Nodo
+- **Grosor de Línea:** Fino ($1\text{px}$), Estándar ($2\text{px}$), Grueso ($3.5\text{px}$), Extra ($5\text{px}$), Sin Borde ($0\text{px}$) y deslizador continuo ($0 - 8\text{px}$).
+- **Patrón de Trazo:** Continuo (`solid`), Discontinuo (`dashed`) y Punteado (`dotted`).
+- **Color de Contorno:** Automático por color de rama (`Multicolor por Rama`) o personalizado vía selector y paleta.
+
+### 8.5. Imágenes Adjuntas al Nodo
+- **Formatos admitidos:** JPG, PNG, SVG y WebP (o URLs remotas).
+- **Posicionamiento:** Arriba (`top`), Abajo (`bottom`) o Fondo (`background`).
+- **Escala:** Deslizador de ancho/escala de imagen ($60 - 300\text{px}$).
+
+### 8.6. 3 Modos de Presentación
+1. 🎬 **Clásico:** Diapositivas secuenciales por ramas con navegación mediante teclado (<kbd>→</kbd>, <kbd>←</kbd>, <kbd>Esc</kbd>).
+2. ✨ **Elaborado:** Modal con notificación de próxima disponibilidad.
+3. 🚀 **Dinámico:** Modal con notificación de próxima disponibilidad.
+
+### 8.7. Paneles Plegables en Acordeón
+- Todas las secciones del Panel de Propiedades (**Mapa** y **Estilos & Forma**) cuentan con cabeceras interactivas, badges de estado y botones rápidos de `Desplegar todo` y `Plegar todo`.
