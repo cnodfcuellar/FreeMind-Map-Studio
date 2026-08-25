@@ -115,6 +115,33 @@ const TEXT_COLOR_PRESETS = [
   '#0f172a', '#1e40af', '#166534', '#9a3412', '#6b21a8', '#991b1b', '#ffffff', '#475569'
 ];
 
+const CATEGORY_EMOJIS: Record<string, string> = {
+  all: '🌟',
+  priority_status: '🎯',
+  business_finance: '💼',
+  tech_code: '💻',
+  communication: '💬',
+  design_media: '🎨',
+  education_science: '🎓',
+  navigation_maps: '🧭',
+  documents_files: '📁',
+  nature_weather: '☀️',
+  tools_security: '🛡️',
+  health_sports: '🏃',
+  emojis_symbols: '✨',
+};
+
+const QUICK_SEARCH_TAGS = [
+  { label: '🎯 Prioridad', query: 'prioridad' },
+  { label: '✓ Check', query: 'check' },
+  { label: '⚠ Alerta', query: 'alerta' },
+  { label: '★ Estrella', query: 'estrella' },
+  { label: '👤 Usuario', query: 'usuario' },
+  { label: '➔ Flecha', query: 'flecha' },
+  { label: '💰 Dinero', query: 'dinero' },
+  { label: '📁 Archivo', query: 'archivo' },
+];
+
 export const ToolPanel: React.FC<ToolPanelProps> = ({
   selectedNode,
   currentTheme,
@@ -145,6 +172,16 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
   const [showAppliedToast, setShowAppliedToast] = useState(false);
   const [iconSearchQuery, setIconSearchQuery] = useState('');
   const [iconCategory, setIconCategory] = useState<VectorIconCategory | 'all'>('all');
+  const [showCategoryGrid, setShowCategoryGrid] = useState(false);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: TOTAL_VECTOR_ICONS_COUNT };
+    VECTOR_ICON_CATEGORIES.forEach(c => {
+      counts[c.id] = VECTOR_ICON_PACK.filter(i => i.category === c.id).length;
+    });
+    return counts;
+  }, []);
+
   const [bgCategoryFilter, setBgCategoryFilter] = useState<'all' | 'light' | 'dark' | 'paper' | 'technical' | 'creative'>('all');
   const [mapSectionsOpen, setMapSectionsOpen] = useState<Record<string, boolean>>({
     background: false,
@@ -1744,20 +1781,24 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
               </div>
             )}
 
-            {/* ICONS TAB */}
+            {/* ICONS TAB (Sistema de Categorización y Búsqueda Mejorado) */}
             {activeTab === 'icons' && selectedNode && (
               <div className="space-y-3.5">
-                {/* Active Icons on Selected Node */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="font-semibold text-slate-700 text-xs flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                      Iconos en este Nodo
+                {/* 1. Active Icons on Selected Node */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3 space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-slate-800 text-xs flex items-center gap-1.5">
+                      <Smile className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Iconos en este Nodo</span>
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.2 rounded-full">
+                        {selectedNode.icons?.length || 0}
+                      </span>
                     </label>
                     {selectedNode.icons && selectedNode.icons.length > 0 && (
                       <button
+                        type="button"
                         onClick={() => onUpdateNode(selectedNode.id, { icons: [] })}
-                        className="text-[10px] text-red-500 hover:text-red-700 underline"
+                        className="text-[10px] text-red-600 hover:text-red-700 font-semibold underline cursor-pointer"
                       >
                         Quitar todos
                       </button>
@@ -1765,19 +1806,20 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                   </div>
 
                   {selectedNode.icons && selectedNode.icons.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="flex flex-wrap gap-1.5 p-2 bg-white border border-slate-200 rounded-xl shadow-2xs">
                       {selectedNode.icons.map((icId) => (
                         <span
                           key={icId}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-blue-200 text-blue-900 text-xs shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-50/80 border border-blue-200 text-blue-900 text-xs shadow-2xs group"
                         >
                           <span className="w-4 h-4 flex items-center justify-center">
                             {renderNodeIcon(icId, 'w-3.5 h-3.5 text-blue-600')}
                           </span>
-                          <span className="text-[11px] font-mono font-medium">{icId}</span>
+                          <span className="text-[10.5px] font-mono font-medium">{icId}</span>
                           <button
+                            type="button"
                             onClick={() => handleToggleIcon(icId)}
-                            className="text-slate-400 hover:text-red-600 ml-0.5"
+                            className="text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors cursor-pointer"
                             title="Quitar icono"
                           >
                             ×
@@ -1786,107 +1828,262 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-[11px] text-slate-400 italic bg-slate-50/70 p-2 rounded-lg border border-dashed border-slate-200">
-                      Sin iconos aplicados. Selecciona abajo o abre el explorador.
+                    <p className="text-[11px] text-slate-400 italic bg-white p-2 rounded-xl border border-dashed border-slate-200 text-center">
+                      Haz clic en cualquier icono de abajo para agregarlo al nodo.
                     </p>
                   )}
                 </div>
 
-                {/* Open Full 500+ Vector Icon Browser */}
+                {/* 2. Open Full 520+ Icon Browser Button */}
                 {onOpenIconPackModal && (
                   <button
+                    type="button"
                     onClick={onOpenIconPackModal}
-                    className="w-full py-2 px-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all"
+                    className="w-full py-2.5 px-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-semibold flex items-center justify-center gap-2 shadow-2xs transition-all cursor-pointer group"
                   >
-                    <Sparkles className="w-4 h-4" />
-                    <span>Explorar los 500+ Iconos SVG</span>
+                    <Sparkles className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span>Explorar Catálogo Completo (520+ Iconos)</span>
                     <Maximize2 className="w-3.5 h-3.5 opacity-80" />
                   </button>
                 )}
 
-                {/* Real-time Search */}
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={iconSearchQuery}
-                    onChange={(e) => setIconSearchQuery(e.target.value)}
-                    placeholder="Buscar en 500+ iconos..."
-                    className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-700 outline-none focus:border-blue-500 placeholder:text-slate-400 shadow-2xs"
-                  />
-                  {iconSearchQuery && (
-                    <button
-                      onClick={() => setIconSearchQuery('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs"
-                    >
-                      ×
-                    </button>
-                  )}
+                {/* 3. Real-time Search Box with Match Counter */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3 space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-slate-800 text-xs flex items-center gap-1.5">
+                      <Search className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Búsqueda Inteligente</span>
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      {filteredVectorIcons.length} {filteredVectorIcons.length === 1 ? 'icono' : 'iconos'}
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={iconSearchQuery}
+                      onChange={(e) => setIconSearchQuery(e.target.value)}
+                      placeholder="Buscar por nombre, tag o ID (ej: check, alerta, user)..."
+                      className="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-7 py-2 text-xs text-slate-700 outline-none focus:border-blue-500 placeholder:text-slate-400 shadow-2xs"
+                    />
+                    {iconSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setIconSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs w-4 h-4 flex items-center justify-center cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Quick Search Keyword Chips */}
+                  <div>
+                    <span className="text-[9.5px] text-slate-400 font-medium block mb-1">Sugerencias rápidas:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {QUICK_SEARCH_TAGS.map((st) => (
+                        <button
+                          key={st.query}
+                          type="button"
+                          onClick={() => setIconSearchQuery(iconSearchQuery === st.query ? '' : st.query)}
+                          className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                            iconSearchQuery === st.query
+                              ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-2xs'
+                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
+                          }`}
+                        >
+                          {st.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Category Pills */}
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-[11px]">
-                  <button
-                    onClick={() => setIconCategory('all')}
-                    className={`px-2 py-1 rounded-md whitespace-nowrap transition-colors ${
-                      iconCategory === 'all'
-                        ? 'bg-slate-900 text-white font-medium'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
+                {/* 4. Categorization System (Clear Dropdown + 12 Category Grid) */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3 space-y-2.5 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-slate-800 text-xs flex items-center gap-1.5">
+                      <LayoutGrid className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>Categorías (12 Colecciones)</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowCategoryGrid(!showCategoryGrid)}
+                      className="text-[10.5px] text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      {showCategoryGrid ? 'Ocultar cuadrícula' : 'Ver cuadrícula (12)'}
+                      <ChevronDown className={`w-3 h-3 transition-transform ${showCategoryGrid ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+
+                  {/* Primary Category Selector Dropdown */}
+                  <select
+                    value={iconCategory}
+                    onChange={(e) => setIconCategory(e.target.value as any)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-blue-500 shadow-2xs cursor-pointer"
                   >
-                    Todos ({TOTAL_VECTOR_ICONS_COUNT})
-                  </button>
-                  {VECTOR_ICON_CATEGORIES.map((cat) => {
-                    const isSelected = iconCategory === cat.id;
-                    return (
+                    <option value="all">🌟 Todas las Categorías ({TOTAL_VECTOR_ICONS_COUNT} iconos)</option>
+                    {VECTOR_ICON_CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {CATEGORY_EMOJIS[cat.id] || '📁'} {cat.name} ({categoryCounts[cat.id] || 0})
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Expandable 2-Column Category Grid with Icons & Counts */}
+                  {showCategoryGrid && (
+                    <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-200/70 animate-in fade-in duration-150">
                       <button
-                        key={cat.id}
-                        onClick={() => setIconCategory(cat.id)}
-                        className={`px-2 py-1 rounded-md whitespace-nowrap transition-colors ${
-                          isSelected
-                            ? 'bg-blue-600 text-white font-medium'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        type="button"
+                        onClick={() => {
+                          setIconCategory('all');
+                          setShowCategoryGrid(false);
+                        }}
+                        className={`p-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                          iconCategory === 'all'
+                            ? 'bg-blue-50 border-blue-500 text-blue-900 font-bold ring-1 ring-blue-400 shadow-2xs'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
                         }`}
                       >
-                        {cat.name.split('&')[0].trim()}
+                        <span className="text-base shrink-0">🌟</span>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-[10.5px] block truncate font-medium">Todas</span>
+                          <span className="text-[9px] text-slate-400 block font-mono">{TOTAL_VECTOR_ICONS_COUNT} iconos</span>
+                        </div>
                       </button>
-                    );
-                  })}
-                </div>
 
-                {/* Icon Grid */}
-                <div className="max-h-72 overflow-y-auto pr-1">
-                  {filteredVectorIcons.length === 0 ? (
-                    <div className="text-center py-6 text-slate-400 text-xs">
-                      No se encontraron iconos para "{iconSearchQuery}"
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {filteredVectorIcons.map((ic) => {
-                        const IconComponent = ic.icon;
-                        const isSelected = selectedNode.icons?.includes(ic.id);
+                      {VECTOR_ICON_CATEGORIES.map((cat) => {
+                        const isSelected = iconCategory === cat.id;
+                        const emoji = CATEGORY_EMOJIS[cat.id] || '📁';
+                        const count = categoryCounts[cat.id] || 0;
                         return (
                           <button
-                            key={ic.id}
-                            title={`${ic.name} (${ic.id})`}
-                            onClick={() => handleToggleIcon(ic.id)}
-                            className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all text-center group ${
+                            key={cat.id}
+                            type="button"
+                            onClick={() => {
+                              setIconCategory(cat.id);
+                              setShowCategoryGrid(false);
+                            }}
+                            className={`p-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-blue-50 border-blue-500 shadow-2xs scale-105 ring-1 ring-blue-400'
-                                : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                                ? 'bg-blue-50 border-blue-500 text-blue-900 font-bold ring-1 ring-blue-400 shadow-2xs'
+                                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
                             }`}
                           >
-                            <div className="w-5 h-5 flex items-center justify-center mb-1 text-slate-700 group-hover:text-blue-600 group-hover:scale-110 transition-transform">
-                              <IconComponent className="w-4 h-4" />
+                            <span className="text-base shrink-0">{emoji}</span>
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[10px] block truncate font-medium leading-tight">{cat.name}</span>
+                              <span className="text-[9px] text-slate-400 block font-mono">{count} iconos</span>
                             </div>
-                            <span className="text-[9px] text-slate-600 truncate max-w-full font-medium">
-                              {ic.name}
-                            </span>
                           </button>
                         );
                       })}
                     </div>
                   )}
+
+                  {/* Multi-line Wrap Quick Category Chips (Never Cut Off) */}
+                  {!showCategoryGrid && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setIconCategory('all')}
+                        className={`px-2 py-1 rounded-lg text-[10.5px] transition-all cursor-pointer font-medium ${
+                          iconCategory === 'all'
+                            ? 'bg-slate-900 text-white font-bold shadow-2xs'
+                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        🌟 Todos ({TOTAL_VECTOR_ICONS_COUNT})
+                      </button>
+                      {VECTOR_ICON_CATEGORIES.map((cat) => {
+                        const isSelected = iconCategory === cat.id;
+                        const emoji = CATEGORY_EMOJIS[cat.id] || '📁';
+                        const shortName = cat.name.split('&')[0].trim();
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setIconCategory(cat.id)}
+                            title={`${cat.name} (${categoryCounts[cat.id]} iconos)`}
+                            className={`px-2 py-1 rounded-lg text-[10.5px] transition-all cursor-pointer flex items-center gap-1 ${
+                              isSelected
+                                ? 'bg-blue-600 text-white font-bold shadow-2xs'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                            }`}
+                          >
+                            <span>{emoji}</span>
+                            <span>{shortName}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Icon Grid List */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3 space-y-2 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-slate-800 text-xs">
+                      {iconCategory === 'all'
+                        ? 'Todos los Iconos'
+                        : `${CATEGORY_EMOJIS[iconCategory] || '📁'} ${VECTOR_ICON_CATEGORIES.find(c => c.id === iconCategory)?.name || 'Iconos'}`}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {filteredVectorIcons.length} mostrados
+                    </span>
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto pr-1">
+                    {filteredVectorIcons.length === 0 ? (
+                      <div className="text-center py-8 text-slate-400 space-y-2">
+                        <p className="text-xs">No se encontraron iconos para "{iconSearchQuery}"</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIconSearchQuery('');
+                            setIconCategory('all');
+                          }}
+                          className="text-xs text-blue-600 hover:underline font-semibold"
+                        >
+                          Limpiar búsqueda y filtros
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {filteredVectorIcons.map((ic) => {
+                          const IconComponent = ic.icon;
+                          const isSelected = selectedNode.icons?.includes(ic.id);
+                          return (
+                            <button
+                              key={ic.id}
+                              type="button"
+                              title={`${ic.name}\nID: ${ic.id}\nCategoría: ${ic.category}\nTags: ${ic.tags.join(', ')}`}
+                              onClick={() => handleToggleIcon(ic.id)}
+                              className={`relative flex flex-col items-center justify-center p-2 rounded-xl border transition-all text-center group cursor-pointer ${
+                                isSelected
+                                  ? 'bg-blue-50 border-blue-500 shadow-2xs ring-2 ring-blue-500 scale-105'
+                                  : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                              }`}
+                            >
+                              {isSelected && (
+                                <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-blue-600 text-white text-[8px] flex items-center justify-center font-bold">
+                                  ✓
+                                </span>
+                              )}
+                              <div className="w-5 h-5 flex items-center justify-center mb-1 text-slate-700 group-hover:text-blue-600 group-hover:scale-110 transition-transform">
+                                <IconComponent className="w-4 h-4" />
+                              </div>
+                              <span className="text-[9px] text-slate-600 truncate max-w-full font-medium leading-tight">
+                                {ic.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
