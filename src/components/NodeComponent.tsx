@@ -467,8 +467,12 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           <img
             src={node.imageUrl}
             alt=""
-            className="rounded-lg object-contain max-h-48 pointer-events-none shadow-2xs"
-            style={{ maxWidth: node.imageWidth ? `${node.imageWidth}px` : '100%' }}
+            className="rounded-lg object-contain pointer-events-none shadow-2xs transition-all"
+            style={{
+              width: `${node.imageWidth || 140}px`,
+              maxWidth: '100%',
+              height: 'auto',
+            }}
           />
         </div>
       )}
@@ -608,8 +612,12 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           <img
             src={node.imageUrl}
             alt=""
-            className="rounded-lg object-contain max-h-48 pointer-events-none shadow-2xs"
-            style={{ maxWidth: node.imageWidth ? `${node.imageWidth}px` : '100%' }}
+            className="rounded-lg object-contain pointer-events-none shadow-2xs transition-all"
+            style={{
+              width: `${node.imageWidth || 140}px`,
+              maxWidth: '100%',
+              height: 'auto',
+            }}
           />
         </div>
       )}

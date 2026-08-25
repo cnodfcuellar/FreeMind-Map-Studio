@@ -36,10 +36,10 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
       imageMinWidth = 70;
       imageExtraHeight = 20;
     } else {
-      const imgW = node.imageWidth || 120;
-      const imgH = node.imageHeight || 80;
-      imageExtraHeight = imgH + 8;
-      imageMinWidth = imgW;
+      const imgW = node.imageWidth || 140;
+      const imgH = node.imageHeight || Math.round(imgW * 0.65);
+      imageExtraHeight = imgH + 12;
+      imageMinWidth = imgW + 16;
     }
   }
 
