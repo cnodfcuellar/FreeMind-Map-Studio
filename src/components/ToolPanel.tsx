@@ -3508,7 +3508,35 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                                       </div>
                                     </div>
 
-                                    {/* 6. Color & Etiqueta de la Relación */}
+                                    {/* 6. Opacidad del Conector */}
+                                    <div className="space-y-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                                      <div className="flex items-center justify-between text-[11px]">
+                                        <span className="font-semibold text-slate-700">Opacidad de la Línea:</span>
+                                        <span className="font-mono text-cyan-700 font-bold bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200 text-[10.5px]">
+                                          {Math.round((conn.opacity !== undefined ? conn.opacity : 1) * 100)}%
+                                        </span>
+                                      </div>
+                                      <input
+                                        type="range"
+                                        min="10"
+                                        max="100"
+                                        step="5"
+                                        value={Math.round((conn.opacity !== undefined ? conn.opacity : 1) * 100)}
+                                        onChange={(e) =>
+                                          onUpdateConnector(conn.id, {
+                                            opacity: Number(e.target.value) / 100,
+                                          })
+                                        }
+                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600"
+                                      />
+                                      <div className="flex justify-between text-[9px] text-slate-400">
+                                        <span>Tenue (10%)</span>
+                                        <span>Medio (50%)</span>
+                                        <span>Opaco (100%)</span>
+                                      </div>
+                                    </div>
+
+                                    {/* 7. Color & Etiqueta de la Relación */}
                                     <div className="space-y-2">
                                       <div>
                                         <label className="font-semibold text-slate-700 text-[11px] block mb-1">

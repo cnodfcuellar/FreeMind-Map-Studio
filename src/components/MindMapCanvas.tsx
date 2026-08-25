@@ -355,6 +355,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
 
     const strokeColor = conn.color || '#3b82f6';
     const strokeWidth = conn.width || 2;
+    const opacity = conn.opacity !== undefined ? conn.opacity : 1;
 
     const connectorDash =
       conn.style === 'dashed'
@@ -408,6 +409,8 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
           d={geom.pathD}
           stroke={strokeColor}
           strokeWidth={strokeWidth}
+          strokeOpacity={opacity}
+          opacity={opacity}
           strokeDasharray={connectorDash}
           strokeLinecap="round"
           fill="none"
@@ -421,6 +424,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             x={geom.labelX}
             y={geom.labelY}
             textAnchor="middle"
+            opacity={opacity}
             className="text-xs font-semibold fill-slate-800 select-none pointer-events-none"
             style={{
               fontSize: '11px',

@@ -22,6 +22,7 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
   const [shape, setShape] = useState<'curved' | 'bezier' | 'straight' | 'step'>('curved');
   const [curvature, setCurvature] = useState<number>(-50);
   const [layer, setLayer] = useState<'above' | 'below'>('above');
+  const [opacity, setOpacity] = useState<number>(1);
   const [style, setStyle] = useState<'solid' | 'dashed' | 'dotted'>('dashed');
   const [color, setColor] = useState<string>('#3b82f6');
 
@@ -45,6 +46,7 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
       shape,
       curvature,
       layer,
+      opacity,
       style,
       color,
       arrow: 'end',
@@ -184,6 +186,25 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
                 <span>Detrás de los nodos</span>
               </button>
             </div>
+          </div>
+
+          {/* Opacidad del Conector */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="font-semibold text-slate-700">Opacidad de la Línea</label>
+              <span className="font-mono text-cyan-700 font-bold bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200 text-[10px]">
+                {Math.round(opacity * 100)}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              step="5"
+              value={Math.round(opacity * 100)}
+              onChange={(e) => setOpacity(Number(e.target.value) / 100)}
+              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

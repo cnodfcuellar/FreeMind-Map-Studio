@@ -131,6 +131,7 @@ export interface Connector {
   width?: number;
   controlPoint?: { x: number; y: number };
   layer?: 'above' | 'below';
+  opacity?: number;
 }
 
 export type BackgroundPatternStyle =
