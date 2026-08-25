@@ -3475,7 +3475,40 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                                       </div>
                                     </div>
 
-                                    {/* 5. Color & Etiqueta de la Relación */}
+                                    {/* 5. Capa de Visualización (Sobre los nodos vs Detrás de los nodos) */}
+                                    <div>
+                                      <label className="font-semibold text-slate-700 text-[11px] block mb-1">
+                                        Capa de Visualización
+                                      </label>
+                                      <div className="grid grid-cols-2 gap-1.5">
+                                        <button
+                                          type="button"
+                                          onClick={() => onUpdateConnector(conn.id, { layer: 'above' })}
+                                          className={`py-1.5 px-2 rounded-lg border text-center text-[11px] font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                                            conn.layer !== 'below'
+                                              ? 'bg-cyan-600 text-white border-cyan-600 font-bold shadow-2xs'
+                                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                                          }`}
+                                        >
+                                          <span>🔼</span>
+                                          <span>Sobre los nodos</span>
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => onUpdateConnector(conn.id, { layer: 'below' })}
+                                          className={`py-1.5 px-2 rounded-lg border text-center text-[11px] font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                                            conn.layer === 'below'
+                                              ? 'bg-cyan-600 text-white border-cyan-600 font-bold shadow-2xs'
+                                              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                                          }`}
+                                        >
+                                          <span>🔽</span>
+                                          <span>Detrás de los nodos</span>
+                                        </button>
+                                      </div>
+                                    </div>
+
+                                    {/* 6. Color & Etiqueta de la Relación */}
                                     <div className="space-y-2">
                                       <div>
                                         <label className="font-semibold text-slate-700 text-[11px] block mb-1">

@@ -21,6 +21,7 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
   const [label, setLabel] = useState<string>('');
   const [shape, setShape] = useState<'curved' | 'bezier' | 'straight' | 'step'>('curved');
   const [curvature, setCurvature] = useState<number>(-50);
+  const [layer, setLayer] = useState<'above' | 'below'>('above');
   const [style, setStyle] = useState<'solid' | 'dashed' | 'dotted'>('dashed');
   const [color, setColor] = useState<string>('#3b82f6');
 
@@ -43,6 +44,7 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
       label: label.trim() || undefined,
       shape,
       curvature,
+      layer,
       style,
       color,
       arrow: 'end',
@@ -152,6 +154,37 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
               />
             </div>
           )}
+
+          {/* Capa de Visualización */}
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Capa de Visualización</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setLayer('above')}
+                className={`py-2 px-3 rounded-lg border text-center font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  layer === 'above'
+                    ? 'bg-cyan-600 text-white border-cyan-600 font-bold shadow-2xs'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <span>🔼</span>
+                <span>Sobre los nodos</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setLayer('below')}
+                className={`py-2 px-3 rounded-lg border text-center font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  layer === 'below'
+                    ? 'bg-cyan-600 text-white border-cyan-600 font-bold shadow-2xs'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <span>🔽</span>
+                <span>Detrás de los nodos</span>
+              </button>
+            </div>
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>

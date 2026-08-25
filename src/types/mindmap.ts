@@ -130,6 +130,7 @@ export interface Connector {
   shape?: 'curved' | 'bezier' | 'straight' | 'step';
   width?: number;
   controlPoint?: { x: number; y: number };
+  layer?: 'above' | 'below';
 }
 
 export type BackgroundPatternStyle =

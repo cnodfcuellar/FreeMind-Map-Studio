@@ -337,6 +337,150 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   const hexH2 = effectivePatternSize * 0.8660254;
   const hexH3 = effectivePatternSize * 1.1547005;
 
+  const renderConnector = (conn: Connector, isTopLayer = false) => {
+    const fromLayout = layoutMap.get(conn.fromId);
+    const toLayout = layoutMap.get(conn.toId);
+    if (!fromLayout || !toLayout) return null;
+
+    const x1 = fromLayout.x + fromLayout.width / 2;
+    const y1 = fromLayout.y + fromLayout.height / 2;
+    const x2 = toLayout.x + toLayout.width / 2;
+    const y2 = toLayout.y + toLayout.height / 2;
+
+    const geom = calculateConnectorGeometry(x1, y1, x2, y2, conn);
+    const isHovered = hoveredConnectorId === conn.id;
+    const isSelected = selectedConnectorId === conn.id;
+    const isDraggingThis = draggingConnectorId === conn.id;
+    const showHandle = isHovered || isSelected || isDraggingThis;
+
+    const strokeColor = conn.color || '#3b82f6';
+    const strokeWidth = conn.width || 2;
+
+    const connectorDash =
+      conn.style === 'dashed'
+        ? '8 6'
+        : conn.style === 'dotted'
+        ? '2 5'
+        : undefined;
+
+    const arrowMode = conn.arrow || 'end';
+    const hasEndArrow = arrowMode === 'end' || arrowMode === 'both';
+    const hasStartArrow = arrowMode === 'start' || arrowMode === 'both';
+
+    const endMarkerUrl = isTopLayer ? 'url(#top-connector-arrow-end)' : 'url(#connector-arrow-end)';
+    const startMarkerUrl = isTopLayer ? 'url(#top-connector-arrow-start)' : 'url(#connector-arrow-start)';
+
+    return (
+      <g
+        key={conn.id}
+        className="cursor-pointer pointer-events-auto"
+        onMouseEnter={() => setHoveredConnectorId(conn.id)}
+        onMouseLeave={() => {
+          if (!isDraggingThis) setHoveredConnectorId(null);
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedConnectorId(conn.id);
+        }}
+      >
+        {/* Broad invisible hit area for easy click/hover */}
+        <path
+          d={geom.pathD}
+          stroke="transparent"
+          strokeWidth="20"
+          fill="none"
+        />
+
+        {/* Highlight halo when selected or hovered */}
+        {(isSelected || isHovered) && (
+          <path
+            d={geom.pathD}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth + 5}
+            strokeOpacity="0.25"
+            strokeLinecap="round"
+            fill="none"
+          />
+        )}
+
+        {/* Main Connector Path */}
+        <path
+          d={geom.pathD}
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          strokeDasharray={connectorDash}
+          strokeLinecap="round"
+          fill="none"
+          markerEnd={hasEndArrow ? endMarkerUrl : undefined}
+          markerStart={hasStartArrow ? startMarkerUrl : undefined}
+        />
+
+        {/* Text Label with readable background halo */}
+        {conn.label && (
+          <text
+            x={geom.labelX}
+            y={geom.labelY}
+            textAnchor="middle"
+            className="text-xs font-semibold fill-slate-800 select-none pointer-events-none"
+            style={{
+              fontSize: '11px',
+              paintOrder: 'stroke fill',
+              stroke: '#ffffff',
+              strokeWidth: '4px',
+              strokeLinejoin: 'round',
+            }}
+          >
+            {conn.label}
+          </text>
+        )}
+
+        {/* Interactive Control Point Guide and Handle */}
+        {showHandle && (
+          <g className="cursor-grab active:cursor-grabbing">
+            {/* Dashed guide line from midpoint to control point */}
+            <line
+              x1={geom.midX}
+              y1={geom.midY}
+              x2={geom.cpX}
+              y2={geom.cpY}
+              stroke={strokeColor}
+              strokeWidth="1.2"
+              strokeDasharray="3 3"
+              strokeOpacity="0.6"
+            />
+
+            {/* Control Point Circle Handle */}
+            <circle
+              cx={geom.cpX}
+              cy={geom.cpY}
+              r={isDraggingThis ? 8 : 6}
+              fill="#ffffff"
+              stroke={strokeColor}
+              strokeWidth="2.5"
+              className="transition-transform hover:scale-125 shadow-md"
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                setDraggingConnectorId(conn.id);
+                setSelectedConnectorId(conn.id);
+              }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                if (onUpdateConnector) {
+                  onUpdateConnector(conn.id, {
+                    controlPoint: undefined,
+                    curvature: -50,
+                  });
+                }
+              }}
+            >
+              <title>Arrastra para curvar o doble clic para restablecer</title>
+            </circle>
+          </g>
+        )}
+      </g>
+    );
+  };
+
   return (
     <div
       ref={containerRef}
@@ -651,148 +795,9 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             })}
           </g>
 
-          {/* Group 3: Custom Connectors / Relations with interactive curve manipulation */}
-          <g id="connectors-group">
-            {mindMap.connectors?.map((conn) => {
-              const fromLayout = layoutMap.get(conn.fromId);
-              const toLayout = layoutMap.get(conn.toId);
-              if (!fromLayout || !toLayout) return null;
-
-              const x1 = fromLayout.x + fromLayout.width / 2;
-              const y1 = fromLayout.y + fromLayout.height / 2;
-              const x2 = toLayout.x + toLayout.width / 2;
-              const y2 = toLayout.y + toLayout.height / 2;
-
-              const geom = calculateConnectorGeometry(x1, y1, x2, y2, conn);
-              const isHovered = hoveredConnectorId === conn.id;
-              const isSelected = selectedConnectorId === conn.id;
-              const isDraggingThis = draggingConnectorId === conn.id;
-              const showHandle = isHovered || isSelected || isDraggingThis;
-
-              const strokeColor = conn.color || '#3b82f6';
-              const strokeWidth = conn.width || 2;
-
-              const connectorDash =
-                conn.style === 'dashed'
-                  ? '8 6'
-                  : conn.style === 'dotted'
-                  ? '2 5'
-                  : undefined;
-
-              const arrowMode = conn.arrow || 'end';
-              const hasEndArrow = arrowMode === 'end' || arrowMode === 'both';
-              const hasStartArrow = arrowMode === 'start' || arrowMode === 'both';
-
-              return (
-                <g
-                  key={conn.id}
-                  className="cursor-pointer pointer-events-auto"
-                  onMouseEnter={() => setHoveredConnectorId(conn.id)}
-                  onMouseLeave={() => {
-                    if (!isDraggingThis) setHoveredConnectorId(null);
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedConnectorId(conn.id);
-                  }}
-                >
-                  {/* Broad invisible hit area for easy click/hover */}
-                  <path
-                    d={geom.pathD}
-                    stroke="transparent"
-                    strokeWidth="20"
-                    fill="none"
-                  />
-
-                  {/* Highlight halo when selected or hovered */}
-                  {(isSelected || isHovered) && (
-                    <path
-                      d={geom.pathD}
-                      stroke={strokeColor}
-                      strokeWidth={strokeWidth + 5}
-                      strokeOpacity="0.25"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                  )}
-
-                  {/* Main Connector Path */}
-                  <path
-                    d={geom.pathD}
-                    stroke={strokeColor}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={connectorDash}
-                    strokeLinecap="round"
-                    fill="none"
-                    markerEnd={hasEndArrow ? "url(#connector-arrow-end)" : undefined}
-                    markerStart={hasStartArrow ? "url(#connector-arrow-start)" : undefined}
-                  />
-
-                  {/* Text Label with readable background halo */}
-                  {conn.label && (
-                    <text
-                      x={geom.labelX}
-                      y={geom.labelY}
-                      textAnchor="middle"
-                      className="text-xs font-semibold fill-slate-800 select-none pointer-events-none"
-                      style={{
-                        fontSize: '11px',
-                        paintOrder: 'stroke fill',
-                        stroke: '#ffffff',
-                        strokeWidth: '4px',
-                        strokeLinejoin: 'round',
-                      }}
-                    >
-                      {conn.label}
-                    </text>
-                  )}
-
-                  {/* Interactive Control Point Guide and Handle */}
-                  {showHandle && (
-                    <g className="cursor-grab active:cursor-grabbing">
-                      {/* Dashed guide line from midpoint to control point */}
-                      <line
-                        x1={geom.midX}
-                        y1={geom.midY}
-                        x2={geom.cpX}
-                        y2={geom.cpY}
-                        stroke={strokeColor}
-                        strokeWidth="1.2"
-                        strokeDasharray="3 3"
-                        strokeOpacity="0.6"
-                      />
-
-                      {/* Control Point Circle Handle */}
-                      <circle
-                        cx={geom.cpX}
-                        cy={geom.cpY}
-                        r={isDraggingThis ? 8 : 6}
-                        fill="#ffffff"
-                        stroke={strokeColor}
-                        strokeWidth="2.5"
-                        className="transition-transform hover:scale-125 shadow-md"
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          setDraggingConnectorId(conn.id);
-                          setSelectedConnectorId(conn.id);
-                        }}
-                        onDoubleClick={(e) => {
-                          e.stopPropagation();
-                          if (onUpdateConnector) {
-                            onUpdateConnector(conn.id, {
-                              controlPoint: undefined,
-                              curvature: -50,
-                            });
-                          }
-                        }}
-                      >
-                        <title>Arrastra para curvar o doble clic para restablecer</title>
-                      </circle>
-                    </g>
-                  )}
-                </g>
-              );
-            })}
+          {/* Group 3: Custom Connectors / Relations rendered BEHIND nodes (layer === 'below') */}
+          <g id="connectors-below-group">
+            {mindMap.connectors?.filter(c => c.layer === 'below').map(conn => renderConnector(conn, false))}
           </g>
         </svg>
 
@@ -830,6 +835,41 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             );
           })}
         </div>
+
+        {/* Top SVG Layer for Connectors rendered ABOVE nodes (layer !== 'below') */}
+        <svg
+          id="svg-top-connectors-layer"
+          className="absolute top-0 left-0 w-full h-full overflow-visible pointer-events-none"
+          style={{ overflow: 'visible', zIndex: 20 }}
+        >
+          <defs>
+            <marker
+              id="top-connector-arrow-end"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="context-stroke" />
+            </marker>
+            <marker
+              id="top-connector-arrow-start"
+              viewBox="0 0 10 10"
+              refX="2"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
+              <path d="M 8 1.5 L 0 5 L 8 8.5 z" fill="context-stroke" />
+            </marker>
+          </defs>
+          <g id="connectors-above-group">
+            {mindMap.connectors?.filter(c => c.layer !== 'below').map(conn => renderConnector(conn, true))}
+          </g>
+        </svg>
       </div>
 
       {/* Interactive Mini-Map & Zoom Controls */}
