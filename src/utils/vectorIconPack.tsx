@@ -1,6 +1,5 @@
 import React from 'react';
 import * as LucideIcons from 'lucide-react';
-import { ALL_SIMPLE_ICONS, SIMPLE_ICONS_BY_ID } from './simpleIconsPack';
 
 export interface VectorIconItem {
   id: string;
@@ -9,8 +8,6 @@ export interface VectorIconItem {
   tags: string[];
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   isColorFilled?: boolean;
-  hex?: string;
-  path?: string;
 }
 
 export type VectorIconCategory =
@@ -25,12 +22,7 @@ export type VectorIconCategory =
   | 'nature_weather'
   | 'tools_security'
   | 'health_sports'
-  | 'emojis_symbols'
-  | 'brands_dev'
-  | 'brands_tech'
-  | 'brands_social'
-  | 'brands_design'
-  | 'brands_all';
+  | 'emojis_symbols';
 
 export interface CategoryInfo {
   id: VectorIconCategory;
@@ -41,15 +33,10 @@ export interface CategoryInfo {
 
 export const VECTOR_ICON_CATEGORIES: CategoryInfo[] = [
   { id: 'priority_status', name: 'Prioridad & Estados', iconName: 'CheckCircle2', description: 'Niveles de prioridad 1-9, completado, alertas, banderas' },
-  { id: 'brands_dev', name: 'Desarrollo & Cloud (Simple Icons)', iconName: 'Code', description: 'GitHub, Docker, React, Python, AWS, Kubernetes, Linux, TypeScript...' },
-  { id: 'brands_tech', name: 'Big Tech & IA (Simple Icons)', iconName: 'Cpu', description: 'Google, Apple, Microsoft, OpenAI, Nvidia, Meta, Amazon, Tesla...' },
-  { id: 'brands_social', name: 'Redes & Social (Simple Icons)', iconName: 'MessageSquare', description: 'YouTube, Discord, Slack, LinkedIn, Twitter/X, Instagram, Telegram...' },
-  { id: 'brands_design', name: 'Diseño & Apps (Simple Icons)', iconName: 'Palette', description: 'Figma, Notion, Canva, Adobe, Jira, Trello, Linear, Miro...' },
-  { id: 'brands_all', name: 'Todas las Marcas (3,450+ Simple Icons)', iconName: 'Globe', description: 'Catálogo exhaustivo completo de marcas y logos Simple Icons' },
   { id: 'business_finance', name: 'Negocios & Finanzas', iconName: 'Briefcase', description: 'Monedas, finanzas, métricas, ventas, gráficos de crecimiento' },
-  { id: 'tech_code', name: 'Tecnología & Código', iconName: 'Terminal', description: 'Desarrollo, servidores, nube, hardware, bases de datos' },
-  { id: 'communication', name: 'Comunicación & Usuarios', iconName: 'Users', description: 'Mensajería, correo, usuarios, llamadas, notificaciones' },
-  { id: 'design_media', name: 'Diseño & Multimedia', iconName: 'Image', description: 'Arte, fotografía, vídeo, audio, herramientas de diseño' },
+  { id: 'tech_code', name: 'Tecnología & Código', iconName: 'Code', description: 'Desarrollo, servidores, nube, hardware, bases de datos' },
+  { id: 'communication', name: 'Comunicación & Redes', iconName: 'MessageSquare', description: 'Mensajería, correo, usuarios, llamadas, notificaciones' },
+  { id: 'design_media', name: 'Diseño & Multimedia', iconName: 'Palette', description: 'Arte, fotografía, vídeo, audio, herramientas de diseño' },
   { id: 'education_science', name: 'Educación & Ciencia', iconName: 'GraduationCap', description: 'Aprendizaje, física, química, investigación, ideas' },
   { id: 'navigation_maps', name: 'Navegación & Lugares', iconName: 'Compass', description: 'Mapas, brújulas, flechas, ubicación, rutas' },
   { id: 'documents_files', name: 'Documentos & Archivos', iconName: 'FileText', description: 'Carpetas, hojas de cálculo, notas, libros, proyectos' },
@@ -89,7 +76,7 @@ const createPriorityBadge = (num: number, bg: string, border: string): React.Com
 };
 
 // MASTER VECTOR ICONS REPOSITORY: 520+ CURATED VECTOR SVG ICONS
-const LUCIDE_CURATED_PACK: VectorIconItem[] = [
+export const VECTOR_ICON_PACK: VectorIconItem[] = [
   // ==========================================
   // 1. PRIORIDAD & ESTADOS (45 icons)
   // ==========================================
@@ -509,26 +496,12 @@ const LUCIDE_CURATED_PACK: VectorIconItem[] = [
   { id: 'sparkles-alt', name: 'Destellos Mágicos', category: 'emojis_symbols', tags: ['estrellas', 'magico', 'especial'], icon: getIcon('Sparkles') },
 ];
 
-// Merge Lucide curated pack + 3,450+ Simple Icons catalog
-export const VECTOR_ICON_PACK: VectorIconItem[] = [
-  ...LUCIDE_CURATED_PACK,
-  ...(ALL_SIMPLE_ICONS as VectorIconItem[]),
-];
-
 export const TOTAL_VECTOR_ICONS_COUNT = VECTOR_ICON_PACK.length;
 
-// Fast lookup map by ID and aliases
+// Fast lookup map by ID
 const ICONS_BY_ID = new Map<string, VectorIconItem>();
 VECTOR_ICON_PACK.forEach(item => {
   ICONS_BY_ID.set(item.id, item);
-  ICONS_BY_ID.set(item.id.toLowerCase(), item);
-});
-
-// Also register slugs for simple icons
-ALL_SIMPLE_ICONS.forEach(item => {
-  ICONS_BY_ID.set(item.slug, item as VectorIconItem);
-  ICONS_BY_ID.set(`si_${item.slug}`, item as VectorIconItem);
-  ICONS_BY_ID.set(`si-${item.slug}`, item as VectorIconItem);
 });
 
 /**
@@ -538,13 +511,8 @@ export function searchVectorIcons(query: string, category?: VectorIconCategory |
   const cleanQuery = query.toLowerCase().trim();
   
   return VECTOR_ICON_PACK.filter(item => {
-    if (category && category !== 'all') {
-      if (category === 'brands_all') {
-        // Any brand/simple-icon
-        if (!item.category.startsWith('brands_')) return false;
-      } else if (item.category !== category) {
-        return false;
-      }
+    if (category && category !== 'all' && item.category !== category) {
+      return false;
     }
     if (!cleanQuery) return true;
 
@@ -559,7 +527,5 @@ export function searchVectorIcons(query: string, category?: VectorIconCategory |
  * Gets a specific vector icon component or fallback.
  */
 export function getVectorIconItem(iconId: string): VectorIconItem | undefined {
-  if (!iconId) return undefined;
-  return ICONS_BY_ID.get(iconId) || ICONS_BY_ID.get(iconId.toLowerCase()) || SIMPLE_ICONS_BY_ID.get(iconId);
+  return ICONS_BY_ID.get(iconId);
 }
-
