@@ -56,6 +56,15 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
     extraHeight += 22; // Tag bar height + top border/margin
     tagMinWidth = Math.min(node.tags.reduce((acc, t) => acc + t.length * 7 + 16, 0), 280);
   }
+
+  // Links are rendered with a dedicated badge
+  let linkExtraHeight = 0;
+  let linkMinWidth = 0;
+  if (node.link && node.link.trim().length > 0) {
+    linkExtraHeight += 24;
+    const cleanUrl = node.link.replace(/^https?:\/\//, '').replace(/^www\./, '');
+    linkMinWidth = Math.min(cleanUrl.length * 6.5 + 28, 220);
+  }
   
   const charWidth = fontSize * 0.58;
   const lines = (node.text || ' ').split('\n');
@@ -113,8 +122,8 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
   const contentWidth = Math.max(titleWidth, bodyWidth);
   const contentHeight = titleHeight + bodyHeight;
 
-  let width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
-  let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + imageExtraHeight));
+  let width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, linkMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
+  let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + linkExtraHeight + imageExtraHeight));
 
   // Custom User-Defined Width and Height
   if (node.customWidth && node.customWidth > 0) {

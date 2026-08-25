@@ -13,7 +13,7 @@ function escapeXML(str: string): string {
 /**
  * Generates an ultra-high fidelity, 100% self-contained standalone HTML file
  * featuring full support for all 8 layout engine distributions, node shapes,
- * rich text & body formatting, images, icons, links, tags, progress bars,
+ * rich text & body formatting, images, icons, prominent links, tags, progress bars,
  * notes drawer, clouds, cross-connectors, and interactive pan/zoom/search.
  */
 export function exportToStandaloneHTML(mindMap: MindMap): string {
@@ -171,7 +171,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       padding: 6px 8px;
     }
     
-    /* Floating Floating Controls */
+    /* Floating Controls */
     .floating-toolbar {
       position: absolute;
       bottom: 24px;
@@ -353,6 +353,51 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       border-radius: 6px;
     }
     
+    /* Prominent Dedicated Link Badge */
+    .node-link-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
+      border: 1px solid rgba(37, 99, 235, 0.28);
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      width: fit-content;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+      position: relative;
+      z-index: 10;
+    }
+    .node-link-badge:hover {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #1d4ed8;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+    .node-link-badge svg {
+      shrink: 0;
+    }
+    .inline-link {
+      color: #2563eb;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .inline-link:hover {
+      color: #1d4ed8;
+    }
+    
     /* Progress Bar */
     .node-progress-wrap {
       margin-top: 5px;
@@ -400,8 +445,8 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       align-items: center;
     }
     
-    /* Link & Note Action Badges */
-    .node-link-btn, .node-note-btn {
+    /* Note Action Badge */
+    .node-note-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -414,7 +459,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       cursor: pointer;
       transition: background 0.15s;
     }
-    .node-link-btn:hover, .node-note-btn:hover {
+    .node-note-btn:hover {
       background: rgba(0,0,0,0.18);
     }
     
@@ -616,6 +661,27 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       return icons[iconName] || '<span style="font-size:12px;">🏷️</span>';
     }
 
+    // Auto-Hyperlink formatter for text/body
+    function formatTextWithLinks(rawText) {
+      if (!rawText) return '';
+      let escaped = String(rawText)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Markdown links: [Label](url)
+      escaped = escaped.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s\\)]+)\\)/g, (match, label, url) => {
+        return \`<a href="\${url}" target="_blank" rel="noopener noreferrer" class="inline-link" onclick="event.stopPropagation()">\${label} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>\`;
+      });
+
+      // Raw URLs: https://... or http://...
+      escaped = escaped.replace(/(^|[\\s(])(https?:\\/\\/[^\\s\\)<]+)/g, (match, prefix, url) => {
+        return \`\${prefix}<a href="\${url}" target="_blank" rel="noopener noreferrer" class="inline-link" onclick="event.stopPropagation()">\${url} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>\`;
+      });
+
+      return escaped;
+    }
+
     // Node Estimation Engine matching FreeMind Studio
     function estimateNodeSize(node) {
       const isRoot = !node.parentId;
@@ -626,8 +692,15 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       let extraWidth = 0;
       if (node.icons && node.icons.length > 0) extraWidth += node.icons.length * 20 + 6;
       if (node.progress !== undefined) extraWidth += 24;
-      if (node.link) extraWidth += 18;
       if (node.note) extraWidth += 18;
+
+      let linkExtraHeight = 0;
+      let linkMinWidth = 0;
+      if (node.link && node.link.trim().length > 0) {
+        linkExtraHeight += 24;
+        const cleanUrl = node.link.replace(/^https?:\\/\\//, '').replace(/^www\\./, '');
+        linkMinWidth = Math.min(cleanUrl.length * 6.5 + 28, 220);
+      }
 
       let imageExtraHeight = 0;
       let imageMinWidth = 0;
@@ -671,8 +744,8 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       const contentWidth = Math.max(titleWidth, bodyWidth);
       const contentHeight = titleHeight + bodyHeight;
 
-      let width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
-      let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + imageExtraHeight));
+      let width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, linkMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
+      let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + linkExtraHeight + imageExtraHeight));
 
       if (node.customWidth && node.customWidth > 0) width = Math.max(width, node.customWidth);
       if (node.customHeight && node.customHeight > 0) height = Math.max(height, node.customHeight);
@@ -1319,7 +1392,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         // Title Text
         const titleEl = document.createElement('div');
         titleEl.className = 'node-title-text';
-        titleEl.textContent = node.text || '';
+        titleEl.innerHTML = formatTextWithLinks(node.text || '');
         titleEl.style.fontSize = \`\${node.fontSize || (isRoot ? 16 : 14)}px\`;
         titleEl.style.color = node.textColor || (isRoot ? '#ffffff' : '#1e293b');
         if (node.bold) titleEl.style.fontWeight = '700';
@@ -1337,19 +1410,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           headerRow.appendChild(img);
         }
 
-        // Link Button
-        if (node.link) {
-          const linkBtn = document.createElement('a');
-          linkBtn.className = 'node-link-btn';
-          linkBtn.href = node.link;
-          linkBtn.target = '_blank';
-          linkBtn.title = node.link;
-          linkBtn.innerHTML = '🔗';
-          linkBtn.onclick = (e) => e.stopPropagation();
-          headerRow.appendChild(linkBtn);
-        }
-
-        // Note Button
+        // Note Indicator Button in Header
         if (node.note) {
           const noteBtn = document.createElement('span');
           noteBtn.className = 'node-note-btn';
@@ -1380,7 +1441,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         if (node.body && node.body.trim().length > 0) {
           const bodyEl = document.createElement('div');
           bodyEl.className = 'node-body-text';
-          bodyEl.textContent = node.body;
+          bodyEl.innerHTML = formatTextWithLinks(node.body);
           bodyEl.style.fontSize = \`\${node.bodyFontSize || (isRoot ? 13 : 11.5)}px\`;
           bodyEl.style.color = node.bodyColor || (isRoot ? '#e2e8f0' : '#475569');
           if (node.bodyBold) bodyEl.style.fontWeight = '700';
@@ -1399,6 +1460,28 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           if (node.imageWidth) img.style.width = \`\${node.imageWidth}px\`;
           imgWrap.appendChild(img);
           wrap.appendChild(imgWrap);
+        }
+
+        // Dedicated Prominent Link Badge
+        if (node.link && node.link.trim().length > 0) {
+          const linkBadge = document.createElement('a');
+          linkBadge.className = 'node-link-badge';
+          linkBadge.href = node.link;
+          linkBadge.target = '_blank';
+          linkBadge.rel = 'noopener noreferrer';
+          linkBadge.title = \`Abrir enlace: \${node.link}\`;
+          linkBadge.onclick = (e) => e.stopPropagation();
+
+          const cleanDisplayUrl = node.link.replace(/^https?:\\/\\//, '').replace(/^www\\./, '').replace(/\\/$/, '');
+          linkBadge.innerHTML = \`
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px;">\${cleanDisplayUrl}</span>
+          \`;
+          wrap.appendChild(linkBadge);
         }
 
         // Progress Bar
@@ -1439,6 +1522,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           const q = searchQuery.toLowerCase();
           if ((node.text && node.text.toLowerCase().includes(q)) ||
               (node.body && node.body.toLowerCase().includes(q)) ||
+              (node.link && node.link.toLowerCase().includes(q)) ||
               (node.tags && node.tags.some(t => t.toLowerCase().includes(q)))) {
             div.classList.add('search-match');
           }

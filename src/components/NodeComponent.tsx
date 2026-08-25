@@ -670,6 +670,23 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         </div>
       )}
 
+      {/* Dedicated Prominent Link Badge */}
+      {node.link && node.link.trim().length > 0 && (
+        <a
+          href={node.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`Abrir enlace: ${node.link}`}
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1.5 mt-1.5 px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-sky-400 hover:bg-blue-600 hover:text-white border border-blue-500/20 text-[11px] font-semibold transition-all max-w-full truncate shadow-2xs z-10 select-none cursor-pointer"
+        >
+          <ExternalLink className="w-3 h-3 shrink-0" />
+          <span className="truncate">
+            {node.link.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '')}
+          </span>
+        </a>
+      )}
+
       {/* Tags in the bottom area of the node */}
       {node.tags && node.tags.length > 0 && (
         <div className="flex flex-wrap items-center gap-1 mt-1 pt-1 border-t border-black/10 dark:border-white/10 w-full shrink-0 relative z-10">
