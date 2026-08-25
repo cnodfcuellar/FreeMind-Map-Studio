@@ -19,6 +19,8 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
 }) => {
   const [toNodeId, setToNodeId] = useState<string>('');
   const [label, setLabel] = useState<string>('');
+  const [shape, setShape] = useState<'curved' | 'bezier' | 'straight' | 'step'>('curved');
+  const [curvature, setCurvature] = useState<number>(-50);
   const [style, setStyle] = useState<'solid' | 'dashed' | 'dotted'>('dashed');
   const [color, setColor] = useState<string>('#3b82f6');
 
@@ -39,9 +41,12 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
       fromId: fromNodeId,
       toId: toNodeId,
       label: label.trim() || undefined,
+      shape,
+      curvature,
       style,
       color,
       arrow: 'end',
+      width: 2,
     };
 
     onSaveConnector(newConnector);
@@ -103,6 +108,50 @@ export const ConnectorModal: React.FC<ConnectorModalProps> = ({
               className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
             />
           </div>
+
+          {/* Forma del Recorrido */}
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">Forma / Trazado</label>
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                { id: 'curved', label: 'Curva', sym: '⌒' },
+                { id: 'bezier', label: 'Bézier S', sym: '∿' },
+                { id: 'straight', label: 'Recta', sym: '─' },
+                { id: 'step', label: 'Escalón', sym: '┐' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setShape(s.id as any)}
+                  className={`py-1.5 rounded-lg border text-center font-medium transition-all ${
+                    shape === s.id
+                      ? 'bg-cyan-600 text-white border-cyan-600 font-bold shadow-2xs'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="block font-mono text-xs">{s.sym}</span>
+                  <span className="text-[10px] block">{s.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {shape !== 'straight' && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-semibold text-slate-700">Curvatura Inicial ({curvature}px)</label>
+              </div>
+              <input
+                type="range"
+                min="-200"
+                max="200"
+                step="5"
+                value={curvature}
+                onChange={(e) => setCurvature(Number(e.target.value))}
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600"
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div>

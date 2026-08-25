@@ -183,6 +183,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
   }, []);
 
   const [bgCategoryFilter, setBgCategoryFilter] = useState<'all' | 'light' | 'dark' | 'paper' | 'technical' | 'creative'>('all');
+  const [expandedConnectorId, setExpandedConnectorId] = useState<string | null>(null);
   const [mapSectionsOpen, setMapSectionsOpen] = useState<Record<string, boolean>>({
     background: false,
     theme: false,
@@ -3252,48 +3253,275 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                   {mapSectionsOpen.connectors && (
                     <div className="px-3.5 pb-3.5 pt-1 space-y-2.5 border-t border-slate-200/60 animate-in fade-in duration-150">
                       {mindMap?.connectors && mindMap.connectors.length > 0 ? (
-                        <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                        <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
                           {mindMap.connectors.map((conn) => {
                             const fromNode = mindMap.nodes[conn.fromId];
                             const toNode = mindMap.nodes[conn.toId];
+                            const isExpanded = expandedConnectorId === conn.id;
+                            const currentCurvature = conn.curvature !== undefined ? conn.curvature : -50;
+                            const currentShape = conn.shape || 'curved';
+                            const currentStyle = conn.style || 'dashed';
+                            const currentArrow = conn.arrow || 'end';
+                            const currentWidth = conn.width || 2;
+                            const currentColor = conn.color || '#3b82f6';
+
                             return (
                               <div
                                 key={conn.id}
-                                className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 hover:border-slate-300 transition-colors"
+                                className={`rounded-xl border transition-all ${
+                                  isExpanded
+                                    ? 'bg-white border-cyan-400 ring-1 ring-cyan-200 shadow-2xs'
+                                    : 'bg-white border-slate-200 hover:border-slate-300'
+                                }`}
                               >
-                                <div className="flex-1 min-w-0 pr-2">
-                                  <div className="flex items-center gap-1 text-[11px] font-medium text-slate-800 truncate">
-                                    <span className="truncate max-w-[70px]" title={fromNode?.text}>
-                                      {fromNode?.text || 'Nodo'}
-                                    </span>
-                                    <ArrowRight className="w-3 h-3 text-cyan-500 shrink-0" />
-                                    <span className="truncate max-w-[70px]" title={toNode?.text}>
-                                      {toNode?.text || 'Nodo'}
-                                    </span>
-                                  </div>
-                                  {conn.label && (
-                                    <div className="text-[10px] text-slate-400 truncate italic">
-                                      "{conn.label}"
+                                {/* Connector Item Header */}
+                                <div
+                                  onClick={() => setExpandedConnectorId(isExpanded ? null : conn.id)}
+                                  className="flex items-center justify-between p-2.5 cursor-pointer select-none"
+                                >
+                                  <div className="flex-1 min-w-0 pr-2">
+                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-800 truncate">
+                                      <span className="truncate max-w-[85px]" title={fromNode?.text}>
+                                        {fromNode?.text?.split('\n')[0] || 'Nodo'}
+                                      </span>
+                                      <ArrowRight className="w-3 h-3 text-cyan-600 shrink-0" />
+                                      <span className="truncate max-w-[85px]" title={toNode?.text}>
+                                        {toNode?.text?.split('\n')[0] || 'Nodo'}
+                                      </span>
                                     </div>
-                                  )}
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      {conn.label ? (
+                                        <span className="text-[10.5px] text-slate-500 truncate italic">
+                                          "{conn.label}"
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] text-slate-400">Sin etiqueta</span>
+                                      )}
+                                      <span className="text-[9.5px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500">
+                                        {currentShape} • {currentCurvature}px
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <div
+                                      style={{ backgroundColor: currentColor }}
+                                      className="w-3.5 h-3.5 rounded-full border border-slate-200 shrink-0 shadow-2xs"
+                                    />
+                                    <ChevronDown
+                                      className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                                        isExpanded ? 'rotate-180 text-cyan-600' : ''
+                                      }`}
+                                    />
+                                    {onDeleteConnector && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onDeleteConnector(conn.id);
+                                        }}
+                                        title="Eliminar conector"
+                                        className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
 
-                                <div className="flex items-center gap-1.5 shrink-0">
-                                  <div
-                                    style={{ backgroundColor: conn.color || '#3b82f6' }}
-                                    className="w-3.5 h-3.5 rounded-full border border-slate-200"
-                                  />
-                                  {onDeleteConnector && (
-                                    <button
-                                      type="button"
-                                      onClick={() => onDeleteConnector(conn.id)}
-                                      title="Eliminar conector"
-                                      className="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  )}
-                                </div>
+                                {/* Expanded Customization Controls */}
+                                {isExpanded && onUpdateConnector && (
+                                  <div className="px-3 pb-3 pt-2 border-t border-slate-100 space-y-3 bg-slate-50/50 rounded-b-xl text-xs animate-in fade-in duration-100">
+                                    {/* 1. Forma y Recorrido de la Línea */}
+                                    <div>
+                                      <label className="font-semibold text-slate-700 text-[11px] block mb-1.5">
+                                        Forma del Recorrido
+                                      </label>
+                                      <div className="grid grid-cols-4 gap-1">
+                                        {[
+                                          { id: 'curved', label: 'Curva', symbol: '⌒' },
+                                          { id: 'bezier', label: 'Bézier S', symbol: '∿' },
+                                          { id: 'straight', label: 'Recta', symbol: '─' },
+                                          { id: 'step', label: 'Escalón', symbol: '┐' },
+                                        ].map((shp) => (
+                                          <button
+                                            key={shp.id}
+                                            type="button"
+                                            onClick={() => onUpdateConnector(conn.id, { shape: shp.id as any })}
+                                            className={`py-1 px-1.5 rounded-lg border text-center transition-all cursor-pointer ${
+                                              currentShape === shp.id
+                                                ? 'bg-cyan-600 text-white border-cyan-600 font-bold shadow-2xs'
+                                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                          >
+                                            <span className="block text-xs font-mono">{shp.symbol}</span>
+                                            <span className="text-[9.5px] block truncate">{shp.label}</span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* 2. Curvatura y Desplazamiento */}
+                                    {currentShape !== 'straight' && (
+                                      <div className="space-y-1.5 bg-white p-2.5 rounded-xl border border-slate-200">
+                                        <div className="flex items-center justify-between text-[11px]">
+                                          <span className="font-semibold text-slate-700">Curvatura / Arco:</span>
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="font-mono text-cyan-700 font-bold bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200 text-[10.5px]">
+                                              {currentCurvature}px
+                                            </span>
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                onUpdateConnector(conn.id, {
+                                                  curvature: -50,
+                                                  controlPoint: undefined,
+                                                })
+                                              }
+                                              className="text-[10px] text-cyan-600 hover:text-cyan-800 underline cursor-pointer"
+                                              title="Restablecer arco por defecto"
+                                            >
+                                              Reset
+                                            </button>
+                                          </div>
+                                        </div>
+                                        <input
+                                          type="range"
+                                          min="-200"
+                                          max="200"
+                                          step="5"
+                                          value={currentCurvature}
+                                          onChange={(e) =>
+                                            onUpdateConnector(conn.id, {
+                                              curvature: Number(e.target.value),
+                                              controlPoint: undefined,
+                                            })
+                                          }
+                                          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-600"
+                                        />
+                                        <div className="flex justify-between text-[9px] text-slate-400">
+                                          <span>Arco invertido (-200)</span>
+                                          <span>Recto (0)</span>
+                                          <span>Arco directo (+200)</span>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* 3. Estilo de Línea & Grosor */}
+                                    <div className="grid grid-cols-2 gap-2">
+                                      <div>
+                                        <label className="font-semibold text-slate-700 text-[11px] block mb-1">
+                                          Estilo de Trazo
+                                        </label>
+                                        <select
+                                          value={currentStyle}
+                                          onChange={(e) => onUpdateConnector(conn.id, { style: e.target.value as any })}
+                                          className="w-full bg-white border border-slate-200 rounded-lg p-1.5 text-xs text-slate-700 outline-none focus:border-cyan-500 shadow-2xs"
+                                        >
+                                          <option value="solid">Sólida (Solid)</option>
+                                          <option value="dashed">Discontinua (Dashed)</option>
+                                          <option value="dotted">Punteada (Dotted)</option>
+                                        </select>
+                                      </div>
+
+                                      <div>
+                                        <label className="font-semibold text-slate-700 text-[11px] block mb-1">
+                                          Grosor: {currentWidth}px
+                                        </label>
+                                        <div className="flex gap-1">
+                                          {[1, 2, 3, 4, 5].map((w) => (
+                                            <button
+                                              key={w}
+                                              type="button"
+                                              onClick={() => onUpdateConnector(conn.id, { width: w })}
+                                              className={`flex-1 py-1 rounded-lg border text-center text-xs font-semibold cursor-pointer ${
+                                                currentWidth === w
+                                                  ? 'bg-cyan-600 text-white border-cyan-600 shadow-2xs'
+                                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                                              }`}
+                                            >
+                                              {w}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* 4. Flechas / Dirección */}
+                                    <div>
+                                      <label className="font-semibold text-slate-700 text-[11px] block mb-1">
+                                        Dirección de Flechas
+                                      </label>
+                                      <div className="grid grid-cols-4 gap-1">
+                                        {[
+                                          { id: 'end', label: '➔ Destino' },
+                                          { id: 'start', label: '⬅ Origen' },
+                                          { id: 'both', label: '↔ Ambas' },
+                                          { id: 'none', label: '— Ninguna' },
+                                        ].map((arr) => (
+                                          <button
+                                            key={arr.id}
+                                            type="button"
+                                            onClick={() => onUpdateConnector(conn.id, { arrow: arr.id as any })}
+                                            className={`py-1 px-1 rounded-lg border text-center text-[10px] transition-all cursor-pointer ${
+                                              currentArrow === arr.id
+                                                ? 'bg-cyan-600 text-white border-cyan-600 font-bold shadow-2xs'
+                                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                          >
+                                            {arr.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+
+                                    {/* 5. Color & Etiqueta de la Relación */}
+                                    <div className="space-y-2">
+                                      <div>
+                                        <label className="font-semibold text-slate-700 text-[11px] block mb-1">
+                                          Color del Conector
+                                        </label>
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          {['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#64748b'].map((c) => (
+                                            <button
+                                              key={c}
+                                              type="button"
+                                              onClick={() => onUpdateConnector(conn.id, { color: c })}
+                                              style={{ backgroundColor: c }}
+                                              className={`w-5 h-5 rounded-full border transition-all cursor-pointer ${
+                                                currentColor === c ? 'ring-2 ring-cyan-500 scale-110 border-white' : 'border-slate-300'
+                                              }`}
+                                            />
+                                          ))}
+                                          <input
+                                            type="color"
+                                            value={currentColor}
+                                            onChange={(e) => onUpdateConnector(conn.id, { color: e.target.value })}
+                                            className="w-5 h-5 rounded border border-slate-200 cursor-pointer p-0 shrink-0"
+                                            title="Color personalizado"
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <div>
+                                        <label className="font-semibold text-slate-700 text-[11px] block mb-1">
+                                          Texto / Etiqueta de Relación
+                                        </label>
+                                        <input
+                                          type="text"
+                                          value={conn.label || ''}
+                                          onChange={(e) =>
+                                            onUpdateConnector(conn.id, {
+                                              label: e.target.value || undefined,
+                                            })
+                                          }
+                                          placeholder="Ej: Depende de, Relacionado con..."
+                                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-cyan-500 placeholder:text-slate-400 shadow-2xs"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             );
                           })}

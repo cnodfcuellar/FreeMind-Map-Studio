@@ -30,6 +30,7 @@ import {
   Scissors,
   Clipboard,
 } from 'lucide-react';
+import { calculateConnectorGeometry } from '../utils/connectorUtils';
 
 interface MindMapCanvasProps {
   mindMap: MindMap;
@@ -52,6 +53,7 @@ interface MindMapCanvasProps {
   onCopyNode: (id: string) => void;
   onCutNode: (id: string) => void;
   onPasteNode: (targetParentId: string) => void;
+  onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
 }
 
 interface ContextMenuState {
@@ -82,6 +84,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   onCopyNode,
   onCutNode,
   onPasteNode,
+  onUpdateConnector,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +97,11 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   // Drag & Drop Node state
   const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
   const [dragOverNodeId, setDragOverNodeId] = useState<string | null>(null);
+
+  // Connector Interactive State
+  const [selectedConnectorId, setSelectedConnectorId] = useState<string | null>(null);
+  const [hoveredConnectorId, setHoveredConnectorId] = useState<string | null>(null);
+  const [draggingConnectorId, setDraggingConnectorId] = useState<string | null>(null);
 
   // Context Menu state
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -176,17 +184,30 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
     });
   }, [layoutMap]);
 
-  // Handle Pan Events
+  // Handle Pan & Drag Events
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0 && (e.target === containerRef.current || (e.target as HTMLElement).id === 'svg-edges-layer' || (e.target as HTMLElement).id === 'canvas-background')) {
       setIsPanning(true);
       setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
       onSelectNode(null);
+      setSelectedConnectorId(null);
       setContextMenu((prev) => ({ ...prev, visible: false }));
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (draggingConnectorId && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const canvasX = (e.clientX - rect.left - pan.x) / zoom;
+      const canvasY = (e.clientY - rect.top - pan.y) / zoom;
+      if (onUpdateConnector) {
+        onUpdateConnector(draggingConnectorId, {
+          controlPoint: { x: Math.round(canvasX), y: Math.round(canvasY) },
+        });
+      }
+      return;
+    }
+
     if (isPanning) {
       setPan({
         x: e.clientX - panStart.x,
@@ -211,6 +232,10 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
 
   const handleMouseUp = () => {
     setIsPanning(false);
+
+    if (draggingConnectorId) {
+      setDraggingConnectorId(null);
+    }
 
     if (draggedNodeId && dragOverNodeId && draggedNodeId !== dragOverNodeId) {
       onReparentNode(draggedNodeId, dragOverNodeId);
@@ -340,7 +365,33 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
           style={{ overflow: 'visible' }}
         >
           <defs>
-            {/* Arrowhead marker for connectors */}
+            {/* Arrowhead marker for connectors (End) */}
+            <marker
+              id="connector-arrow-end"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="context-stroke" />
+            </marker>
+
+            {/* Arrowhead marker for connectors (Start) */}
+            <marker
+              id="connector-arrow-start"
+              viewBox="0 0 10 10"
+              refX="2"
+              refY="5"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
+              <path d="M 8 1.5 L 0 5 L 8 8.5 z" fill="context-stroke" />
+            </marker>
+
+            {/* Fallback marker */}
             <marker
               id="connector-arrow"
               viewBox="0 0 10 10"
@@ -600,7 +651,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             })}
           </g>
 
-          {/* Group 3: Custom Connectors / Relations */}
+          {/* Group 3: Custom Connectors / Relations with interactive curve manipulation */}
           <g id="connectors-group">
             {mindMap.connectors?.map((conn) => {
               const fromLayout = layoutMap.get(conn.fromId);
@@ -612,38 +663,132 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               const x2 = toLayout.x + toLayout.width / 2;
               const y2 = toLayout.y + toLayout.height / 2;
 
-              const midX = (x1 + x2) / 2;
-              const midY = (y1 + y2) / 2 - 40; // Curve arc
-              const pathD = `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`;
+              const geom = calculateConnectorGeometry(x1, y1, x2, y2, conn);
+              const isHovered = hoveredConnectorId === conn.id;
+              const isSelected = selectedConnectorId === conn.id;
+              const isDraggingThis = draggingConnectorId === conn.id;
+              const showHandle = isHovered || isSelected || isDraggingThis;
+
+              const strokeColor = conn.color || '#3b82f6';
+              const strokeWidth = conn.width || 2;
 
               const connectorDash =
                 conn.style === 'dashed'
-                  ? '10 7'
+                  ? '8 6'
                   : conn.style === 'dotted'
-                  ? '0.1 9'
+                  ? '2 5'
                   : undefined;
 
+              const arrowMode = conn.arrow || 'end';
+              const hasEndArrow = arrowMode === 'end' || arrowMode === 'both';
+              const hasStartArrow = arrowMode === 'start' || arrowMode === 'both';
+
               return (
-                <g key={conn.id} className="cursor-pointer pointer-events-auto group">
+                <g
+                  key={conn.id}
+                  className="cursor-pointer pointer-events-auto"
+                  onMouseEnter={() => setHoveredConnectorId(conn.id)}
+                  onMouseLeave={() => {
+                    if (!isDraggingThis) setHoveredConnectorId(null);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedConnectorId(conn.id);
+                  }}
+                >
+                  {/* Broad invisible hit area for easy click/hover */}
                   <path
-                    d={pathD}
-                    stroke={conn.color || '#3b82f6'}
-                    strokeWidth="2"
+                    d={geom.pathD}
+                    stroke="transparent"
+                    strokeWidth="20"
+                    fill="none"
+                  />
+
+                  {/* Highlight halo when selected or hovered */}
+                  {(isSelected || isHovered) && (
+                    <path
+                      d={geom.pathD}
+                      stroke={strokeColor}
+                      strokeWidth={strokeWidth + 5}
+                      strokeOpacity="0.25"
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  )}
+
+                  {/* Main Connector Path */}
+                  <path
+                    d={geom.pathD}
+                    stroke={strokeColor}
+                    strokeWidth={strokeWidth}
                     strokeDasharray={connectorDash}
                     strokeLinecap="round"
                     fill="none"
-                    markerEnd="url(#connector-arrow)"
+                    markerEnd={hasEndArrow ? "url(#connector-arrow-end)" : undefined}
+                    markerStart={hasStartArrow ? "url(#connector-arrow-start)" : undefined}
                   />
+
+                  {/* Text Label with readable background halo */}
                   {conn.label && (
                     <text
-                      x={midX}
-                      y={midY + 5}
+                      x={geom.labelX}
+                      y={geom.labelY}
                       textAnchor="middle"
-                      className="text-xs font-semibold fill-slate-700 bg-white"
-                      style={{ fontSize: '11px', paintOrder: 'stroke', stroke: '#ffffff', strokeWidth: '4px' }}
+                      className="text-xs font-semibold fill-slate-800 select-none pointer-events-none"
+                      style={{
+                        fontSize: '11px',
+                        paintOrder: 'stroke fill',
+                        stroke: '#ffffff',
+                        strokeWidth: '4px',
+                        strokeLinejoin: 'round',
+                      }}
                     >
                       {conn.label}
                     </text>
+                  )}
+
+                  {/* Interactive Control Point Guide and Handle */}
+                  {showHandle && (
+                    <g className="cursor-grab active:cursor-grabbing">
+                      {/* Dashed guide line from midpoint to control point */}
+                      <line
+                        x1={geom.midX}
+                        y1={geom.midY}
+                        x2={geom.cpX}
+                        y2={geom.cpY}
+                        stroke={strokeColor}
+                        strokeWidth="1.2"
+                        strokeDasharray="3 3"
+                        strokeOpacity="0.6"
+                      />
+
+                      {/* Control Point Circle Handle */}
+                      <circle
+                        cx={geom.cpX}
+                        cy={geom.cpY}
+                        r={isDraggingThis ? 8 : 6}
+                        fill="#ffffff"
+                        stroke={strokeColor}
+                        strokeWidth="2.5"
+                        className="transition-transform hover:scale-125 shadow-md"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          setDraggingConnectorId(conn.id);
+                          setSelectedConnectorId(conn.id);
+                        }}
+                        onDoubleClick={(e) => {
+                          e.stopPropagation();
+                          if (onUpdateConnector) {
+                            onUpdateConnector(conn.id, {
+                              controlPoint: undefined,
+                              curvature: -50,
+                            });
+                          }
+                        }}
+                      >
+                        <title>Arrastra para curvar o doble clic para restablecer</title>
+                      </circle>
+                    </g>
                   )}
                 </g>
               );

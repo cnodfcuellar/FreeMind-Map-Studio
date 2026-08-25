@@ -898,6 +898,16 @@ export default function App() {
             onCopyNode={handleCopyNode}
             onCutNode={handleCutNode}
             onPasteNode={handlePasteNode}
+            onUpdateConnector={(connectorId, updates) => {
+              pushHistory(mindMap);
+              setMindMap((m) => ({
+                ...m,
+                connectors: (m.connectors || []).map((c) =>
+                  c.id === connectorId ? { ...c, ...updates } : c
+                ),
+                updatedAt: Date.now(),
+              }));
+            }}
           />
         )}
 

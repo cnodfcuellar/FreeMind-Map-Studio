@@ -127,6 +127,9 @@ export interface Connector {
   style?: 'solid' | 'dashed' | 'dotted';
   arrow?: 'start' | 'end' | 'both' | 'none';
   curvature?: number;
+  shape?: 'curved' | 'bezier' | 'straight' | 'step';
+  width?: number;
+  controlPoint?: { x: number; y: number };
 }
 
 export type BackgroundPatternStyle =
