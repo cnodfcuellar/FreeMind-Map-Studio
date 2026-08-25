@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
+
+/* Background grid patterns */
+.bg-grid-dots {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.35) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-grid-dots-dark {
+  background-image: radial-gradient(rgba(100, 116, 139, 0.4) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-grid-lines {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(226, 232, 240, 0.7) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.7) 1px, transparent 1px);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+/* Node animation and transitions */
+.mind-node {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.node-selected {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Prevent accidental browser gestures interfering with canvas */
+.canvas-container {
+  touch-action: none;
+  user-select: none;
+}
+

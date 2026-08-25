@@ -1,0 +1,6 @@
+{
+  "name": "FreeMind Map Studio",
+  "description": "Aplicación offline y portable para crear y editar mapas mentales tipo Freeplane y Mindomo con soporte de exportación .mm, HTML portable, imágenes y modo presentación.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
