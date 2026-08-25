@@ -217,16 +217,24 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
 
   // Shape class generator
   const getShapeStyle = (): React.CSSProperties => {
+    // When node has an active image, it replaces the geometric shape and serves as the background
+    if (node.imageUrl) {
+      return {
+        backgroundColor: 'transparent',
+        backgroundImage: node.imagePosition === 'background' || !node.imagePosition ? `url(${node.imageUrl})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        borderRadius: isRoot ? '16px' : '10px',
+        border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
+        boxShadow: isRoot ? '0 10px 25px -5px rgba(0,0,0,0.2)' : '0 4px 12px -2px rgba(0,0,0,0.12)',
+      };
+    }
+
     const baseStyle: React.CSSProperties = {
       ...getNodeBackgroundStyles(),
       border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
     };
-
-    if (node.imageUrl && node.imagePosition === 'background') {
-      baseStyle.backgroundImage = `url(${node.imageUrl})`;
-      baseStyle.backgroundSize = 'cover';
-      baseStyle.backgroundPosition = 'center';
-    }
 
     if (shape === 'fork') {
       return {
@@ -309,7 +317,8 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star';
 
   const renderSvgPolygonBackground = () => {
-    if (!isSvgShape) return null;
+    // If shape is not an SVG polygon or if node has an active image background, do not draw polygon
+    if (!isSvgShape || node.imageUrl) return null;
 
     const w = layout.width;
     const h = layout.height;
