@@ -22,11 +22,16 @@ import {
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   all: '🌟',
+  brands_dev: '⚡',
+  brands_tech: '🚀',
+  brands_social: '💬',
+  brands_design: '🎨',
+  brands_all: '🌐',
   priority_status: '🎯',
   business_finance: '💼',
   tech_code: '💻',
-  communication: '💬',
-  design_media: '🎨',
+  communication: '👥',
+  design_media: '🖼️',
   education_science: '🎓',
   navigation_maps: '🧭',
   documents_files: '📁',
@@ -37,14 +42,17 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 };
 
 const QUICK_SEARCH_TAGS = [
+  { label: '🚀 Google', query: 'google' },
+  { label: '🐙 GitHub', query: 'github' },
+  { label: '⚛️ React', query: 'react' },
+  { label: '🐍 Python', query: 'python' },
+  { label: '🐳 Docker', query: 'docker' },
+  { label: '🎨 Figma', query: 'figma' },
+  { label: '▶️ YouTube', query: 'youtube' },
+  { label: '🤖 OpenAI', query: 'openai' },
   { label: '🎯 Prioridad', query: 'prioridad' },
   { label: '✓ Check', query: 'check' },
-  { label: '⚠ Alerta', query: 'alerta' },
   { label: '★ Estrella', query: 'estrella' },
-  { label: '👤 Usuario', query: 'usuario' },
-  { label: '➔ Flecha', query: 'flecha' },
-  { label: '💰 Dinero', query: 'dinero' },
-  { label: '📁 Archivo', query: 'archivo' },
 ];
 
 interface IconPackModalProps {
@@ -68,11 +76,21 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
   const [activeCategory, setActiveCategory] = useState<VectorIconCategory | 'all'>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [previewIcon, setPreviewIcon] = useState<VectorIconItem | null>(null);
+  const [visibleCount, setVisibleCount] = useState(120);
 
   // Filtered list
   const filteredIcons = useMemo(() => {
     return searchVectorIcons(searchQuery, activeCategory);
   }, [searchQuery, activeCategory]);
+
+  // Reset pagination on filter change
+  React.useEffect(() => {
+    setVisibleCount(120);
+  }, [searchQuery, activeCategory]);
+
+  const displayedIcons = useMemo(() => {
+    return filteredIcons.slice(0, visibleCount);
+  }, [filteredIcons, visibleCount]);
 
   if (!isOpen) return null;
 
@@ -294,56 +312,71 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
-                  {filteredIcons.map((icon) => {
-                    const IconComponent = icon.icon;
-                    const isSelectedOnNode = currentNodeIcons.includes(icon.id);
-                    const isCurrentPreview = previewIcon?.id === icon.id;
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
+                    {displayedIcons.map((icon) => {
+                      const IconComponent = icon.icon;
+                      const isSelectedOnNode = currentNodeIcons.includes(icon.id);
+                      const isCurrentPreview = previewIcon?.id === icon.id;
 
-                    return (
-                      <div
-                        key={icon.id}
-                        onClick={() => {
-                          setPreviewIcon(icon);
-                          if (selectedNodeId) {
-                            onToggleIcon(icon.id);
-                          }
-                        }}
-                        onMouseEnter={() => setPreviewIcon(icon)}
-                        className={`group relative flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all cursor-pointer select-none text-center ${
-                          isSelectedOnNode
-                            ? 'bg-blue-50/90 border-blue-500 shadow-xs ring-1 ring-blue-400 scale-102'
-                            : isCurrentPreview
-                            ? 'bg-white border-slate-400 shadow-xs ring-1 ring-slate-300'
-                            : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs'
-                        }`}
-                      >
-                        {/* Active checkmark */}
-                        {isSelectedOnNode && (
-                          <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] shadow-2xs">
-                            <Check className="w-2.5 h-2.5" />
-                          </div>
-                        )}
-
-                        {/* SVG Icon Container */}
+                      return (
                         <div
-                          className={`w-7 h-7 flex items-center justify-center rounded-lg transition-transform group-hover:scale-110 mb-1.5 ${
-                            isSelectedOnNode ? 'text-blue-600' : 'text-slate-700 group-hover:text-blue-600'
+                          key={icon.id}
+                          onClick={() => {
+                            setPreviewIcon(icon);
+                            if (selectedNodeId) {
+                              onToggleIcon(icon.id);
+                            }
+                          }}
+                          onMouseEnter={() => setPreviewIcon(icon)}
+                          className={`group relative flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all cursor-pointer select-none text-center ${
+                            isSelectedOnNode
+                              ? 'bg-blue-50/90 border-blue-500 shadow-xs ring-1 ring-blue-400 scale-102'
+                              : isCurrentPreview
+                              ? 'bg-white border-slate-400 shadow-xs ring-1 ring-slate-300'
+                              : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xs'
                           }`}
                         >
-                          <IconComponent className="w-5 h-5" />
-                        </div>
+                          {/* Active checkmark */}
+                          {isSelectedOnNode && (
+                            <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] shadow-2xs">
+                              <Check className="w-2.5 h-2.5" />
+                            </div>
+                          )}
 
-                        {/* Icon Name */}
-                        <span className="text-[10.5px] font-medium text-slate-700 truncate w-full px-1 leading-tight">
-                          {icon.name}
-                        </span>
-                        <span className="text-[9px] text-slate-400 font-mono truncate w-full mt-0.5">
-                          {icon.id}
-                        </span>
-                      </div>
-                    );
-                  })}
+                          {/* SVG Icon Container */}
+                          <div
+                            className={`w-7 h-7 flex items-center justify-center rounded-lg transition-transform group-hover:scale-110 mb-1.5 ${
+                              isSelectedOnNode ? 'text-blue-600' : 'text-slate-700 group-hover:text-blue-600'
+                            }`}
+                          >
+                            <IconComponent className="w-5 h-5" />
+                          </div>
+
+                          {/* Icon Name */}
+                          <span className="text-[10.5px] font-medium text-slate-700 truncate w-full px-1 leading-tight">
+                            {icon.name}
+                          </span>
+                          <span className="text-[9px] text-slate-400 font-mono truncate w-full mt-0.5">
+                            {icon.id}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Load more button if more icons exist */}
+                  {filteredIcons.length > visibleCount && (
+                    <div className="pt-3 pb-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setVisibleCount((prev) => prev + 120)}
+                        className="px-5 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs cursor-pointer transition-all hover:scale-102 active:scale-98"
+                      >
+                        Cargar más iconos ({filteredIcons.length - visibleCount} restantes de {filteredIcons.length})
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

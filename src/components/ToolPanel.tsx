@@ -117,11 +117,16 @@ const TEXT_COLOR_PRESETS = [
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   all: '🌟',
+  brands_dev: '⚡',
+  brands_tech: '🚀',
+  brands_social: '💬',
+  brands_design: '🎨',
+  brands_all: '🌐',
   priority_status: '🎯',
   business_finance: '💼',
   tech_code: '💻',
-  communication: '💬',
-  design_media: '🎨',
+  communication: '👥',
+  design_media: '🖼️',
   education_science: '🎓',
   navigation_maps: '🧭',
   documents_files: '📁',
@@ -132,15 +137,19 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 };
 
 const QUICK_SEARCH_TAGS = [
+  { label: '🚀 Google', query: 'google' },
+  { label: '🐙 GitHub', query: 'github' },
+  { label: '⚛️ React', query: 'react' },
+  { label: '🐍 Python', query: 'python' },
+  { label: '🐳 Docker', query: 'docker' },
+  { label: '🎨 Figma', query: 'figma' },
+  { label: '▶️ YouTube', query: 'youtube' },
+  { label: '🤖 OpenAI', query: 'openai' },
   { label: '🎯 Prioridad', query: 'prioridad' },
   { label: '✓ Check', query: 'check' },
-  { label: '⚠ Alerta', query: 'alerta' },
   { label: '★ Estrella', query: 'estrella' },
-  { label: '👤 Usuario', query: 'usuario' },
-  { label: '➔ Flecha', query: 'flecha' },
-  { label: '💰 Dinero', query: 'dinero' },
-  { label: '📁 Archivo', query: 'archivo' },
 ];
+
 
 export const ToolPanel: React.FC<ToolPanelProps> = ({
   selectedNode,

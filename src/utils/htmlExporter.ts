@@ -1,5 +1,6 @@
 import { MindMap } from '../types/mindmap';
 import { THEMES } from './themes';
+import { getVectorIconItem } from './vectorIconPack';
 
 function escapeXML(str: string): string {
   return (str || '')
@@ -13,14 +14,29 @@ function escapeXML(str: string): string {
 /**
  * Generates an ultra-high fidelity, 100% self-contained standalone HTML file
  * featuring full support for all 8 layout engine distributions, node shapes,
- * rich text & body formatting, images, icons, prominent links, tags, progress bars,
- * notes drawer, clouds, cross-connectors, and interactive pan/zoom/search.
+ * rich text & body formatting, images, icons (including 3,450+ Simple Icons),
+ * prominent links, tags, progress bars, notes drawer, clouds, cross-connectors,
+ * and interactive pan/zoom/search.
  */
 export function exportToStandaloneHTML(mindMap: MindMap): string {
   const jsonMap = JSON.stringify(mindMap).replace(/<\/script>/gi, '<\\/script>');
   const title = escapeXML(mindMap.title || 'Mapa Mental');
   const theme = THEMES[mindMap.themeId] || THEMES.default;
   const layout = mindMap.layout || 'standard';
+
+  // Pre-collect SVG markup for all used icons in the map (Lucide + Simple Icons)
+  const usedIconsMap: Record<string, string> = {};
+  Object.values(mindMap.nodes).forEach((node) => {
+    if (node.icons && node.icons.length > 0) {
+      node.icons.forEach((icId) => {
+        const item = getVectorIconItem(icId);
+        if (item && item.path) {
+          usedIconsMap[icId] = `<svg width="14" height="14" viewBox="0 0 24 24" fill="#${item.hex || '3b82f6'}"><path d="${item.path}"/></svg>`;
+        }
+      });
+    }
+  });
+  const jsonUsedIcons = JSON.stringify(usedIconsMap).replace(/<\/script>/gi, '<\\/script>');
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -639,8 +655,13 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     const nodesLayer = document.getElementById('nodes-layer');
     const zoomText = document.getElementById('zoom-text');
 
+    const usedIcons = ${jsonUsedIcons};
+
     // Vector Icon Generator
     function getSvgIcon(iconName) {
+      if (usedIcons && usedIcons[iconName]) {
+        return usedIcons[iconName];
+      }
       const icons = {
         'check': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
         'star': '<svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
