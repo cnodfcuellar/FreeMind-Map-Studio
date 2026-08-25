@@ -686,8 +686,14 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                           <span className="text-[11px] font-bold text-slate-800 block truncate">
                             Imagen de contenido
                           </span>
-                          <span className="text-[10px] text-slate-500 block">
-                            Posición: {selectedNode.imagePosition === 'bottom' ? 'Debajo del texto' : 'Arriba del texto'}
+                          <span className="text-[10px] text-slate-500 block truncate">
+                            Posición: {
+                              selectedNode.imagePosition === 'bottom' ? 'Debajo del texto' :
+                              selectedNode.imagePosition === 'left' ? 'A la izquierda' :
+                              selectedNode.imagePosition === 'right' ? 'A la derecha' :
+                              selectedNode.imagePosition === 'between' ? 'Entre título y cuerpo' :
+                              'Arriba del texto'
+                            }
                           </span>
                           <button
                             type="button"
@@ -699,24 +705,48 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                         </div>
                       </div>
 
-                      {/* Image Position Selector: Top or Bottom */}
+                      {/* Image Position Selector: Top, Bottom, Left, Right, Between */}
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                           Posición respecto al texto
                         </label>
-                        <div className="grid grid-cols-2 gap-1.5">
+                        <div className="grid grid-cols-3 gap-1.5 mb-1.5">
                           {[
-                            { id: 'top', label: '⬆️ Arriba del texto' },
-                            { id: 'bottom', label: '⬇️ Debajo del texto' },
+                            { id: 'top', label: '⬆️ Arriba', tip: 'Sobre el título del nodo' },
+                            { id: 'between', label: '↕️ Entre texto', tip: 'Entre el título y el cuerpo' },
+                            { id: 'bottom', label: '⬇️ Abajo', tip: 'Bajo el cuerpo del nodo' },
                           ].map((pos) => (
                             <button
                               key={pos.id}
                               type="button"
+                              title={pos.tip}
                               onClick={() => {
                                 onUpdateNode(selectedNode.id, { imagePosition: pos.id as any });
                               }}
-                              className={`py-1.5 px-1.5 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer text-center ${
+                              className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer text-center truncate ${
                                 (selectedNode.imagePosition || 'top') === pos.id
+                                  ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
+                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              {pos.label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {[
+                            { id: 'left', label: '⬅️ Izquierda', tip: 'Al lado izquierdo del texto' },
+                            { id: 'right', label: '➡️ Derecha', tip: 'Al lado derecho del texto' },
+                          ].map((pos) => (
+                            <button
+                              key={pos.id}
+                              type="button"
+                              title={pos.tip}
+                              onClick={() => {
+                                onUpdateNode(selectedNode.id, { imagePosition: pos.id as any });
+                              }}
+                              className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer text-center truncate ${
+                                selectedNode.imagePosition === pos.id
                                   ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
                                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                               }`}

@@ -76,7 +76,7 @@ export interface MindNode {
   imageUrl?: string;
   imageWidth?: number;
   imageHeight?: number;
-  imagePosition?: 'top' | 'bottom' | 'background' | 'fit';
+  imagePosition?: 'top' | 'bottom' | 'left' | 'right' | 'between' | 'background' | 'fit';
 
   // Title Text & Typography
   textColor?: string;

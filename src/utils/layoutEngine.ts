@@ -35,7 +35,13 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
     if (node.imagePosition === 'background') {
       imageMinWidth = 70;
       imageExtraHeight = 20;
+    } else if (node.imagePosition === 'left' || node.imagePosition === 'right') {
+      const imgW = node.imageWidth || 100;
+      const imgH = node.imageHeight || Math.round(imgW * 0.75);
+      extraWidth += imgW + 10;
+      imageExtraHeight = Math.max(0, imgH - 28);
     } else {
+      // 'top', 'bottom', 'between'
       const imgW = node.imageWidth || 140;
       const imgH = node.imageHeight || Math.round(imgW * 0.65);
       imageExtraHeight = imgH + 12;

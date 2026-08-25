@@ -514,6 +514,22 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           </div>
         )}
 
+        {/* Left Attached Content Image */}
+        {node.imageUrl && node.imagePosition === 'left' && (
+          <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 mr-1.5">
+            <img
+              src={node.imageUrl}
+              alt=""
+              className="rounded-lg object-contain pointer-events-none shadow-2xs transition-all"
+              style={{
+                width: `${node.imageWidth || 100}px`,
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+            />
+          </div>
+        )}
+
         {/* Main Text Content (Title & Body) */}
         <div className="flex-1 min-w-0 w-full flex flex-col justify-center overflow-hidden">
           {isEditing ? (
@@ -554,6 +570,22 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
                 {node.text || 'Nuevo Nodo'}
               </div>
 
+              {/* Between Image (between title and body) */}
+              {node.imageUrl && node.imagePosition === 'between' && (
+                <div className="w-full flex justify-center my-1.5 overflow-hidden rounded-lg relative z-10">
+                  <img
+                    src={node.imageUrl}
+                    alt=""
+                    className="rounded-lg object-contain pointer-events-none shadow-2xs transition-all"
+                    style={{
+                      width: `${node.imageWidth || 140}px`,
+                      maxWidth: '100%',
+                      height: 'auto',
+                    }}
+                  />
+                </div>
+              )}
+
               {/* Body (Cuerpo del nodo) */}
               {node.body && node.body.trim().length > 0 && (
                 <div
@@ -576,6 +608,22 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
             </>
           )}
         </div>
+
+        {/* Right Attached Content Image */}
+        {node.imageUrl && node.imagePosition === 'right' && (
+          <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 ml-1.5">
+            <img
+              src={node.imageUrl}
+              alt=""
+              className="rounded-lg object-contain pointer-events-none shadow-2xs transition-all"
+              style={{
+                width: `${node.imageWidth || 100}px`,
+                maxWidth: '100%',
+                height: 'auto',
+              }}
+            />
+          </div>
+        )}
 
         {/* Note indicator */}
         {node.note && (
