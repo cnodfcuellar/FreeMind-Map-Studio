@@ -625,7 +625,155 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                   </div>
                 </div>
 
-                {/* 3. METADATA: Enlace, Progreso y Etiquetas */}
+                {/* 3. IMAGEN DEL NODO (Insertar imagen JPG, PNG, SVG, WebP o URL) */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <label className="font-semibold text-slate-800 text-xs block">
+                          Imagen del Nodo
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-normal block">
+                          JPG, PNG, SVG, WebP o URL
+                        </span>
+                      </div>
+                    </div>
+                    {selectedNode.imageUrl && (
+                      <span className="text-[9.5px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                        Adjunta
+                      </span>
+                    )}
+                  </div>
+
+                  {selectedNode.imageUrl ? (
+                    <div className="space-y-3 pt-1 border-t border-slate-200/70">
+                      {/* Preview card */}
+                      <div className="relative rounded-xl border border-slate-200 bg-white p-2.5 flex items-center gap-3 shadow-2xs">
+                        <div className="w-14 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                          <img
+                            src={selectedNode.imageUrl}
+                            alt="Vista previa del nodo"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[11px] font-bold text-slate-800 block truncate">
+                            Imagen cargada
+                          </span>
+                          <span className="text-[10px] text-slate-500 block">
+                            Posición: {selectedNode.imagePosition === 'bottom' ? 'Abajo' : selectedNode.imagePosition === 'background' ? 'Fondo' : 'Arriba'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => onUpdateNode(selectedNode.id, { imageUrl: undefined })}
+                            className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-red-600 hover:text-red-700 font-semibold hover:underline cursor-pointer"
+                          >
+                            <Trash2 className="w-3 h-3" /> Quitar imagen
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Image Position */}
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                          Posición en el nodo
+                        </label>
+                        <div className="grid grid-cols-3 gap-1">
+                          {[
+                            { id: 'top', label: '⬆️ Arriba' },
+                            { id: 'bottom', label: '⬇️ Abajo' },
+                            { id: 'background', label: '🎨 Fondo' },
+                          ].map((pos) => (
+                            <button
+                              key={pos.id}
+                              type="button"
+                              onClick={() => onUpdateNode(selectedNode.id, { imagePosition: pos.id as any })}
+                              className={`py-1.5 px-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer ${
+                                (selectedNode.imagePosition || 'top') === pos.id
+                                  ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
+                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              {pos.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Image Scale Slider */}
+                      {selectedNode.imagePosition !== 'background' && (
+                        <div>
+                          <div className="flex items-center justify-between text-[11px] mb-1">
+                            <span className="font-semibold text-slate-600">Ancho / Escala</span>
+                            <span className="text-slate-500 font-mono text-[10.5px]">{selectedNode.imageWidth || 140}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="60"
+                            max="300"
+                            step="10"
+                            value={selectedNode.imageWidth || 140}
+                            onChange={(e) => onUpdateNode(selectedNode.id, { imageWidth: Number(e.target.value) })}
+                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                          />
+                        </div>
+                      )}
+
+                      {/* Change image button */}
+                      <button
+                        type="button"
+                        onClick={() => imageFileInputRef.current?.click()}
+                        className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-purple-600" />
+                        <span>Cambiar Imagen...</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pt-1 border-t border-slate-200/70">
+                      <button
+                        type="button"
+                        onClick={() => imageFileInputRef.current?.click()}
+                        className="w-full py-3 border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/50 hover:bg-purple-50/90 rounded-2xl text-purple-700 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+                          <Upload className="w-4 h-4" />
+                        </div>
+                        <span>Subir Imagen desde el equipo</span>
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          Archivos JPG, PNG, SVG o WebP
+                        </span>
+                      </button>
+
+                      {/* URL input fallback */}
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <input
+                          type="url"
+                          placeholder="O pegar URL de imagen (Enter)..."
+                          className="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-purple-500 shadow-2xs"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const val = (e.target as HTMLInputElement).value.trim();
+                              if (val) {
+                                onUpdateNode(selectedNode.id, {
+                                  imageUrl: val,
+                                  imagePosition: selectedNode.imagePosition || 'top',
+                                  imageWidth: selectedNode.imageWidth || 140,
+                                });
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. METADATA: Enlace, Progreso y Etiquetas */}
                 <div className="space-y-3 pt-2">
                   {/* Hyperlink */}
                   <div>
