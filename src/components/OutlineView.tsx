@@ -20,6 +20,43 @@ import {
   Tag,
 } from 'lucide-react';
 
+// Utility to ensure optimal contrast against the outline panel's white/light background
+function getReadableOutlineTextColor(customColor?: string, defaultColor: string = '#1e293b'): string {
+  if (!customColor) return defaultColor;
+
+  const clean = customColor.trim().toLowerCase();
+  // Handle white or near-white CSS strings
+  if (
+    clean === '#fff' ||
+    clean === '#ffffff' ||
+    clean === 'white' ||
+    clean.startsWith('rgba(255, 255, 255') ||
+    clean.startsWith('rgba(255,255,255') ||
+    clean.startsWith('rgb(255, 255, 255') ||
+    clean.startsWith('rgb(255,255,255')
+  ) {
+    return defaultColor;
+  }
+
+  // Check luminance for hex colors
+  const hex = clean.replace('#', '');
+  if (hex.length === 6 || hex.length === 3) {
+    const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16);
+    const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16);
+    const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16);
+    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+      // YIQ perceptual brightness calculation
+      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+      // If the color is too light for a light panel background (brightness > 180), fallback to high-contrast dark color
+      if (yiq > 180) {
+        return defaultColor;
+      }
+    }
+  }
+
+  return customColor;
+}
+
 interface OutlineViewProps {
   mindMap: MindMap;
   selectedNodeId: string | null;
@@ -201,12 +238,15 @@ export const OutlineView: React.FC<OutlineViewProps> = ({
                   onDoubleClick={() => setEditingId(node.id)}
                   title="Doble clic para editar título"
                   style={{
-                    color: node.textColor || undefined,
+                    color: getReadableOutlineTextColor(
+                      node.textColor,
+                      isRoot ? '#0f172a' : isSelected ? '#1e3a8a' : '#1e293b'
+                    ),
                     fontWeight: node.bold || isRoot ? 'bold' : 'normal',
                     fontStyle: node.italic ? 'italic' : 'normal',
                   }}
                   className={`leading-tight block break-words ${
-                    isRoot ? 'font-bold text-[13px] text-slate-900' : 'text-xs text-slate-800'
+                    isRoot ? 'font-bold text-[13px]' : 'text-xs'
                   }`}
                 >
                   {node.text}
@@ -216,11 +256,11 @@ export const OutlineView: React.FC<OutlineViewProps> = ({
                 {node.body && (
                   <span
                     style={{
-                      color: node.bodyColor || undefined,
+                      color: getReadableOutlineTextColor(node.bodyColor, '#64748b'),
                       fontWeight: node.bodyBold ? 'bold' : 'normal',
                       fontStyle: node.bodyItalic ? 'italic' : 'normal',
                     }}
-                    className="text-[11px] text-slate-500 block truncate mt-0.5 leading-snug"
+                    className="text-[11px] block truncate mt-0.5 leading-snug"
                   >
                     {node.body}
                   </span>
