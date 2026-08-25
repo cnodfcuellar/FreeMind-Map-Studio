@@ -21,6 +21,15 @@ import {
   Palette,
   GitBranch,
   Tag,
+  Bot,
+  BarChart3,
+  ShieldCheck,
+  Compass,
+  Briefcase,
+  Code,
+  DollarSign,
+  Mic,
+  HeartPulse,
 } from 'lucide-react';
 
 interface TemplatesModalProps {
@@ -73,6 +82,26 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
         return <AlertTriangle className="w-5 h-5 text-rose-400" />;
       case 'product-gtm':
         return <Rocket className="w-5 h-5 text-teal-600" />;
+      case 'ai-roadmap':
+        return <Bot className="w-5 h-5 text-sky-400" />;
+      case 'swot-matrix':
+        return <BarChart3 className="w-5 h-5 text-blue-600" />;
+      case 'cybersecurity-framework':
+        return <ShieldCheck className="w-5 h-5 text-indigo-400" />;
+      case 'customer-journey':
+        return <Compass className="w-5 h-5 text-orange-600" />;
+      case 'startup-pitch':
+        return <Briefcase className="w-5 h-5 text-blue-600" />;
+      case 'fullstack-roadmap':
+        return <Code className="w-5 h-5 text-cyan-400" />;
+      case 'financial-budget':
+        return <DollarSign className="w-5 h-5 text-emerald-600" />;
+      case 'design-system':
+        return <Palette className="w-5 h-5 text-fuchsia-600" />;
+      case 'content-creator':
+        return <Mic className="w-5 h-5 text-amber-600" />;
+      case 'health-wellness':
+        return <HeartPulse className="w-5 h-5 text-emerald-600" />;
       default:
         return <Sparkles className="w-5 h-5 text-indigo-600" />;
     }
@@ -104,7 +133,7 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
               <h2 className="font-bold text-base text-slate-800 flex items-center gap-2">
                 Galería de Plantillas y Ejemplos
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                  10 Modelos
+                  20 Modelos
                 </span>
               </h2>
               <p className="text-xs text-slate-500">
