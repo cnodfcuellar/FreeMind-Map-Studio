@@ -17,7 +17,35 @@ import {
   Trash2,
   Download,
   Info,
+  LayoutGrid,
 } from 'lucide-react';
+
+const CATEGORY_EMOJIS: Record<string, string> = {
+  all: '🌟',
+  priority_status: '🎯',
+  business_finance: '💼',
+  tech_code: '💻',
+  communication: '💬',
+  design_media: '🎨',
+  education_science: '🎓',
+  navigation_maps: '🧭',
+  documents_files: '📁',
+  nature_weather: '☀️',
+  tools_security: '🛡️',
+  health_sports: '🏃',
+  emojis_symbols: '✨',
+};
+
+const QUICK_SEARCH_TAGS = [
+  { label: '🎯 Prioridad', query: 'prioridad' },
+  { label: '✓ Check', query: 'check' },
+  { label: '⚠ Alerta', query: 'alerta' },
+  { label: '★ Estrella', query: 'estrella' },
+  { label: '👤 Usuario', query: 'usuario' },
+  { label: '➔ Flecha', query: 'flecha' },
+  { label: '💰 Dinero', query: 'dinero' },
+  { label: '📁 Archivo', query: 'archivo' },
+];
 
 interface IconPackModalProps {
   isOpen: boolean;
@@ -84,7 +112,7 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -98,7 +126,7 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
               <span className="truncate max-w-xs bg-white/80 px-2 py-0.5 rounded border border-blue-200 text-slate-800 font-medium">
                 {selectedNodeText || selectedNodeId}
               </span>
-              <span className="text-blue-600">({currentNodeIcons.length} iconos activos)</span>
+              <span className="text-blue-600 font-mono">({currentNodeIcons.length} iconos activos)</span>
             </div>
             <span className="text-[11px] text-blue-700">
               Haz clic en cualquier icono para añadirlo o quitarlo del nodo.
@@ -108,67 +136,120 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
 
         {/* Search & Categories Bar */}
         <div className="p-4 border-b border-slate-200 space-y-3 bg-white">
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              autoFocus
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar entre 500+ iconos por nombre, concepto (ej: dinero, cpu, correo, exito, estrella)..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 text-xs"
-              >
-                ×
-              </button>
-            )}
+          {/* Search Input with Live Counter */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar entre 500+ iconos por nombre, concepto (ej: dinero, cpu, correo, exito, estrella)..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400 shadow-2xs"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 text-xs cursor-pointer"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            <div className="px-3 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold shrink-0 font-mono">
+              {filteredIcons.length} {filteredIcons.length === 1 ? 'icono' : 'iconos'}
+            </div>
           </div>
 
-          {/* Categories Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-            <button
-              onClick={() => setActiveCategory('all')}
-              className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
-                activeCategory === 'all'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
-              }`}
-            >
-              <span>Todos los Iconos</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-slate-700/50 text-[10px]">
-                {TOTAL_VECTOR_ICONS_COUNT}
+          {/* Quick Search Tag Suggestions */}
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className="text-[10px] text-slate-400 font-medium mr-1">Búsquedas rápidas:</span>
+            {QUICK_SEARCH_TAGS.map((st) => (
+              <button
+                key={st.query}
+                type="button"
+                onClick={() => setSearchQuery(searchQuery === st.query ? '' : st.query)}
+                className={`text-[10.5px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                  searchQuery === st.query
+                    ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-2xs'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
+                }`}
+              >
+                {st.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Categories Bar (Fully Visible Multi-line Wrap with Icons & Counts) */}
+          <div className="pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <LayoutGrid className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Colecciones & Categorías (12)</span>
               </span>
-            </button>
-            {VECTOR_ICON_CATEGORIES.map((cat) => {
-              const count = VECTOR_ICON_PACK.filter((i) => i.category === cat.id).length;
-              const isSelected = activeCategory === cat.id;
-              return (
+              {activeCategory !== 'all' && (
                 <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
-                    isSelected
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
-                  }`}
-                  title={cat.description}
+                  type="button"
+                  onClick={() => setActiveCategory('all')}
+                  className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold underline cursor-pointer"
                 >
-                  <span>{cat.name}</span>
-                  <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] ${
-                      isSelected ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-600'
-                    }`}
-                  >
-                    {count}
-                  </span>
+                  Ver todas
                 </button>
-              );
-            })}
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveCategory('all')}
+                className={`px-3 py-1.5 rounded-xl font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeCategory === 'all'
+                    ? 'bg-slate-900 text-white shadow-xs font-bold'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200/60'
+                }`}
+              >
+                <span>🌟</span>
+                <span>Todos</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                    activeCategory === 'all' ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {TOTAL_VECTOR_ICONS_COUNT}
+                </span>
+              </button>
+
+              {VECTOR_ICON_CATEGORIES.map((cat) => {
+                const count = VECTOR_ICON_PACK.filter((i) => i.category === cat.id).length;
+                const isSelected = activeCategory === cat.id;
+                const emoji = CATEGORY_EMOJIS[cat.id] || '📁';
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-xl font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                      isSelected
+                        ? 'bg-blue-600 text-white shadow-xs font-bold ring-1 ring-blue-400'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200/60'
+                    }`}
+                    title={cat.description}
+                  >
+                    <span>{emoji}</span>
+                    <span>{cat.name}</span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                        isSelected ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
