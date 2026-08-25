@@ -12,6 +12,7 @@ import {
   NodeBackgroundType,
   NodeGradientDirection,
   NodePatternStyle,
+  NodeBgImageMode,
 } from '../types/mindmap';
 import { AVAILABLE_ICONS, renderNodeIcon } from '../utils/iconMap';
 import {
@@ -160,6 +161,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
   }, [iconSearchQuery, iconCategory]);
 
   const imageFileInputRef = useRef<HTMLInputElement>(null);
+  const bgImageFileInputRef = useRef<HTMLInputElement>(null);
 
   const [formatSectionsOpen, setFormatSectionsOpen] = useState<Record<string, boolean>>({
     shape: true,
@@ -632,10 +634,10 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                       </div>
                       <div>
                         <label className="font-semibold text-slate-800 text-xs block">
-                          Imagen del Nodo
+                          Imagen de Contenido del Nodo
                         </label>
                         <span className="text-[10px] text-slate-400 font-normal block">
-                          JPG, PNG, SVG, WebP o URL
+                          Insertada en el cuerpo del nodo (arriba o abajo del texto)
                         </span>
                       </div>
                     </div>
@@ -653,56 +655,45 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                         <div className="w-14 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                           <img
                             src={selectedNode.imageUrl}
-                            alt="Vista previa del nodo"
+                            alt="Imagen de contenido"
                             className="w-full h-full object-contain"
                           />
                         </div>
                         <div className="flex-1 min-w-0">
                           <span className="text-[11px] font-bold text-slate-800 block truncate">
-                            Imagen cargada
+                            Imagen de contenido
                           </span>
                           <span className="text-[10px] text-slate-500 block">
-                            Posición: {selectedNode.imagePosition === 'bottom' ? 'Abajo' : selectedNode.imagePosition === 'background' ? 'Fondo' : 'Arriba'}
+                            Posición: {selectedNode.imagePosition === 'bottom' ? 'Debajo del texto' : 'Arriba del texto'}
                           </span>
                           <button
                             type="button"
                             onClick={() => onUpdateNode(selectedNode.id, { imageUrl: undefined })}
                             className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-red-600 hover:text-red-700 font-semibold hover:underline cursor-pointer"
                           >
-                            <Trash2 className="w-3 h-3" /> Quitar imagen
+                            <Trash2 className="w-3 h-3" /> Quitar imagen de contenido
                           </button>
                         </div>
                       </div>
 
-                      {/* Image Position Selector */}
+                      {/* Image Position Selector: Top or Bottom */}
                       <div>
                         <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Ajuste de la imagen
+                          Posición respecto al texto
                         </label>
-                        <div className="grid grid-cols-4 gap-1">
+                        <div className="grid grid-cols-2 gap-1.5">
                           {[
-                            { id: 'fit', label: '🖼️ Ajustado', tip: 'El nodo toma la forma y proporción de la imagen' },
-                            { id: 'background', label: '🎨 Fondo', tip: 'Fondo completo' },
-                            { id: 'top', label: '⬆️ Arriba', tip: 'Sobre texto' },
-                            { id: 'bottom', label: '⬇️ Abajo', tip: 'Bajo texto' },
+                            { id: 'top', label: '⬆️ Arriba del texto' },
+                            { id: 'bottom', label: '⬇️ Debajo del texto' },
                           ].map((pos) => (
                             <button
                               key={pos.id}
                               type="button"
-                              title={pos.tip}
                               onClick={() => {
-                                const newPos = pos.id as any;
-                                const scale = selectedNode.imageWidth || selectedNode.customWidth || 160;
-                                onUpdateNode(selectedNode.id, {
-                                  imagePosition: newPos,
-                                  ...(newPos === 'fit' ? {
-                                    customWidth: scale,
-                                    customHeight: Math.round(scale * 0.75),
-                                  } : {}),
-                                });
+                                onUpdateNode(selectedNode.id, { imagePosition: pos.id as any });
                               }}
-                              className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer truncate ${
-                                (selectedNode.imagePosition || 'background') === pos.id
+                              className={`py-1.5 px-1.5 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer text-center ${
+                                (selectedNode.imagePosition || 'top') === pos.id
                                   ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
                                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                               }`}
@@ -713,14 +704,14 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                         </div>
                       </div>
 
-                      {/* Image Width / Uniform Scale Slider */}
+                      {/* Image Width Slider */}
                       <div>
                         <div className="flex items-center justify-between text-[11px] mb-1">
                           <span className="font-semibold text-slate-600">
-                            {selectedNode.imagePosition === 'fit' ? 'Tamaño Uniforme del Nodo' : 'Escala / Ancho del nodo'}
+                            Ancho / Escala de la imagen
                           </span>
                           <span className="text-purple-700 font-mono font-bold text-[10.5px] bg-purple-50 px-1.5 py-0.2 rounded">
-                            {selectedNode.imageWidth || selectedNode.customWidth || 160}px
+                            {selectedNode.imageWidth || 140}px
                           </span>
                         </div>
                         <input
@@ -728,28 +719,17 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                           min="60"
                           max="400"
                           step="10"
-                          value={selectedNode.imageWidth || selectedNode.customWidth || 160}
+                          value={selectedNode.imageWidth || 140}
                           onChange={(e) => {
-                            const val = Number(e.target.value);
-                            if (selectedNode.imagePosition === 'fit') {
-                              onUpdateNode(selectedNode.id, {
-                                imageWidth: val,
-                                customWidth: val,
-                                customHeight: Math.round(val * 0.75),
-                              });
-                            } else {
-                              onUpdateNode(selectedNode.id, { imageWidth: val, customWidth: val });
-                            }
+                            onUpdateNode(selectedNode.id, { imageWidth: Number(e.target.value) });
                           }}
                           className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
                         />
-                        {selectedNode.imagePosition === 'fit' && (
-                          <div className="flex items-center justify-between text-[9.5px] text-slate-400 font-medium px-0.5 mt-0.5">
-                            <span>Compacto (60px)</span>
-                            <span className="text-purple-600 font-semibold">Escala Proporcional 1:1</span>
-                            <span>Grande (400px)</span>
-                          </div>
-                        )}
+                        <div className="flex items-center justify-between text-[9px] text-slate-400 px-0.5 mt-0.5">
+                          <span>Pequeña (60px)</span>
+                          <span>Mediana (200px)</span>
+                          <span>Grande (400px)</span>
+                        </div>
                       </div>
 
                       {/* Change image button */}
@@ -759,7 +739,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                         className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                       >
                         <Upload className="w-3.5 h-3.5 text-purple-600" />
-                        <span>Cambiar Imagen...</span>
+                        <span>Cambiar Imagen de Contenido...</span>
                       </button>
                     </div>
                   ) : (
@@ -919,7 +899,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                   </div>
                 </div>
 
-                {/* 1. SECCIÓN: FORMA E IMAGEN DEL NODO */}
+                {/* 1. SECCIÓN: FORMA Y DIMENSIONES DEL NODO */}
                 <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
                   <button
                     type="button"
@@ -928,28 +908,22 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                        {selectedNode.imageUrl ? <ImageIcon className="w-3.5 h-3.5 text-purple-600" /> : <Square className="w-3.5 h-3.5" />}
+                        <Square className="w-3.5 h-3.5" />
                       </div>
                       <div className="min-w-0">
                         <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
-                          Forma e Imagen del Nodo
+                          Forma y Dimensiones del Nodo
                         </label>
                         <span className="text-[10px] text-slate-400 font-normal block truncate">
-                          {selectedNode.imageUrl ? 'Imagen activa (sustituye forma)' : '10 estilos geométricos o imagen de fondo'}
+                          10 estilos geométricos, ancho y alto
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {selectedNode.imageUrl ? (
-                        <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <ImageIcon className="w-3 h-3" /> Imagen
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-full capitalize">
-                          {selectedNode.shape || 'burbuja'}
-                        </span>
-                      )}
+                      <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-full capitalize">
+                        {selectedNode.shape || 'burbuja'}
+                      </span>
                       <ChevronDown
                         className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
                           formatSectionsOpen.shape ? 'rotate-0' : '-rotate-90'
@@ -958,358 +932,157 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                     </div>
                   </button>
 
-                  {/* Hidden File Input for Image Upload */}
-                  <input
-                    ref={imageFileInputRef}
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        const result = reader.result as string;
-                        onUpdateNode(selectedNode.id, {
-                          imageUrl: result,
-                          imagePosition: selectedNode.imagePosition || 'background',
-                          imageWidth: selectedNode.imageWidth || 160,
-                        });
-                      };
-                      reader.readAsDataURL(file);
-                      e.target.value = '';
-                    }}
-                  />
-
                   {formatSectionsOpen.shape && (
                     <div className="px-3.5 pb-3.5 pt-1 space-y-3.5 border-t border-slate-200/60 animate-in fade-in duration-150">
-                      {/* WHEN IMAGE IS ACTIVE: Show Image Card as Shape Replacement */}
-                      {selectedNode.imageUrl ? (
-                        <div className="space-y-3">
-                          {/* Image Replacement Banner */}
-                          <div className="p-2.5 rounded-xl bg-purple-50 border border-purple-200/80 text-purple-900 text-[11px] space-y-1">
-                            <div className="flex items-center gap-1.5 font-bold text-purple-800">
-                              <ImageIcon className="w-3.5 h-3.5" />
-                              <span>Modo Imagen de Fondo Activo</span>
-                            </div>
-                            <p className="text-[10px] text-purple-700/90 leading-tight">
-                              La imagen sustituye a las formas geométricas y funciona directamente como el contenedor y fondo del nodo.
-                            </p>
-                          </div>
+                      {/* Grid de 10 Formas Geométricas */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="font-semibold text-slate-700 text-xs">Formas Geométricas (10 Estilos)</label>
+                          <span className="text-[10px] text-slate-400 font-medium">Selecciona una</span>
+                        </div>
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {[
+                            { id: 'bubble', label: 'Burbuja', icon: <span className="w-4 h-2.5 rounded-sm border-2 border-current block" /> },
+                            { id: 'fork', label: 'Horquilla', icon: <span className="w-4 h-0.5 border-b-2 border-current block mt-1" /> },
+                            { id: 'rectangle', label: 'Rectángulo', icon: <span className="w-4 h-2.5 rounded-[1px] border-2 border-current block" /> },
+                            { id: 'square', label: 'Cuadrada', icon: <Square className="w-3.5 h-3.5" /> },
+                            { id: 'oval', label: 'Óvalo', icon: <span className="w-4 h-2.5 rounded-full border-2 border-current block" /> },
+                            { id: 'circle', label: 'Circular', icon: <Circle className="w-3.5 h-3.5" /> },
+                            { id: 'pill', label: 'Cápsula', icon: <span className="w-4 h-2 rounded-full border-2 border-current block" /> },
+                            { id: 'hexagon', label: 'Hexágono', icon: <Hexagon className="w-3.5 h-3.5" /> },
+                            { id: 'arrow', label: 'Flecha', icon: <ArrowRight className="w-3.5 h-3.5" /> },
+                            { id: 'star', label: 'Estrella', icon: <Star className="w-3.5 h-3.5" /> },
+                          ].map((s) => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              onClick={() => handleShapeChange(s.id as NodeShape)}
+                              title={s.label}
+                              className={`px-1 py-1.5 rounded-xl border text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
+                                (selectedNode.shape || 'bubble') === s.id
+                                  ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-2xs font-bold'
+                                  : 'border-slate-200 hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <span className="flex items-center justify-center h-4">{s.icon}</span>
+                              <span className="text-[9.5px] leading-tight truncate w-full text-center">{s.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-                          {/* Image Preview Card */}
-                          <div className="relative rounded-xl border border-slate-200 bg-white p-2.5 flex items-center gap-3 shadow-2xs">
-                            <div className="w-14 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                              <img
-                                src={selectedNode.imageUrl}
-                                alt="Fondo del nodo"
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <span className="text-[11px] font-bold text-slate-800 block truncate">
-                                Imagen de fondo
-                              </span>
-                              <span className="text-[10px] text-slate-500 block">
-                                Posición: {selectedNode.imagePosition === 'bottom' ? 'Abajo' : selectedNode.imagePosition === 'top' ? 'Arriba' : 'Fondo Completo'}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => onUpdateNode(selectedNode.id, { imageUrl: undefined })}
-                                className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-red-600 hover:text-red-700 font-semibold hover:underline cursor-pointer"
-                              >
-                                <Trash2 className="w-3 h-3" /> Quitar imagen (Restaurar forma)
-                              </button>
-                            </div>
-                          </div>
+                      {/* Deslizadores de Dimensión: Adaptados y Centrados */}
+                      {(() => {
+                        const is1to1Shape = selectedNode.shape === 'square' || selectedNode.shape === 'circle';
+                        const shapeName = selectedNode.shape === 'square' ? 'Cuadrado' : selectedNode.shape === 'circle' ? 'Círculo' : 'la Forma';
+                        const current1to1Size = Math.max(selectedNode.customWidth || 0, selectedNode.customHeight || 0);
 
-                          {/* Image Position Selector */}
-                          <div>
-                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                              Ajuste de la imagen
-                            </label>
-                            <div className="grid grid-cols-4 gap-1">
-                              {[
-                                { id: 'fit', label: '🖼️ Ajustado', tip: 'El nodo toma la forma y proporción de la imagen' },
-                                { id: 'background', label: '🎨 Fondo', tip: 'Fondo completo cubriendo el nodo' },
-                                { id: 'top', label: '⬆️ Arriba', tip: 'Imagen sobre el texto' },
-                                { id: 'bottom', label: '⬇️ Abajo', tip: 'Imagen bajo el texto' },
-                              ].map((pos) => (
+                        return (
+                          <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-3 shadow-2xs">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 font-semibold text-xs text-slate-800">
+                                <MoveHorizontal className="w-3.5 h-3.5 text-blue-600" />
+                                <span>Dimensiones de {shapeName}</span>
+                              </div>
+                              {(selectedNode.customWidth || selectedNode.customHeight) && (
                                 <button
-                                  key={pos.id}
                                   type="button"
-                                  title={pos.tip}
-                                  onClick={() => {
-                                    const newPos = pos.id as any;
-                                    const scale = selectedNode.imageWidth || selectedNode.customWidth || 160;
-                                    onUpdateNode(selectedNode.id, {
-                                      imagePosition: newPos,
-                                      ...(newPos === 'fit' ? {
-                                        customWidth: scale,
-                                        customHeight: Math.round(scale * 0.75),
-                                      } : {}),
-                                    });
-                                  }}
-                                  className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer truncate ${
-                                    (selectedNode.imagePosition || 'background') === pos.id
-                                      ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
-                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                  }`}
+                                  onClick={() => onUpdateNode(selectedNode.id, { customWidth: undefined, customHeight: undefined })}
+                                  className="text-[10px] text-blue-600 hover:text-blue-700 font-semibold underline cursor-pointer"
                                 >
-                                  {pos.label}
+                                  Automático
                                 </button>
-                              ))}
+                              )}
                             </div>
-                          </div>
 
-                          {/* Image Width / Uniform Scale Slider */}
-                          <div>
-                            <div className="flex items-center justify-between text-[11px] mb-1">
-                              <span className="font-semibold text-slate-600">
-                                {selectedNode.imagePosition === 'fit' ? 'Tamaño Uniforme del Nodo' : 'Escala / Ancho del nodo'}
-                              </span>
-                              <span className="text-purple-700 font-mono font-bold text-[10.5px] bg-purple-50 px-1.5 py-0.2 rounded">
-                                {selectedNode.imageWidth || selectedNode.customWidth || 160}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="60"
-                              max="400"
-                              step="10"
-                              value={selectedNode.imageWidth || selectedNode.customWidth || 160}
-                              onChange={(e) => {
-                                const val = Number(e.target.value);
-                                if (selectedNode.imagePosition === 'fit') {
-                                  onUpdateNode(selectedNode.id, {
-                                    imageWidth: val,
-                                    customWidth: val,
-                                    customHeight: Math.round(val * 0.75),
-                                  });
-                                } else {
-                                  onUpdateNode(selectedNode.id, { imageWidth: val, customWidth: val });
-                                }
-                              }}
-                              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                            />
-                            {selectedNode.imagePosition === 'fit' && (
-                              <div className="flex items-center justify-between text-[9.5px] text-slate-400 font-medium px-0.5 mt-0.5">
-                                <span>Compacto (60px)</span>
-                                <span className="text-purple-600 font-semibold">Escala Proporcional 1:1</span>
-                                <span>Grande (400px)</span>
+                            {/* CASE A: SQUARE OR CIRCLE (ONLY ONE SYNCHRONIZED SLIDER) */}
+                            {is1to1Shape ? (
+                              <div className="space-y-1.5 text-center">
+                                <div className="flex items-center justify-between text-[11px] mb-1">
+                                  <span className="font-semibold text-slate-700">
+                                    Tamaño / Diámetro Simétrico (1:1)
+                                  </span>
+                                  <span className="text-blue-700 font-mono font-bold text-[10.5px] bg-blue-100/70 px-2 py-0.5 rounded">
+                                    {current1to1Size > 0 ? `${current1to1Size} px` : 'Auto'}
+                                  </span>
+                                </div>
+                                <input
+                                  type="range"
+                                  min="48"
+                                  max="400"
+                                  step="4"
+                                  value={current1to1Size || 64}
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    onUpdateNode(selectedNode.id, { customWidth: val, customHeight: val });
+                                  }}
+                                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                />
+                                <div className="flex items-center justify-between text-[9.5px] text-slate-400 font-medium px-1">
+                                  <span>Compacto (48px)</span>
+                                  <span className="text-slate-500 font-semibold">Proporción 1:1</span>
+                                  <span>Grande (400px)</span>
+                                </div>
+                              </div>
+                            ) : (
+                              /* CASE B: ALL OTHER SHAPES (BOTH WIDTH AND HEIGHT SLIDERS) */
+                              <div className="space-y-3">
+                                {/* 1. Deslizador de Ancho */}
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between text-[11px]">
+                                    <span className="font-semibold text-slate-700 flex items-center gap-1">
+                                      <MoveHorizontal className="w-3 h-3 text-slate-400" /> Ancho de la forma
+                                    </span>
+                                    <span className="text-blue-700 font-mono font-bold text-[10.5px] bg-blue-100/70 px-2 py-0.5 rounded">
+                                      {selectedNode.customWidth ? `${selectedNode.customWidth} px` : 'Auto'}
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="50"
+                                    max="500"
+                                    step="5"
+                                    value={selectedNode.customWidth || 140}
+                                    onChange={(e) => onUpdateNode(selectedNode.id, { customWidth: Number(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                  />
+                                  <div className="flex items-center justify-between text-[9px] text-slate-400 px-0.5">
+                                    <span>Compacto (50px)</span>
+                                    <span>Medio (250px)</span>
+                                    <span>Amplio (500px)</span>
+                                  </div>
+                                </div>
+
+                                {/* 2. Deslizador de Alto */}
+                                <div className="pt-2 border-t border-slate-200/60 space-y-1">
+                                  <div className="flex items-center justify-between text-[11px]">
+                                    <span className="font-semibold text-slate-700 flex items-center gap-1">
+                                      <MoveVertical className="w-3 h-3 text-slate-400" /> Alto de la forma
+                                    </span>
+                                    <span className="text-blue-700 font-mono font-bold text-[10.5px] bg-blue-100/70 px-2 py-0.5 rounded">
+                                      {selectedNode.customHeight ? `${selectedNode.customHeight} px` : 'Auto'}
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="30"
+                                    max="300"
+                                    step="5"
+                                    value={selectedNode.customHeight || 40}
+                                    onChange={(e) => onUpdateNode(selectedNode.id, { customHeight: Number(e.target.value) })}
+                                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                  />
+                                  <div className="flex items-center justify-between text-[9px] text-slate-400 px-0.5">
+                                    <span>Mínimo (30px)</span>
+                                    <span>Medio (150px)</span>
+                                    <span>Alto (300px)</span>
+                                  </div>
+                                </div>
                               </div>
                             )}
                           </div>
-
-                          {/* Change Image Button */}
-                          <button
-                            type="button"
-                            onClick={() => imageFileInputRef.current?.click()}
-                            className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                          >
-                            <Upload className="w-3.5 h-3.5 text-purple-600" />
-                            <span>Cambiar Imagen de Fondo...</span>
-                          </button>
-
-                          {/* Quick Switch back to Geometric Shapes */}
-                          <div className="pt-2 border-t border-slate-200/60 space-y-1.5">
-                            <label className="font-semibold text-slate-700 text-[11px] block">
-                              O cambiar a una Forma Geométrica:
-                            </label>
-                            <div className="grid grid-cols-5 gap-1.5">
-                              {[
-                                { id: 'bubble', label: 'Burbuja', icon: <span className="w-4 h-2.5 rounded-sm border-2 border-current block" /> },
-                                { id: 'fork', label: 'Horquilla', icon: <span className="w-4 h-0.5 border-b-2 border-current block mt-1" /> },
-                                { id: 'rectangle', label: 'Rectángulo', icon: <span className="w-4 h-2.5 rounded-[1px] border-2 border-current block" /> },
-                                { id: 'square', label: 'Cuadrada', icon: <Square className="w-3.5 h-3.5" /> },
-                                { id: 'oval', label: 'Óvalo', icon: <span className="w-4 h-2.5 rounded-full border-2 border-current block" /> },
-                                { id: 'circle', label: 'Circular', icon: <Circle className="w-3.5 h-3.5" /> },
-                                { id: 'pill', label: 'Cápsula', icon: <span className="w-4 h-2 rounded-full border-2 border-current block" /> },
-                                { id: 'hexagon', label: 'Hexágono', icon: <Hexagon className="w-3.5 h-3.5" /> },
-                                { id: 'arrow', label: 'Flecha', icon: <ArrowRight className="w-3.5 h-3.5" /> },
-                                { id: 'star', label: 'Estrella', icon: <Star className="w-3.5 h-3.5" /> },
-                              ].map((s) => (
-                                <button
-                                  key={s.id}
-                                  type="button"
-                                  onClick={() => {
-                                    onUpdateNode(selectedNode.id, { shape: s.id as NodeShape, imageUrl: undefined });
-                                  }}
-                                  title={s.label}
-                                  className="px-1 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer"
-                                >
-                                  <span className="flex items-center justify-center h-4">{s.icon}</span>
-                                  <span className="text-[9.5px] leading-tight truncate w-full text-center">{s.label}</span>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        /* WHEN NO IMAGE: Show Geometric Shapes + Option to Upload Image */
-                        <div className="space-y-3">
-                          <div>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <label className="font-semibold text-slate-700 text-xs">Formas Geométricas (10 Estilos)</label>
-                              <span className="text-[10px] text-slate-400 font-medium">Selecciona una</span>
-                            </div>
-                            <div className="grid grid-cols-5 gap-1.5">
-                              {[
-                                { id: 'bubble', label: 'Burbuja', icon: <span className="w-4 h-2.5 rounded-sm border-2 border-current block" /> },
-                                { id: 'fork', label: 'Horquilla', icon: <span className="w-4 h-0.5 border-b-2 border-current block mt-1" /> },
-                                { id: 'rectangle', label: 'Rectángulo', icon: <span className="w-4 h-2.5 rounded-[1px] border-2 border-current block" /> },
-                                { id: 'square', label: 'Cuadrada', icon: <Square className="w-3.5 h-3.5" /> },
-                                { id: 'oval', label: 'Óvalo', icon: <span className="w-4 h-2.5 rounded-full border-2 border-current block" /> },
-                                { id: 'circle', label: 'Circular', icon: <Circle className="w-3.5 h-3.5" /> },
-                                { id: 'pill', label: 'Cápsula', icon: <span className="w-4 h-2 rounded-full border-2 border-current block" /> },
-                                { id: 'hexagon', label: 'Hexágono', icon: <Hexagon className="w-3.5 h-3.5" /> },
-                                { id: 'arrow', label: 'Flecha', icon: <ArrowRight className="w-3.5 h-3.5" /> },
-                                { id: 'star', label: 'Estrella', icon: <Star className="w-3.5 h-3.5" /> },
-                              ].map((s) => (
-                                <button
-                                  key={s.id}
-                                  type="button"
-                                  onClick={() => handleShapeChange(s.id as NodeShape)}
-                                  title={s.label}
-                                  className={`px-1 py-1.5 rounded-xl border text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                                    (selectedNode.shape || 'bubble') === s.id
-                                      ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-2xs font-bold'
-                                      : 'border-slate-200 hover:bg-slate-50 text-slate-600'
-                                  }`}
-                                >
-                                  <span className="flex items-center justify-center h-4">{s.icon}</span>
-                                  <span className="text-[9.5px] leading-tight truncate w-full text-center">{s.label}</span>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Upload Image Option (Replaces Shape) */}
-                          <div className="pt-1">
-                            <button
-                              type="button"
-                              onClick={() => imageFileInputRef.current?.click()}
-                              className="w-full py-2.5 px-3 border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/40 hover:bg-purple-50/80 rounded-xl text-purple-700 text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer group"
-                            >
-                              <Upload className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" />
-                              <span>Usar Imagen como Fondo (Sustituir Forma)</span>
-                            </button>
-                          </div>
-
-                          {/* Dimension Sliders: Centered & Adaptive */}
-                          {(() => {
-                            const is1to1Shape = selectedNode.shape === 'square' || selectedNode.shape === 'circle';
-                            const shapeName = selectedNode.shape === 'square' ? 'Cuadrado' : selectedNode.shape === 'circle' ? 'Círculo' : 'la Forma';
-                            const current1to1Size = Math.max(selectedNode.customWidth || 0, selectedNode.customHeight || 0);
-
-                            return (
-                              <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-3 shadow-2xs">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-1.5 font-semibold text-xs text-slate-800">
-                                    <MoveHorizontal className="w-3.5 h-3.5 text-blue-600" />
-                                    <span>Dimensiones de {shapeName}</span>
-                                  </div>
-                                  {(selectedNode.customWidth || selectedNode.customHeight) && (
-                                    <button
-                                      type="button"
-                                      onClick={() => onUpdateNode(selectedNode.id, { customWidth: undefined, customHeight: undefined })}
-                                      className="text-[10px] text-blue-600 hover:text-blue-700 font-semibold underline cursor-pointer"
-                                    >
-                                      Automático
-                                    </button>
-                                  )}
-                                </div>
-
-                                {/* CASE A: SQUARE OR CIRCLE (ONLY ONE SYNCHRONIZED SLIDER) */}
-                                {is1to1Shape ? (
-                                  <div className="space-y-1.5 text-center">
-                                    <div className="flex items-center justify-between text-[11px] mb-1">
-                                      <span className="font-semibold text-slate-700">
-                                        Tamaño / Diámetro Simétrico (1:1)
-                                      </span>
-                                      <span className="text-blue-700 font-mono font-bold text-[10.5px] bg-blue-100/70 px-2 py-0.5 rounded">
-                                        {current1to1Size > 0 ? `${current1to1Size} px` : 'Auto'}
-                                      </span>
-                                    </div>
-                                    <input
-                                      type="range"
-                                      min="48"
-                                      max="400"
-                                      step="4"
-                                      value={current1to1Size || 64}
-                                      onChange={(e) => {
-                                        const val = Number(e.target.value);
-                                        onUpdateNode(selectedNode.id, { customWidth: val, customHeight: val });
-                                      }}
-                                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                    />
-                                    <div className="flex items-center justify-between text-[9.5px] text-slate-400 font-medium px-1">
-                                      <span>Compacto (48px)</span>
-                                      <span className="text-slate-500 font-semibold">Proporción 1:1</span>
-                                      <span>Grande (400px)</span>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  /* CASE B: ALL OTHER SHAPES (BOTH WIDTH AND HEIGHT SLIDERS) */
-                                  <div className="space-y-3">
-                                    {/* 1. Deslizador de Ancho */}
-                                    <div className="space-y-1">
-                                      <div className="flex items-center justify-between text-[11px]">
-                                        <span className="font-semibold text-slate-700 flex items-center gap-1">
-                                          <MoveHorizontal className="w-3 h-3 text-slate-400" /> Ancho de la forma
-                                        </span>
-                                        <span className="text-blue-700 font-mono font-bold text-[10.5px] bg-blue-100/70 px-2 py-0.5 rounded">
-                                          {selectedNode.customWidth ? `${selectedNode.customWidth} px` : 'Auto'}
-                                        </span>
-                                      </div>
-                                      <input
-                                        type="range"
-                                        min="50"
-                                        max="500"
-                                        step="5"
-                                        value={selectedNode.customWidth || 140}
-                                        onChange={(e) => onUpdateNode(selectedNode.id, { customWidth: Number(e.target.value) })}
-                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                      />
-                                      <div className="flex items-center justify-between text-[9px] text-slate-400 px-0.5">
-                                        <span>Compacto (50px)</span>
-                                        <span>Medio (250px)</span>
-                                        <span>Amplio (500px)</span>
-                                      </div>
-                                    </div>
-
-                                    {/* 2. Deslizador de Alto */}
-                                    <div className="pt-2 border-t border-slate-200/60 space-y-1">
-                                      <div className="flex items-center justify-between text-[11px]">
-                                        <span className="font-semibold text-slate-700 flex items-center gap-1">
-                                          <MoveVertical className="w-3 h-3 text-slate-400" /> Alto de la forma
-                                        </span>
-                                        <span className="text-blue-700 font-mono font-bold text-[10.5px] bg-blue-100/70 px-2 py-0.5 rounded">
-                                          {selectedNode.customHeight ? `${selectedNode.customHeight} px` : 'Auto'}
-                                        </span>
-                                      </div>
-                                      <input
-                                        type="range"
-                                        min="30"
-                                        max="300"
-                                        step="5"
-                                        value={selectedNode.customHeight || 40}
-                                        onChange={(e) => onUpdateNode(selectedNode.id, { customHeight: Number(e.target.value) })}
-                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                      />
-                                      <div className="flex items-center justify-between text-[9px] text-slate-400 px-0.5">
-                                        <span>Mínimo (30px)</span>
-                                        <span>Medio (150px)</span>
-                                        <span>Alto (300px)</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
                   )}
                 </div>
@@ -1330,7 +1103,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                           Fondo del Nodo
                         </label>
                         <span className="text-[10px] text-slate-400 font-normal block truncate">
-                          Sólido, transparente, degradado o trama
+                          Color, transparente, degradado, patrón o imagen de fondo
                         </span>
                       </div>
                     </div>
@@ -1342,7 +1115,9 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                           : selectedNode.bgType === 'gradient'
                           ? 'Degradado'
                           : selectedNode.bgType === 'pattern'
-                          ? 'Trama'
+                          ? 'Patrón'
+                          : selectedNode.bgType === 'image'
+                          ? 'Imagen'
                           : 'Color'}
                       </span>
                       <ChevronDown
@@ -1353,17 +1128,41 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                     </div>
                   </button>
 
+                  {/* Hidden File Input for Background Image Upload */}
+                  <input
+                    ref={bgImageFileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.svg,.webp,image/jpeg,image/png,image/svg+xml,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const result = reader.result as string;
+                        onUpdateNode(selectedNode.id, {
+                          bgType: 'image',
+                          bgImageUrl: result,
+                          bgImageMode: selectedNode.bgImageMode || 'cover',
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                      e.target.value = '';
+                    }}
+                  />
+
                   {formatSectionsOpen.background && (
                     <div className="px-3.5 pb-3.5 pt-1 space-y-3.5 border-t border-slate-200/60 animate-in fade-in duration-150">
-                      {/* Selector de Tipo de Fondo */}
-                      <div className="grid grid-cols-4 gap-1">
+                      {/* Selector de Tipo de Fondo: 5 Opciones */}
+                      <div className="grid grid-cols-5 gap-1">
                         {[
                           { id: 'color', label: 'Color', icon: '🎨' },
                           { id: 'transparent', label: 'Sin Color', icon: '🚫' },
                           { id: 'gradient', label: 'Degradado', icon: '🌈' },
                           { id: 'pattern', label: 'Patrón', icon: '▦' },
+                          { id: 'image', label: 'Imagen', icon: '🖼️' },
                         ].map((bt) => {
-                          const currentBgType = selectedNode.bgType || 'color';
+                          const currentBgType = selectedNode.bgType || (selectedNode.bgImageUrl ? 'image' : 'color');
                           const isSelected = currentBgType === bt.id;
                           return (
                             <button
@@ -1387,16 +1186,21 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                                         nodePatternOpacity: 0.4,
                                       }
                                     : {}),
+                                  ...(bt.id === 'image' && !selectedNode.bgImageMode
+                                    ? {
+                                        bgImageMode: 'fit',
+                                      }
+                                    : {}),
                                 });
                               }}
-                              className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer ${
+                              className={`py-2 px-0.5 rounded-xl border text-center transition-all cursor-pointer ${
                                 isSelected
                                   ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-bold shadow-2xs'
                                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                               }`}
                             >
                               <span className="text-xs block mb-0.5">{bt.icon}</span>
-                              <span className="text-[10px] block leading-tight">{bt.label}</span>
+                              <span className="text-[9.5px] block leading-tight truncate">{bt.label}</span>
                             </button>
                           );
                         })}
@@ -1406,15 +1210,8 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                       {selectedNode.bgType === 'transparent' && (
                         <div className="p-3 bg-white border border-dashed border-slate-200 rounded-xl text-center space-y-2">
                           <p className="text-xs text-slate-500">
-                            El nodo tiene fondo <span className="font-semibold text-slate-700">transparente</span> (sin color de relleno).
+                            El nodo tiene fondo <span className="font-semibold text-slate-700">transparente</span>.
                           </p>
-                          <button
-                            type="button"
-                            onClick={() => onUpdateNode(selectedNode.id, { bgType: 'color', color: undefined })}
-                            className="text-[11px] text-blue-600 hover:text-blue-700 font-semibold underline cursor-pointer"
-                          >
-                            Restablecer a color por defecto
-                          </button>
                         </div>
                       )}
 
@@ -1433,90 +1230,48 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                                 {selectedNode.color || '#ffffff'}
                               </span>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => onUpdateNode(selectedNode.id, { color: undefined })}
-                              className="text-[11px] text-slate-500 hover:text-slate-800 underline cursor-pointer"
-                            >
-                              Por defecto
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-8 gap-1.5">
-                            {COLOR_PRESETS.map((c) => (
-                              <button
-                                key={c}
-                                type="button"
-                                style={{ backgroundColor: c }}
-                                onClick={() => onUpdateNode(selectedNode.id, { color: c })}
-                                className={`w-6 h-6 rounded-md border border-black/10 shadow-2xs hover:scale-115 transition-transform cursor-pointer ${
-                                  selectedNode.color === c ? 'ring-2 ring-emerald-500 ring-offset-1 scale-110' : ''
-                                }`}
-                              />
-                            ))}
                           </div>
                         </div>
                       )}
 
-                      {/* 3. OPCIÓN: DEGRADADO DE DOS COLORES */}
+                      {/* 3. OPCIÓN: DEGRADADO */}
                       {selectedNode.bgType === 'gradient' && (
                         <div className="space-y-3 pt-1 border-t border-slate-200/70">
-                          {/* Selectores de Color 1 y Color 2 */}
                           <div className="grid grid-cols-2 gap-2">
-                            {/* Color 1 */}
-                            <div className="bg-white p-2 rounded-xl border border-slate-200 space-y-1">
-                              <label className="text-[10px] font-semibold text-slate-600 block">Color Inicial (1)</label>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="color"
-                                  value={selectedNode.gradientColor1 || selectedNode.color || '#3b82f6'}
-                                  onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor1: e.target.value })}
-                                  className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 shrink-0"
-                                />
-                                <span className="text-[10.5px] font-mono text-slate-600 truncate">
-                                  {selectedNode.gradientColor1 || selectedNode.color || '#3b82f6'}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Color 2 */}
-                            <div className="bg-white p-2 rounded-xl border border-slate-200 space-y-1">
-                              <label className="text-[10px] font-semibold text-slate-600 block">Color Final (2)</label>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="color"
-                                  value={selectedNode.gradientColor2 || '#8b5cf6'}
-                                  onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor2: e.target.value })}
-                                  className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 shrink-0"
-                                />
-                                <span className="text-[10.5px] font-mono text-slate-600 truncate">
-                                  {selectedNode.gradientColor2 || '#8b5cf6'}
-                                </span>
-                              </div>
-                            </div>
+                            <input
+                              type="color"
+                              value={selectedNode.gradientColor1 || selectedNode.color || '#3b82f6'}
+                              onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor1: e.target.value })}
+                              className="w-full h-8 rounded-lg cursor-pointer"
+                            />
+                            <input
+                              type="color"
+                              value={selectedNode.gradientColor2 || '#8b5cf6'}
+                              onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor2: e.target.value })}
+                              className="w-full h-8 rounded-lg cursor-pointer"
+                            />
                           </div>
-
-                          {/* Dirección del Degradado */}
                           <div>
                             <label className="text-[11px] font-semibold text-slate-700 block mb-1">
                               Dirección del Degradado
                             </label>
                             <div className="grid grid-cols-4 gap-1">
                               {[
-                                { id: 'to-r', label: 'Horizontal', icon: '→' },
-                                { id: 'to-b', label: 'Vertical', icon: '↓' },
-                                { id: 'to-br', label: 'Diagonal', icon: '↘' },
-                                { id: 'radial', label: 'Radial', icon: '⊙' },
+                                { id: 'to-r', label: 'Horizontal', icon: '➡️' },
+                                { id: 'to-b', label: 'Vertical', icon: '⬇️' },
+                                { id: 'to-br', label: 'Diagonal', icon: '↘️' },
+                                { id: 'radial', label: 'Radial', icon: '🔘' },
                               ].map((dir) => {
-                                const isSelected = (selectedNode.gradientDirection || 'to-br') === dir.id;
+                                const currentDir = selectedNode.gradientDirection || 'to-br';
+                                const isSelected = currentDir === dir.id;
                                 return (
                                   <button
                                     key={dir.id}
                                     type="button"
                                     onClick={() => onUpdateNode(selectedNode.id, { gradientDirection: dir.id as NodeGradientDirection })}
-                                    className={`py-1 px-1 rounded-lg border text-center transition-all cursor-pointer ${
+                                    className={`py-1.5 px-1 rounded-xl border text-center transition-all cursor-pointer ${
                                       isSelected
-                                        ? 'bg-purple-100 border-purple-400 text-purple-800 font-bold shadow-2xs'
+                                        ? 'bg-purple-50 border-purple-500 text-purple-800 font-bold shadow-2xs'
                                         : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                     }`}
                                   >
@@ -1527,138 +1282,137 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                               })}
                             </div>
                           </div>
-
-                          {/* Presets de Degradados Populares */}
-                          <div>
-                            <label className="text-[10.5px] font-semibold text-slate-500 block mb-1">
-                              Combinaciones rápidas
-                            </label>
-                            <div className="grid grid-cols-6 gap-1.5">
-                              {[
-                                { c1: '#3b82f6', c2: '#8b5cf6', name: 'Océano a Púrpura' },
-                                { c1: '#f59e0b', c2: '#ef4444', name: 'Atardecer' },
-                                { c1: '#10b981', c2: '#06b6d4', name: 'Esmeralda Cian' },
-                                { c1: '#ec4899', c2: '#8b5cf6', name: 'Rosa Neón' },
-                                { c1: '#6366f1', c2: '#ec4899', name: 'Índigo Rosa' },
-                                { c1: '#1e293b', c2: '#475569', name: 'Carbón Elegante' },
-                              ].map((gp, idx) => (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  title={gp.name}
-                                  style={{ background: `linear-gradient(135deg, ${gp.c1}, ${gp.c2})` }}
-                                  onClick={() => onUpdateNode(selectedNode.id, { gradientColor1: gp.c1, gradientColor2: gp.c2 })}
-                                  className="h-6 rounded-lg border border-black/10 shadow-2xs hover:scale-110 transition-transform cursor-pointer"
-                                />
-                              ))}
-                            </div>
-                          </div>
                         </div>
                       )}
 
-                      {/* 4. OPCIÓN: PATRÓN / TRAMA */}
+                      {/* 4. OPCIÓN: PATRÓN */}
                       {selectedNode.bgType === 'pattern' && (
                         <div className="space-y-3 pt-1 border-t border-slate-200/70">
-                          {/* Color Base de Fondo */}
-                          <div className="flex items-center justify-between">
-                            <label className="text-[11px] font-semibold text-slate-700">Color Base del Nodo</label>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="color"
-                                value={selectedNode.color || '#ffffff'}
-                                onChange={(e) => onUpdateNode(selectedNode.id, { color: e.target.value })}
-                                className="w-6 h-6 rounded-md border border-slate-200 cursor-pointer p-0"
-                              />
-                              <span className="text-[10px] font-mono text-slate-500">
-                                {selectedNode.color || '#ffffff'}
-                              </span>
-                            </div>
-                          </div>
+                          <input
+                            type="range"
+                            min="8"
+                            max="36"
+                            step="2"
+                            value={selectedNode.nodePatternSize || 16}
+                            onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternSize: Number(e.target.value) })}
+                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                          />
+                        </div>
+                      )}
 
-                          {/* Selector de Tramas / Patrones */}
-                          <div>
-                            <label className="text-[11px] font-semibold text-slate-700 block mb-1.5">
-                              Estilo de Trama
-                            </label>
-                            <div className="grid grid-cols-4 gap-1.5">
-                              {[
-                                { id: 'dots', label: 'Puntos', icon: '• • •' },
-                                { id: 'lines', label: 'Líneas', icon: '═══' },
-                                { id: 'squares', label: 'Cuadrícula', icon: '▦ ▦' },
-                                { id: 'stripes', label: 'Rayas', icon: '///' },
-                                { id: 'triangles', label: 'Triángulos', icon: '◬ ◬' },
-                                { id: 'hexagons', label: 'Hexágonos', icon: '⬡ ⬡' },
-                                { id: 'cross', label: 'Cruces', icon: '+++' },
-                              ].map((pat) => {
-                                const isSelected = (selectedNode.nodePattern || 'dots') === pat.id;
-                                return (
+                      {/* 5. OPCIÓN: IMAGEN DE FONDO DEL NODO */}
+                      {selectedNode.bgType === 'image' && (
+                        <div className="space-y-3 pt-1 border-t border-slate-200/70">
+                          {selectedNode.bgImageUrl ? (
+                            <div className="space-y-3">
+                              <div className="relative rounded-xl border border-slate-200 bg-white p-2.5 flex items-center gap-3 shadow-2xs">
+                                <div className="w-14 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                                  <img
+                                    src={selectedNode.bgImageUrl}
+                                    alt="Fondo del nodo"
+                                    className="w-full h-full object-contain"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <span className="text-[11px] font-bold text-slate-800 block truncate">
+                                    Imagen de Fondo Activa
+                                  </span>
                                   <button
-                                    key={pat.id}
                                     type="button"
-                                    onClick={() => onUpdateNode(selectedNode.id, { nodePattern: pat.id as NodePatternStyle })}
-                                    className={`py-1.5 px-1 rounded-xl border text-center transition-all cursor-pointer ${
-                                      isSelected
-                                        ? 'bg-blue-50 border-blue-500 text-blue-800 font-bold shadow-2xs'
-                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                    }`}
+                                    onClick={() => onUpdateNode(selectedNode.id, { bgImageUrl: undefined, bgType: 'color' })}
+                                    className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-red-600 hover:text-red-700 font-semibold hover:underline cursor-pointer"
                                   >
-                                    <span className="text-[11px] font-mono block leading-none mb-1 text-slate-500">{pat.icon}</span>
-                                    <span className="text-[9.5px] block leading-tight">{pat.label}</span>
+                                    <Trash2 className="w-3 h-3" /> Quitar imagen de fondo
                                   </button>
-                                );
-                              })}
-                            </div>
-                          </div>
+                                </div>
+                              </div>
 
-                          {/* Color del Trazo del Patrón */}
-                          <div className="flex items-center justify-between">
-                            <label className="text-[11px] font-semibold text-slate-700">Color del Patrón</label>
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="color"
-                                value={selectedNode.nodePatternColor || '#475569'}
-                                onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternColor: e.target.value })}
-                                className="w-6 h-6 rounded-md border border-slate-200 cursor-pointer p-0"
-                              />
-                              <span className="text-[10px] font-mono text-slate-500">
-                                {selectedNode.nodePatternColor || '#475569'}
-                              </span>
-                            </div>
-                          </div>
+                              <div>
+                                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                                  Ajuste del Fondo
+                                </label>
+                                <div className="grid grid-cols-4 gap-1">
+                                  {[
+                                    { id: 'fit', label: '🖼️ Ajustado', tip: 'El nodo toma la forma y proporción de la imagen de fondo' },
+                                    { id: 'cover', label: '🎨 Cubrir', tip: 'Llena todo el fondo del nodo' },
+                                    { id: 'contain', label: '📦 Contener', tip: 'Muestra la imagen completa sin recortar' },
+                                    { id: 'tile', label: '🔲 Repetir', tip: 'Mosaico repetido' },
+                                  ].map((mode) => (
+                                    <button
+                                      key={mode.id}
+                                      type="button"
+                                      onClick={() => {
+                                        const newMode = mode.id as NodeBgImageMode;
+                                        const scale = selectedNode.customWidth || 160;
+                                        onUpdateNode(selectedNode.id, {
+                                          bgImageMode: newMode,
+                                          ...(newMode === 'fit' ? {
+                                            customWidth: scale,
+                                            customHeight: Math.round(scale * 0.75),
+                                          } : {}),
+                                        });
+                                      }}
+                                      className={`py-1.5 px-0.5 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer truncate ${
+                                        (selectedNode.bgImageMode || 'fit') === mode.id
+                                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold shadow-2xs'
+                                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                      }`}
+                                    >
+                                      {mode.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
 
-                          {/* Tamaño de Trama Slider */}
-                          <div>
-                            <div className="flex items-center justify-between text-[11px] mb-1">
-                              <span className="font-semibold text-slate-600">Espaciado / Tamaño</span>
-                              <span className="text-slate-400 font-mono">{selectedNode.nodePatternSize || 16}px</span>
-                            </div>
-                            <input
-                              type="range"
-                              min="8"
-                              max="36"
-                              step="2"
-                              value={selectedNode.nodePatternSize || 16}
-                              onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternSize: Number(e.target.value) })}
-                              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                            />
-                          </div>
+                              {selectedNode.bgImageMode === 'fit' && (
+                                <div>
+                                  <div className="flex items-center justify-between text-[11px] mb-1">
+                                    <span className="font-semibold text-slate-600">
+                                      Tamaño Uniforme del Nodo
+                                    </span>
+                                    <span className="text-emerald-700 font-mono font-bold text-[10.5px] bg-emerald-50 px-1.5 py-0.2 rounded">
+                                      {selectedNode.customWidth || 160}px
+                                    </span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="60"
+                                    max="400"
+                                    step="10"
+                                    value={selectedNode.customWidth || 160}
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value);
+                                      onUpdateNode(selectedNode.id, {
+                                        customWidth: val,
+                                        customHeight: Math.round(val * 0.75),
+                                      });
+                                    }}
+                                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                                  />
+                                </div>
+                              )}
 
-                          {/* Opacidad de Trama Slider */}
-                          <div>
-                            <div className="flex items-center justify-between text-[11px] mb-1">
-                              <span className="font-semibold text-slate-600">Opacidad del Patrón</span>
-                              <span className="text-slate-400 font-mono">{Math.round((selectedNode.nodePatternOpacity ?? 0.4) * 100)}%</span>
+                              <button
+                                type="button"
+                                onClick={() => bgImageFileInputRef.current?.click()}
+                                className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                              >
+                                <Upload className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Cambiar Imagen de Fondo...</span>
+                              </button>
                             </div>
-                            <input
-                              type="range"
-                              min="0.1"
-                              max="1.0"
-                              step="0.05"
-                              value={selectedNode.nodePatternOpacity ?? 0.4}
-                              onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternOpacity: Number(e.target.value) })}
-                              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                            />
-                          </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <button
+                                type="button"
+                                onClick={() => bgImageFileInputRef.current?.click()}
+                                className="w-full py-3 border-2 border-dashed border-emerald-200 hover:border-emerald-400 bg-emerald-50/50 hover:bg-emerald-50/90 rounded-2xl text-emerald-700 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group"
+                              >
+                                <Upload className="w-4 h-4" />
+                                <span>Subir Imagen de Fondo</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

@@ -35,9 +35,10 @@ export interface NodeCloud {
   shape: CloudShape;
 }
 
-export type NodeBackgroundType = 'color' | 'transparent' | 'gradient' | 'pattern';
+export type NodeBackgroundType = 'color' | 'transparent' | 'gradient' | 'pattern' | 'image';
 export type NodeGradientDirection = 'to-r' | 'to-b' | 'to-br' | 'radial';
 export type NodePatternStyle = 'dots' | 'lines' | 'squares' | 'stripes' | 'triangles' | 'hexagons' | 'cross';
+export type NodeBgImageMode = 'fit' | 'cover' | 'contain' | 'tile';
 
 export interface MindNode {
   id: string;
@@ -61,12 +62,17 @@ export interface MindNode {
   nodePatternSize?: number;
   nodePatternOpacity?: number;
 
+  // Background Image (Fondo del nodo)
+  bgImageUrl?: string;
+  bgImageMode?: NodeBgImageMode;
+  bgImageOpacity?: number;
+
   borderColor?: string;
   borderWidth?: number;
   borderDash?: 'solid' | 'dashed' | 'dotted';
   borderStyle?: 'solid' | 'dashed' | 'dotted';
 
-  // Node Image (JPG, PNG, SVG, WebP)
+  // Node Attached Content Image (Imagen de contenido del nodo)
   imageUrl?: string;
   imageWidth?: number;
   imageHeight?: number;

@@ -210,6 +210,23 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       };
     }
 
+    if (bgType === 'image' || node.bgImageUrl) {
+      const bgImg = node.bgImageUrl || (bgType === 'image' ? node.imageUrl : undefined);
+      if (bgImg) {
+        const mode = node.bgImageMode || 'cover';
+        const bgSize = mode === 'fit' || mode === 'contain' ? 'contain' : mode === 'tile' ? 'auto' : 'cover';
+        const bgRepeat = mode === 'tile' ? 'repeat' : 'no-repeat';
+        const bgPos = 'center';
+        return {
+          backgroundColor: node.color || bgColor || '#ffffff',
+          backgroundImage: `url("${bgImg}")`,
+          backgroundSize: bgSize,
+          backgroundRepeat: bgRepeat,
+          backgroundPosition: bgPos,
+        };
+      }
+    }
+
     return {
       backgroundColor: bgColor,
     };
@@ -217,46 +234,16 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
 
   // Shape class generator
   const getShapeStyle = (): React.CSSProperties => {
-    // When node has an active image in fit or background mode, it replaces the geometric shape and serves as the background
-    if (node.imageUrl) {
-      if (node.imagePosition === 'fit') {
-        return {
-          backgroundColor: 'transparent',
-          backgroundImage: `url(${node.imageUrl})`,
-          backgroundSize: 'contain',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          borderRadius: isRoot ? '16px' : '10px',
-          border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
-          boxShadow: isRoot ? '0 10px 25px -5px rgba(0,0,0,0.2)' : '0 4px 12px -2px rgba(0,0,0,0.12)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '12px 14px',
-        };
-      }
-      if (node.imagePosition === 'background' || !node.imagePosition) {
-        return {
-          backgroundColor: 'transparent',
-          backgroundImage: `url(${node.imageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          borderRadius: isRoot ? '16px' : '10px',
-          border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
-          boxShadow: isRoot ? '0 10px 25px -5px rgba(0,0,0,0.2)' : '0 4px 12px -2px rgba(0,0,0,0.12)',
-        };
-      }
-    }
+    const bgStyles = getNodeBackgroundStyles();
 
     const baseStyle: React.CSSProperties = {
-      ...getNodeBackgroundStyles(),
+      ...bgStyles,
       border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
     };
 
     if (shape === 'fork') {
       return {
+        ...baseStyle,
         background: 'transparent',
         borderBottom: `${Math.max(2, borderWidth || 2.5)}px ${borderStyle} ${borderColor || branchColor || '#3b82f6'}`,
         borderRadius: 0,
@@ -272,26 +259,20 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       return {
         ...baseStyle,
         borderRadius: '9999px',
-        paddingLeft: '14px',
-        paddingRight: '14px',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
       };
     }
     if (shape === 'pill') {
       return {
         ...baseStyle,
         borderRadius: '9999px',
-        paddingLeft: '14px',
-        paddingRight: '14px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
       };
     }
     if (shape === 'oval') {
       return {
         ...baseStyle,
-        borderRadius: '28px',
+        borderRadius: '50%',
         paddingLeft: '16px',
         paddingRight: '16px',
       };
@@ -336,8 +317,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star';
 
   const renderSvgPolygonBackground = () => {
-    // If shape is not an SVG polygon or if node has an active image background, do not draw polygon
-    if (!isSvgShape || node.imageUrl) return null;
+    if (!isSvgShape) return null;
 
     const w = layout.width;
     const h = layout.height;
@@ -345,13 +325,17 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     const effectiveBorderColor = borderWidth > 0 ? borderColor : 'none';
     const effectiveBorderWidth = borderWidth;
 
-    const bgType = node.bgType || 'color';
+    const bgType = node.bgType || (node.bgImageUrl ? 'image' : 'color');
     const gradId = `grad-${node.id}`;
     const patternId = `pat-${node.id}`;
+    const bgImgId = `bg-img-${node.id}`;
+    const bgImg = node.bgImageUrl || (bgType === 'image' ? node.imageUrl : undefined);
 
     let fillAttr = node.color || bgColor || '#ffffff';
     if (bgType === 'transparent') {
       fillAttr = 'transparent';
+    } else if (bgType === 'image' && bgImg) {
+      fillAttr = `url(#${bgImgId})`;
     } else if (bgType === 'gradient') {
       fillAttr = `url(#${gradId})`;
     } else if (bgType === 'pattern') {
@@ -360,18 +344,15 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
 
     let points = '';
     if (shape === 'hexagon') {
-      // Much more pronounced, classic angular hexagon points
       const inset = Math.min(w * 0.28, Math.max(28, h * 0.58));
       const pad = effectiveBorderWidth / 2;
       points = `${inset},${pad} ${w - inset},${pad} ${w - pad},${h / 2} ${w - inset},${h - pad} ${inset},${h - pad} ${pad},${h / 2}`;
     } else if (shape === 'arrow') {
-      // Bold, dynamic, sharply angled arrow tip & tail notch
       const arrowTip = Math.min(w * 0.32, Math.max(32, h * 0.70));
       const notch = Math.min(w * 0.16, Math.max(16, h * 0.40));
       const pad = effectiveBorderWidth / 2;
       points = `${pad},${pad} ${w - arrowTip},${pad} ${w - pad},${h / 2} ${w - arrowTip},${h - pad} ${pad},${h - pad} ${notch},${h / 2}`;
     } else if (shape === 'star') {
-      // Upright, proportionate 5-pointed star with sharp points
       const pad = effectiveBorderWidth / 2;
       const cx = w / 2;
       const cy = h / 2;
@@ -398,6 +379,21 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         viewBox={`0 0 ${w} ${h}`}
       >
         <defs>
+          {bgImg && (
+            <pattern
+              id={bgImgId}
+              width="100%"
+              height="100%"
+              patternContentUnits="objectBoundingBox"
+            >
+              <image
+                href={bgImg}
+                width="1"
+                height="1"
+                preserveAspectRatio={node.bgImageMode === 'fit' || node.bgImageMode === 'contain' ? 'xMidYMid meet' : 'xMidYMid slice'}
+              />
+            </pattern>
+          )}
           {bgType === 'gradient' && (
             <linearGradient
               id={gradId}
