@@ -16,6 +16,7 @@ import {
   AlignCenter,
   GitBranch,
   Network,
+  Layers,
 } from 'lucide-react';
 
 interface PresentationThemeConfig {
@@ -110,6 +111,16 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
   },
 ];
 
+const MAX_CHILDREN_PER_SLIDE = 4;
+
+export interface PresentationSlide {
+  slideKey: string;
+  node: MindNode;
+  pageIndex: number;
+  totalPages: number;
+  childrenSubset: string[];
+}
+
 interface PresentationModeProps {
   mindMap: MindMap;
   onClose: () => void;
@@ -159,24 +170,6 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   onClose,
   onEditNode,
 }) => {
-  // Collect all slides (nodes in depth-first order)
-  const slides = useMemo(() => {
-    const list: MindNode[] = [];
-    function traverse(nodeId: string) {
-      const node = mindMap.nodes[nodeId];
-      if (!node) return;
-      list.push(node);
-      if (node.children) {
-        node.children.forEach(traverse);
-      }
-    }
-    traverse(mindMap.rootId);
-    return list;
-  }, [mindMap]);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
-
   // Presentation customization options
   const [themeId, setThemeId] = useState<string>('dark-studio');
   const [showNotes, setShowNotes] = useState<boolean>(true);
@@ -186,12 +179,63 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const [contentAlign, setContentAlign] = useState<'center' | 'left'>('center');
   const [fontSizeScale, setFontSizeScale] = useState<'normal' | 'large' | 'compact'>('normal');
 
+  // Generate paginated slides: when a node has more than 4 children, it automatically
+  // generates continuation slides showing the next batch of children until all appear.
+  const slides = useMemo(() => {
+    const list: PresentationSlide[] = [];
+
+    function traverse(nodeId: string) {
+      const node = mindMap.nodes[nodeId];
+      if (!node) return;
+
+      const childrenIds = node.children || [];
+      const shouldPaginate = showChildrenCards && childrenIds.length > MAX_CHILDREN_PER_SLIDE;
+
+      if (shouldPaginate) {
+        const totalPages = Math.ceil(childrenIds.length / MAX_CHILDREN_PER_SLIDE);
+        for (let page = 0; page < totalPages; page++) {
+          const subset = childrenIds.slice(
+            page * MAX_CHILDREN_PER_SLIDE,
+            (page + 1) * MAX_CHILDREN_PER_SLIDE
+          );
+          list.push({
+            slideKey: `${node.id}-p${page}`,
+            node,
+            pageIndex: page,
+            totalPages,
+            childrenSubset: subset,
+          });
+        }
+      } else {
+        list.push({
+          slideKey: `${node.id}-p0`,
+          node,
+          pageIndex: 0,
+          totalPages: 1,
+          childrenSubset: childrenIds,
+        });
+      }
+
+      // Depth-first traversal into children
+      if (node.children) {
+        node.children.forEach(traverse);
+      }
+    }
+
+    traverse(mindMap.rootId);
+    return list;
+  }, [mindMap, showChildrenCards]);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+
   const currentTheme = useMemo(() => {
     return PRESENTATION_THEMES.find((t) => t.id === themeId) || PRESENTATION_THEMES[0];
   }, [themeId]);
 
   const isLight = themeId === 'light-clean';
-  const currentNode = slides[currentIndex] || slides[0];
+  const currentSlide = slides[currentIndex] || slides[0];
+  const currentNode = currentSlide?.node;
 
   // Navigation handlers
   const handleNext = () => {
@@ -207,7 +251,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   };
 
   const handleJumpToNode = (nodeId: string) => {
-    const idx = slides.findIndex((s) => s.id === nodeId);
+    const idx = slides.findIndex((s) => s.node.id === nodeId);
     if (idx !== -1) {
       setCurrentIndex(idx);
     }
@@ -254,17 +298,22 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
     );
   }, [mindMap.connectors, currentNode]);
 
-  // Find child nodes
-  const childNodes = useMemo(() => {
-    if (!currentNode.children || currentNode.children.length === 0) return [];
-    return currentNode.children
+  // Current batch of child nodes for this paginated slide
+  const currentChildNodes = useMemo(() => {
+    if (!currentSlide || !currentSlide.childrenSubset || currentSlide.childrenSubset.length === 0) {
+      return [];
+    }
+    return currentSlide.childrenSubset
       .map((id) => mindMap.nodes[id])
       .filter((n): n is MindNode => Boolean(n));
-  }, [currentNode.children, mindMap.nodes]);
+  }, [currentSlide, mindMap.nodes]);
+
+  // Total child count for node
+  const totalChildrenCount = currentNode.children?.length || 0;
 
   // Check what supplementary panels are visible
   const hasNotes = showNotes && Boolean(currentNode.note?.trim());
-  const hasChildren = showChildrenCards && childNodes.length > 0;
+  const hasChildren = showChildrenCards && currentChildNodes.length > 0;
   const hasConnectors = showConnectorsCards && relatedConnectors.length > 0;
   const hasSecondary = hasNotes || hasChildren || hasConnectors;
 
@@ -298,7 +347,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
     <div
       className={`fixed inset-0 h-screen w-screen overflow-hidden ${currentTheme.bgClass} ${currentTheme.textClass} z-50 flex flex-col justify-between p-4 sm:p-6 select-none animate-in fade-in duration-200 transition-colors`}
     >
-      {/* 1. TOP HEADER BAR (Compact fixed height) */}
+      {/* 1. TOP HEADER BAR */}
       <header className="flex items-center justify-between gap-3 w-full shrink-0 h-10">
         <div className="flex items-center gap-3">
           <div
@@ -312,6 +361,16 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Multi-page slide badge */}
+          {currentSlide.totalPages > 1 && (
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
+              isLight ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-blue-950/80 border-blue-800 text-blue-300'
+            }`}>
+              <Layers className="w-3.5 h-3.5" />
+              <span>Parte {currentSlide.pageIndex + 1} de {currentSlide.totalPages}</span>
+            </span>
+          )}
+
           {/* EDIT & CONFIGURE PRESENTATION BUTTON (Editar) */}
           <button
             onClick={() => setIsConfigOpen(!isConfigOpen)}
@@ -473,7 +532,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
             </div>
 
-            {/* D. MOSTRAR HIJOS COMO CARDS */}
+            {/* D. MOSTRAR HIJOS COMO CARDS (Con Paginación Automática) */}
             <div className={`space-y-2 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -483,7 +542,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       Sub-Nodos Hijos como Cards
                     </span>
                     <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      Renderiza los subtemas hijos como tarjetas interactivas
+                      Genera diapositivas continuas si hay más de 4 hijos
                     </span>
                   </div>
                 </div>
@@ -605,7 +664,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         </div>
       )}
 
-      {/* 3. MAIN SLIDE CONTENT CANVAS (100% Viewport-Contained, NO Scrollbars, NO Off-Screen Overflow) */}
+      {/* 3. MAIN SLIDE CONTENT CANVAS (100% Viewport-Contained, NO Scrollbars) */}
       <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto overflow-hidden flex items-center justify-center p-2">
         {!hasSecondary ? (
           /* SINGLE-COLUMN CENTERED SPOTLIGHT (When only title/body are present) */
@@ -741,18 +800,27 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               )}
 
               {/* Main Title */}
-              <h1
-                style={{
-                  color: isRoot
-                    ? undefined
-                    : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
-                }}
-                className={`${getHeadingSizeClass()} font-bold tracking-tight mb-2 leading-tight whitespace-pre-wrap ${
-                  isRoot ? currentTheme.accentClass : ''
-                }`}
-              >
-                {currentNode.text}
-              </h1>
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <h1
+                  style={{
+                    color: isRoot
+                      ? undefined
+                      : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
+                  }}
+                  className={`${getHeadingSizeClass()} font-bold tracking-tight leading-tight whitespace-pre-wrap ${
+                    isRoot ? currentTheme.accentClass : ''
+                  }`}
+                >
+                  {currentNode.text}
+                </h1>
+                {currentSlide.totalPages > 1 && (
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border self-center ${
+                    isLight ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-blue-950 border-blue-700 text-blue-300'
+                  }`}>
+                    ({currentSlide.pageIndex + 1}/{currentSlide.totalPages})
+                  </span>
+                )}
+              </div>
 
               {/* Node Body / Subtitle */}
               {currentNode.body && (
@@ -788,9 +856,9 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
             </div>
 
-            {/* SECONDARY PANE (Right / Notes & Interactive Cards fitted to screen with ZERO scrollbars) */}
+            {/* SECONDARY PANE (Right / Notes & Interactive Cards with Auto-Pagination) */}
             <div className="md:col-span-6 lg:col-span-5 flex flex-col justify-center gap-3 overflow-hidden">
-              {/* 1. Presenter Notes (Full clean view without scrollbars) */}
+              {/* 1. Presenter Notes */}
               {hasNotes && (
                 <div
                   className={`w-full rounded-xl p-3.5 text-left text-xs leading-relaxed shadow-lg border overflow-hidden ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
@@ -805,22 +873,27 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 </div>
               )}
 
-              {/* 2. Subtopics / Child Cards (Fitted clean cards without scrollbars) */}
+              {/* 2. Subtopics / Child Cards (Paginated subset of children) */}
               {hasChildren && (
                 <div className="w-full text-left overflow-hidden">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
                       <GitBranch className="w-3.5 h-3.5" />
-                      <span>Subtemas ({childNodes.length})</span>
+                      <span>
+                        Subtemas ({currentSlide.pageIndex * MAX_CHILDREN_PER_SLIDE + 1}-
+                        {Math.min((currentSlide.pageIndex + 1) * MAX_CHILDREN_PER_SLIDE, totalChildrenCount)} de {totalChildrenCount})
+                      </span>
                     </div>
-                    {childNodes.length > 4 && (
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isLight ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-400'}`}>
-                        +{childNodes.length - 4} más
+                    {currentSlide.totalPages > 1 && (
+                      <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full ${
+                        isLight ? 'bg-cyan-100 text-cyan-800' : 'bg-cyan-950 border border-cyan-800 text-cyan-300'
+                      }`}>
+                        Diapositiva {currentSlide.pageIndex + 1} de {currentSlide.totalPages}
                       </span>
                     )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {childNodes.slice(0, 4).map((child) => (
+                    {currentChildNodes.map((child) => (
                       <div
                         key={child.id}
                         onClick={() => handleJumpToNode(child.id)}
@@ -852,7 +925,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 </div>
               )}
 
-              {/* 3. Connectors & Cross-Links (Fitted clean cards without scrollbars) */}
+              {/* 3. Connectors & Cross-Links */}
               {hasConnectors && (
                 <div className="w-full text-left overflow-hidden">
                   <div className="flex items-center justify-between mb-1.5">
@@ -860,11 +933,6 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       <Network className="w-3.5 h-3.5" />
                       <span>Enlaces y Conectores ({relatedConnectors.length})</span>
                     </div>
-                    {relatedConnectors.length > 2 && (
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isLight ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-400'}`}>
-                        +{relatedConnectors.length - 2} más
-                      </span>
-                    )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {relatedConnectors.slice(0, 2).map((conn) => {
@@ -907,7 +975,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         )}
       </main>
 
-      {/* 4. BOTTOM NAVIGATION BAR (Compact fixed height, perfectly positioned) */}
+      {/* 4. BOTTOM NAVIGATION BAR */}
       <footer className="flex items-center justify-between max-w-2xl mx-auto w-full shrink-0 h-12">
         <button
           disabled={currentIndex === 0}
