@@ -1063,6 +1063,12 @@ export default function App() {
         <PresentationMode
           mindMap={mindMap}
           onClose={() => setIsPresentationMode(false)}
+          onEditNode={(nodeId) => {
+            setSelectedNodeId(nodeId);
+            setIsPresentationMode(false);
+            setIsToolPanelOpen(true);
+          }}
+          onUpdateNode={updateNode}
         />
       )}
 
