@@ -118,7 +118,12 @@ export interface PresentationSlide {
   node: MindNode;
   pageIndex: number;
   totalPages: number;
+  noteSubset: string;
+  notePageIndex: number;
+  noteTotalPages: number;
   childrenSubset: string[];
+  childrenPageIndex: number;
+  childrenTotalPages: number;
 }
 
 interface PresentationModeProps {
@@ -126,6 +131,47 @@ interface PresentationModeProps {
   onClose: () => void;
   onEditNode?: (nodeId: string) => void;
   onUpdateNode?: (nodeId: string, updates: Partial<MindNode>) => void;
+}
+
+/**
+ * Splits a markdown note into readable, compact slide chunks (~5-7 lines or ~380 chars)
+ * to ensure that long notes are paginated across duplicate continuation slides without scrollbars.
+ */
+function splitMarkdownIntoSlideChunks(markdown: string | undefined): string[] {
+  if (!markdown || !markdown.trim()) return [];
+
+  const rawLines = markdown.trim().split('\n');
+  const chunks: string[] = [];
+  let currentChunkLines: string[] = [];
+  let currentLength = 0;
+
+  const MAX_LINES_PER_CHUNK = 6;
+  const MAX_CHARS_PER_CHUNK = 380;
+
+  for (let i = 0; i < rawLines.length; i++) {
+    const line = rawLines[i];
+    const lineLen = line.length + 1;
+
+    if (
+      currentChunkLines.length >= MAX_LINES_PER_CHUNK ||
+      (currentLength + lineLen > MAX_CHARS_PER_CHUNK && currentChunkLines.length >= 3)
+    ) {
+      if (currentChunkLines.length > 0) {
+        chunks.push(currentChunkLines.join('\n'));
+        currentChunkLines = [];
+        currentLength = 0;
+      }
+    }
+
+    currentChunkLines.push(line);
+    currentLength += lineLen;
+  }
+
+  if (currentChunkLines.length > 0) {
+    chunks.push(currentChunkLines.join('\n'));
+  }
+
+  return chunks.length > 0 ? chunks : [markdown.trim()];
 }
 
 /**
@@ -179,8 +225,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const [contentAlign, setContentAlign] = useState<'center' | 'left'>('center');
   const [fontSizeScale, setFontSizeScale] = useState<'normal' | 'large' | 'compact'>('normal');
 
-  // Generate paginated slides: when a node has more than 4 children, it automatically
-  // generates continuation slides showing the next batch of children until all appear.
+  // Generate paginated slides: when a node has long notes or more than 4 children, it automatically
+  // generates duplicate continuation slides showing the next batch of content until everything is presented.
   const slides = useMemo(() => {
     const list: PresentationSlide[] = [];
 
@@ -189,30 +235,45 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       if (!node) return;
 
       const childrenIds = node.children || [];
-      const shouldPaginate = showChildrenCards && childrenIds.length > MAX_CHILDREN_PER_SLIDE;
-
-      if (shouldPaginate) {
-        const totalPages = Math.ceil(childrenIds.length / MAX_CHILDREN_PER_SLIDE);
-        for (let page = 0; page < totalPages; page++) {
-          const subset = childrenIds.slice(
-            page * MAX_CHILDREN_PER_SLIDE,
-            (page + 1) * MAX_CHILDREN_PER_SLIDE
+      const childChunks: string[][] = [];
+      if (showChildrenCards && childrenIds.length > 0) {
+        const totalChildPages = Math.ceil(childrenIds.length / MAX_CHILDREN_PER_SLIDE);
+        for (let p = 0; p < totalChildPages; p++) {
+          childChunks.push(
+            childrenIds.slice(p * MAX_CHILDREN_PER_SLIDE, (p + 1) * MAX_CHILDREN_PER_SLIDE)
           );
-          list.push({
-            slideKey: `${node.id}-p${page}`,
-            node,
-            pageIndex: page,
-            totalPages,
-            childrenSubset: subset,
-          });
         }
+      } else if (childrenIds.length > 0) {
+        childChunks.push(childrenIds);
       } else {
+        childChunks.push([]);
+      }
+
+      const noteChunks =
+        showNotes && node.note?.trim() ? splitMarkdownIntoSlideChunks(node.note) : [''];
+
+      const totalPages = Math.max(childChunks.length, noteChunks.length, 1);
+
+      for (let page = 0; page < totalPages; page++) {
+        const childrenSubset = childChunks[page] || [];
+        const noteSubset =
+          noteChunks[page] !== undefined
+            ? noteChunks[page]
+            : noteChunks.length === 1
+            ? noteChunks[0]
+            : '';
+
         list.push({
-          slideKey: `${node.id}-p0`,
+          slideKey: `${node.id}-p${page}`,
           node,
-          pageIndex: 0,
-          totalPages: 1,
-          childrenSubset: childrenIds,
+          pageIndex: page,
+          totalPages,
+          noteSubset,
+          notePageIndex: Math.min(page, noteChunks.length - 1),
+          noteTotalPages: noteChunks.length,
+          childrenSubset,
+          childrenPageIndex: Math.min(page, childChunks.length - 1),
+          childrenTotalPages: childChunks.length,
         });
       }
 
@@ -224,7 +285,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
     traverse(mindMap.rootId);
     return list;
-  }, [mindMap, showChildrenCards]);
+  }, [mindMap, showChildrenCards, showNotes]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -312,7 +373,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const totalChildrenCount = currentNode.children?.length || 0;
 
   // Check what supplementary panels are visible
-  const hasNotes = showNotes && Boolean(currentNode.note?.trim());
+  const hasNotes = showNotes && Boolean(currentSlide.noteSubset?.trim());
   const hasChildren = showChildrenCards && currentChildNodes.length > 0;
   const hasConnectors = showConnectorsCards && relatedConnectors.length > 0;
   const hasSecondary = hasNotes || hasChildren || hasConnectors;
@@ -364,7 +425,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           {/* Multi-page slide badge */}
           {currentSlide.totalPages > 1 && (
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
-              isLight ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-blue-950/80 border-blue-800 text-blue-300'
+              isLight ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold' : 'bg-blue-950/80 border-blue-800 text-blue-300'
             }`}>
               <Layers className="w-3.5 h-3.5" />
               <span>Parte {currentSlide.pageIndex + 1} de {currentSlide.totalPages}</span>
@@ -484,7 +545,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       Notas del Presentador
                     </span>
                     <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      Muestra la caja de notas formateadas con Markdown
+                      Muestra la caja de notas con paginación automática sin scroll
                     </span>
                   </div>
                 </div>
@@ -532,7 +593,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
             </div>
 
-            {/* D. MOSTRAR HIJOS COMO CARDS (Con Paginación Automática) */}
+            {/* D. MOSTRAR HIJOS COMO CARDS */}
             <div className={`space-y-2 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -856,19 +917,28 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
             </div>
 
-            {/* SECONDARY PANE (Right / Notes & Interactive Cards with Auto-Pagination) */}
+            {/* SECONDARY PANE (Right / Notes & Interactive Cards with Auto-Pagination for Notes & Children) */}
             <div className="md:col-span-6 lg:col-span-5 flex flex-col justify-center gap-3 overflow-hidden">
-              {/* 1. Presenter Notes */}
+              {/* 1. Presenter Notes (Paginated Chunks without scrollbar) */}
               {hasNotes && (
                 <div
                   className={`w-full rounded-xl p-3.5 text-left text-xs leading-relaxed shadow-lg border overflow-hidden ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
                 >
-                  <div className={`flex items-center gap-1.5 text-[11px] font-bold mb-1.5 uppercase tracking-wider ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Notas del Presentador</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Notas del Presentador</span>
+                    </div>
+                    {currentSlide.noteTotalPages > 1 && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        isLight ? 'bg-amber-100 text-amber-800' : 'bg-amber-950 border border-amber-800 text-amber-300'
+                      }`}>
+                        Parte {currentSlide.notePageIndex + 1} de {currentSlide.noteTotalPages}
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs leading-relaxed">
-                    <MarkdownView content={currentNode.note || ''} isDark={!isLight} />
+                    <MarkdownView content={currentSlide.noteSubset} isDark={!isLight} />
                   </div>
                 </div>
               )}
@@ -880,15 +950,15 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
                       <GitBranch className="w-3.5 h-3.5" />
                       <span>
-                        Subtemas ({currentSlide.pageIndex * MAX_CHILDREN_PER_SLIDE + 1}-
-                        {Math.min((currentSlide.pageIndex + 1) * MAX_CHILDREN_PER_SLIDE, totalChildrenCount)} de {totalChildrenCount})
+                        Subtemas ({currentSlide.childrenPageIndex * MAX_CHILDREN_PER_SLIDE + 1}-
+                        {Math.min((currentSlide.childrenPageIndex + 1) * MAX_CHILDREN_PER_SLIDE, totalChildrenCount)} de {totalChildrenCount})
                       </span>
                     </div>
-                    {currentSlide.totalPages > 1 && (
-                      <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full ${
+                    {currentSlide.childrenTotalPages > 1 && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         isLight ? 'bg-cyan-100 text-cyan-800' : 'bg-cyan-950 border border-cyan-800 text-cyan-300'
                       }`}>
-                        Diapositiva {currentSlide.pageIndex + 1} de {currentSlide.totalPages}
+                        Parte {currentSlide.childrenPageIndex + 1} de {currentSlide.childrenTotalPages}
                       </span>
                     )}
                   </div>
