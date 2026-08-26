@@ -250,18 +250,20 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       }
 
       const noteChunks =
-        showNotes && node.note?.trim() ? splitMarkdownIntoSlideChunks(node.note) : [''];
+        showNotes && node.note?.trim() ? splitMarkdownIntoSlideChunks(node.note) : [];
 
-      const totalPages = Math.max(childChunks.length, noteChunks.length, 1);
+      const noteTotalPages = noteChunks.length > 0 ? noteChunks.length : 1;
+      const childTotalPages = childChunks.length > 0 ? childChunks.length : 1;
+      const totalPages = Math.max(childTotalPages, noteTotalPages);
 
       for (let page = 0; page < totalPages; page++) {
-        const childrenSubset = childChunks[page] || [];
-        const noteSubset =
-          noteChunks[page] !== undefined
-            ? noteChunks[page]
-            : noteChunks.length === 1
-            ? noteChunks[0]
-            : '';
+        // If notes have fewer pages than children, keep the last note chunk active
+        const noteIdx = Math.min(page, Math.max(0, noteChunks.length - 1));
+        const noteSubset = noteChunks.length > 0 ? noteChunks[noteIdx] : '';
+
+        // If children have fewer pages than notes, keep the last children batch active
+        const childIdx = Math.min(page, Math.max(0, childChunks.length - 1));
+        const childrenSubset = childChunks.length > 0 ? childChunks[childIdx] : [];
 
         list.push({
           slideKey: `${node.id}-p${page}`,
@@ -269,10 +271,10 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           pageIndex: page,
           totalPages,
           noteSubset,
-          notePageIndex: Math.min(page, noteChunks.length - 1),
+          notePageIndex: noteIdx,
           noteTotalPages: noteChunks.length,
           childrenSubset,
-          childrenPageIndex: Math.min(page, childChunks.length - 1),
+          childrenPageIndex: childIdx,
           childrenTotalPages: childChunks.length,
         });
       }
