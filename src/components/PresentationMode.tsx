@@ -788,9 +788,9 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
             </div>
 
-            {/* SECONDARY PANE (Right / Notes & Interactive Cards fitted to screen) */}
-            <div className="md:col-span-6 lg:col-span-5 flex flex-col justify-center gap-2.5 max-h-full overflow-hidden">
-              {/* 1. Presenter Notes */}
+            {/* SECONDARY PANE (Right / Notes & Interactive Cards fitted to screen with ZERO scrollbars) */}
+            <div className="md:col-span-6 lg:col-span-5 flex flex-col justify-center gap-3 overflow-hidden">
+              {/* 1. Presenter Notes (Full clean view without scrollbars) */}
               {hasNotes && (
                 <div
                   className={`w-full rounded-xl p-3.5 text-left text-xs leading-relaxed shadow-lg border overflow-hidden ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
@@ -799,21 +799,28 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     <FileText className="w-3.5 h-3.5" />
                     <span>Notas del Presentador</span>
                   </div>
-                  <div className="max-h-40 overflow-y-auto pr-1">
+                  <div className="text-xs leading-relaxed">
                     <MarkdownView content={currentNode.note || ''} isDark={!isLight} />
                   </div>
                 </div>
               )}
 
-              {/* 2. Subtopics / Child Cards */}
+              {/* 2. Subtopics / Child Cards (Fitted clean cards without scrollbars) */}
               {hasChildren && (
                 <div className="w-full text-left overflow-hidden">
-                  <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-1.5 ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
-                    <GitBranch className="w-3.5 h-3.5" />
-                    <span>Subtemas ({childNodes.length})</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
+                      <GitBranch className="w-3.5 h-3.5" />
+                      <span>Subtemas ({childNodes.length})</span>
+                    </div>
+                    {childNodes.length > 4 && (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isLight ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-400'}`}>
+                        +{childNodes.length - 4} más
+                      </span>
+                    )}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
-                    {childNodes.slice(0, 6).map((child) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {childNodes.slice(0, 4).map((child) => (
                       <div
                         key={child.id}
                         onClick={() => handleJumpToNode(child.id)}
@@ -845,15 +852,22 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 </div>
               )}
 
-              {/* 3. Connectors & Cross-Links */}
+              {/* 3. Connectors & Cross-Links (Fitted clean cards without scrollbars) */}
               {hasConnectors && (
                 <div className="w-full text-left overflow-hidden">
-                  <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-1.5 ${isLight ? 'text-pink-800' : 'text-pink-400'}`}>
-                    <Network className="w-3.5 h-3.5" />
-                    <span>Enlaces y Conectores ({relatedConnectors.length})</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-pink-800' : 'text-pink-400'}`}>
+                      <Network className="w-3.5 h-3.5" />
+                      <span>Enlaces y Conectores ({relatedConnectors.length})</span>
+                    </div>
+                    {relatedConnectors.length > 2 && (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${isLight ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-400'}`}>
+                        +{relatedConnectors.length - 2} más
+                      </span>
+                    )}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-32 overflow-y-auto pr-1">
-                    {relatedConnectors.slice(0, 4).map((conn) => {
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {relatedConnectors.slice(0, 2).map((conn) => {
                       const isSource = conn.fromNodeId === currentNode.id;
                       const targetId = isSource ? conn.toNodeId : conn.fromNodeId;
                       const targetNode = mindMap.nodes[targetId];
@@ -907,7 +921,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           <ChevronLeft className="w-4 h-4" /> Anterior
         </button>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto max-w-xs px-2">
+        <div className="flex items-center gap-1.5 overflow-hidden max-w-xs px-2">
           {slides.map((_, idx) => (
             <button
               key={idx}
