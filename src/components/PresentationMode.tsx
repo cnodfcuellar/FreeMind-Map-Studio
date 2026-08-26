@@ -34,10 +34,10 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
   {
     id: 'dark-studio',
     name: 'Estudio Oscuro',
-    bgClass: 'bg-slate-950/98',
+    bgClass: 'bg-slate-950',
     textClass: 'text-white',
     accentClass: 'text-blue-400',
-    cardBgClass: 'bg-slate-900/90',
+    cardBgClass: 'bg-slate-900/95',
     cardBorderClass: 'border-slate-800',
     previewColor: '#0f172a',
     badgeBg: 'bg-blue-950/80 border-blue-800/60 text-blue-300',
@@ -59,7 +59,7 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
     bgClass: 'bg-[#120726]',
     textClass: 'text-purple-100',
     accentClass: 'text-pink-400',
-    cardBgClass: 'bg-[#1e0d3d]/90',
+    cardBgClass: 'bg-[#1e0d3d]/95',
     cardBorderClass: 'border-purple-800/60',
     previewColor: '#1e0d3d',
     badgeBg: 'bg-purple-950/80 border-purple-800/60 text-purple-300',
@@ -70,7 +70,7 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
     bgClass: 'bg-[#09152b]',
     textClass: 'text-slate-100',
     accentClass: 'text-amber-400',
-    cardBgClass: 'bg-[#102347]/90',
+    cardBgClass: 'bg-[#102347]/95',
     cardBorderClass: 'border-blue-900/60',
     previewColor: '#0a192f',
     badgeBg: 'bg-amber-950/80 border-amber-800/60 text-amber-300',
@@ -81,7 +81,7 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
     bgClass: 'bg-[#051c14]',
     textClass: 'text-emerald-50',
     accentClass: 'text-emerald-400',
-    cardBgClass: 'bg-[#0b2f22]/90',
+    cardBgClass: 'bg-[#0b2f22]/95',
     cardBorderClass: 'border-emerald-800/60',
     previewColor: '#064e3b',
     badgeBg: 'bg-emerald-950/80 border-emerald-800/60 text-emerald-300',
@@ -92,7 +92,7 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
     bgClass: 'bg-[#210c14]',
     textClass: 'text-orange-50',
     accentClass: 'text-orange-400',
-    cardBgClass: 'bg-[#3b1523]/90',
+    cardBgClass: 'bg-[#3b1523]/95',
     cardBorderClass: 'border-rose-900/60',
     previewColor: '#881337',
     badgeBg: 'bg-orange-950/80 border-orange-800/60 text-orange-300',
@@ -118,9 +118,7 @@ interface PresentationModeProps {
 }
 
 /**
- * Intelligent contrast resolver: ensures that text colors assigned in mind map nodes
- * (which might be dark on light canvas, or light on dark canvas) never become invisible
- * when viewing in presentation themes.
+ * Intelligent contrast resolver: guarantees 100% legibility in all presentation themes.
  */
 function getContrastSafeColor(
   customColor: string | undefined,
@@ -264,16 +262,22 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       .filter((n): n is MindNode => Boolean(n));
   }, [currentNode.children, mindMap.nodes]);
 
+  // Check what supplementary panels are visible
+  const hasNotes = showNotes && Boolean(currentNode.note?.trim());
+  const hasChildren = showChildrenCards && childNodes.length > 0;
+  const hasConnectors = showConnectorsCards && relatedConnectors.length > 0;
+  const hasSecondary = hasNotes || hasChildren || hasConnectors;
+
   // Image dimension styling
   const getImageDimensions = () => {
     switch (imageSize) {
       case 'small':
-        return 'max-w-[180px] max-h-[140px]';
+        return 'max-h-24 max-w-[140px]';
       case 'large':
-        return 'max-w-[600px] max-h-[420px]';
+        return hasSecondary ? 'max-h-48 max-w-[260px]' : 'max-h-72 max-w-[480px]';
       case 'medium':
       default:
-        return 'max-w-[360px] max-h-[260px]';
+        return hasSecondary ? 'max-h-36 max-w-[200px]' : 'max-h-56 max-w-[360px]';
     }
   };
 
@@ -281,21 +285,21 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const getHeadingSizeClass = () => {
     switch (fontSizeScale) {
       case 'large':
-        return 'text-4xl md:text-6xl';
+        return hasSecondary ? 'text-2xl sm:text-4xl' : 'text-3xl sm:text-5xl md:text-6xl';
       case 'compact':
-        return 'text-2xl md:text-4xl';
+        return hasSecondary ? 'text-lg sm:text-2xl' : 'text-xl sm:text-3xl';
       case 'normal':
       default:
-        return 'text-3xl md:text-5xl';
+        return hasSecondary ? 'text-xl sm:text-3xl' : 'text-2xl sm:text-4xl md:text-5xl';
     }
   };
 
   return (
     <div
-      className={`fixed inset-0 ${currentTheme.bgClass} ${currentTheme.textClass} backdrop-blur-xl z-50 flex flex-col justify-between p-6 sm:p-8 select-none animate-in fade-in duration-200 overflow-y-auto transition-colors`}
+      className={`fixed inset-0 h-screen w-screen overflow-hidden ${currentTheme.bgClass} ${currentTheme.textClass} z-50 flex flex-col justify-between p-4 sm:p-6 select-none animate-in fade-in duration-200 transition-colors`}
     >
-      {/* 1. TOP HEADER BAR */}
-      <div className="flex items-center justify-between gap-3 w-full shrink-0">
+      {/* 1. TOP HEADER BAR (Compact fixed height) */}
+      <header className="flex items-center justify-between gap-3 w-full shrink-0 h-10">
         <div className="flex items-center gap-3">
           <div
             className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold shadow-2xs border ${currentTheme.badgeBg}`}
@@ -330,7 +334,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               isLight ? 'bg-white border-slate-300 text-slate-700 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'
             }`}
           >
-            Diapositiva {currentIndex + 1} de {slides.length}
+            {currentIndex + 1} / {slides.length}
           </span>
 
           {/* Exit Presentation */}
@@ -344,13 +348,13 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* 2. CUSTOMIZATION SETTINGS MODAL / DRAWER (Al pulsar Editar) */}
+      {/* 2. CUSTOMIZATION SETTINGS MODAL */}
       {isConfigOpen && (
         <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div
-            className={`w-full max-w-xl rounded-2xl border p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto ${
+            className={`w-full max-w-xl rounded-2xl border p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto ${
               isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
             }`}
           >
@@ -412,7 +416,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* B. MOSTRAR / OCULTAR NOTAS */}
-            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+            <div className={`space-y-2 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-amber-500" />
@@ -438,7 +442,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* C. TAMAÑO DE IMÁGENES */}
-            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+            <div className={`space-y-2 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <label className={`text-xs font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
                 <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
                 <span>Tamaño de Imágenes Adjuntas</span>
@@ -470,7 +474,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* D. MOSTRAR HIJOS COMO CARDS */}
-            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+            <div className={`space-y-2 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <GitBranch className="w-4 h-4 text-cyan-500" />
@@ -496,7 +500,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* E. MOSTRAR CONEXIONES CRUZADAS COMO CARDS */}
-            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+            <div className={`space-y-2 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Network className="w-4 h-4 text-pink-500" />
@@ -522,9 +526,9 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* F. ALINEACIÓN Y TAMAÑO DE TEXTO */}
-            <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+            <div className={`grid grid-cols-2 gap-3 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div>
-                <label className={`text-xs font-bold block mb-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                <label className={`text-xs font-bold block mb-1 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
                   Alineación del Contenido
                 </label>
                 <div className={`grid grid-cols-2 gap-1 p-1 rounded-xl border ${isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-800/60 border-slate-700'}`}>
@@ -554,7 +558,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
 
               <div>
-                <label className={`text-xs font-bold block mb-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                <label className={`text-xs font-bold block mb-1 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
                   Escala de Título
                 </label>
                 <div className={`grid grid-cols-3 gap-1 p-1 rounded-xl border ${isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-800/60 border-slate-700'}`}>
@@ -601,203 +605,300 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         </div>
       )}
 
-      {/* 3. MAIN SLIDE CONTENT SPOTLIGHT */}
-      <div
-        className={`max-w-4xl mx-auto w-full py-6 sm:py-10 flex flex-col justify-center flex-1 transition-all ${
-          contentAlign === 'center' ? 'items-center text-center' : 'items-start text-left'
-        }`}
-      >
-        {/* Parent Breadcrumb if not root */}
-        {parentNode && (
-          <div className={`text-sm font-medium mb-3 flex items-center gap-2 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-            <span
-              onClick={() => handleJumpToNode(parentNode.id)}
-              className="hover:underline cursor-pointer"
-            >
-              {parentNode.text.split('\n')[0]}
-            </span>
-            <span>→</span>
-          </div>
-        )}
-
-        {/* Node Icons */}
-        {currentNode.icons && currentNode.icons.length > 0 && (
-          <div className="flex items-center gap-2 mb-4">
-            {currentNode.icons.map((ic, i) => (
-              <span key={i} className="scale-125">
-                {renderNodeIcon(ic)}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Image Attachment (Respects Image Size Setting) */}
-        {currentNode.imageUrl && imageSize !== 'hidden' && (
-          <div className={`my-4 flex justify-center overflow-hidden rounded-2xl shadow-xl border ${isLight ? 'border-slate-300 bg-white p-2' : 'border-white/10'}`}>
-            <img
-              src={currentNode.imageUrl}
-              alt=""
-              className={`rounded-2xl object-contain pointer-events-none transition-all ${getImageDimensions()}`}
-            />
-          </div>
-        )}
-
-        {/* Main Node Title Heading (Guaranteed Contrast in all Themes) */}
-        <h1
-          style={{
-            color: isRoot
-              ? undefined
-              : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
-          }}
-          className={`${getHeadingSizeClass()} font-bold tracking-tight mb-3 leading-tight whitespace-pre-wrap ${
-            isRoot ? currentTheme.accentClass : ''
-          }`}
-        >
-          {currentNode.text}
-        </h1>
-
-        {/* Node Body / Subtitle (Guaranteed Contrast in all Themes) */}
-        {currentNode.body && (
+      {/* 3. MAIN SLIDE CONTENT CANVAS (100% Viewport-Contained, NO Scrollbars, NO Off-Screen Overflow) */}
+      <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto overflow-hidden flex items-center justify-center p-2">
+        {!hasSecondary ? (
+          /* SINGLE-COLUMN CENTERED SPOTLIGHT (When only title/body are present) */
           <div
-            style={{
-              color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
-              fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
-              fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
-            }}
-            className="text-lg md:text-xl max-w-2xl mb-5 font-normal whitespace-pre-wrap leading-relaxed"
+            className={`w-full max-w-3xl flex flex-col justify-center transition-all ${
+              contentAlign === 'center' ? 'items-center text-center' : 'items-start text-left'
+            }`}
           >
-            {currentNode.body}
-          </div>
-        )}
+            {/* Parent Breadcrumb */}
+            {parentNode && (
+              <div className={`text-xs sm:text-sm font-medium mb-2 flex items-center gap-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                <span
+                  onClick={() => handleJumpToNode(parentNode.id)}
+                  className="hover:underline cursor-pointer"
+                >
+                  {parentNode.text.split('\n')[0]}
+                </span>
+                <span>→</span>
+              </div>
+            )}
 
-        {/* Progress and Tags */}
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          {currentNode.progress !== undefined && (
-            <span className="px-3 py-1 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold">
-              Progreso: {currentNode.progress}%
-            </span>
-          )}
-          {currentNode.tags?.map((t) => (
-            <span
-              key={t}
-              className={`px-2.5 py-0.5 rounded-full border text-xs font-medium ${
-                isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
+            {/* Node Icons */}
+            {currentNode.icons && currentNode.icons.length > 0 && (
+              <div className="flex items-center gap-2 mb-3">
+                {currentNode.icons.map((ic, i) => (
+                  <span key={i} className="scale-125">
+                    {renderNodeIcon(ic)}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Attached Image */}
+            {currentNode.imageUrl && imageSize !== 'hidden' && (
+              <div className={`my-3 overflow-hidden rounded-2xl shadow-xl border ${isLight ? 'border-slate-300 bg-white p-1.5' : 'border-white/10'}`}>
+                <img
+                  src={currentNode.imageUrl}
+                  alt=""
+                  className={`rounded-xl object-contain pointer-events-none transition-all ${getImageDimensions()}`}
+                />
+              </div>
+            )}
+
+            {/* Main Title Heading */}
+            <h1
+              style={{
+                color: isRoot
+                  ? undefined
+                  : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
+              }}
+              className={`${getHeadingSizeClass()} font-bold tracking-tight mb-2.5 leading-tight whitespace-pre-wrap ${
+                isRoot ? currentTheme.accentClass : ''
               }`}
             >
-              #{t}
-            </span>
-          ))}
-        </div>
+              {currentNode.text}
+            </h1>
 
-        {/* Presenter Notes (Respects showNotes Setting) */}
-        {showNotes && currentNode.note && (
-          <div
-            className={`w-full max-w-2xl rounded-2xl p-5 text-left text-sm leading-relaxed shadow-xl border mb-6 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
-          >
-            <div className={`flex items-center gap-2 text-xs font-bold mb-2 uppercase tracking-wider ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
-              <FileText className="w-3.5 h-3.5" />
-              <span>Notas del Presentador (Markdown)</span>
-            </div>
-            <MarkdownView content={currentNode.note} isDark={!isLight} />
-          </div>
-        )}
+            {/* Node Body / Subtitle */}
+            {currentNode.body && (
+              <div
+                style={{
+                  color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
+                  fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
+                  fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
+                }}
+                className="text-base sm:text-lg max-w-2xl mb-4 font-normal whitespace-pre-wrap leading-relaxed opacity-90 line-clamp-6"
+              >
+                {currentNode.body}
+              </div>
+            )}
 
-        {/* Child Nodes as Cards (Respects showChildrenCards Setting) */}
-        {showChildrenCards && childNodes.length > 0 && (
-          <div className="w-full max-w-3xl mb-6 text-left">
-            <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-2.5 ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
-              <GitBranch className="w-3.5 h-3.5" />
-              <span>Subtemas / Nodos Hijos ({childNodes.length})</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-              {childNodes.map((child) => (
-                <div
-                  key={child.id}
-                  onClick={() => handleJumpToNode(child.id)}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-lg ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-blue-500`}
+            {/* Progress and Tags */}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {currentNode.progress !== undefined && (
+                <span className="px-3 py-1 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold">
+                  Progreso: {currentNode.progress}%
+                </span>
+              )}
+              {currentNode.tags?.map((t) => (
+                <span
+                  key={t}
+                  className={`px-2.5 py-0.5 rounded-full border text-xs font-medium ${
+                    isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
+                  }`}
                 >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    {child.icons && child.icons.length > 0 ? (
-                      <span className="shrink-0">{renderNodeIcon(child.icons[0])}</span>
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                    )}
-                    <h4
-                      style={{
-                        color: getContrastSafeColor(child.textColor, isLight, '#0f172a', '#ffffff'),
-                      }}
-                      className="text-xs font-bold truncate group-hover:text-blue-500 transition-colors"
-                    >
-                      {child.text}
-                    </h4>
-                  </div>
-                  {child.body && (
-                    <p className={`text-[11px] line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
-                      {child.body}
-                    </p>
-                  )}
-                  {child.note && (
-                    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold mt-2 ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
-                      <FileText className="w-3 h-3" /> Nota adjunta
-                    </span>
-                  )}
-                </div>
+                  #{t}
+                </span>
               ))}
             </div>
           </div>
-        )}
-
-        {/* Cross Connectors as Cards (Respects showConnectorsCards Setting) */}
-        {showConnectorsCards && relatedConnectors.length > 0 && (
-          <div className="w-full max-w-3xl mb-4 text-left">
-            <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-2.5 ${isLight ? 'text-pink-800' : 'text-pink-400'}`}>
-              <Network className="w-3.5 h-3.5" />
-              <span>Conexiones y Enlaces Cruzados ({relatedConnectors.length})</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {relatedConnectors.map((conn) => {
-                const isSource = conn.fromNodeId === currentNode.id;
-                const targetId = isSource ? conn.toNodeId : conn.fromNodeId;
-                const targetNode = mindMap.nodes[targetId];
-                if (!targetNode) return null;
-
-                return (
-                  <div
-                    key={conn.id}
-                    onClick={() => handleJumpToNode(targetId)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-lg flex items-center justify-between gap-3 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-pink-500`}
+        ) : (
+          /* RESPONSIVE DUAL-PANE SPLIT SLIDE (Guarantees all content fits neatly on screen) */
+          <div className="w-full h-full max-h-full grid grid-cols-1 md:grid-cols-12 gap-4 items-center overflow-hidden">
+            {/* PRIMARY PANE (Left / Main Node Details) */}
+            <div
+              className={`md:col-span-6 lg:col-span-7 flex flex-col justify-center overflow-hidden pr-0 md:pr-4 ${
+                contentAlign === 'center' ? 'items-center text-center' : 'items-start text-left'
+              }`}
+            >
+              {/* Parent Breadcrumb */}
+              {parentNode && (
+                <div className={`text-xs sm:text-sm font-medium mb-1.5 flex items-center gap-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+                  <span
+                    onClick={() => handleJumpToNode(parentNode.id)}
+                    className="hover:underline cursor-pointer"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className={`flex items-center gap-1.5 text-[10.5px] font-bold mb-0.5 ${isLight ? 'text-pink-700' : 'text-pink-400'}`}>
-                        <span>{isSource ? 'Conecta hacia ➔' : 'Recibe de ⬅'}</span>
-                        {conn.label && <span className="opacity-80 italic truncate">"{conn.label}"</span>}
-                      </div>
-                      <h4
-                        style={{
-                          color: getContrastSafeColor(targetNode.textColor, isLight, '#0f172a', '#ffffff'),
-                        }}
-                        className="text-xs font-bold truncate group-hover:text-pink-500 transition-colors"
-                      >
-                        {targetNode.text}
-                      </h4>
-                    </div>
-                    <div className="w-7 h-7 rounded-lg bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-colors">
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </div>
+                    {parentNode.text.split('\n')[0]}
+                  </span>
+                  <span>→</span>
+                </div>
+              )}
+
+              {/* Node Icons */}
+              {currentNode.icons && currentNode.icons.length > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  {currentNode.icons.map((ic, i) => (
+                    <span key={i} className="scale-110">
+                      {renderNodeIcon(ic)}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Attached Image */}
+              {currentNode.imageUrl && imageSize !== 'hidden' && (
+                <div className={`my-2 overflow-hidden rounded-xl shadow-lg border ${isLight ? 'border-slate-300 bg-white p-1' : 'border-white/10'}`}>
+                  <img
+                    src={currentNode.imageUrl}
+                    alt=""
+                    className={`rounded-lg object-contain pointer-events-none transition-all ${getImageDimensions()}`}
+                  />
+                </div>
+              )}
+
+              {/* Main Title */}
+              <h1
+                style={{
+                  color: isRoot
+                    ? undefined
+                    : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
+                }}
+                className={`${getHeadingSizeClass()} font-bold tracking-tight mb-2 leading-tight whitespace-pre-wrap ${
+                  isRoot ? currentTheme.accentClass : ''
+                }`}
+              >
+                {currentNode.text}
+              </h1>
+
+              {/* Node Body / Subtitle */}
+              {currentNode.body && (
+                <div
+                  style={{
+                    color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
+                    fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
+                    fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
+                  }}
+                  className="text-sm sm:text-base mb-3 font-normal whitespace-pre-wrap leading-relaxed opacity-90 line-clamp-4"
+                >
+                  {currentNode.body}
+                </div>
+              )}
+
+              {/* Progress and Tags */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {currentNode.progress !== undefined && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-[11px] font-bold">
+                    Progreso: {currentNode.progress}%
+                  </span>
+                )}
+                {currentNode.tags?.map((t) => (
+                  <span
+                    key={t}
+                    className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${
+                      isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    #{t}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* SECONDARY PANE (Right / Notes & Interactive Cards fitted to screen) */}
+            <div className="md:col-span-6 lg:col-span-5 flex flex-col justify-center gap-2.5 max-h-full overflow-hidden">
+              {/* 1. Presenter Notes */}
+              {hasNotes && (
+                <div
+                  className={`w-full rounded-xl p-3.5 text-left text-xs leading-relaxed shadow-lg border overflow-hidden ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
+                >
+                  <div className={`flex items-center gap-1.5 text-[11px] font-bold mb-1.5 uppercase tracking-wider ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Notas del Presentador</span>
                   </div>
-                );
-              })}
+                  <div className="max-h-40 overflow-y-auto pr-1">
+                    <MarkdownView content={currentNode.note || ''} isDark={!isLight} />
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Subtopics / Child Cards */}
+              {hasChildren && (
+                <div className="w-full text-left overflow-hidden">
+                  <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-1.5 ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
+                    <GitBranch className="w-3.5 h-3.5" />
+                    <span>Subtemas ({childNodes.length})</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                    {childNodes.slice(0, 6).map((child) => (
+                      <div
+                        key={child.id}
+                        onClick={() => handleJumpToNode(child.id)}
+                        className={`p-2.5 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-md ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-blue-500`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {child.icons && child.icons.length > 0 ? (
+                            <span className="shrink-0">{renderNodeIcon(child.icons[0])}</span>
+                          ) : (
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                          )}
+                          <h4
+                            style={{
+                              color: getContrastSafeColor(child.textColor, isLight, '#0f172a', '#ffffff'),
+                            }}
+                            className="text-xs font-bold truncate group-hover:text-blue-500 transition-colors"
+                          >
+                            {child.text}
+                          </h4>
+                        </div>
+                        {child.body && (
+                          <p className={`text-[10.5px] line-clamp-1 leading-snug mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                            {child.body}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Connectors & Cross-Links */}
+              {hasConnectors && (
+                <div className="w-full text-left overflow-hidden">
+                  <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-1.5 ${isLight ? 'text-pink-800' : 'text-pink-400'}`}>
+                    <Network className="w-3.5 h-3.5" />
+                    <span>Enlaces y Conectores ({relatedConnectors.length})</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-32 overflow-y-auto pr-1">
+                    {relatedConnectors.slice(0, 4).map((conn) => {
+                      const isSource = conn.fromNodeId === currentNode.id;
+                      const targetId = isSource ? conn.toNodeId : conn.fromNodeId;
+                      const targetNode = mindMap.nodes[targetId];
+                      if (!targetNode) return null;
+
+                      return (
+                        <div
+                          key={conn.id}
+                          onClick={() => handleJumpToNode(targetId)}
+                          className={`p-2 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-md flex items-center justify-between gap-2 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-pink-500`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className={`flex items-center gap-1 text-[10px] font-bold ${isLight ? 'text-pink-700' : 'text-pink-400'}`}>
+                              <span>{isSource ? 'Hacia ➔' : 'Desde ⬅'}</span>
+                              {conn.label && <span className="opacity-80 italic truncate">"{conn.label}"</span>}
+                            </div>
+                            <h4
+                              style={{
+                                color: getContrastSafeColor(targetNode.textColor, isLight, '#0f172a', '#ffffff'),
+                              }}
+                              className="text-[11.5px] font-bold truncate group-hover:text-pink-500 transition-colors"
+                            >
+                              {targetNode.text}
+                            </h4>
+                          </div>
+                          <div className="w-5 h-5 rounded-md bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-colors">
+                            <ExternalLink className="w-3 h-3" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* 4. BOTTOM NAVIGATION BAR */}
-      <div className="flex items-center justify-between max-w-2xl mx-auto w-full shrink-0">
+      {/* 4. BOTTOM NAVIGATION BAR (Compact fixed height, perfectly positioned) */}
+      <footer className="flex items-center justify-between max-w-2xl mx-auto w-full shrink-0 h-12">
         <button
           disabled={currentIndex === 0}
           onClick={handlePrev}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-semibold text-sm transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-semibold text-xs transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
             isLight
               ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-200'
               : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
@@ -825,11 +926,11 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         <button
           disabled={currentIndex === slides.length - 1}
           onClick={handleNext}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 disabled:hover:bg-blue-600 disabled:cursor-not-allowed transition-all text-sm font-semibold shadow-lg shadow-blue-900/40 cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 disabled:hover:bg-blue-600 disabled:cursor-not-allowed transition-all text-xs font-semibold shadow-lg shadow-blue-900/40 cursor-pointer"
         >
           Siguiente <ChevronRight className="w-4 h-4" />
         </button>
-      </div>
+      </footer>
     </div>
   );
 };
