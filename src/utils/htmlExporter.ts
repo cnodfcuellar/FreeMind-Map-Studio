@@ -463,6 +463,71 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       background: rgba(0,0,0,0.18);
     }
     
+    /* Floating Note Hover Tooltip */
+    .node-note-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 270px;
+      max-height: 220px;
+      overflow-y: auto;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 11.5px;
+      line-height: 1.5;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      border: 1px solid rgba(71, 85, 105, 0.8);
+      pointer-events: auto;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+      z-index: 120;
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-align: left;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .node-note-tooltip.pos-bottom {
+      bottom: auto;
+      top: calc(100% + 10px);
+    }
+    .node-note-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+    }
+    .node-note-tooltip.pos-bottom::after {
+      top: auto;
+      bottom: 100%;
+      border-color: transparent transparent rgba(15, 23, 42, 0.96) transparent;
+    }
+    .node-element:hover .node-note-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    .tooltip-note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 5px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #fbbf24;
+    }
+
+    
     /* Fold / Unfold Button */
     .fold-btn {
       position: absolute;
@@ -1415,7 +1480,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           const noteBtn = document.createElement('span');
           noteBtn.className = 'node-note-btn';
           noteBtn.innerHTML = '📝';
-          noteBtn.title = 'Ver nota';
+          noteBtn.title = 'Nota: ' + (node.note || '');
           noteBtn.onclick = (e) => {
             e.stopPropagation();
             openNoteDrawer(node.text, node.note);
@@ -1513,6 +1578,28 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
             tagsWrap.appendChild(tSpan);
           });
           wrap.appendChild(tagsWrap);
+        }
+
+        // Floating Note Hover Tooltip
+        if (node.note && node.note.trim().length > 0) {
+          const tooltip = document.createElement('div');
+          const isTopLayout = layout.side === 'top';
+          tooltip.className = 'node-note-tooltip' + (isTopLayout ? ' pos-bottom' : '');
+          
+          const tipHeader = document.createElement('div');
+          tipHeader.className = 'tooltip-note-header';
+          tipHeader.innerHTML = '<span>📝 Nota del Nodo</span><span style="font-size:9.5px; opacity:0.8; font-weight:normal;">Clic para abrir</span>';
+          
+          const tipBody = document.createElement('div');
+          tipBody.textContent = node.note;
+          
+          tooltip.appendChild(tipHeader);
+          tooltip.appendChild(tipBody);
+          tooltip.onclick = (e) => {
+            e.stopPropagation();
+            openNoteDrawer(node.text, node.note);
+          };
+          div.appendChild(tooltip);
         }
 
         div.appendChild(wrap);

@@ -628,12 +628,12 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         {/* Note indicator */}
         {node.note && (
           <button
-            title="Ver nota detallada (Markdown)"
+            title={`Nota: ${node.note}`}
             onClick={(e) => {
               e.stopPropagation();
               onOpenNote(node.id);
             }}
-            className="shrink-0 p-0.5 text-slate-400 hover:text-blue-600 transition-colors"
+            className="shrink-0 p-0.5 text-amber-500 hover:text-amber-600 dark:text-amber-400 transition-colors cursor-pointer"
           >
             <FileText className="w-3.5 h-3.5" />
           </button>
@@ -752,6 +752,42 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         >
           <Plus className="w-3 h-3 stroke-[2.5]" />
         </button>
+      )}
+
+      {/* Floating Note Hover Tooltip Preview Card */}
+      {node.note && node.note.trim().length > 0 && isHovered && !isEditing && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenNote(node.id);
+          }}
+          className={`absolute left-1/2 -translate-x-1/2 w-64 sm:w-72 max-h-60 overflow-y-auto bg-slate-900/95 text-slate-100 dark:bg-slate-800/98 dark:text-slate-100 p-3 rounded-xl shadow-2xl border border-slate-700/80 backdrop-blur-md text-left z-50 animate-in fade-in zoom-in-95 duration-150 cursor-pointer pointer-events-auto select-text group/tooltip ${
+            layout.side === 'top' ? 'top-full mt-2.5' : 'bottom-full mb-2.5'
+          }`}
+        >
+          {/* Tooltip Header */}
+          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-700/60 text-[11px] text-slate-400">
+            <span className="flex items-center gap-1.5 font-semibold text-amber-400">
+              <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Nota del Nodo</span>
+            </span>
+            <span className="text-[10px] text-slate-400 group-hover/tooltip:text-amber-300 transition-colors">
+              Clic para editar
+            </span>
+          </div>
+
+          {/* Tooltip Body */}
+          <div className="text-xs leading-relaxed text-slate-200 whitespace-pre-wrap break-words font-normal">
+            {node.note}
+          </div>
+
+          {/* Arrow pointing towards node */}
+          {layout.side === 'top' ? (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-px w-0 h-0 border-x-6 border-x-transparent border-b-6 border-b-slate-900/95 dark:border-b-slate-800/98" />
+          ) : (
+            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-0 h-0 border-x-6 border-x-transparent border-t-6 border-t-slate-900/95 dark:border-t-slate-800/98" />
+          )}
+        </div>
       )}
     </div>
   );
