@@ -17,6 +17,8 @@ import {
   GitBranch,
   Network,
   Layers,
+  BookOpen,
+  LayoutGrid,
 } from 'lucide-react';
 
 interface PresentationThemeConfig {
@@ -111,19 +113,18 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
   },
 ];
 
-const MAX_CHILDREN_PER_SLIDE = 4;
+const MAX_CHILDREN_PER_SLIDE = 6;
+
+export type SlidePhase = 'body' | 'notes' | 'children';
 
 export interface PresentationSlide {
   slideKey: string;
   node: MindNode;
+  phase: SlidePhase;
   pageIndex: number;
   totalPages: number;
-  noteSubset: string;
-  notePageIndex: number;
-  noteTotalPages: number;
-  childrenSubset: string[];
-  childrenPageIndex: number;
-  childrenTotalPages: number;
+  noteSubset?: string;
+  childrenSubset?: string[];
 }
 
 interface PresentationModeProps {
@@ -134,8 +135,8 @@ interface PresentationModeProps {
 }
 
 /**
- * Splits a markdown note into readable, compact slide chunks (~5-7 lines or ~380 chars)
- * to ensure that long notes are paginated across duplicate continuation slides without scrollbars.
+ * Splits a markdown note into readable, compact slide chunks (~8-10 lines or ~550 chars)
+ * to ensure that long notes paginate across continuation slides without scrollbars.
  */
 function splitMarkdownIntoSlideChunks(markdown: string | undefined): string[] {
   if (!markdown || !markdown.trim()) return [];
@@ -145,8 +146,8 @@ function splitMarkdownIntoSlideChunks(markdown: string | undefined): string[] {
   let currentChunkLines: string[] = [];
   let currentLength = 0;
 
-  const MAX_LINES_PER_CHUNK = 6;
-  const MAX_CHARS_PER_CHUNK = 380;
+  const MAX_LINES_PER_CHUNK = 9;
+  const MAX_CHARS_PER_CHUNK = 550;
 
   for (let i = 0; i < rawLines.length; i++) {
     const line = rawLines[i];
@@ -154,7 +155,7 @@ function splitMarkdownIntoSlideChunks(markdown: string | undefined): string[] {
 
     if (
       currentChunkLines.length >= MAX_LINES_PER_CHUNK ||
-      (currentLength + lineLen > MAX_CHARS_PER_CHUNK && currentChunkLines.length >= 3)
+      (currentLength + lineLen > MAX_CHARS_PER_CHUNK && currentChunkLines.length >= 4)
     ) {
       if (currentChunkLines.length > 0) {
         chunks.push(currentChunkLines.join('\n'));
@@ -225,8 +226,12 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const [contentAlign, setContentAlign] = useState<'center' | 'left'>('center');
   const [fontSizeScale, setFontSizeScale] = useState<'normal' | 'large' | 'compact'>('normal');
 
-  // Generate paginated slides: when a node has long notes or more than 4 children, it automatically
-  // generates duplicate continuation slides showing the next batch of content until everything is presented.
+  // Generate sequential unmixed slides:
+  // For each node:
+  // 1. Fase 1: Spotlight (Título y Cuerpo)
+  // 2. Fase 2: Notas del Presentador (si existen y están activadas)
+  // 3. Fase 3: Subtemas / Nodos Hijos (si existen y están activados)
+  // Then depth-first into children.
   const slides = useMemo(() => {
     const list: PresentationSlide[] = [];
 
@@ -234,49 +239,48 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       const node = mindMap.nodes[nodeId];
       if (!node) return;
 
-      const childrenIds = node.children || [];
-      const childChunks: string[][] = [];
-      if (showChildrenCards && childrenIds.length > 0) {
-        const totalChildPages = Math.ceil(childrenIds.length / MAX_CHILDREN_PER_SLIDE);
-        for (let p = 0; p < totalChildPages; p++) {
-          childChunks.push(
-            childrenIds.slice(p * MAX_CHILDREN_PER_SLIDE, (p + 1) * MAX_CHILDREN_PER_SLIDE)
-          );
+      // 1. FASE 1: TÍTULO Y CUERPO (Siempre se presenta primero como diapositiva limpia)
+      list.push({
+        slideKey: `${node.id}-body`,
+        node,
+        phase: 'body',
+        pageIndex: 0,
+        totalPages: 1,
+      });
+
+      // 2. FASE 2: NOTAS DEL PRESENTADOR (Se presentan después del cuerpo de forma dedicada)
+      if (showNotes && node.note && node.note.trim().length > 0) {
+        const noteChunks = splitMarkdownIntoSlideChunks(node.note);
+        for (let p = 0; p < noteChunks.length; p++) {
+          list.push({
+            slideKey: `${node.id}-notes-${p}`,
+            node,
+            phase: 'notes',
+            pageIndex: p,
+            totalPages: noteChunks.length,
+            noteSubset: noteChunks[p],
+          });
         }
-      } else if (childrenIds.length > 0) {
-        childChunks.push(childrenIds);
-      } else {
-        childChunks.push([]);
       }
 
-      const noteChunks =
-        showNotes && node.note?.trim() ? splitMarkdownIntoSlideChunks(node.note) : [];
-
-      const noteTotalPages = noteChunks.length > 0 ? noteChunks.length : 1;
-      const childTotalPages = childChunks.length > 0 ? childChunks.length : 1;
-      const totalPages = Math.max(childTotalPages, noteTotalPages);
-
-      for (let page = 0; page < totalPages; page++) {
-        // If notes have fewer pages than children, keep the last note chunk active
-        const noteIdx = Math.min(page, Math.max(0, noteChunks.length - 1));
-        const noteSubset = noteChunks.length > 0 ? noteChunks[noteIdx] : '';
-
-        // If children have fewer pages than notes, keep the last children batch active
-        const childIdx = Math.min(page, Math.max(0, childChunks.length - 1));
-        const childrenSubset = childChunks.length > 0 ? childChunks[childIdx] : [];
-
-        list.push({
-          slideKey: `${node.id}-p${page}`,
-          node,
-          pageIndex: page,
-          totalPages,
-          noteSubset,
-          notePageIndex: noteIdx,
-          noteTotalPages: noteChunks.length,
-          childrenSubset,
-          childrenPageIndex: childIdx,
-          childrenTotalPages: childChunks.length,
-        });
+      // 3. FASE 3: SUBTEMAS / NODOS HIJOS (Se presentan al final de forma dedicada en cards)
+      const childrenIds = node.children || [];
+      if (showChildrenCards && childrenIds.length > 0) {
+        const childPages = Math.ceil(childrenIds.length / MAX_CHILDREN_PER_SLIDE);
+        for (let p = 0; p < childPages; p++) {
+          const subset = childrenIds.slice(
+            p * MAX_CHILDREN_PER_SLIDE,
+            (p + 1) * MAX_CHILDREN_PER_SLIDE
+          );
+          list.push({
+            slideKey: `${node.id}-children-${p}`,
+            node,
+            phase: 'children',
+            pageIndex: p,
+            totalPages: childPages,
+            childrenSubset: subset,
+          });
+        }
       }
 
       // Depth-first traversal into children
@@ -314,9 +318,12 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   };
 
   const handleJumpToNode = (nodeId: string) => {
-    const idx = slides.findIndex((s) => s.node.id === nodeId);
+    const idx = slides.findIndex((s) => s.node.id === nodeId && s.phase === 'body');
     if (idx !== -1) {
       setCurrentIndex(idx);
+    } else {
+      const anyIdx = slides.findIndex((s) => s.node.id === nodeId);
+      if (anyIdx !== -1) setCurrentIndex(anyIdx);
     }
   };
 
@@ -361,7 +368,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
     );
   }, [mindMap.connectors, currentNode]);
 
-  // Current batch of child nodes for this paginated slide
+  // Current batch of child nodes for this slide (in phase 'children')
   const currentChildNodes = useMemo(() => {
     if (!currentSlide || !currentSlide.childrenSubset || currentSlide.childrenSubset.length === 0) {
       return [];
@@ -371,25 +378,18 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       .filter((n): n is MindNode => Boolean(n));
   }, [currentSlide, mindMap.nodes]);
 
-  // Total child count for node
   const totalChildrenCount = currentNode.children?.length || 0;
-
-  // Check what supplementary panels are visible
-  const hasNotes = showNotes && Boolean(currentSlide.noteSubset?.trim());
-  const hasChildren = showChildrenCards && currentChildNodes.length > 0;
-  const hasConnectors = showConnectorsCards && relatedConnectors.length > 0;
-  const hasSecondary = hasNotes || hasChildren || hasConnectors;
 
   // Image dimension styling
   const getImageDimensions = () => {
     switch (imageSize) {
       case 'small':
-        return 'max-h-24 max-w-[140px]';
+        return 'max-h-32 max-w-[180px]';
       case 'large':
-        return hasSecondary ? 'max-h-48 max-w-[260px]' : 'max-h-72 max-w-[480px]';
+        return 'max-h-80 max-w-[560px]';
       case 'medium':
       default:
-        return hasSecondary ? 'max-h-36 max-w-[200px]' : 'max-h-56 max-w-[360px]';
+        return 'max-h-60 max-w-[400px]';
     }
   };
 
@@ -397,12 +397,12 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const getHeadingSizeClass = () => {
     switch (fontSizeScale) {
       case 'large':
-        return hasSecondary ? 'text-2xl sm:text-4xl' : 'text-3xl sm:text-5xl md:text-6xl';
+        return 'text-4xl sm:text-6xl md:text-7xl';
       case 'compact':
-        return hasSecondary ? 'text-lg sm:text-2xl' : 'text-xl sm:text-3xl';
+        return 'text-2xl sm:text-4xl';
       case 'normal':
       default:
-        return hasSecondary ? 'text-xl sm:text-3xl' : 'text-2xl sm:text-4xl md:text-5xl';
+        return 'text-3xl sm:text-5xl md:text-6xl';
     }
   };
 
@@ -412,28 +412,47 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
     >
       {/* 1. TOP HEADER BAR */}
       <header className="flex items-center justify-between gap-3 w-full shrink-0 h-10">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <div
             className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold shadow-2xs border ${currentTheme.badgeBg}`}
           >
             <Sparkles className="w-3.5 h-3.5" /> Modo Presentación Clásica
           </div>
-          <span className={`text-xs font-mono hidden sm:inline truncate max-w-xs ${isLight ? 'text-slate-500 font-semibold' : 'text-slate-400'}`}>
-            {mindMap.title}
-          </span>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {/* Multi-page slide badge */}
-          {currentSlide.totalPages > 1 && (
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${
-              isLight ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold' : 'bg-blue-950/80 border-blue-800 text-blue-300'
+          {/* Phase Badge: Indica si estamos en Cuerpo, Notas o Subtemas */}
+          {currentSlide.phase === 'body' && (
+            <span className={`text-xs font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 ${
+              isLight ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-blue-950/80 border-blue-800 text-blue-300'
             }`}>
-              <Layers className="w-3.5 h-3.5" />
-              <span>Parte {currentSlide.pageIndex + 1} de {currentSlide.totalPages}</span>
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Tema Principal</span>
             </span>
           )}
 
+          {currentSlide.phase === 'notes' && (
+            <span className={`text-xs font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 ${
+              isLight ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-amber-950/80 border-amber-800 text-amber-300'
+            }`}>
+              <FileText className="w-3.5 h-3.5" />
+              <span>
+                Notas del Tema {currentSlide.totalPages > 1 ? `(Parte ${currentSlide.pageIndex + 1}/${currentSlide.totalPages})` : ''}
+              </span>
+            </span>
+          )}
+
+          {currentSlide.phase === 'children' && (
+            <span className={`text-xs font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 ${
+              isLight ? 'bg-cyan-50 border-cyan-200 text-cyan-800' : 'bg-cyan-950/80 border-cyan-800 text-cyan-300'
+            }`}>
+              <GitBranch className="w-3.5 h-3.5" />
+              <span>
+                Subtemas {currentSlide.totalPages > 1 ? `(Parte ${currentSlide.pageIndex + 1}/${currentSlide.totalPages})` : ''}
+              </span>
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
           {/* EDIT & CONFIGURE PRESENTATION BUTTON (Editar) */}
           <button
             onClick={() => setIsConfigOpen(!isConfigOpen)}
@@ -544,10 +563,10 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                   <FileText className="w-4 h-4 text-amber-500" />
                   <div>
                     <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                      Notas del Presentador
+                      Diapositivas de Notas del Presentador
                     </span>
                     <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      Muestra la caja de notas con paginación automática sin scroll
+                      Presenta las notas en una diapositiva dedicada después del cuerpo
                     </span>
                   </div>
                 </div>
@@ -602,10 +621,10 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                   <GitBranch className="w-4 h-4 text-cyan-500" />
                   <div>
                     <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                      Sub-Nodos Hijos como Cards
+                      Diapositivas de Sub-Nodos Hijos
                     </span>
                     <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      Genera diapositivas continuas si hay más de 4 hijos
+                      Presenta los subtemas en una diapositiva dedicada al final del nodo
                     </span>
                   </div>
                 </div>
@@ -628,10 +647,10 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                   <Network className="w-4 h-4 text-pink-500" />
                   <div>
                     <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-                      Conexiones Cruzadas como Cards
+                      Conexiones Cruzadas
                     </span>
                     <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
-                      Muestra enlaces entre nodos con acceso directo
+                      Muestra enlaces cruzados junto a las tarjetas de subtemas
                     </span>
                   </div>
                 </div>
@@ -727,18 +746,21 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         </div>
       )}
 
-      {/* 3. MAIN SLIDE CONTENT CANVAS (100% Viewport-Contained, NO Scrollbars) */}
-      <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto overflow-hidden flex items-center justify-center p-2">
-        {!hasSecondary ? (
-          /* SINGLE-COLUMN CENTERED SPOTLIGHT (When only title/body are present) */
+      {/* 3. MAIN SLIDE CONTENT CANVAS (Pure Single-Focus Stages) */}
+      <main className="flex-1 min-h-0 w-full max-w-6xl mx-auto overflow-hidden flex items-center justify-center p-2 sm:p-4">
+        
+        {/* ========================================================================= */}
+        {/* FASE 1: TÍTULO Y CUERPO (Visión Principal del Tema)                       */}
+        {/* ========================================================================= */}
+        {currentSlide.phase === 'body' && (
           <div
-            className={`w-full max-w-3xl flex flex-col justify-center transition-all ${
+            className={`w-full max-w-4xl flex flex-col justify-center transition-all animate-in fade-in zoom-in-95 duration-200 ${
               contentAlign === 'center' ? 'items-center text-center' : 'items-start text-left'
             }`}
           >
             {/* Parent Breadcrumb */}
             {parentNode && (
-              <div className={`text-xs sm:text-sm font-medium mb-2 flex items-center gap-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
+              <div className={`text-xs sm:text-sm font-medium mb-3 flex items-center gap-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                 <span
                   onClick={() => handleJumpToNode(parentNode.id)}
                   className="hover:underline cursor-pointer"
@@ -751,7 +773,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
             {/* Node Icons */}
             {currentNode.icons && currentNode.icons.length > 0 && (
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-4">
                 {currentNode.icons.map((ic, i) => (
                   <span key={i} className="scale-125">
                     {renderNodeIcon(ic)}
@@ -762,7 +784,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
             {/* Attached Image */}
             {currentNode.imageUrl && imageSize !== 'hidden' && (
-              <div className={`my-3 overflow-hidden rounded-2xl shadow-xl border ${isLight ? 'border-slate-300 bg-white p-1.5' : 'border-white/10'}`}>
+              <div className={`my-3.5 overflow-hidden rounded-2xl shadow-xl border ${isLight ? 'border-slate-300 bg-white p-2' : 'border-white/10'}`}>
                 <img
                   src={currentNode.imageUrl}
                   alt=""
@@ -778,14 +800,14 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                   ? undefined
                   : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
               }}
-              className={`${getHeadingSizeClass()} font-bold tracking-tight mb-2.5 leading-tight whitespace-pre-wrap ${
+              className={`${getHeadingSizeClass()} font-bold tracking-tight mb-4 leading-tight whitespace-pre-wrap ${
                 isRoot ? currentTheme.accentClass : ''
               }`}
             >
               {currentNode.text}
             </h1>
 
-            {/* Node Body / Subtitle */}
+            {/* Node Body / Subtitle (Generously sized, clean readability) */}
             {currentNode.body && (
               <div
                 style={{
@@ -793,23 +815,23 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                   fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
                   fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
                 }}
-                className="text-base sm:text-lg max-w-2xl mb-4 font-normal whitespace-pre-wrap leading-relaxed opacity-90 line-clamp-6"
+                className="text-lg sm:text-xl md:text-2xl max-w-3xl mb-6 font-normal whitespace-pre-wrap leading-relaxed opacity-95"
               >
                 {currentNode.body}
               </div>
             )}
 
             {/* Progress and Tags */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {currentNode.progress !== undefined && (
-                <span className="px-3 py-1 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold">
+                <span className="px-3.5 py-1 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold">
                   Progreso: {currentNode.progress}%
                 </span>
               )}
               {currentNode.tags?.map((t) => (
                 <span
                   key={t}
-                  className={`px-2.5 py-0.5 rounded-full border text-xs font-medium ${
+                  className={`px-3 py-1 rounded-full border text-xs font-medium ${
                     isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
                   }`}
                 >
@@ -818,231 +840,162 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               ))}
             </div>
           </div>
-        ) : (
-          /* RESPONSIVE DUAL-PANE SPLIT SLIDE (Guarantees all content fits neatly on screen) */
-          <div className="w-full h-full max-h-full grid grid-cols-1 md:grid-cols-12 gap-4 items-center overflow-hidden">
-            {/* PRIMARY PANE (Left / Main Node Details) */}
-            <div
-              className={`md:col-span-6 lg:col-span-7 flex flex-col justify-center overflow-hidden pr-0 md:pr-4 ${
-                contentAlign === 'center' ? 'items-center text-center' : 'items-start text-left'
-              }`}
-            >
-              {/* Parent Breadcrumb */}
-              {parentNode && (
-                <div className={`text-xs sm:text-sm font-medium mb-1.5 flex items-center gap-1.5 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
-                  <span
-                    onClick={() => handleJumpToNode(parentNode.id)}
-                    className="hover:underline cursor-pointer"
-                  >
-                    {parentNode.text.split('\n')[0]}
-                  </span>
-                  <span>→</span>
-                </div>
-              )}
+        )}
 
-              {/* Node Icons */}
-              {currentNode.icons && currentNode.icons.length > 0 && (
-                <div className="flex items-center gap-2 mb-2">
-                  {currentNode.icons.map((ic, i) => (
-                    <span key={i} className="scale-110">
-                      {renderNodeIcon(ic)}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Attached Image */}
-              {currentNode.imageUrl && imageSize !== 'hidden' && (
-                <div className={`my-2 overflow-hidden rounded-xl shadow-lg border ${isLight ? 'border-slate-300 bg-white p-1' : 'border-white/10'}`}>
-                  <img
-                    src={currentNode.imageUrl}
-                    alt=""
-                    className={`rounded-lg object-contain pointer-events-none transition-all ${getImageDimensions()}`}
-                  />
-                </div>
-              )}
-
-              {/* Main Title */}
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                <h1
+        {/* ========================================================================= */}
+        {/* FASE 2: NOTAS DEL PRESENTADOR (Diapositiva Dedicada a las Notas)           */}
+        {/* ========================================================================= */}
+        {currentSlide.phase === 'notes' && (
+          <div className="w-full max-w-4xl flex flex-col justify-center items-center text-left animate-in fade-in zoom-in-95 duration-200">
+            {/* Header Context Bar: Shows parent & node title */}
+            <div className="w-full mb-3 flex items-center justify-between gap-3 pb-2 border-b border-slate-700/40">
+              <div className="flex items-center gap-2 min-w-0">
+                {currentNode.icons && currentNode.icons.length > 0 && (
+                  <span className="scale-110">{renderNodeIcon(currentNode.icons[0])}</span>
+                )}
+                <h3
                   style={{
-                    color: isRoot
-                      ? undefined
-                      : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
+                    color: getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
                   }}
-                  className={`${getHeadingSizeClass()} font-bold tracking-tight leading-tight whitespace-pre-wrap ${
-                    isRoot ? currentTheme.accentClass : ''
-                  }`}
+                  className="text-lg sm:text-xl font-bold truncate"
                 >
                   {currentNode.text}
-                </h1>
-                {currentSlide.totalPages > 1 && (
-                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border self-center ${
-                    isLight ? 'bg-blue-100 border-blue-300 text-blue-800' : 'bg-blue-950 border-blue-700 text-blue-300'
-                  }`}>
-                    ({currentSlide.pageIndex + 1}/{currentSlide.totalPages})
-                  </span>
-                )}
+                </h3>
               </div>
-
-              {/* Node Body / Subtitle */}
-              {currentNode.body && (
-                <div
-                  style={{
-                    color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
-                    fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
-                    fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
-                  }}
-                  className="text-sm sm:text-base mb-3 font-normal whitespace-pre-wrap leading-relaxed opacity-90 line-clamp-4"
-                >
-                  {currentNode.body}
-                </div>
-              )}
-
-              {/* Progress and Tags */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {currentNode.progress !== undefined && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-[11px] font-bold">
-                    Progreso: {currentNode.progress}%
-                  </span>
-                )}
-                {currentNode.tags?.map((t) => (
-                  <span
-                    key={t}
-                    className={`px-2 py-0.5 rounded-full border text-[11px] font-medium ${
-                      isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
-                    }`}
-                  >
-                    #{t}
-                  </span>
-                ))}
-              </div>
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${
+                isLight ? 'bg-amber-100 text-amber-800' : 'bg-amber-950 border border-amber-800 text-amber-300'
+              }`}>
+                {currentSlide.totalPages > 1
+                  ? `Notas (${currentSlide.pageIndex + 1} de ${currentSlide.totalPages})`
+                  : 'Notas del Tema'}
+              </span>
             </div>
 
-            {/* SECONDARY PANE (Right / Notes & Interactive Cards with Auto-Pagination for Notes & Children) */}
-            <div className="md:col-span-6 lg:col-span-5 flex flex-col justify-center gap-3 overflow-hidden">
-              {/* 1. Presenter Notes (Paginated Chunks without scrollbar) */}
-              {hasNotes && (
-                <div
-                  className={`w-full rounded-xl p-3.5 text-left text-xs leading-relaxed shadow-lg border overflow-hidden ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
-                      <FileText className="w-3.5 h-3.5" />
-                      <span>Notas del Presentador</span>
-                    </div>
-                    {currentSlide.noteTotalPages > 1 && (
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        isLight ? 'bg-amber-100 text-amber-800' : 'bg-amber-950 border border-amber-800 text-amber-300'
-                      }`}>
-                        Parte {currentSlide.notePageIndex + 1} de {currentSlide.noteTotalPages}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs leading-relaxed">
-                    <MarkdownView content={currentSlide.noteSubset} isDark={!isLight} />
-                  </div>
-                </div>
-              )}
+            {/* Main Note Card (Full visual focus, zero scrollbars) */}
+            <div
+              className={`w-full rounded-2xl p-6 sm:p-8 shadow-2xl border ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
+            >
+              <div className="text-sm sm:text-base md:text-lg leading-relaxed">
+                <MarkdownView content={currentSlide.noteSubset || ''} isDark={!isLight} />
+              </div>
+            </div>
+          </div>
+        )}
 
-              {/* 2. Subtopics / Child Cards (Paginated subset of children) */}
-              {hasChildren && (
-                <div className="w-full text-left overflow-hidden">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
-                      <GitBranch className="w-3.5 h-3.5" />
-                      <span>
-                        Subtemas ({currentSlide.childrenPageIndex * MAX_CHILDREN_PER_SLIDE + 1}-
-                        {Math.min((currentSlide.childrenPageIndex + 1) * MAX_CHILDREN_PER_SLIDE, totalChildrenCount)} de {totalChildrenCount})
-                      </span>
-                    </div>
-                    {currentSlide.childrenTotalPages > 1 && (
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        isLight ? 'bg-cyan-100 text-cyan-800' : 'bg-cyan-950 border border-cyan-800 text-cyan-300'
-                      }`}>
-                        Parte {currentSlide.childrenPageIndex + 1} de {currentSlide.childrenTotalPages}
-                      </span>
+        {/* ========================================================================= */}
+        {/* FASE 3: SUBTEMAS / NODOS HIJOS (Diapositiva Dedicada a las Cards)          */}
+        {/* ========================================================================= */}
+        {currentSlide.phase === 'children' && (
+          <div className="w-full max-w-5xl flex flex-col justify-center items-center text-left animate-in fade-in zoom-in-95 duration-200">
+            {/* Header Context Bar: Shows parent node title & subtopics count */}
+            <div className="w-full mb-4 flex items-center justify-between gap-3 pb-2 border-b border-slate-700/40">
+              <div className="flex items-center gap-2 min-w-0">
+                {currentNode.icons && currentNode.icons.length > 0 && (
+                  <span className="scale-110">{renderNodeIcon(currentNode.icons[0])}</span>
+                )}
+                <div>
+                  <h3
+                    style={{
+                      color: getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
+                    }}
+                    className="text-lg sm:text-xl font-bold truncate"
+                  >
+                    {currentNode.text}
+                  </h3>
+                  <span className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Exploración de Subtemas
+                  </span>
+                </div>
+              </div>
+
+              <span className={`text-xs font-bold px-3 py-1 rounded-full shrink-0 ${
+                isLight ? 'bg-cyan-100 text-cyan-800' : 'bg-cyan-950 border border-cyan-800 text-cyan-300'
+              }`}>
+                Subtemas ({currentSlide.pageIndex * MAX_CHILDREN_PER_SLIDE + 1}-
+                {Math.min((currentSlide.pageIndex + 1) * MAX_CHILDREN_PER_SLIDE, totalChildrenCount)} de {totalChildrenCount})
+              </span>
+            </div>
+
+            {/* Grid of Subtopic Cards (Spacious, elegant 2x3 or 3x2, zero scrollbars) */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 mb-4">
+              {currentChildNodes.map((child) => (
+                <div
+                  key={child.id}
+                  onClick={() => handleJumpToNode(child.id)}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-xl ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-blue-500`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    {child.icons && child.icons.length > 0 ? (
+                      <span className="shrink-0 scale-110">{renderNodeIcon(child.icons[0])}</span>
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                     )}
+                    <h4
+                      style={{
+                        color: getContrastSafeColor(child.textColor, isLight, '#0f172a', '#ffffff'),
+                      }}
+                      className="text-sm font-bold truncate group-hover:text-blue-500 transition-colors"
+                    >
+                      {child.text}
+                    </h4>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {currentChildNodes.map((child) => (
+                  {child.body && (
+                    <p className={`text-xs line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                      {child.body}
+                    </p>
+                  )}
+                  {child.note && (
+                    <span className={`inline-flex items-center gap-1 text-[10.5px] font-semibold mt-2.5 ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
+                      <FileText className="w-3 h-3" /> Nota adjunta
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Cross Connectors (if enabled) */}
+            {showConnectorsCards && relatedConnectors.length > 0 && (
+              <div className="w-full pt-3 border-t border-slate-700/30">
+                <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-2 ${isLight ? 'text-pink-800' : 'text-pink-400'}`}>
+                  <Network className="w-3.5 h-3.5" />
+                  <span>Enlaces y Conectores ({relatedConnectors.length})</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                  {relatedConnectors.slice(0, 3).map((conn) => {
+                    const isSource = conn.fromNodeId === currentNode.id;
+                    const targetId = isSource ? conn.toNodeId : conn.fromNodeId;
+                    const targetNode = mindMap.nodes[targetId];
+                    if (!targetNode) return null;
+
+                    return (
                       <div
-                        key={child.id}
-                        onClick={() => handleJumpToNode(child.id)}
-                        className={`p-2.5 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-md ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-blue-500`}
+                        key={conn.id}
+                        onClick={() => handleJumpToNode(targetId)}
+                        className={`p-2.5 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-md flex items-center justify-between gap-2 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-pink-500`}
                       >
-                        <div className="flex items-center gap-1.5">
-                          {child.icons && child.icons.length > 0 ? (
-                            <span className="shrink-0">{renderNodeIcon(child.icons[0])}</span>
-                          ) : (
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                          )}
+                        <div className="min-w-0 flex-1">
+                          <div className={`flex items-center gap-1 text-[10px] font-bold ${isLight ? 'text-pink-700' : 'text-pink-400'}`}>
+                            <span>{isSource ? 'Hacia ➔' : 'Desde ⬅'}</span>
+                            {conn.label && <span className="opacity-80 italic truncate">"{conn.label}"</span>}
+                          </div>
                           <h4
                             style={{
-                              color: getContrastSafeColor(child.textColor, isLight, '#0f172a', '#ffffff'),
+                              color: getContrastSafeColor(targetNode.textColor, isLight, '#0f172a', '#ffffff'),
                             }}
-                            className="text-xs font-bold truncate group-hover:text-blue-500 transition-colors"
+                            className="text-xs font-bold truncate group-hover:text-pink-500 transition-colors"
                           >
-                            {child.text}
+                            {targetNode.text}
                           </h4>
                         </div>
-                        {child.body && (
-                          <p className={`text-[10.5px] line-clamp-1 leading-snug mt-0.5 ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
-                            {child.body}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 3. Connectors & Cross-Links */}
-              {hasConnectors && (
-                <div className="w-full text-left overflow-hidden">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${isLight ? 'text-pink-800' : 'text-pink-400'}`}>
-                      <Network className="w-3.5 h-3.5" />
-                      <span>Enlaces y Conectores ({relatedConnectors.length})</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {relatedConnectors.slice(0, 2).map((conn) => {
-                      const isSource = conn.fromNodeId === currentNode.id;
-                      const targetId = isSource ? conn.toNodeId : conn.fromNodeId;
-                      const targetNode = mindMap.nodes[targetId];
-                      if (!targetNode) return null;
-
-                      return (
-                        <div
-                          key={conn.id}
-                          onClick={() => handleJumpToNode(targetId)}
-                          className={`p-2 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-md flex items-center justify-between gap-2 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-pink-500`}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className={`flex items-center gap-1 text-[10px] font-bold ${isLight ? 'text-pink-700' : 'text-pink-400'}`}>
-                              <span>{isSource ? 'Hacia ➔' : 'Desde ⬅'}</span>
-                              {conn.label && <span className="opacity-80 italic truncate">"{conn.label}"</span>}
-                            </div>
-                            <h4
-                              style={{
-                                color: getContrastSafeColor(targetNode.textColor, isLight, '#0f172a', '#ffffff'),
-                              }}
-                              className="text-[11.5px] font-bold truncate group-hover:text-pink-500 transition-colors"
-                            >
-                              {targetNode.text}
-                            </h4>
-                          </div>
-                          <div className="w-5 h-5 rounded-md bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-colors">
-                            <ExternalLink className="w-3 h-3" />
-                          </div>
+                        <div className="w-5 h-5 rounded-md bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-colors">
+                          <ExternalLink className="w-3 h-3" />
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </main>
