@@ -755,29 +755,20 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         </button>
       )}
 
-      {/* Floating Note Hover Tooltip Preview Card */}
+      {/* Floating Note Hover Tooltip Preview Card (Full content without scrollbars) */}
       {node.note && node.note.trim().length > 0 && isHovered && !isEditing && (
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenNote(node.id);
-          }}
-          className={`absolute left-1/2 -translate-x-1/2 w-64 sm:w-72 max-h-60 overflow-y-auto bg-slate-900/95 text-slate-100 dark:bg-slate-800/98 dark:text-slate-100 p-3 rounded-xl shadow-2xl border border-slate-700/80 backdrop-blur-md text-left z-50 animate-in fade-in zoom-in-95 duration-150 cursor-pointer pointer-events-auto select-text group/tooltip ${
+          className={`absolute left-1/2 -translate-x-1/2 w-max min-w-[200px] max-w-[340px] sm:max-w-[420px] bg-slate-900/95 text-slate-100 dark:bg-slate-800/98 dark:text-slate-100 p-3.5 rounded-xl shadow-2xl border border-slate-700/80 backdrop-blur-md text-left z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none ${
             layout.side === 'top' ? 'top-full mt-2.5' : 'bottom-full mb-2.5'
           }`}
         >
           {/* Tooltip Header */}
-          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-700/60 text-[11px] text-slate-400">
-            <span className="flex items-center gap-1.5 font-semibold text-amber-400">
-              <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Nota del Nodo</span>
-            </span>
-            <span className="text-[10px] text-slate-400 group-hover/tooltip:text-amber-300 transition-colors">
-              Clic para editar
-            </span>
+          <div className="flex items-center gap-1.5 pb-1.5 mb-2 border-b border-slate-700/60 text-[11px] font-semibold text-amber-400">
+            <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span>Nota del Nodo</span>
           </div>
 
-          {/* Tooltip Body with Rich Markdown Rendering */}
+          {/* Tooltip Body with Complete Rich Markdown Rendering (No Scrollbars) */}
           <div className="text-xs leading-relaxed text-slate-200">
             <MarkdownView content={node.note} isDark={true} />
           </div>

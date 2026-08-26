@@ -463,33 +463,33 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       background: rgba(0,0,0,0.18);
     }
     
-    /* Floating Note Hover Tooltip */
+    /* Floating Note Hover Tooltip (Full content without scrollbars) */
     .node-note-tooltip {
       position: absolute;
       bottom: calc(100% + 10px);
       left: 50%;
       transform: translateX(-50%);
-      width: 270px;
-      max-height: 220px;
-      overflow-y: auto;
+      width: max-content;
+      min-width: 200px;
+      max-width: min(420px, 90vw);
       background: rgba(15, 23, 42, 0.96);
       color: #f8fafc;
-      padding: 10px 12px;
+      padding: 10px 14px;
       border-radius: 12px;
       font-size: 11.5px;
       line-height: 1.5;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
       border: 1px solid rgba(71, 85, 105, 0.8);
-      pointer-events: auto;
+      pointer-events: none;
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
       z-index: 120;
-      white-space: pre-wrap;
+      white-space: normal;
       word-break: break-word;
       text-align: left;
-      user-select: text;
-      -webkit-user-select: text;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .node-note-tooltip.pos-bottom {
       bottom: auto;
@@ -1630,7 +1630,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           
           const tipHeader = document.createElement('div');
           tipHeader.className = 'tooltip-note-header';
-          tipHeader.innerHTML = '<span>📝 Nota del Nodo</span><span style="font-size:9.5px; opacity:0.8; font-weight:normal;">Clic para abrir</span>';
+          tipHeader.innerHTML = '<span>📝 Nota del Nodo</span>';
           
           const tipBody = document.createElement('div');
           tipBody.className = 'tooltip-note-body';
@@ -1638,10 +1638,6 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           
           tooltip.appendChild(tipHeader);
           tooltip.appendChild(tipBody);
-          tooltip.onclick = (e) => {
-            e.stopPropagation();
-            openNoteDrawer(node.text, node.note);
-          };
           div.appendChild(tooltip);
         }
 
