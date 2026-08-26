@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MindMap, MindNode } from '../types/mindmap';
 import { renderNodeIcon } from '../utils/iconMap';
+import { MarkdownView } from '../utils/markdownRenderer';
 import {
   ChevronLeft,
   ChevronRight,
@@ -160,9 +161,9 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         {currentNode.note && (
           <div className="w-full max-w-2xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 text-left text-sm text-slate-300 leading-relaxed shadow-xl max-h-60 overflow-y-auto">
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">
-              <FileText className="w-3.5 h-3.5 text-blue-400" /> Notas del Presentador
+              <FileText className="w-3.5 h-3.5 text-amber-400" /> Notas del Presentador (Markdown)
             </div>
-            <p className="whitespace-pre-wrap">{currentNode.note}</p>
+            <MarkdownView content={currentNode.note} isDark={true} />
           </div>
         )}
       </div>

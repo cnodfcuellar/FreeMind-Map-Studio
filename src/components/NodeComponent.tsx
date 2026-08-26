@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MindNode, CalculatedNodeLayout, MindMapTheme } from '../types/mindmap';
 import { renderNodeIcon } from '../utils/iconMap';
+import { MarkdownView } from '../utils/markdownRenderer';
 import {
   FileText,
   ExternalLink,
@@ -776,9 +777,9 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
             </span>
           </div>
 
-          {/* Tooltip Body */}
-          <div className="text-xs leading-relaxed text-slate-200 whitespace-pre-wrap break-words font-normal">
-            {node.note}
+          {/* Tooltip Body with Rich Markdown Rendering */}
+          <div className="text-xs leading-relaxed text-slate-200">
+            <MarkdownView content={node.note} isDark={true} />
           </div>
 
           {/* Arrow pointing towards node */}

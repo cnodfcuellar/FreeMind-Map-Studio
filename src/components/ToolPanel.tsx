@@ -23,6 +23,7 @@ import {
   TOTAL_VECTOR_ICONS_COUNT,
 } from '../utils/vectorIconPack';
 import { THEMES, BACKGROUND_PRESET_THEMES, BackgroundPresetTheme } from '../utils/themes';
+import { MarkdownView } from '../utils/markdownRenderer';
 import {
   Palette,
   FileText,
@@ -68,6 +69,16 @@ import {
   Star,
   Upload,
   Image as ImageIcon,
+  Eye,
+  Edit3,
+  List,
+  ListOrdered,
+  CheckSquare,
+  Code,
+  Quote,
+  Heading1,
+  Heading2,
+  Columns,
 } from 'lucide-react';
 
 interface ToolPanelProps {
@@ -197,6 +208,28 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
   const filteredVectorIcons = useMemo(() => {
     return searchVectorIcons(iconSearchQuery, iconCategory);
   }, [iconSearchQuery, iconCategory]);
+
+  const [notesViewMode, setNotesViewMode] = useState<'preview' | 'edit' | 'split'>('preview');
+
+  const handleInsertMarkdown = (prefix: string, suffix: string = '', defaultPlaceholder: string = '') => {
+    if (!selectedNode) return;
+    const currentNote = selectedNode.note || '';
+    const textarea = document.getElementById('node-note-textarea') as HTMLTextAreaElement | null;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = currentNote.substring(start, end) || defaultPlaceholder;
+      const replacement = prefix + selectedText + suffix;
+      const newText = currentNote.substring(0, start) + replacement + currentNote.substring(end);
+      onUpdateNode(selectedNode.id, { note: newText });
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+      }, 0);
+    } else {
+      onUpdateNode(selectedNode.id, { note: (currentNote ? currentNote + '\n' : '') + prefix + defaultPlaceholder + suffix });
+    }
+  };
 
   const imageFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageFileInputRef = useRef<HTMLInputElement>(null);
@@ -1763,22 +1796,220 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
               </div>
             )}
 
-            {/* NOTES TAB */}
+            {/* NOTES TAB WITH MARKDOWN VISION MODE */}
             {activeTab === 'notes' && selectedNode && (
               <div className="space-y-3">
-                <label className="block font-semibold text-slate-700">
-                  Nota Detallada (Markdown)
-                </label>
-                <textarea
-                  value={selectedNode.note || ''}
-                  onChange={(e) => onUpdateNode(selectedNode.id, { note: e.target.value || undefined })}
-                  rows={10}
-                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-xs font-mono text-slate-800 outline-none focus:border-blue-500 resize-y"
-                  placeholder="# Título de nota&#10;&#10;Escribe notas detalladas con soporte de listas, texto enriquecido o enlaces..."
-                />
-                <p className="text-[11px] text-slate-400">
-                  Las notas se guardan automáticamente y son visibles al pasar el ratón por el icono del nodo.
-                </p>
+                {/* Header with Mode Switcher */}
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-slate-800 text-xs flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Nota del Nodo (Markdown)</span>
+                  </label>
+                  
+                  {/* Mode Selector Tabs: Vision vs Edit vs Split */}
+                  <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[11px] font-medium">
+                    <button
+                      type="button"
+                      onClick={() => setNotesViewMode('preview')}
+                      className={`px-2 py-1 rounded-md flex items-center gap-1 transition-all cursor-pointer ${
+                        notesViewMode === 'preview'
+                          ? 'bg-white text-blue-700 font-bold shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                      title="Modo de Visión (Markdown renderizado)"
+                    >
+                      <Eye className="w-3 h-3" />
+                      <span>Visión</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNotesViewMode('edit')}
+                      className={`px-2 py-1 rounded-md flex items-center gap-1 transition-all cursor-pointer ${
+                        notesViewMode === 'edit'
+                          ? 'bg-white text-blue-700 font-bold shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                      title="Modo de Edición"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>Editor</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNotesViewMode('split')}
+                      className={`px-2 py-1 rounded-md flex items-center gap-1 transition-all cursor-pointer ${
+                        notesViewMode === 'split'
+                          ? 'bg-white text-blue-700 font-bold shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                      title="Modo Dividido"
+                    >
+                      <Columns className="w-3 h-3" />
+                      <span>Dividido</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Markdown Quick Formatting Toolbar (Visible in Edit & Split modes) */}
+                {(notesViewMode === 'edit' || notesViewMode === 'split') && (
+                  <div className="flex flex-wrap items-center gap-1 p-1.5 bg-slate-50 border border-slate-200 rounded-xl shadow-2xs">
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('**', '**', 'texto')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Negrita (**texto**)"
+                    >
+                      <Bold className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('*', '*', 'texto')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Cursiva (*texto*)"
+                    >
+                      <Italic className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="w-px h-3.5 bg-slate-200 mx-0.5" />
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('# ', '', 'Título 1')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer font-bold text-xs"
+                      title="Título 1 (# Título)"
+                    >
+                      <Heading1 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('## ', '', 'Título 2')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer font-bold text-xs"
+                      title="Título 2 (## Título)"
+                    >
+                      <Heading2 className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="w-px h-3.5 bg-slate-200 mx-0.5" />
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('- [ ] ', '', 'Tarea pendiente')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Lista de tareas (- [ ] Tarea)"
+                    >
+                      <CheckSquare className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('- ', '', 'Elemento de lista')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Lista con viñetas (- Item)"
+                    >
+                      <List className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('1. ', '', 'Primer elemento')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Lista numerada (1. Item)"
+                    >
+                      <ListOrdered className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="w-px h-3.5 bg-slate-200 mx-0.5" />
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('`', '`', 'código')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Código en línea (`código`)"
+                    >
+                      <Code className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('> ', '', 'Cita importante')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Cita (> Cita)"
+                    >
+                      <Quote className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInsertMarkdown('[', '](https://ejemplo.com)', 'texto del enlace')}
+                      className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-700 hover:text-blue-600 transition-all cursor-pointer"
+                      title="Enlace ([texto](url))"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* 1. VISION MODE (Rich Visual Render) */}
+                {notesViewMode === 'preview' && (
+                  <div className="bg-white border border-slate-200 rounded-xl p-3.5 min-h-[220px] max-h-[360px] overflow-y-auto shadow-2xs">
+                    {selectedNode.note && selectedNode.note.trim().length > 0 ? (
+                      <MarkdownView content={selectedNode.note} isDark={false} />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-8 text-center text-slate-400">
+                        <FileText className="w-8 h-8 stroke-1 text-slate-300 mb-2" />
+                        <p className="text-xs font-semibold text-slate-600">No hay nota en este nodo</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Haz clic en "Editor" para escribir texto en formato Markdown.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setNotesViewMode('edit')}
+                          className="mt-3 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-100 cursor-pointer"
+                        >
+                          Escribir Nota
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2. EDIT MODE (Textarea Editor) */}
+                {notesViewMode === 'edit' && (
+                  <div className="space-y-1.5">
+                    <textarea
+                      id="node-note-textarea"
+                      value={selectedNode.note || ''}
+                      onChange={(e) => onUpdateNode(selectedNode.id, { note: e.target.value || undefined })}
+                      rows={12}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-400 shadow-2xs resize-y leading-relaxed"
+                      placeholder="# Título de nota&#10;&#10;Escribe notas detalladas con soporte de listas, negrita, código, tareas o enlaces..."
+                    />
+                  </div>
+                )}
+
+                {/* 3. SPLIT MODE (Side-by-side or Stacked) */}
+                {notesViewMode === 'split' && (
+                  <div className="space-y-2.5">
+                    <div>
+                      <span className="text-[10.5px] font-semibold text-slate-500 block mb-1">Editor Markdown:</span>
+                      <textarea
+                        id="node-note-textarea"
+                        value={selectedNode.note || ''}
+                        onChange={(e) => onUpdateNode(selectedNode.id, { note: e.target.value || undefined })}
+                        rows={7}
+                        className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-mono text-slate-800 outline-none focus:border-blue-500 shadow-2xs resize-y"
+                        placeholder="# Escribe aquí..."
+                      />
+                    </div>
+                    <div>
+                      <span className="text-[10.5px] font-semibold text-slate-500 block mb-1">Vista Previa en Vivo:</span>
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 min-h-[120px] max-h-[200px] overflow-y-auto shadow-2xs">
+                        <MarkdownView content={selectedNode.note || ''} isDark={false} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Quick Helper Tips */}
+                <div className="p-2.5 bg-amber-50/70 border border-amber-200/80 rounded-xl text-[11px] text-amber-800 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold">
+                    <Sparkles className="w-3 h-3 text-amber-600" />
+                    <span>Visualización Instantánea</span>
+                  </div>
+                  <p className="text-[10.5px] text-amber-700 leading-snug">
+                    Las notas se muestran automáticamente en <strong>Modo Visión (Markdown renderizado)</strong> al pasar el ratón por encima de cualquier nodo en el lienzo.
+                  </p>
+                </div>
               </div>
             )}
 

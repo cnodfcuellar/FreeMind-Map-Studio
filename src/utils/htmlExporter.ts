@@ -747,6 +747,48 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       return escaped;
     }
 
+    // Markdown Parser & Formatter for Notes
+    function renderMarkdown(markdown) {
+      if (!markdown) return '';
+      var html = String(markdown)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Code blocks
+      html = html.replace(/\`\`\`([\\s\\S]*?)\`\`\`/g, function(m, code) {
+        return '<pre style="background:#020617; color:#38bdf8; padding:8px 10px; border-radius:8px; font-family:monospace; font-size:11px; overflow-x:auto; margin:6px 0; border:1px solid #1e293b;"><code>' + code.trim() + '</code></pre>';
+      });
+
+      // Headings
+      html = html.replace(/^# (.+)$/gm, '<h1 style="font-size:13.5px; font-weight:bold; color:#60a5fa; margin:6px 0 3px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:2px;">$1</h1>');
+      html = html.replace(/^## (.+)$/gm, '<h2 style="font-size:12.5px; font-weight:bold; color:#fcd34d; margin:5px 0 2px;">$1</h2>');
+      html = html.replace(/^### (.+)$/gm, '<h3 style="font-size:11.5px; font-weight:bold; color:#34d399; margin:4px 0 2px;">$1</h3>');
+
+      // Blockquotes
+      html = html.replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #f59e0b; padding-left:8px; margin:4px 0; color:#cbd5e1; font-style:italic; background:rgba(245,158,11,0.08); border-radius:0 4px 4px 0;">$1</blockquote>');
+
+      // Checkboxes
+      html = html.replace(/^- \\[x\\] (.+)$/gim, '<div style="display:flex; align-items:center; gap:6px; margin:2px 0;"><input type="checkbox" checked disabled><span style="text-decoration:line-through; opacity:0.6;">$1</span></div>');
+      html = html.replace(/^- \\[ \\] (.+)$/gm, '<div style="display:flex; align-items:center; gap:6px; margin:2px 0;"><input type="checkbox" disabled><span>$1</span></div>');
+
+      // Lists
+      html = html.replace(/^[\\*\\-] (.+)$/gm, '<li style="margin-left:14px; list-style-type:disc; margin-bottom:2px;">$1</li>');
+
+      // Bold & Italic & Inline Code
+      html = html.replace(/\\*\\*([^*]+)\\*\\*/g, '<strong style="color:#ffffff; font-weight:bold;">$1</strong>');
+      html = html.replace(/\\*([^*]+)\\*/g, '<em style="font-style:italic;">$1</em>');
+      html = html.replace(/\`([^\`]+)\`/g, '<code style="background:rgba(255,255,255,0.14); color:#fef08a; padding:1px 4px; border-radius:4px; font-family:monospace; font-size:10.5px;">$1</code>');
+
+      // Links
+      html = html.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s\\)]+)\\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:underline; font-weight:600;" onclick="event.stopPropagation()">$1 ↗</a>');
+
+      // Line breaks
+      html = html.replace(/\\n/g, '<br/>');
+
+      return html;
+    }
+
     // Node Estimation Engine matching FreeMind Studio
     function estimateNodeSize(node) {
       const isRoot = !node.parentId;
@@ -1591,7 +1633,8 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           tipHeader.innerHTML = '<span>📝 Nota del Nodo</span><span style="font-size:9.5px; opacity:0.8; font-weight:normal;">Clic para abrir</span>';
           
           const tipBody = document.createElement('div');
-          tipBody.textContent = node.note;
+          tipBody.className = 'tooltip-note-body';
+          tipBody.innerHTML = renderMarkdown(node.note);
           
           tooltip.appendChild(tipHeader);
           tooltip.appendChild(tipBody);
@@ -1781,7 +1824,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     // Notes Drawer
     function openNoteDrawer(title, note) {
       document.getElementById('note-title').textContent = title || 'Nota';
-      document.getElementById('note-body').textContent = note || '';
+      document.getElementById('note-body').innerHTML = renderMarkdown(note || '');
       document.getElementById('note-drawer').classList.add('open');
     }
 
