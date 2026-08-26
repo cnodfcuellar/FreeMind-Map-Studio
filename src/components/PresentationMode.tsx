@@ -17,6 +17,7 @@ import {
   GitBranch,
   Network,
   BookOpen,
+  CornerUpLeft,
 } from 'lucide-react';
 
 interface PresentationThemeConfig {
@@ -361,6 +362,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const currentSlide = slides[currentIndex] || slides[0];
   const currentNode = currentSlide?.node;
 
+  const [jumpHistory, setJumpHistory] = useState<number[]>([]);
+
   // Navigation handlers
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
@@ -376,11 +379,18 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
   const handleJumpToNode = (nodeId: string) => {
     const idx = slides.findIndex((s) => s.node.id === nodeId && s.phase === 'body');
-    if (idx !== -1) {
-      setCurrentIndex(idx);
-    } else {
-      const anyIdx = slides.findIndex((s) => s.node.id === nodeId);
-      if (anyIdx !== -1) setCurrentIndex(anyIdx);
+    const targetIdx = idx !== -1 ? idx : slides.findIndex((s) => s.node.id === nodeId);
+    if (targetIdx !== -1 && targetIdx !== currentIndex) {
+      setJumpHistory((prev) => [...prev, currentIndex]);
+      setCurrentIndex(targetIdx);
+    }
+  };
+
+  const handleReturnJump = () => {
+    if (jumpHistory.length > 0) {
+      const prevIdx = jumpHistory[jumpHistory.length - 1];
+      setJumpHistory((prev) => prev.slice(0, prev.length - 1));
+      setCurrentIndex(prevIdx);
     }
   };
 
@@ -392,10 +402,16 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         return;
       }
 
+      if (e.key === 'Backspace' && jumpHistory.length > 0 && (e.altKey || !e.shiftKey)) {
+        e.preventDefault();
+        handleReturnJump();
+        return;
+      }
+
       if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'Enter') {
         e.preventDefault();
         handleNext();
-      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+      } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         handlePrev();
       } else if (e.key === 'Escape') {
@@ -410,7 +426,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, slides.length, isConfigOpen]);
+  }, [currentIndex, slides.length, isConfigOpen, jumpHistory]);
 
   if (!currentNode) return null;
 
@@ -512,6 +528,22 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* RETURN JUMP BUTTON (Volver al nodo previo si se hizo clic en un Card) */}
+          {jumpHistory.length > 0 && (
+            <button
+              onClick={handleReturnJump}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md animate-in fade-in slide-in-from-right-2 duration-150 ${
+                isLight
+                  ? 'bg-amber-100 border border-amber-300 text-amber-900 hover:bg-amber-200'
+                  : 'bg-amber-950/90 border border-amber-700/80 text-amber-300 hover:bg-amber-900'
+              }`}
+              title="Regresar a la diapositiva previa desde donde saltaste (Tecla Backspace)"
+            >
+              <CornerUpLeft className="w-3.5 h-3.5" />
+              <span>Volver</span>
+            </button>
+          )}
+
           {/* EDIT & CONFIGURE PRESENTATION BUTTON (Editar) */}
           <button
             onClick={() => setIsConfigOpen(!isConfigOpen)}
