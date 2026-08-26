@@ -35,7 +35,9 @@ export function renderInlineMarkdown(text: string, isDark = false): React.ReactN
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
-          className="text-blue-400 dark:text-sky-400 hover:underline font-semibold inline-flex items-center gap-0.5"
+          className={`${
+            isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'
+          } hover:underline font-semibold inline-flex items-center gap-0.5`}
         >
           {label}
           <svg className="w-2.5 h-2.5 inline-block opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -48,7 +50,7 @@ export function renderInlineMarkdown(text: string, isDark = false): React.ReactN
     } else if (match[4]) {
       // Bold **text**
       nodes.push(
-        <strong key={`bold-${matchIndex}`} className="font-bold text-white dark:text-slate-100">
+        <strong key={`bold-${matchIndex}`} className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {match[4]}
         </strong>
       );
@@ -65,7 +67,7 @@ export function renderInlineMarkdown(text: string, isDark = false): React.ReactN
         <code
           key={`code-${matchIndex}`}
           className={`px-1.5 py-0.5 rounded text-[11px] font-mono font-semibold ${
-            isDark ? 'bg-slate-800 text-amber-300 border border-slate-700' : 'bg-slate-100 text-purple-700 border border-slate-200'
+            isDark ? 'bg-slate-800 text-amber-300 border border-slate-700' : 'bg-slate-100 text-purple-800 border border-slate-300'
           }`}
         >
           {match[6]}
@@ -99,7 +101,7 @@ export const MarkdownView: React.FC<{
   className?: string;
 }> = ({ content, isDark = false, className = '' }) => {
   if (!content || content.trim().length === 0) {
-    return <div className="text-xs italic text-slate-400">Sin contenido en la nota.</div>;
+    return <div className="text-xs italic opacity-50">Sin contenido en la nota.</div>;
   }
 
   const lines = content.split('\n');
@@ -133,7 +135,7 @@ export const MarkdownView: React.FC<{
           <pre
             key={`codeblock-${elements.length}`}
             className={`my-2 p-2.5 rounded-lg text-[11px] font-mono overflow-x-auto ${
-              isDark ? 'bg-slate-950 text-emerald-300 border border-slate-800' : 'bg-slate-900 text-slate-100'
+              isDark ? 'bg-slate-950 text-emerald-300 border border-slate-800' : 'bg-slate-900 text-emerald-400'
             }`}
           >
             <code>{codeBlockBuffer.join('\n')}</code>
@@ -157,7 +159,7 @@ export const MarkdownView: React.FC<{
     if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
       flushList();
       elements.push(
-        <hr key={`hr-${elements.length}`} className={`my-2 ${isDark ? 'border-slate-700' : 'border-slate-200'}`} />
+        <hr key={`hr-${elements.length}`} className={`my-2 ${isDark ? 'border-slate-700' : 'border-slate-300'}`} />
       );
       continue;
     }
@@ -166,7 +168,12 @@ export const MarkdownView: React.FC<{
     if (trimmed.startsWith('# ')) {
       flushList();
       elements.push(
-        <h1 key={`h1-${elements.length}`} className="text-sm font-bold text-blue-400 mt-2 mb-1 border-b border-blue-500/30 pb-0.5">
+        <h1
+          key={`h1-${elements.length}`}
+          className={`text-sm font-bold mt-2 mb-1 border-b pb-0.5 ${
+            isDark ? 'text-blue-400 border-blue-500/30' : 'text-blue-700 border-blue-200'
+          }`}
+        >
           {renderInlineMarkdown(trimmed.substring(2), isDark)}
         </h1>
       );
@@ -175,7 +182,12 @@ export const MarkdownView: React.FC<{
     if (trimmed.startsWith('## ')) {
       flushList();
       elements.push(
-        <h2 key={`h2-${elements.length}`} className="text-xs font-bold text-amber-300 mt-2 mb-1">
+        <h2
+          key={`h2-${elements.length}`}
+          className={`text-xs font-bold mt-2 mb-1 ${
+            isDark ? 'text-amber-300' : 'text-amber-700'
+          }`}
+        >
           {renderInlineMarkdown(trimmed.substring(3), isDark)}
         </h2>
       );
@@ -184,7 +196,12 @@ export const MarkdownView: React.FC<{
     if (trimmed.startsWith('### ')) {
       flushList();
       elements.push(
-        <h3 key={`h3-${elements.length}`} className="text-xs font-semibold text-emerald-400 mt-1.5 mb-0.5">
+        <h3
+          key={`h3-${elements.length}`}
+          className={`text-xs font-semibold mt-1.5 mb-0.5 ${
+            isDark ? 'text-emerald-400' : 'text-emerald-700'
+          }`}
+        >
           {renderInlineMarkdown(trimmed.substring(4), isDark)}
         </h3>
       );
@@ -193,7 +210,12 @@ export const MarkdownView: React.FC<{
     if (trimmed.startsWith('#### ')) {
       flushList();
       elements.push(
-        <h4 key={`h4-${elements.length}`} className="text-[11.5px] font-semibold text-purple-300 mt-1 mb-0.5">
+        <h4
+          key={`h4-${elements.length}`}
+          className={`text-[11.5px] font-semibold mt-1 mb-0.5 ${
+            isDark ? 'text-purple-300' : 'text-purple-700'
+          }`}
+        >
           {renderInlineMarkdown(trimmed.substring(5), isDark)}
         </h4>
       );
@@ -207,7 +229,7 @@ export const MarkdownView: React.FC<{
         <blockquote
           key={`quote-${elements.length}`}
           className={`my-1.5 pl-2.5 py-0.5 border-l-2 text-xs italic ${
-            isDark ? 'border-amber-400 text-slate-300 bg-amber-500/5' : 'border-blue-500 text-slate-600 bg-blue-50/50'
+            isDark ? 'border-amber-400 text-slate-300 bg-amber-500/5' : 'border-blue-500 text-slate-700 bg-blue-50/70'
           }`}
         >
           {renderInlineMarkdown(trimmed.substring(2), isDark)}
@@ -254,7 +276,9 @@ export const MarkdownView: React.FC<{
       flushList();
       elements.push(
         <div key={`ordered-${elements.length}`} className="flex items-start gap-1.5 my-0.5 text-xs leading-snug">
-          <span className="font-mono font-bold text-amber-400 shrink-0 text-[11px]">{orderedMatch[1]}.</span>
+          <span className={`font-mono font-bold shrink-0 text-[11px] ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>
+            {orderedMatch[1]}.
+          </span>
           <div className="flex-1">{renderInlineMarkdown(orderedMatch[2], isDark)}</div>
         </div>
       );
@@ -271,7 +295,7 @@ export const MarkdownView: React.FC<{
     // 9. Standard Paragraph
     flushList();
     elements.push(
-      <p key={`p-${elements.length}`} className="my-0.5 text-xs leading-relaxed break-words">
+      <p key={`p-${elements.length}`} className={`my-0.5 text-xs leading-relaxed break-words ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
         {renderInlineMarkdown(line, isDark)}
       </p>
     );
@@ -279,7 +303,7 @@ export const MarkdownView: React.FC<{
 
   flushList();
 
-  return <div className={`markdown-view space-y-0.5 ${className}`}>{elements}</div>;
+  return <div className={`markdown-view space-y-0.5 ${isDark ? 'text-slate-200' : 'text-slate-800'} ${className}`}>{elements}</div>;
 };
 
 /**
@@ -314,7 +338,7 @@ export function renderMarkdownToHTML(markdown: string): string {
   html = html.replace(/^[\*\-] (.+)$/gm, '<li style="margin-left:14px; list-style-type:disc;">$1</li>');
 
   // Bold & Italic
-  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#ffffff; font-weight:bold;">$1</strong>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong style="font-weight:bold;">$1</strong>');
   html = html.replace(/\*([^*]+)\*/g, '<em style="font-style:italic;">$1</em>');
   html = html.replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.12); color:#fef08a; padding:1px 4px; border-radius:4px; font-family:monospace; font-size:10.5px;">$1</code>');
 

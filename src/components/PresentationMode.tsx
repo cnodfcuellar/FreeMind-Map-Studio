@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { MindMap, MindNode, Connector } from '../types/mindmap';
+import { MindMap, MindNode } from '../types/mindmap';
 import { renderNodeIcon } from '../utils/iconMap';
 import { MarkdownView } from '../utils/markdownRenderer';
 import {
@@ -9,17 +9,13 @@ import {
   FileText,
   Sparkles,
   SlidersHorizontal,
-  Check,
   ExternalLink,
-  Layers,
   Image as ImageIcon,
   Palette,
   AlignLeft,
   AlignCenter,
   GitBranch,
   Network,
-  Type,
-  Maximize2,
 } from 'lucide-react';
 
 interface PresentationThemeConfig {
@@ -38,7 +34,7 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
   {
     id: 'dark-studio',
     name: 'Estudio Oscuro',
-    bgClass: 'bg-slate-950/95',
+    bgClass: 'bg-slate-950/98',
     textClass: 'text-white',
     accentClass: 'text-blue-400',
     cardBgClass: 'bg-slate-900/90',
@@ -104,11 +100,11 @@ const PRESENTATION_THEMES: PresentationThemeConfig[] = [
   {
     id: 'light-clean',
     name: 'Luz Minimalista',
-    bgClass: 'bg-slate-50',
+    bgClass: 'bg-slate-100',
     textClass: 'text-slate-900',
     accentClass: 'text-blue-600',
     cardBgClass: 'bg-white',
-    cardBorderClass: 'border-slate-200',
+    cardBorderClass: 'border-slate-300 shadow-sm',
     previewColor: '#f8fafc',
     badgeBg: 'bg-blue-100 border-blue-300 text-blue-800',
   },
@@ -121,11 +117,49 @@ interface PresentationModeProps {
   onUpdateNode?: (nodeId: string, updates: Partial<MindNode>) => void;
 }
 
+/**
+ * Intelligent contrast resolver: ensures that text colors assigned in mind map nodes
+ * (which might be dark on light canvas, or light on dark canvas) never become invisible
+ * when viewing in presentation themes.
+ */
+function getContrastSafeColor(
+  customColor: string | undefined,
+  isLightTheme: boolean,
+  defaultLightBgText: string,
+  defaultDarkBgText: string
+): string {
+  if (!customColor) {
+    return isLightTheme ? defaultLightBgText : defaultDarkBgText;
+  }
+  const hex = customColor.replace('#', '').toLowerCase();
+  const isColorLight =
+    hex === 'fff' ||
+    hex === 'ffffff' ||
+    hex === 'f8fafc' ||
+    hex === 'f1f5f9' ||
+    hex === 'e2e8f0' ||
+    hex === 'cbd5e1';
+  const isColorDark =
+    hex === '000' ||
+    hex === '000000' ||
+    hex === '0f172a' ||
+    hex === '1e293b' ||
+    hex === '334155' ||
+    hex === '475569';
+
+  if (isLightTheme) {
+    if (isColorLight) return defaultLightBgText;
+    return customColor;
+  } else {
+    if (isColorDark) return defaultDarkBgText;
+    return customColor;
+  }
+}
+
 export const PresentationMode: React.FC<PresentationModeProps> = ({
   mindMap,
   onClose,
   onEditNode,
-  onUpdateNode,
 }) => {
   // Collect all slides (nodes in depth-first order)
   const slides = useMemo(() => {
@@ -234,12 +268,12 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   const getImageDimensions = () => {
     switch (imageSize) {
       case 'small':
-        return 'max-w-[160px] max-h-[120px]';
+        return 'max-w-[180px] max-h-[140px]';
       case 'large':
-        return 'max-w-[560px] max-h-[380px]';
+        return 'max-w-[600px] max-h-[420px]';
       case 'medium':
       default:
-        return 'max-w-[320px] max-h-[220px]';
+        return 'max-w-[360px] max-h-[260px]';
     }
   };
 
@@ -268,7 +302,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5" /> Modo Presentación Clásica
           </div>
-          <span className="text-xs opacity-60 font-mono hidden sm:inline truncate max-w-xs">
+          <span className={`text-xs font-mono hidden sm:inline truncate max-w-xs ${isLight ? 'text-slate-500 font-semibold' : 'text-slate-400'}`}>
             {mindMap.title}
           </span>
         </div>
@@ -281,19 +315,19 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               isConfigOpen
                 ? 'bg-blue-600 text-white ring-2 ring-blue-400'
                 : isLight
-                ? 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
+                ? 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-200'
                 : 'bg-slate-900 border border-slate-700/80 text-slate-200 hover:text-white hover:bg-slate-800'
             }`}
-            title="Editar tema, visualización de notas, imágenes y tarjetas de hijos/conectores (Tecla E)"
+            title="Personalizar tema, notas, imágenes y tarjetas de hijos/conectores (Tecla E)"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-blue-400" />
-            <span>Editar Presentación</span>
+            <span>Editar</span>
           </button>
 
           {/* Slide Indicator */}
           <span
             className={`text-xs font-mono px-3 py-1.5 rounded-xl border hidden sm:inline ${
-              isLight ? 'bg-white border-slate-200 text-slate-600' : 'bg-slate-900 border-slate-800 text-slate-400'
+              isLight ? 'bg-white border-slate-300 text-slate-700 font-bold' : 'bg-slate-900 border-slate-800 text-slate-400'
             }`}
           >
             Diapositiva {currentIndex + 1} de {slides.length}
@@ -303,7 +337,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           <button
             onClick={onClose}
             className={`p-2 rounded-xl transition-colors cursor-pointer ${
-              isLight ? 'text-slate-500 hover:text-slate-900 hover:bg-slate-200' : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              isLight ? 'text-slate-700 hover:text-black hover:bg-slate-200' : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
             title="Salir de la presentación (Esc)"
           >
@@ -317,23 +351,27 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
           <div
             className={`w-full max-w-xl rounded-2xl border p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto ${
-              isLight ? 'bg-white border-slate-300 text-slate-800' : 'bg-slate-900 border-slate-700 text-white'
+              isLight ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-900 border-slate-700 text-white'
             }`}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-700/40">
+            <div className={`flex items-center justify-between pb-3 border-b ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-500 border border-blue-500/30 flex items-center justify-center">
                   <SlidersHorizontal className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold">Opciones del Modo Presentación</h3>
-                  <p className="text-[11px] opacity-60">Personaliza el tema, notas, imágenes y tarjetas</p>
+                  <h3 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    Opciones del Modo Presentación
+                  </h3>
+                  <p className={`text-[11px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                    Personaliza el tema, notas, imágenes y tarjetas
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsConfigOpen(false)}
-                className="p-1.5 rounded-lg opacity-60 hover:opacity-100 hover:bg-slate-800/40 cursor-pointer"
+                className={`p-1.5 rounded-lg cursor-pointer ${isLight ? 'text-slate-400 hover:text-slate-800 hover:bg-slate-100' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -341,8 +379,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
             {/* A. SELECTOR DE TEMAS */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-purple-400" />
+              <label className={`text-xs font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                <Palette className="w-3.5 h-3.5 text-purple-500" />
                 <span>Tema de la Presentación</span>
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -355,16 +393,18 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       onClick={() => setThemeId(th.id)}
                       className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
                         isSelected
-                          ? 'border-blue-500 ring-2 ring-blue-400/50 scale-102 font-bold'
-                          : 'border-slate-700/60 opacity-80 hover:opacity-100'
+                          ? 'border-blue-500 ring-2 ring-blue-400/50 scale-102 font-bold shadow-md'
+                          : 'border-slate-600/40 opacity-85 hover:opacity-100'
                       }`}
                       style={{ backgroundColor: th.previewColor }}
                     >
                       <div
-                        className="w-3.5 h-3.5 rounded-full shrink-0 border border-white/30"
+                        className="w-3.5 h-3.5 rounded-full shrink-0 border border-white/40"
                         style={{ backgroundColor: th.previewColor }}
                       />
-                      <span className="text-[11px] truncate text-white drop-shadow-xs">{th.name}</span>
+                      <span className="text-[11px] truncate font-semibold text-white drop-shadow-sm">
+                        {th.name}
+                      </span>
                     </button>
                   );
                 })}
@@ -372,13 +412,15 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* B. MOSTRAR / OCULTAR NOTAS */}
-            <div className="space-y-2 pt-2 border-t border-slate-700/40">
+            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-amber-400" />
+                  <FileText className="w-4 h-4 text-amber-500" />
                   <div>
-                    <span className="text-xs font-semibold block">Notas del Presentador</span>
-                    <span className="text-[10.5px] opacity-60 block">
+                    <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                      Notas del Presentador
+                    </span>
+                    <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                       Muestra la caja de notas formateadas con Markdown
                     </span>
                   </div>
@@ -390,15 +432,15 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     onChange={(e) => setShowNotes(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className={`w-9 h-5 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 ${isLight ? 'bg-slate-300' : 'bg-slate-700'}`}></div>
                 </label>
               </div>
             </div>
 
             {/* C. TAMAÑO DE IMÁGENES */}
-            <div className="space-y-2 pt-2 border-t border-slate-700/40">
-              <label className="text-xs font-semibold flex items-center gap-1.5">
-                <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+              <label className={`text-xs font-bold flex items-center gap-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
                 <span>Tamaño de Imágenes Adjuntas</span>
               </label>
               <div className="grid grid-cols-4 gap-2 text-xs">
@@ -411,8 +453,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       imageSize === size
                         ? 'bg-blue-600 text-white border-blue-500 font-bold shadow-2xs'
                         : isLight
-                        ? 'bg-slate-100 border-slate-200 hover:bg-slate-200'
-                        : 'bg-slate-800 border-slate-700 hover:bg-slate-700'
+                        ? 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
+                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                     }`}
                   >
                     {size === 'small'
@@ -428,13 +470,15 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* D. MOSTRAR HIJOS COMO CARDS */}
-            <div className="space-y-2 pt-2 border-t border-slate-700/40">
+            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <GitBranch className="w-4 h-4 text-cyan-400" />
+                  <GitBranch className="w-4 h-4 text-cyan-500" />
                   <div>
-                    <span className="text-xs font-semibold block">Sub-Nodos Hijos como Cards</span>
-                    <span className="text-[10.5px] opacity-60 block">
+                    <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                      Sub-Nodos Hijos como Cards
+                    </span>
+                    <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                       Renderiza los subtemas hijos como tarjetas interactivas
                     </span>
                   </div>
@@ -446,19 +490,21 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     onChange={(e) => setShowChildrenCards(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className={`w-9 h-5 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 ${isLight ? 'bg-slate-300' : 'bg-slate-700'}`}></div>
                 </label>
               </div>
             </div>
 
             {/* E. MOSTRAR CONEXIONES CRUZADAS COMO CARDS */}
-            <div className="space-y-2 pt-2 border-t border-slate-700/40">
+            <div className={`space-y-2 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Network className="w-4 h-4 text-pink-400" />
+                  <Network className="w-4 h-4 text-pink-500" />
                   <div>
-                    <span className="text-xs font-semibold block">Conexiones Cruzadas como Cards</span>
-                    <span className="text-[10.5px] opacity-60 block">
+                    <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                      Conexiones Cruzadas como Cards
+                    </span>
+                    <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
                       Muestra enlaces entre nodos con acceso directo
                     </span>
                   </div>
@@ -470,23 +516,25 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     onChange={(e) => setShowConnectorsCards(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div className={`w-9 h-5 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 ${isLight ? 'bg-slate-300' : 'bg-slate-700'}`}></div>
                 </label>
               </div>
             </div>
 
             {/* F. ALINEACIÓN Y TAMAÑO DE TEXTO */}
-            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-700/40">
+            <div className={`grid grid-cols-2 gap-3 pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <div>
-                <label className="text-xs font-semibold block mb-1.5">Alineación del Contenido</label>
-                <div className="grid grid-cols-2 gap-1 bg-slate-800/40 p-1 rounded-xl border border-slate-700/60">
+                <label className={`text-xs font-bold block mb-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                  Alineación del Contenido
+                </label>
+                <div className={`grid grid-cols-2 gap-1 p-1 rounded-xl border ${isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-800/60 border-slate-700'}`}>
                   <button
                     type="button"
                     onClick={() => setContentAlign('center')}
                     className={`py-1 rounded-lg text-xs flex items-center justify-center gap-1 font-semibold transition-all cursor-pointer ${
                       contentAlign === 'center'
-                        ? 'bg-blue-600 text-white shadow-2xs'
-                        : 'opacity-70 hover:opacity-100'
+                        ? 'bg-blue-600 text-white shadow-2xs font-bold'
+                        : isLight ? 'text-slate-700 hover:text-black' : 'text-slate-300 hover:text-white'
                     }`}
                   >
                     <AlignCenter className="w-3 h-3" /> Centro
@@ -496,8 +544,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     onClick={() => setContentAlign('left')}
                     className={`py-1 rounded-lg text-xs flex items-center justify-center gap-1 font-semibold transition-all cursor-pointer ${
                       contentAlign === 'left'
-                        ? 'bg-blue-600 text-white shadow-2xs'
-                        : 'opacity-70 hover:opacity-100'
+                        ? 'bg-blue-600 text-white shadow-2xs font-bold'
+                        : isLight ? 'text-slate-700 hover:text-black' : 'text-slate-300 hover:text-white'
                     }`}
                   >
                     <AlignLeft className="w-3 h-3" /> Izquierda
@@ -506,8 +554,10 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
 
               <div>
-                <label className="text-xs font-semibold block mb-1.5">Escala de Título</label>
-                <div className="grid grid-cols-3 gap-1 bg-slate-800/40 p-1 rounded-xl border border-slate-700/60">
+                <label className={`text-xs font-bold block mb-1.5 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                  Escala de Título
+                </label>
+                <div className={`grid grid-cols-3 gap-1 p-1 rounded-xl border ${isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-800/60 border-slate-700'}`}>
                   {(['compact', 'normal', 'large'] as const).map((scale) => (
                     <button
                       key={scale}
@@ -515,8 +565,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       onClick={() => setFontSizeScale(scale)}
                       className={`py-1 rounded-lg text-xs capitalize font-semibold transition-all cursor-pointer ${
                         fontSizeScale === scale
-                          ? 'bg-blue-600 text-white shadow-2xs'
-                          : 'opacity-70 hover:opacity-100'
+                          ? 'bg-blue-600 text-white shadow-2xs font-bold'
+                          : isLight ? 'text-slate-700 hover:text-black' : 'text-slate-300 hover:text-white'
                       }`}
                     >
                       {scale === 'compact' ? 'Compact' : scale === 'normal' ? 'Normal' : 'Grande'}
@@ -527,15 +577,15 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             </div>
 
             {/* Footer Buttons */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-700/40">
+            <div className={`flex items-center justify-between pt-3 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
               <button
                 type="button"
                 onClick={() => {
                   if (onEditNode) onEditNode(currentNode.id);
                 }}
-                className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 cursor-pointer"
+                className={`text-xs font-semibold flex items-center gap-1 cursor-pointer ${isLight ? 'text-blue-600 hover:text-blue-800' : 'text-blue-400 hover:text-blue-300'}`}
               >
-                <span>Editar Mapa Completo</span>
+                <span>Editar en Lienzo</span>
                 <ExternalLink className="w-3 h-3" />
               </button>
 
@@ -559,7 +609,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       >
         {/* Parent Breadcrumb if not root */}
         {parentNode && (
-          <div className="text-sm font-medium opacity-60 mb-3 flex items-center gap-2">
+          <div className={`text-sm font-medium mb-3 flex items-center gap-2 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
             <span
               onClick={() => handleJumpToNode(parentNode.id)}
               className="hover:underline cursor-pointer"
@@ -583,7 +633,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
         {/* Image Attachment (Respects Image Size Setting) */}
         {currentNode.imageUrl && imageSize !== 'hidden' && (
-          <div className="my-4 flex justify-center overflow-hidden rounded-2xl shadow-xl border border-white/10">
+          <div className={`my-4 flex justify-center overflow-hidden rounded-2xl shadow-xl border ${isLight ? 'border-slate-300 bg-white p-2' : 'border-white/10'}`}>
             <img
               src={currentNode.imageUrl}
               alt=""
@@ -592,10 +642,12 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           </div>
         )}
 
-        {/* Main Node Title Heading */}
+        {/* Main Node Title Heading (Guaranteed Contrast in all Themes) */}
         <h1
           style={{
-            color: currentNode.textColor || undefined,
+            color: isRoot
+              ? undefined
+              : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
           }}
           className={`${getHeadingSizeClass()} font-bold tracking-tight mb-3 leading-tight whitespace-pre-wrap ${
             isRoot ? currentTheme.accentClass : ''
@@ -604,15 +656,15 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           {currentNode.text}
         </h1>
 
-        {/* Node Body / Subtitle */}
+        {/* Node Body / Subtitle (Guaranteed Contrast in all Themes) */}
         {currentNode.body && (
           <div
             style={{
-              color: currentNode.bodyColor || undefined,
+              color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
               fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
               fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
             }}
-            className="text-lg md:text-xl max-w-2xl mb-5 opacity-85 font-normal whitespace-pre-wrap leading-relaxed"
+            className="text-lg md:text-xl max-w-2xl mb-5 font-normal whitespace-pre-wrap leading-relaxed"
           >
             {currentNode.body}
           </div>
@@ -629,7 +681,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             <span
               key={t}
               className={`px-2.5 py-0.5 rounded-full border text-xs font-medium ${
-                isLight ? 'bg-slate-200 border-slate-300 text-slate-700' : 'bg-slate-800 border-slate-700 text-slate-300'
+                isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
               }`}
             >
               #{t}
@@ -642,7 +694,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           <div
             className={`w-full max-w-2xl rounded-2xl p-5 text-left text-sm leading-relaxed shadow-xl border mb-6 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass}`}
           >
-            <div className="flex items-center gap-2 text-xs font-semibold text-amber-400 mb-2 uppercase tracking-wider">
+            <div className={`flex items-center gap-2 text-xs font-bold mb-2 uppercase tracking-wider ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
               <FileText className="w-3.5 h-3.5" />
               <span>Notas del Presentador (Markdown)</span>
             </div>
@@ -653,8 +705,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         {/* Child Nodes as Cards (Respects showChildrenCards Setting) */}
         {showChildrenCards && childNodes.length > 0 && (
           <div className="w-full max-w-3xl mb-6 text-left">
-            <div className="flex items-center gap-2 text-xs font-bold opacity-60 uppercase tracking-wider mb-2.5">
-              <GitBranch className="w-3.5 h-3.5 text-cyan-400" />
+            <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-2.5 ${isLight ? 'text-cyan-800' : 'text-cyan-400'}`}>
+              <GitBranch className="w-3.5 h-3.5" />
               <span>Subtemas / Nodos Hijos ({childNodes.length})</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
@@ -670,17 +722,22 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     ) : (
                       <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                     )}
-                    <h4 className="text-xs font-bold truncate group-hover:text-blue-400 transition-colors">
+                    <h4
+                      style={{
+                        color: getContrastSafeColor(child.textColor, isLight, '#0f172a', '#ffffff'),
+                      }}
+                      className="text-xs font-bold truncate group-hover:text-blue-500 transition-colors"
+                    >
                       {child.text}
                     </h4>
                   </div>
                   {child.body && (
-                    <p className="text-[11px] opacity-60 line-clamp-2 leading-relaxed">
+                    <p className={`text-[11px] line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
                       {child.body}
                     </p>
                   )}
                   {child.note && (
-                    <span className="inline-flex items-center gap-1 text-[10px] text-amber-400 mt-2">
+                    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold mt-2 ${isLight ? 'text-amber-700' : 'text-amber-400'}`}>
                       <FileText className="w-3 h-3" /> Nota adjunta
                     </span>
                   )}
@@ -693,8 +750,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         {/* Cross Connectors as Cards (Respects showConnectorsCards Setting) */}
         {showConnectorsCards && relatedConnectors.length > 0 && (
           <div className="w-full max-w-3xl mb-4 text-left">
-            <div className="flex items-center gap-2 text-xs font-bold opacity-60 uppercase tracking-wider mb-2.5">
-              <Network className="w-3.5 h-3.5 text-pink-400" />
+            <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-2.5 ${isLight ? 'text-pink-800' : 'text-pink-400'}`}>
+              <Network className="w-3.5 h-3.5" />
               <span>Conexiones y Enlaces Cruzados ({relatedConnectors.length})</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -711,15 +768,20 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     className={`p-3 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-lg flex items-center justify-between gap-3 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-pink-500`}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 text-[10.5px] font-semibold text-pink-400 mb-0.5">
+                      <div className={`flex items-center gap-1.5 text-[10.5px] font-bold mb-0.5 ${isLight ? 'text-pink-700' : 'text-pink-400'}`}>
                         <span>{isSource ? 'Conecta hacia ➔' : 'Recibe de ⬅'}</span>
                         {conn.label && <span className="opacity-80 italic truncate">"{conn.label}"</span>}
                       </div>
-                      <h4 className="text-xs font-bold truncate group-hover:text-pink-300 transition-colors">
+                      <h4
+                        style={{
+                          color: getContrastSafeColor(targetNode.textColor, isLight, '#0f172a', '#ffffff'),
+                        }}
+                        className="text-xs font-bold truncate group-hover:text-pink-500 transition-colors"
+                      >
                         {targetNode.text}
                       </h4>
                     </div>
-                    <div className="w-7 h-7 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0 group-hover:bg-pink-500 group-hover:text-white transition-colors">
                       <ExternalLink className="w-3.5 h-3.5" />
                     </div>
                   </div>
@@ -737,7 +799,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
           onClick={handlePrev}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border font-semibold text-sm transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
             isLight
-              ? 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+              ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-200'
               : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
           }`}
         >
@@ -753,7 +815,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 currentIndex === idx
                   ? 'w-6 bg-blue-500'
                   : isLight
-                  ? 'w-2 bg-slate-300 hover:bg-slate-400'
+                  ? 'w-2 bg-slate-400 hover:bg-slate-500'
                   : 'w-2 bg-slate-800 hover:bg-slate-700'
               }`}
             />
