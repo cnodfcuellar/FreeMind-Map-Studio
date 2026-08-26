@@ -16,9 +16,7 @@ import {
   AlignCenter,
   GitBranch,
   Network,
-  Layers,
   BookOpen,
-  LayoutGrid,
 } from 'lucide-react';
 
 interface PresentationThemeConfig {
@@ -123,6 +121,7 @@ export interface PresentationSlide {
   phase: SlidePhase;
   pageIndex: number;
   totalPages: number;
+  bodySubset?: string;
   noteSubset?: string;
   childrenSubset?: string[];
 }
@@ -132,6 +131,47 @@ interface PresentationModeProps {
   onClose: () => void;
   onEditNode?: (nodeId: string) => void;
   onUpdateNode?: (nodeId: string, updates: Partial<MindNode>) => void;
+}
+
+/**
+ * Splits plain body text into readable, non-overflowing slide chunks (~4-6 lines or ~320 chars)
+ * when a body is extensive, ensuring full viewport fit without scrollbars.
+ */
+function splitBodyTextIntoSlideChunks(text: string | undefined, hasImage: boolean): string[] {
+  if (!text || !text.trim()) return [];
+
+  const rawParagraphs = text.trim().split(/\n+/);
+  const chunks: string[] = [];
+  let currentChunk: string[] = [];
+  let currentLength = 0;
+
+  const MAX_LINES_PER_CHUNK = hasImage ? 4 : 6;
+  const MAX_CHARS_PER_CHUNK = hasImage ? 280 : 450;
+
+  for (let i = 0; i < rawParagraphs.length; i++) {
+    const para = rawParagraphs[i];
+    const paraLen = para.length + 1;
+
+    if (
+      currentChunk.length >= MAX_LINES_PER_CHUNK ||
+      (currentLength + paraLen > MAX_CHARS_PER_CHUNK && currentChunk.length >= 1)
+    ) {
+      if (currentChunk.length > 0) {
+        chunks.push(currentChunk.join('\n\n'));
+        currentChunk = [];
+        currentLength = 0;
+      }
+    }
+
+    currentChunk.push(para);
+    currentLength += paraLen;
+  }
+
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk.join('\n\n'));
+  }
+
+  return chunks.length > 0 ? chunks : [text.trim()];
 }
 
 /**
@@ -228,9 +268,9 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
   // Generate sequential unmixed slides:
   // For each node:
-  // 1. Fase 1: Spotlight (Título y Cuerpo)
-  // 2. Fase 2: Notas del Presentador (si existen y están activadas)
-  // 3. Fase 3: Subtemas / Nodos Hijos (si existen y están activados)
+  // 1. Fase 1: Spotlight (Título y Cuerpo) -> Auto-paginated if body is long; Image ALWAYS visible!
+  // 2. Fase 2: Notas del Presentador (si existen y están activadas) -> Auto-paginated
+  // 3. Fase 3: Subtemas / Nodos Hijos (si existen y están activados) -> Auto-paginated
   // Then depth-first into children.
   const slides = useMemo(() => {
     const list: PresentationSlide[] = [];
@@ -239,16 +279,33 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       const node = mindMap.nodes[nodeId];
       if (!node) return;
 
-      // 1. FASE 1: TÍTULO Y CUERPO (Siempre se presenta primero como diapositiva limpia)
-      list.push({
-        slideKey: `${node.id}-body`,
-        node,
-        phase: 'body',
-        pageIndex: 0,
-        totalPages: 1,
-      });
+      const hasImage = Boolean(node.imageUrl && imageSize !== 'hidden');
 
-      // 2. FASE 2: NOTAS DEL PRESENTADOR (Se presentan después del cuerpo de forma dedicada)
+      // 1. FASE 1: TÍTULO Y CUERPO (Auto-paginación si el cuerpo es extenso)
+      const bodyChunks = splitBodyTextIntoSlideChunks(node.body, hasImage);
+      if (bodyChunks.length <= 1) {
+        list.push({
+          slideKey: `${node.id}-body-0`,
+          node,
+          phase: 'body',
+          pageIndex: 0,
+          totalPages: 1,
+          bodySubset: bodyChunks[0] || '',
+        });
+      } else {
+        for (let p = 0; p < bodyChunks.length; p++) {
+          list.push({
+            slideKey: `${node.id}-body-${p}`,
+            node,
+            phase: 'body',
+            pageIndex: p,
+            totalPages: bodyChunks.length,
+            bodySubset: bodyChunks[p],
+          });
+        }
+      }
+
+      // 2. FASE 2: NOTAS DEL PRESENTADOR (Auto-paginación si las notas son extensas)
       if (showNotes && node.note && node.note.trim().length > 0) {
         const noteChunks = splitMarkdownIntoSlideChunks(node.note);
         for (let p = 0; p < noteChunks.length; p++) {
@@ -263,7 +320,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         }
       }
 
-      // 3. FASE 3: SUBTEMAS / NODOS HIJOS (Se presentan al final de forma dedicada en cards)
+      // 3. FASE 3: SUBTEMAS / NODOS HIJOS (Auto-paginación en lotes de 6)
       const childrenIds = node.children || [];
       if (showChildrenCards && childrenIds.length > 0) {
         const childPages = Math.ceil(childrenIds.length / MAX_CHILDREN_PER_SLIDE);
@@ -291,7 +348,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
     traverse(mindMap.rootId);
     return list;
-  }, [mindMap, showChildrenCards, showNotes]);
+  }, [mindMap, showChildrenCards, showNotes, imageSize]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -380,16 +437,16 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
   const totalChildrenCount = currentNode.children?.length || 0;
 
-  // Image dimension styling
+  // Image dimension styling for Phase 1
   const getImageDimensions = () => {
     switch (imageSize) {
       case 'small':
-        return 'max-h-32 max-w-[180px]';
+        return 'max-h-36 max-w-[180px]';
       case 'large':
         return 'max-h-80 max-w-[560px]';
       case 'medium':
       default:
-        return 'max-h-60 max-w-[400px]';
+        return 'max-h-60 max-w-[420px]';
     }
   };
 
@@ -419,13 +476,15 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
             <Sparkles className="w-3.5 h-3.5" /> Modo Presentación Clásica
           </div>
 
-          {/* Phase Badge: Indica si estamos en Cuerpo, Notas o Subtemas */}
+          {/* Phase Badge: Indica si estamos en Cuerpo, Notas o Subtemas con Paginación */}
           {currentSlide.phase === 'body' && (
             <span className={`text-xs font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 ${
               isLight ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-blue-950/80 border-blue-800 text-blue-300'
             }`}>
               <BookOpen className="w-3.5 h-3.5" />
-              <span>Tema Principal</span>
+              <span>
+                Tema Principal {currentSlide.totalPages > 1 ? `(Parte ${currentSlide.pageIndex + 1}/${currentSlide.totalPages})` : ''}
+              </span>
             </span>
           )}
 
@@ -750,11 +809,11 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       <main className="flex-1 min-h-0 w-full max-w-6xl mx-auto overflow-hidden flex items-center justify-center p-2 sm:p-4">
         
         {/* ========================================================================= */}
-        {/* FASE 1: TÍTULO Y CUERPO (Visión Principal del Tema)                       */}
+        {/* FASE 1: TÍTULO Y CUERPO (Visión Principal del Tema + Imagen Siempre Visible) */}
         {/* ========================================================================= */}
         {currentSlide.phase === 'body' && (
           <div
-            className={`w-full max-w-4xl flex flex-col justify-center transition-all animate-in fade-in zoom-in-95 duration-200 ${
+            className={`w-full max-w-5xl flex flex-col justify-center transition-all animate-in fade-in zoom-in-95 duration-200 ${
               contentAlign === 'center' ? 'items-center text-center' : 'items-start text-left'
             }`}
           >
@@ -773,7 +832,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
             {/* Node Icons */}
             {currentNode.icons && currentNode.icons.length > 0 && (
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-3">
                 {currentNode.icons.map((ic, i) => (
                   <span key={i} className="scale-125">
                     {renderNodeIcon(ic)}
@@ -782,63 +841,128 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
               </div>
             )}
 
-            {/* Attached Image */}
-            {currentNode.imageUrl && imageSize !== 'hidden' && (
-              <div className={`my-3.5 overflow-hidden rounded-2xl shadow-xl border ${isLight ? 'border-slate-300 bg-white p-2' : 'border-white/10'}`}>
-                <img
-                  src={currentNode.imageUrl}
-                  alt=""
-                  className={`rounded-xl object-contain pointer-events-none transition-all ${getImageDimensions()}`}
-                />
+            {/* Layout inteligente: Si hay imagen + cuerpo, distribuir armoniosamente */}
+            {currentNode.imageUrl && imageSize !== 'hidden' && currentSlide.bodySubset ? (
+              <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-center my-2">
+                {/* Imagen siempre visible en tamaño generoso */}
+                <div className="md:col-span-5 flex justify-center items-center">
+                  <div className={`overflow-hidden rounded-2xl shadow-2xl border ${isLight ? 'border-slate-300 bg-white p-2' : 'border-white/10'}`}>
+                    <img
+                      src={currentNode.imageUrl}
+                      alt=""
+                      className={`rounded-xl object-contain pointer-events-none transition-all ${getImageDimensions()}`}
+                    />
+                  </div>
+                </div>
+
+                {/* Título y Cuerpo correspondiente a esta parte */}
+                <div className={`md:col-span-7 flex flex-col justify-center ${contentAlign === 'center' ? 'items-center text-center' : 'items-start text-left'}`}>
+                  <h1
+                    style={{
+                      color: isRoot
+                        ? undefined
+                        : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
+                    }}
+                    className={`${getHeadingSizeClass()} font-bold tracking-tight mb-3 leading-tight whitespace-pre-wrap ${
+                      isRoot ? currentTheme.accentClass : ''
+                    }`}
+                  >
+                    {currentNode.text}
+                  </h1>
+
+                  <div
+                    style={{
+                      color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
+                      fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
+                      fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
+                    }}
+                    className="text-base sm:text-lg md:text-xl font-normal whitespace-pre-wrap leading-relaxed opacity-95 mb-4"
+                  >
+                    {currentSlide.bodySubset}
+                  </div>
+
+                  {/* Progress and Tags */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {currentNode.progress !== undefined && (
+                      <span className="px-3.5 py-1 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold">
+                        Progreso: {currentNode.progress}%
+                      </span>
+                    )}
+                    {currentNode.tags?.map((t) => (
+                      <span
+                        key={t}
+                        className={`px-3 py-1 rounded-full border text-xs font-medium ${
+                          isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
+                        }`}
+                      >
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-            )}
+            ) : (
+              /* Layout cuando sólo hay imagen O sólo texto de cuerpo */
+              <>
+                {/* Attached Image (cuando no hay cuerpo extenso) */}
+                {currentNode.imageUrl && imageSize !== 'hidden' && (
+                  <div className={`my-3.5 overflow-hidden rounded-2xl shadow-xl border ${isLight ? 'border-slate-300 bg-white p-2' : 'border-white/10'}`}>
+                    <img
+                      src={currentNode.imageUrl}
+                      alt=""
+                      className={`rounded-xl object-contain pointer-events-none transition-all ${getImageDimensions()}`}
+                    />
+                  </div>
+                )}
 
-            {/* Main Title Heading */}
-            <h1
-              style={{
-                color: isRoot
-                  ? undefined
-                  : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
-              }}
-              className={`${getHeadingSizeClass()} font-bold tracking-tight mb-4 leading-tight whitespace-pre-wrap ${
-                isRoot ? currentTheme.accentClass : ''
-              }`}
-            >
-              {currentNode.text}
-            </h1>
-
-            {/* Node Body / Subtitle (Generously sized, clean readability) */}
-            {currentNode.body && (
-              <div
-                style={{
-                  color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
-                  fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
-                  fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
-                }}
-                className="text-lg sm:text-xl md:text-2xl max-w-3xl mb-6 font-normal whitespace-pre-wrap leading-relaxed opacity-95"
-              >
-                {currentNode.body}
-              </div>
-            )}
-
-            {/* Progress and Tags */}
-            <div className="flex flex-wrap items-center gap-2">
-              {currentNode.progress !== undefined && (
-                <span className="px-3.5 py-1 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold">
-                  Progreso: {currentNode.progress}%
-                </span>
-              )}
-              {currentNode.tags?.map((t) => (
-                <span
-                  key={t}
-                  className={`px-3 py-1 rounded-full border text-xs font-medium ${
-                    isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
+                {/* Main Title Heading */}
+                <h1
+                  style={{
+                    color: isRoot
+                      ? undefined
+                      : getContrastSafeColor(currentNode.textColor, isLight, '#0f172a', '#ffffff'),
+                  }}
+                  className={`${getHeadingSizeClass()} font-bold tracking-tight mb-4 leading-tight whitespace-pre-wrap ${
+                    isRoot ? currentTheme.accentClass : ''
                   }`}
                 >
-                  #{t}
-                </span>
-              ))}
-            </div>
+                  {currentNode.text}
+                </h1>
+
+                {/* Node Body / Subtitle (Texto dividido en diapositivas limpias) */}
+                {currentSlide.bodySubset && (
+                  <div
+                    style={{
+                      color: getContrastSafeColor(currentNode.bodyColor, isLight, '#334155', '#cbd5e1'),
+                      fontWeight: currentNode.bodyBold ? 'bold' : 'normal',
+                      fontStyle: currentNode.bodyItalic ? 'italic' : 'normal',
+                    }}
+                    className="text-lg sm:text-xl md:text-2xl max-w-3xl mb-6 font-normal whitespace-pre-wrap leading-relaxed opacity-95"
+                  >
+                    {currentSlide.bodySubset}
+                  </div>
+                )}
+
+                {/* Progress and Tags */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {currentNode.progress !== undefined && (
+                    <span className="px-3.5 py-1 rounded-full bg-blue-600/30 border border-blue-500/40 text-blue-300 text-xs font-bold">
+                      Progreso: {currentNode.progress}%
+                    </span>
+                  )}
+                  {currentNode.tags?.map((t) => (
+                    <span
+                      key={t}
+                      className={`px-3 py-1 rounded-full border text-xs font-medium ${
+                        isLight ? 'bg-slate-200 border-slate-300 text-slate-800 font-semibold' : 'bg-slate-800 border-slate-700 text-slate-300'
+                      }`}
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -847,9 +971,16 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         {/* ========================================================================= */}
         {currentSlide.phase === 'notes' && (
           <div className="w-full max-w-4xl flex flex-col justify-center items-center text-left animate-in fade-in zoom-in-95 duration-200">
-            {/* Header Context Bar: Shows parent & node title */}
+            {/* Header Context Bar: Shows parent, node icon, thumbnail if image exists & title */}
             <div className="w-full mb-3 flex items-center justify-between gap-3 pb-2 border-b border-slate-700/40">
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {currentNode.imageUrl && imageSize !== 'hidden' && (
+                  <img
+                    src={currentNode.imageUrl}
+                    alt=""
+                    className="w-9 h-9 object-cover rounded-lg border border-slate-700 shrink-0 shadow-xs"
+                  />
+                )}
                 {currentNode.icons && currentNode.icons.length > 0 && (
                   <span className="scale-110">{renderNodeIcon(currentNode.icons[0])}</span>
                 )}
@@ -887,9 +1018,16 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         {/* ========================================================================= */}
         {currentSlide.phase === 'children' && (
           <div className="w-full max-w-5xl flex flex-col justify-center items-center text-left animate-in fade-in zoom-in-95 duration-200">
-            {/* Header Context Bar: Shows parent node title & subtopics count */}
+            {/* Header Context Bar: Shows parent, thumbnail image & node title */}
             <div className="w-full mb-4 flex items-center justify-between gap-3 pb-2 border-b border-slate-700/40">
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {currentNode.imageUrl && imageSize !== 'hidden' && (
+                  <img
+                    src={currentNode.imageUrl}
+                    alt=""
+                    className="w-9 h-9 object-cover rounded-lg border border-slate-700 shrink-0 shadow-xs"
+                  />
+                )}
                 {currentNode.icons && currentNode.icons.length > 0 && (
                   <span className="scale-110">{renderNodeIcon(currentNode.icons[0])}</span>
                 )}
