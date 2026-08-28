@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MindNode, NodeShape } from '../types/mindmap';
+import { MindNode, NodeShape, MindMap } from '../types/mindmap';
 import {
   Plus,
   FolderPlus,
@@ -22,6 +22,11 @@ import {
   Map,
   Zap,
   Sparkles,
+  Eye,
+  EyeOff,
+  Image as ImageIcon,
+  FileText,
+  Tag,
 } from 'lucide-react';
 
 interface ToolBarProps {
@@ -31,6 +36,8 @@ interface ToolBarProps {
   isOutlineMode: boolean;
   isFilterBarOpen: boolean;
   isToolPanelOpen: boolean;
+  mindMap?: MindMap;
+  onToggleGlobalVisibility?: (key: 'hideAllBodies' | 'hideAllImages' | 'hideAllTags' | 'hideAllIcons' | 'hideAllLinks') => void;
   onAddChild: () => void;
   onAddSibling: () => void;
   onDeleteNode: () => void;
@@ -58,6 +65,8 @@ export const ToolBar: React.FC<ToolBarProps> = ({
   isOutlineMode,
   isFilterBarOpen,
   isToolPanelOpen,
+  mindMap,
+  onToggleGlobalVisibility,
   onAddChild,
   onAddSibling,
   onDeleteNode,
@@ -79,8 +88,18 @@ export const ToolBar: React.FC<ToolBarProps> = ({
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isPresentationMenuOpen, setIsPresentationMenuOpen] = useState(false);
+  const [isVisibilityMenuOpen, setIsVisibilityMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const presentationMenuRef = useRef<HTMLDivElement>(null);
+  const visibilityMenuRef = useRef<HTMLDivElement>(null);
+
+  const hasAnyHiddenGlobal = Boolean(
+    mindMap?.hideAllBodies ||
+    mindMap?.hideAllImages ||
+    mindMap?.hideAllTags ||
+    mindMap?.hideAllIcons ||
+    mindMap?.hideAllLinks
+  );
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -90,6 +109,9 @@ export const ToolBar: React.FC<ToolBarProps> = ({
       }
       if (presentationMenuRef.current && !presentationMenuRef.current.contains(e.target as Node)) {
         setIsPresentationMenuOpen(false);
+      }
+      if (visibilityMenuRef.current && !visibilityMenuRef.current.contains(e.target as Node)) {
+        setIsVisibilityMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -360,6 +382,115 @@ export const ToolBar: React.FC<ToolBarProps> = ({
         >
           <Search className="w-4 h-4" />
         </button>
+
+        {/* Global Focus / Element Visibility (Eye Dropdown) */}
+        <div className="relative shrink-0" ref={visibilityMenuRef}>
+          <button
+            title="Visibilidad de elementos y modo enfoque (Ocultar/Mostrar imágenes, cuerpo, tags)"
+            onClick={() => setIsVisibilityMenuOpen(!isVisibilityMenuOpen)}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg font-semibold text-xs transition-colors shrink-0 cursor-pointer ${
+              isVisibilityMenuOpen
+                ? 'bg-amber-100 text-amber-800 shadow-2xs'
+                : hasAnyHiddenGlobal
+                ? 'bg-amber-50 text-amber-700 border border-amber-300'
+                : 'text-slate-700 hover:bg-slate-100'
+            }`}
+          >
+            {hasAnyHiddenGlobal ? <EyeOff className="w-3.5 h-3.5 text-amber-600" /> : <Eye className="w-3.5 h-3.5 text-slate-600" />}
+            <span className="hidden lg:inline">Vista</span>
+            <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-150 ${isVisibilityMenuOpen ? 'rotate-180 text-amber-600' : ''}`} />
+          </button>
+
+          {isVisibilityMenuOpen && (
+            <div className="absolute right-0 top-full mt-1.5 w-64 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 select-none">
+              <div className="px-2.5 py-1.5 border-b border-slate-100 mb-1 flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Visibilidad Global (Modo Enfoque)
+                </span>
+              </div>
+
+              {/* 1. Toggle Bodies */}
+              <button
+                onClick={() => onToggleGlobalVisibility?.('hideAllBodies')}
+                className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                  <FileText className="w-4 h-4 text-emerald-600" />
+                  <span>Cuerpos / Explicación</span>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  mindMap?.hideAllBodies ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
+                }`}>
+                  {mindMap?.hideAllBodies ? 'Oculto' : 'Visible'}
+                </span>
+              </button>
+
+              {/* 2. Toggle Images */}
+              <button
+                onClick={() => onToggleGlobalVisibility?.('hideAllImages')}
+                className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                  <ImageIcon className="w-4 h-4 text-purple-600" />
+                  <span>Imágenes adjuntas</span>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  mindMap?.hideAllImages ? 'bg-rose-100 text-rose-700' : 'bg-purple-100 text-purple-700'
+                }`}>
+                  {mindMap?.hideAllImages ? 'Oculto' : 'Visible'}
+                </span>
+              </button>
+
+              {/* 3. Toggle Tags */}
+              <button
+                onClick={() => onToggleGlobalVisibility?.('hideAllTags')}
+                className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                  <Tag className="w-4 h-4 text-amber-600" />
+                  <span>Etiquetas (#Tags)</span>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  mindMap?.hideAllTags ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {mindMap?.hideAllTags ? 'Oculto' : 'Visible'}
+                </span>
+              </button>
+
+              {/* 4. Toggle Icons */}
+              <button
+                onClick={() => onToggleGlobalVisibility?.('hideAllIcons')}
+                className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                  <Sparkles className="w-4 h-4 text-blue-600" />
+                  <span>Iconos temáticos</span>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  mindMap?.hideAllIcons ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {mindMap?.hideAllIcons ? 'Oculto' : 'Visible'}
+                </span>
+              </button>
+
+              {/* 5. Toggle Links */}
+              <button
+                onClick={() => onToggleGlobalVisibility?.('hideAllLinks')}
+                className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                  <Link className="w-4 h-4 text-cyan-600" />
+                  <span>Insignias de enlace</span>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  mindMap?.hideAllLinks ? 'bg-rose-100 text-rose-700' : 'bg-cyan-100 text-cyan-700'
+                }`}>
+                  {mindMap?.hideAllLinks ? 'Oculto' : 'Visible'}
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Outline View Toggle */}
         <button

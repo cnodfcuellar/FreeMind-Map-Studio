@@ -5,23 +5,52 @@ const VERTICAL_GAP = 14;
 const ROOT_HORIZONTAL_GAP = 68;
 
 // Estimation of node size based on text and components
-export function estimateNodeSize(node: MindNode): { width: number; height: number } {
+export function estimateNodeSize(
+  node: MindNode,
+  mapOptions?: {
+    hideAllBodies?: boolean;
+    hideAllImages?: boolean;
+    hideAllTags?: boolean;
+    hideAllIcons?: boolean;
+    hideAllLinks?: boolean;
+  }
+): { width: number; height: number } {
   const isRoot = !node.parentId;
   const fontSize = node.fontSize || (isRoot ? 16 : 14);
   
+  const isBodyHidden = node.hideBody || mapOptions?.hideAllBodies;
+  const isImageHidden = node.hideImage || mapOptions?.hideAllImages;
+  const isTagsHidden = node.hideTags || mapOptions?.hideAllTags;
+  const isIconsHidden = node.hideIcons || mapOptions?.hideAllIcons;
+  const isLinkHidden = node.hideLink || mapOptions?.hideAllLinks;
+  const isProgressHidden = node.hideProgress;
+
   // Base padding
   const paddingX = isRoot ? 24 : 14;
   const paddingY = isRoot ? 12 : 8;
   
-  // Extra width for icons, progress, badges
+  // Extra width / height for icons, progress, badges
+  const iconPos = node.iconPosition || 'top';
+  const progPos = node.progressPosition || 'top';
+
   let extraWidth = 0;
-  if (node.icons && node.icons.length > 0) {
-    extraWidth += node.icons.length * 20 + 6;
+  let iconExtraHeight = 0;
+
+  if (!isIconsHidden && node.icons && node.icons.length > 0) {
+    if (iconPos === 'left') {
+      extraWidth += node.icons.length * 20 + 6;
+    } else {
+      iconExtraHeight = Math.max(iconExtraHeight, 22);
+    }
   }
-  if (node.progress !== undefined) {
-    extraWidth += 24;
+  if (!isProgressHidden && node.progress !== undefined) {
+    if (progPos === 'left') {
+      extraWidth += 24;
+    } else {
+      iconExtraHeight = Math.max(iconExtraHeight, 22);
+    }
   }
-  if (node.link) {
+  if (!isLinkHidden && node.link) {
     extraWidth += 18;
   }
   if (node.note) {
@@ -31,7 +60,7 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
   // Node Image dimensions
   let imageExtraHeight = 0;
   let imageMinWidth = 0;
-  if (node.imageUrl) {
+  if (!isImageHidden && node.imageUrl) {
     if (node.imagePosition === 'background') {
       imageMinWidth = 70;
       imageExtraHeight = 20;
@@ -52,7 +81,7 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
   // Tags are rendered in the bottom row of the node
   let extraHeight = 0;
   let tagMinWidth = 0;
-  if (node.tags && node.tags.length > 0) {
+  if (!isTagsHidden && node.tags && node.tags.length > 0) {
     extraHeight += 22; // Tag bar height + top border/margin
     tagMinWidth = Math.min(node.tags.reduce((acc, t) => acc + t.length * 7 + 16, 0), 280);
   }
@@ -60,7 +89,7 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
   // Links are rendered with a dedicated badge
   let linkExtraHeight = 0;
   let linkMinWidth = 0;
-  if (node.link && node.link.trim().length > 0) {
+  if (!isLinkHidden && node.link && node.link.trim().length > 0) {
     linkExtraHeight += 24;
     const cleanUrl = node.link.replace(/^https?:\/\//, '').replace(/^www\./, '');
     linkMinWidth = Math.min(cleanUrl.length * 6.5 + 28, 220);
@@ -98,7 +127,7 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
   // Body text dimensions
   let bodyWidth = 0;
   let bodyHeight = 0;
-  if (node.body && node.body.trim().length > 0) {
+  if (!isBodyHidden && node.body && node.body.trim().length > 0) {
     const bodyFontSize = node.bodyFontSize || (isRoot ? 13 : 12);
     const bodyLines = node.body.split('\n');
     const bodyCharWidth = bodyFontSize * 0.56;
@@ -123,7 +152,7 @@ export function estimateNodeSize(node: MindNode): { width: number; height: numbe
   const contentHeight = titleHeight + bodyHeight;
 
   let width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, linkMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
-  let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + linkExtraHeight + imageExtraHeight));
+  let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + iconExtraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + iconExtraHeight + linkExtraHeight + imageExtraHeight));
 
   // Custom User-Defined Width and Height
   if (node.customWidth && node.customWidth > 0) {
@@ -184,14 +213,21 @@ export function nodeOrDescendantHasCloud(nodeId: string, nodes: Record<string, M
 function calculateSubTreeMetrics(
   nodeId: string,
   nodes: Record<string, MindNode>,
-  verticalGap: number = VERTICAL_GAP
+  verticalGap: number = VERTICAL_GAP,
+  mapOptions?: {
+    hideAllBodies?: boolean;
+    hideAllImages?: boolean;
+    hideAllTags?: boolean;
+    hideAllIcons?: boolean;
+    hideAllLinks?: boolean;
+  }
 ): SubTreeLayout {
   const node = nodes[nodeId];
   if (!node) {
     return { id: nodeId, width: 60, height: 30, subtreeHeight: 30, childrenLayouts: [] };
   }
 
-  const { width, height } = estimateNodeSize(node);
+  const { width, height } = estimateNodeSize(node, mapOptions);
   const hasCloud = Boolean(node.cloud?.enabled);
   const cloudPad = hasCloud ? 36 : 0;
 
@@ -207,7 +243,7 @@ function calculateSubTreeMetrics(
 
   const childrenLayouts = node.children
     .filter(childId => Boolean(nodes[childId]))
-    .map(childId => calculateSubTreeMetrics(childId, nodes, verticalGap));
+    .map(childId => calculateSubTreeMetrics(childId, nodes, verticalGap, mapOptions));
 
   let totalChildrenHeight = 0;
   for (let i = 0; i < childrenLayouts.length; i++) {
@@ -249,14 +285,21 @@ interface SubTreeVerticalLayout {
 function calculateSubTreeVerticalMetrics(
   nodeId: string,
   nodes: Record<string, MindNode>,
-  horizontalGap: number = HORIZONTAL_GAP
+  horizontalGap: number = HORIZONTAL_GAP,
+  mapOptions?: {
+    hideAllBodies?: boolean;
+    hideAllImages?: boolean;
+    hideAllTags?: boolean;
+    hideAllIcons?: boolean;
+    hideAllLinks?: boolean;
+  }
 ): SubTreeVerticalLayout {
   const node = nodes[nodeId];
   if (!node) {
     return { id: nodeId, width: 60, height: 30, subtreeWidth: 60, childrenLayouts: [] };
   }
 
-  const { width, height } = estimateNodeSize(node);
+  const { width, height } = estimateNodeSize(node, mapOptions);
   const hasCloud = Boolean(node.cloud?.enabled);
   const cloudPad = hasCloud ? 36 : 0;
 
@@ -272,7 +315,7 @@ function calculateSubTreeVerticalMetrics(
 
   const childrenLayouts = node.children
     .filter(childId => Boolean(nodes[childId]))
-    .map(childId => calculateSubTreeVerticalMetrics(childId, nodes, horizontalGap));
+    .map(childId => calculateSubTreeVerticalMetrics(childId, nodes, horizontalGap, mapOptions));
 
   let totalChildrenWidth = 0;
   for (let i = 0; i < childrenLayouts.length; i++) {
@@ -321,7 +364,14 @@ export function computeMindMapLayout(
   const vertLevelVGap = Math.max(50, Math.round(vGap * 2.8 + 45));
   const vertRootVGap = Math.max(70, Math.round(vGap * 3.4 + 60));
 
-  const rootSize = estimateNodeSize(rootNode);
+  const mapOptions = {
+    hideAllBodies: mindMap.hideAllBodies,
+    hideAllImages: mindMap.hideAllImages,
+    hideAllTags: mindMap.hideAllTags,
+    hideAllIcons: mindMap.hideAllIcons,
+    hideAllLinks: mindMap.hideAllLinks,
+  };
+  const rootSize = estimateNodeSize(rootNode, mapOptions);
   const rootLayout: CalculatedNodeLayout = {
     id: rootNode.id,
     x: canvasCenter.x - rootSize.width / 2,

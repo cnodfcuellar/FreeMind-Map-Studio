@@ -104,11 +104,21 @@ export interface MindNode {
   
   // Metadata & Features
   icons?: string[];
+  iconPosition?: 'left' | 'top';
   tags?: string[];
   progress?: number; // 0 to 100
+  progressPosition?: 'left' | 'top';
   link?: string; // URL, mailto:, #nodeId
   note?: string; // Rich Markdown note
   details?: string; // Additional details
+
+  // Node Element Visibility Overrides (Eye Toggles)
+  hideBody?: boolean;
+  hideImage?: boolean;
+  hideTags?: boolean;
+  hideIcons?: boolean;
+  hideLink?: boolean;
+  hideProgress?: boolean;
   
   // Free floating / Post-it
   isFreeFloating?: boolean;
@@ -189,6 +199,14 @@ export interface MindMap {
   edgeProfile?: EdgeProfile;
   horizontalGap?: number;
   verticalGap?: number;
+
+  // Global Map Visibility Toggles (Modo Enfoque / Densidad Visual)
+  hideAllBodies?: boolean;
+  hideAllImages?: boolean;
+  hideAllTags?: boolean;
+  hideAllIcons?: boolean;
+  hideAllLinks?: boolean;
+
   createdAt: number;
   updatedAt: number;
 }

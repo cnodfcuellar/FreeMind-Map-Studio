@@ -826,6 +826,13 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                 theme={theme}
                 branchColor={branchColor}
                 isMatch={isMatch}
+                globalVisibility={{
+                  hideAllBodies: mindMap.hideAllBodies,
+                  hideAllImages: mindMap.hideAllImages,
+                  hideAllTags: mindMap.hideAllTags,
+                  hideAllIcons: mindMap.hideAllIcons,
+                  hideAllLinks: mindMap.hideAllLinks,
+                }}
                 onSelect={(id) => onSelectNode(id)}
                 onDoubleClick={(id) => onStartEditing(id)}
                 onTextChange={onUpdateNodeText}

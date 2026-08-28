@@ -782,6 +782,15 @@ export default function App() {
         isOutlineMode={isOutlineOpen}
         isFilterBarOpen={isFilterBarOpen}
         isToolPanelOpen={isToolPanelOpen}
+        mindMap={mindMap}
+        onToggleGlobalVisibility={(key) => {
+          pushHistory(mindMap);
+          setMindMap((m) => ({
+            ...m,
+            [key]: !m[key],
+            updatedAt: Date.now(),
+          }));
+        }}
         onAddChild={() => handleAddChild()}
         onAddSibling={() => handleAddSibling()}
         onDeleteNode={() => handleDeleteNode()}

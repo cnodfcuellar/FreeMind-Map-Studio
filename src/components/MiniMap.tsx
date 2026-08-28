@@ -269,13 +269,13 @@ export const MiniMap: React.FC<MiniMapProps> = ({
               onClick={handleMiniMapClick}
               onMouseMove={handleMouseMove}
             >
-              {/* Background fill */}
+              {/* Radar Background fill */}
               <rect
                 x={bounds.minX}
                 y={bounds.minY}
                 width={bounds.maxX - bounds.minX}
                 height={bounds.maxY - bounds.minY}
-                fill={mindMap.backgroundColor || theme.background || '#f8fafc'}
+                fill="#0f172a"
               />
 
               {/* Connecting Tree Edges */}
@@ -287,26 +287,53 @@ export const MiniMap: React.FC<MiniMapProps> = ({
                   const parentLayout = layoutMap.get(childNode.parentId);
                   if (!parentLayout) return null;
 
-                  const x1 = parentLayout.x + parentLayout.width / 2;
-                  const y1 = parentLayout.y + parentLayout.height / 2;
-                  const x2 = childLayout.x + childLayout.width / 2;
-                  const y2 = childLayout.y + childLayout.height / 2;
-
                   const branchColor =
                     childNode.edgeColor ||
                     theme.branchColors[childLayout.branchIndex % theme.branchColors.length] ||
-                    '#3b82f6';
+                    '#38bdf8';
+
+                  // Calculate anchor points based on node side for organic curved paths
+                  let pathData = '';
+                  if (childLayout.side === 'left') {
+                    const startX = parentLayout.x;
+                    const startY = parentLayout.y + parentLayout.height / 2;
+                    const endX = childLayout.x + childLayout.width;
+                    const endY = childLayout.y + childLayout.height / 2;
+                    const midX = (startX + endX) / 2;
+                    pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+                  } else if (childLayout.side === 'bottom') {
+                    const startX = parentLayout.x + parentLayout.width / 2;
+                    const startY = parentLayout.y + parentLayout.height;
+                    const endX = childLayout.x + childLayout.width / 2;
+                    const endY = childLayout.y;
+                    const midY = (startY + endY) / 2;
+                    pathData = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
+                  } else if (childLayout.side === 'top') {
+                    const startX = parentLayout.x + parentLayout.width / 2;
+                    const startY = parentLayout.y;
+                    const endX = childLayout.x + childLayout.width / 2;
+                    const endY = childLayout.y + childLayout.height;
+                    const midY = (startY + endY) / 2;
+                    pathData = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
+                  } else {
+                    // Standard right-side branch, root, radial or circular
+                    const startX = parentLayout.x + parentLayout.width;
+                    const startY = parentLayout.y + parentLayout.height / 2;
+                    const endX = childLayout.x;
+                    const endY = childLayout.y + childLayout.height / 2;
+                    const midX = (startX + endX) / 2;
+                    pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+                  }
 
                   return (
-                    <line
+                    <path
                       key={`mm-edge-${childNode.parentId}-${childNode.id}`}
-                      x1={x1}
-                      y1={y1}
-                      x2={x2}
-                      y2={y2}
+                      d={pathData}
+                      fill="none"
                       stroke={branchColor}
-                      strokeWidth={childLayout.depth === 1 ? 3 : 1.5}
-                      strokeOpacity="0.75"
+                      strokeWidth={childLayout.depth === 1 ? 3 : 2}
+                      strokeOpacity={childLayout.depth === 1 ? 0.95 : 0.75}
+                      strokeLinecap="round"
                     />
                   );
                 })}
@@ -319,11 +346,32 @@ export const MiniMap: React.FC<MiniMapProps> = ({
                   const isSelected = selectedNodeId === l.id;
                   const isRoot = l.depth === 0;
 
-                  const nodeColor =
-                    node?.color ||
-                    (isRoot
-                      ? theme.rootBackground || '#2563eb'
-                      : theme.branchColors[l.branchIndex % theme.branchColors.length] || '#64748b');
+                  // Minimum legible width & height for child nodes
+                  const minW = isRoot ? 50 : l.depth === 1 ? 36 : 24;
+                  const minH = isRoot ? 30 : l.depth === 1 ? 20 : 16;
+                  const renderW = Math.max(l.width, minW);
+                  const renderH = Math.max(l.height, minH);
+                  const renderX = l.x - (renderW - l.width) / 2;
+                  const renderY = l.y - (renderH - l.height) / 2;
+
+                  const branchColor = theme.branchColors[l.branchIndex % theme.branchColors.length] || '#38bdf8';
+
+                  // Always vibrant, solid color fill
+                  let nodeFill = node?.color;
+                  if (!nodeFill || nodeFill === '#ffffff' || nodeFill === '#f8fafc') {
+                    if (isRoot) {
+                      nodeFill = '#3b82f6';
+                    } else {
+                      nodeFill = branchColor;
+                    }
+                  }
+
+                  // Border stroke for crisp radar look
+                  const nodeStroke = isSelected
+                    ? '#fbbf24'
+                    : '#ffffff';
+
+                  const strokeW = isSelected ? 4 : isRoot ? 3 : 2;
 
                   return (
                     <g
@@ -336,18 +384,29 @@ export const MiniMap: React.FC<MiniMapProps> = ({
                         const newPanY = containerHeight / 2 - (l.y + l.height / 2) * zoom;
                         onPanChange({ x: newPanX, y: newPanY });
                       }}
-                      className="cursor-pointer"
+                      className="cursor-pointer group"
                     >
                       <rect
-                        x={l.x}
-                        y={l.y}
-                        width={l.width}
-                        height={l.height}
-                        rx={isRoot ? 8 : 4}
-                        fill={nodeColor}
-                        stroke={isSelected ? '#3b82f6' : isRoot ? '#1d4ed8' : '#ffffff'}
-                        strokeWidth={isSelected ? 4 : 1.5}
+                        x={renderX}
+                        y={renderY}
+                        width={renderW}
+                        height={renderH}
+                        rx={isRoot ? 8 : l.depth === 1 ? 6 : 4}
+                        fill={nodeFill}
+                        stroke={nodeStroke}
+                        strokeWidth={strokeW}
                       />
+                      {/* Highlight dot if node has folded children */}
+                      {node?.folded && node?.children && node.children.length > 0 && (
+                        <circle
+                          cx={renderX + renderW - 2}
+                          cy={renderY + 2}
+                          r={4}
+                          fill="#ef4444"
+                          stroke="#ffffff"
+                          strokeWidth={2}
+                        />
+                      )}
                     </g>
                   );
                 })}
@@ -359,12 +418,12 @@ export const MiniMap: React.FC<MiniMapProps> = ({
                 y={viewportRect.y}
                 width={viewportRect.width}
                 height={viewportRect.height}
-                fill="rgba(59, 130, 246, 0.15)"
-                stroke="#2563eb"
-                strokeWidth="2.5"
-                strokeDasharray="4 2"
-                rx="4"
-                className="cursor-move hover:fill-blue-500/25 transition-colors"
+                fill="rgba(56, 189, 248, 0.2)"
+                stroke="#38bdf8"
+                strokeWidth="3"
+                strokeDasharray="6 3"
+                rx="6"
+                className="cursor-move hover:fill-sky-400/30 transition-colors"
                 onMouseDown={handleViewportMouseDown}
               />
             </svg>

@@ -20,6 +20,13 @@ interface NodeComponentProps {
   theme: MindMapTheme;
   branchColor: string;
   isMatch?: boolean;
+  globalVisibility?: {
+    hideAllBodies?: boolean;
+    hideAllImages?: boolean;
+    hideAllTags?: boolean;
+    hideAllIcons?: boolean;
+    hideAllLinks?: boolean;
+  };
   onSelect: (id: string, e: React.MouseEvent) => void;
   onDoubleClick: (id: string) => void;
   onTextChange: (id: string, newText: string) => void;
@@ -39,6 +46,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   theme,
   branchColor,
   isMatch,
+  globalVisibility,
   onSelect,
   onDoubleClick,
   onTextChange,
@@ -56,6 +64,14 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const isRoot = !node.parentId;
   const shape = node.shape || (isRoot ? 'bubble' : 'bubble');
   const hasChildren = node.children && node.children.length > 0;
+
+  // Effective Visibility (combines node-level and map-level global toggles)
+  const isBodyHidden = Boolean(node.hideBody || globalVisibility?.hideAllBodies);
+  const isImageHidden = Boolean(node.hideImage || globalVisibility?.hideAllImages);
+  const isTagsHidden = Boolean(node.hideTags || globalVisibility?.hideAllTags);
+  const isIconsHidden = Boolean(node.hideIcons || globalVisibility?.hideAllIcons);
+  const isLinkHidden = Boolean(node.hideLink || globalVisibility?.hideAllLinks);
+  const isProgressHidden = Boolean(node.hideProgress);
 
   useEffect(() => {
     setEditText(node.text);
@@ -84,7 +100,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     onFinishEditing();
   };
 
-  // Determine Colors
+  // Determine Colors & Fonts (Inherited from Theme & Branch)
   const bgColor = isRoot
     ? (node.color || theme.rootBg)
     : (node.color || theme.nodeBg);
@@ -96,6 +112,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const borderStyle = node.borderDash || node.borderStyle || 'solid';
   const borderColor = node.borderColor || (isRoot ? 'transparent' : branchColor || theme.nodeBorder);
   const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
+  const effectiveFontFamily = node.fontFamily || theme.fontFamily;
 
   // Background computation (Solid, Transparent, Gradient, Pattern)
   const getNodeBackgroundStyles = (): React.CSSProperties => {
@@ -463,7 +480,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       {renderSvgPolygonBackground()}
 
       {/* Top Image if position is top or default */}
-      {node.imageUrl && (!node.imagePosition || node.imagePosition === 'top') && (
+      {!isImageHidden && node.imageUrl && (!node.imagePosition || node.imagePosition === 'top') && (
         <div className="w-full flex justify-center mb-1.5 overflow-hidden rounded-lg relative z-10">
           <img
             src={node.imageUrl}
@@ -478,13 +495,48 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         </div>
       )}
 
-      {/* Node Content Container */}
-      <div className="flex items-center gap-1.5 w-full relative z-10">
+      {/* Top Icons & Status / Progress Row (Placed OVER / ABOVE the Title) */}
+      {((!isIconsHidden && node.icons && node.icons.length > 0 && node.iconPosition !== 'left') ||
+        (!isProgressHidden && node.progress !== undefined && node.progressPosition !== 'left')) && (
+        <div
+          className={`flex items-center gap-1.5 mb-1 relative z-10 w-full ${
+            node.textAlign === 'center' || node.shape === 'circle' || node.shape === 'square' || node.shape === 'star'
+              ? 'justify-center'
+              : node.textAlign === 'right'
+              ? 'justify-end'
+              : 'justify-start'
+          }`}
+        >
+          {/* Icons */}
+          {!isIconsHidden && node.icons && node.icons.length > 0 && node.iconPosition !== 'left' && (
+            <div className="flex items-center gap-1 shrink-0">
+              {node.icons.map((ic, idx) => (
+                <span key={idx} className="inline-flex items-center shrink-0">
+                  {renderNodeIcon(ic)}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Progress / Status indicator */}
+          {!isProgressHidden && node.progress !== undefined && node.progressPosition !== 'left' && (
+            <div
+              title={`Progreso: ${node.progress}%`}
+              className="shrink-0 flex items-center justify-center px-1.5 py-0.5 rounded-full border border-slate-300/80 bg-slate-100/90 text-[9.5px] font-bold text-slate-700 shadow-2xs"
+            >
+              {node.progress === 100 ? '✓ 100%' : `${node.progress}%`}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Node Content Container (Side elements + Title/Body) */}
+      <div className="flex items-start gap-1.5 w-full relative z-10">
         {/* Drag handle on hover (non-root) */}
         {!isRoot && isHovered && (
           <div
             title="Arrastrar para mover o reordenar rama"
-            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-700 -ml-1.5"
+            className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-700 -ml-1.5 mt-0.5 shrink-0"
             onMouseDown={(e) => {
               e.stopPropagation();
               onDragStart(node.id, e);
@@ -494,29 +546,29 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           </div>
         )}
 
-        {/* Node Icons */}
-        {node.icons && node.icons.length > 0 && (
-          <div className="flex items-center gap-1 shrink-0">
+        {/* Side Icons (only when iconPosition is explicitly 'left') */}
+        {!isIconsHidden && node.icons && node.icons.length > 0 && node.iconPosition === 'left' && (
+          <div className="flex items-center gap-1 shrink-0 mt-0.5">
             {node.icons.map((ic, idx) => (
-              <span key={idx} className="inline-flex items-center">
+              <span key={idx} className="inline-flex items-center shrink-0">
                 {renderNodeIcon(ic)}
               </span>
             ))}
           </div>
         )}
 
-        {/* Progress indicator */}
-        {node.progress !== undefined && (
+        {/* Side Progress (only when progressPosition is explicitly 'left') */}
+        {!isProgressHidden && node.progress !== undefined && node.progressPosition === 'left' && (
           <div
             title={`Progreso: ${node.progress}%`}
-            className="shrink-0 flex items-center justify-center w-4 h-4 rounded-full border border-slate-300 bg-slate-100 text-[9px] font-bold text-slate-700"
+            className="shrink-0 flex items-center justify-center w-4.5 h-4.5 rounded-full border border-slate-300 bg-slate-100 text-[9px] font-bold text-slate-700 mt-0.5"
           >
             {node.progress === 100 ? '✓' : `${node.progress}%`}
           </div>
         )}
 
         {/* Left Attached Content Image */}
-        {node.imageUrl && node.imagePosition === 'left' && (
+        {!isImageHidden && node.imageUrl && node.imagePosition === 'left' && (
           <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 mr-1.5">
             <img
               src={node.imageUrl}
@@ -532,7 +584,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         )}
 
         {/* Main Text Content (Title & Body) */}
-        <div className="flex-1 min-w-0 w-full flex flex-col justify-center overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col justify-center overflow-hidden z-10">
           {isEditing ? (
             <textarea
               ref={textareaRef}
@@ -562,7 +614,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
                   fontWeight: node.bold ? 700 : (isRoot ? 600 : 500),
                   fontStyle: node.italic ? 'italic' : 'normal',
                   textAlign: node.textAlign || (node.shape === 'circle' || node.shape === 'square' || node.shape === 'star' ? 'center' : 'left'),
-                  fontFamily: node.fontFamily,
+                  fontFamily: effectiveFontFamily,
                   wordBreak: 'break-word',
                   overflowWrap: 'break-word',
                   hyphens: 'auto',
@@ -572,7 +624,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
               </div>
 
               {/* Between Image (between title and body) */}
-              {node.imageUrl && node.imagePosition === 'between' && (
+              {!isImageHidden && node.imageUrl && node.imagePosition === 'between' && (
                 <div className="w-full flex justify-center my-1.5 overflow-hidden rounded-lg relative z-10">
                   <img
                     src={node.imageUrl}
@@ -588,16 +640,16 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
               )}
 
               {/* Body (Cuerpo del nodo) */}
-              {node.body && node.body.trim().length > 0 && (
+              {!isBodyHidden && node.body && node.body.trim().length > 0 && (
                 <div
                   className="mt-1 pt-0.5 leading-relaxed break-words whitespace-pre-wrap select-text border-t border-black/5 dark:border-white/5 w-full"
                   style={{
-                    color: node.bodyColor || (isRoot ? 'rgba(255,255,255,0.88)' : '#475569'),
+                    color: node.bodyColor || (isRoot ? 'rgba(255,255,255,0.88)' : (theme.nodeText ? `${theme.nodeText}cc` : '#475569')),
                     fontSize: `${node.bodyFontSize || (isRoot ? 13 : 12)}px`,
                     fontWeight: node.bodyBold ? 700 : 400,
                     fontStyle: node.bodyItalic ? 'italic' : 'normal',
                     textAlign: node.bodyAlign || (node.shape === 'circle' || node.shape === 'square' || node.shape === 'star' ? 'center' : 'left'),
-                    fontFamily: node.bodyFontFamily,
+                    fontFamily: node.bodyFontFamily || effectiveFontFamily,
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',
                     hyphens: 'auto',
@@ -611,7 +663,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         </div>
 
         {/* Right Attached Content Image */}
-        {node.imageUrl && node.imagePosition === 'right' && (
+        {!isImageHidden && node.imageUrl && node.imagePosition === 'right' && (
           <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 ml-1.5">
             <img
               src={node.imageUrl}
@@ -641,7 +693,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         )}
 
         {/* Link indicator */}
-        {node.link && (
+        {!isLinkHidden && node.link && (
           <a
             href={node.link}
             target="_blank"
@@ -656,7 +708,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       </div>
 
       {/* Bottom Image if position is bottom */}
-      {node.imageUrl && node.imagePosition === 'bottom' && (
+      {!isImageHidden && node.imageUrl && node.imagePosition === 'bottom' && (
         <div className="w-full flex justify-center mt-1.5 overflow-hidden rounded-lg relative z-10">
           <img
             src={node.imageUrl}
@@ -672,7 +724,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       )}
 
       {/* Dedicated Prominent Link Badge */}
-      {node.link && node.link.trim().length > 0 && (
+      {!isLinkHidden && node.link && node.link.trim().length > 0 && (
         <a
           href={node.link}
           target="_blank"
@@ -688,13 +740,13 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         </a>
       )}
 
-      {/* Tags in the bottom area of the node */}
-      {node.tags && node.tags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1 mt-1 pt-1 border-t border-black/10 dark:border-white/10 w-full shrink-0 relative z-10">
+      {/* Tags in the bottom area of the node (Centrados) */}
+      {!isTagsHidden && node.tags && node.tags.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-1 mt-1 pt-1 border-t border-black/10 dark:border-white/10 w-full shrink-0 relative z-10">
           {node.tags.map((tg, idx) => (
             <span
               key={idx}
-              className="text-[10px] leading-tight px-1.5 py-0.5 rounded-md bg-slate-200/80 text-slate-700 font-medium tracking-tight"
+              className="text-[10px] leading-tight px-1.5 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-700/80 text-slate-700 dark:text-slate-200 font-medium tracking-tight shadow-2xs"
             >
               #{tg}
             </span>

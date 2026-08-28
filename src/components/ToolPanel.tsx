@@ -70,6 +70,7 @@ import {
   Upload,
   Image as ImageIcon,
   Eye,
+  EyeOff,
   Edit3,
   List,
   ListOrdered,
@@ -234,10 +235,33 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
   const imageFileInputRef = useRef<HTMLInputElement>(null);
   const bgImageFileInputRef = useRef<HTMLInputElement>(null);
 
+  const [contentSectionsOpen, setContentSectionsOpen] = useState<Record<string, boolean>>({
+    title: false,
+    body: false,
+    image: false,
+    metadata: false,
+  });
+
+  const toggleContentSection = (section: string) => {
+    setContentSectionsOpen(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const handleExpandAllContentSections = (expand: boolean) => {
+    setContentSectionsOpen({
+      title: expand,
+      body: expand,
+      image: expand,
+      metadata: expand,
+    });
+  };
+
   const [formatSectionsOpen, setFormatSectionsOpen] = useState<Record<string, boolean>>({
-    shape: true,
-    background: true,
-    border: true,
+    shape: false,
+    background: false,
+    border: false,
     edge: false,
   });
 
@@ -445,260 +469,352 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
           <>
             {/* CONTENT & TEXT TAB (Two Text Boxes: Título and Cuerpo, each with formatting) */}
             {activeTab === 'content' && selectedNode && (
-              <div className="space-y-4">
-                {/* 1. TÍTULO DEL NODO */}
-                <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-3 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <label className="font-semibold text-slate-800 flex items-center gap-1.5 text-xs">
-                      <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-                      Título del Nodo
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-normal">Texto principal</span>
-                  </div>
-
-                  {/* Title Textarea */}
-                  <textarea
-                    value={selectedNode.text}
-                    onChange={(e) => onUpdateNode(selectedNode.id, { text: e.target.value })}
-                    rows={2}
-                    className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 resize-y shadow-2xs"
-                    placeholder="Escribe el título..."
-                  />
-
-                  {/* Title Formatting Controls */}
-                  <div className="space-y-2 pt-1 border-t border-slate-200/80">
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                      <span>Formato del Título</span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {/* Bold / Italic */}
-                      <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                        <button
-                          title="Negrita"
-                          onClick={() => onUpdateNode(selectedNode.id, { bold: !selectedNode.bold })}
-                          className={`p-1.5 transition-colors ${
-                            selectedNode.bold ? 'bg-blue-100 text-blue-700 font-bold' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <Bold className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Cursiva"
-                          onClick={() => onUpdateNode(selectedNode.id, { italic: !selectedNode.italic })}
-                          className={`p-1.5 transition-colors border-l border-slate-200 ${
-                            selectedNode.italic ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <Italic className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      {/* Alignment */}
-                      <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                        <button
-                          title="Alinear a la izquierda"
-                          onClick={() => onUpdateNode(selectedNode.id, { textAlign: 'left' })}
-                          className={`p-1.5 transition-colors ${
-                            (selectedNode.textAlign || 'left') === 'left' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <AlignLeft className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Alinear al centro"
-                          onClick={() => onUpdateNode(selectedNode.id, { textAlign: 'center' })}
-                          className={`p-1.5 transition-colors border-l border-slate-200 ${
-                            selectedNode.textAlign === 'center' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <AlignCenter className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Alinear a la derecha"
-                          onClick={() => onUpdateNode(selectedNode.id, { textAlign: 'right' })}
-                          className={`p-1.5 transition-colors border-l border-slate-200 ${
-                            selectedNode.textAlign === 'right' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <AlignRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      {/* Font Size */}
-                      <select
-                        value={selectedNode.fontSize || 14}
-                        onChange={(e) => onUpdateNode(selectedNode.id, { fontSize: parseInt(e.target.value, 10) })}
-                        className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium outline-none focus:border-blue-500 shadow-2xs"
-                      >
-                        <option value={12}>12 px</option>
-                        <option value={14}>14 px</option>
-                        <option value={16}>16 px</option>
-                        <option value={18}>18 px</option>
-                        <option value={20}>20 px</option>
-                        <option value={24}>24 px</option>
-                      </select>
-                    </div>
-
-                    {/* Title Color */}
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] text-slate-500">Color:</span>
-                      <input
-                        type="color"
-                        value={selectedNode.textColor || '#0f172a'}
-                        onChange={(e) => onUpdateNode(selectedNode.id, { textColor: e.target.value })}
-                        className="w-5 h-5 rounded border border-slate-200 cursor-pointer p-0 shadow-2xs"
-                        title="Seleccionar color personalizado"
-                      />
-                      <div className="flex items-center gap-1 flex-1">
-                        {TEXT_COLOR_PRESETS.map((c) => (
-                          <button
-                            key={c}
-                            style={{ backgroundColor: c }}
-                            onClick={() => onUpdateNode(selectedNode.id, { textColor: c })}
-                            className="w-4 h-4 rounded-full border border-slate-300 shadow-2xs hover:scale-110 transition-transform"
-                            title={c}
-                          />
-                        ))}
-                      </div>
-                      <button
-                        onClick={() => onUpdateNode(selectedNode.id, { textColor: undefined })}
-                        className="text-[10px] text-slate-400 hover:text-slate-700 underline"
-                      >
-                        Auto
-                      </button>
-                    </div>
+              <div className="space-y-3.5">
+                {/* Global Collapsible Toolbar for Content Tab */}
+                <div className="flex items-center justify-between pb-0.5">
+                  <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider">
+                    Secciones de Contenido
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleExpandAllContentSections(true)}
+                      className="text-[10.5px] text-blue-600 hover:text-blue-800 font-semibold hover:underline cursor-pointer"
+                    >
+                      Desplegar todo
+                    </button>
+                    <span className="text-slate-300 text-[10px]">|</span>
+                    <button
+                      type="button"
+                      onClick={() => handleExpandAllContentSections(false)}
+                      className="text-[10.5px] text-slate-500 hover:text-slate-700 font-medium hover:underline cursor-pointer"
+                    >
+                      Plegar todo
+                    </button>
                   </div>
                 </div>
 
-                {/* 2. CUERPO DEL NODO */}
-                <div className="bg-slate-50/70 border border-slate-200 rounded-xl p-3 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <label className="font-semibold text-slate-800 flex items-center gap-1.5 text-xs">
-                      <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                      Cuerpo del Nodo
-                    </label>
-                    <span className="text-[10px] text-slate-400 font-normal">Explicación del título</span>
-                  </div>
-
-                  {/* Body Textarea */}
-                  <textarea
-                    value={selectedNode.body || ''}
-                    onChange={(e) => onUpdateNode(selectedNode.id, { body: e.target.value || undefined })}
-                    rows={3}
-                    className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs font-normal text-slate-700 outline-none focus:border-blue-500 resize-y shadow-2xs"
-                    placeholder="Escribe una pequeña explicación o detalle sobre el título del nodo..."
-                  />
-
-                  {/* Body Formatting Controls */}
-                  <div className="space-y-2 pt-1 border-t border-slate-200/80">
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                      <span>Formato del Cuerpo</span>
+                {/* 1. SECCIÓN: TÍTULO DEL NODO */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
+                  <button
+                    type="button"
+                    onClick={() => toggleContentSection('title')}
+                    className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors cursor-pointer select-none"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                        <Type className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+                          Título del Nodo
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-normal block truncate">
+                          Texto principal y tipografía
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {/* Bold / Italic */}
-                      <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                        <button
-                          title="Cuerpo en Negrita"
-                          onClick={() => onUpdateNode(selectedNode.id, { bodyBold: !selectedNode.bodyBold })}
-                          className={`p-1.5 transition-colors ${
-                            selectedNode.bodyBold ? 'bg-emerald-100 text-emerald-700 font-bold' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <Bold className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Cuerpo en Cursiva"
-                          onClick={() => onUpdateNode(selectedNode.id, { bodyItalic: !selectedNode.bodyItalic })}
-                          className={`p-1.5 transition-colors border-l border-slate-200 ${
-                            selectedNode.bodyItalic ? 'bg-emerald-100 text-emerald-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <Italic className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      {/* Alignment */}
-                      <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
-                        <button
-                          title="Alinear cuerpo a la izquierda"
-                          onClick={() => onUpdateNode(selectedNode.id, { bodyAlign: 'left' })}
-                          className={`p-1.5 transition-colors ${
-                            (selectedNode.bodyAlign || 'left') === 'left' ? 'bg-emerald-100 text-emerald-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <AlignLeft className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Alinear cuerpo al centro"
-                          onClick={() => onUpdateNode(selectedNode.id, { bodyAlign: 'center' })}
-                          className={`p-1.5 transition-colors border-l border-slate-200 ${
-                            selectedNode.bodyAlign === 'center' ? 'bg-emerald-100 text-emerald-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <AlignCenter className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          title="Alinear cuerpo a la derecha"
-                          onClick={() => onUpdateNode(selectedNode.id, { bodyAlign: 'right' })}
-                          className={`p-1.5 transition-colors border-l border-slate-200 ${
-                            selectedNode.bodyAlign === 'right' ? 'bg-emerald-100 text-emerald-700' : 'hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          <AlignRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      {/* Body Font Size */}
-                      <select
-                        value={selectedNode.bodyFontSize || 12}
-                        onChange={(e) => onUpdateNode(selectedNode.id, { bodyFontSize: parseInt(e.target.value, 10) })}
-                        className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium outline-none focus:border-blue-500 shadow-2xs"
-                      >
-                        <option value={10}>10 px</option>
-                        <option value={11}>11 px</option>
-                        <option value={12}>12 px</option>
-                        <option value={13}>13 px</option>
-                        <option value={14}>14 px</option>
-                        <option value={16}>16 px</option>
-                      </select>
-                    </div>
-
-                    {/* Body Color */}
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] text-slate-500">Color:</span>
-                      <input
-                        type="color"
-                        value={selectedNode.bodyColor || '#475569'}
-                        onChange={(e) => onUpdateNode(selectedNode.id, { bodyColor: e.target.value })}
-                        className="w-5 h-5 rounded border border-slate-200 cursor-pointer p-0 shadow-2xs"
-                        title="Seleccionar color personalizado del cuerpo"
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                        {selectedNode.fontSize || 14}px
+                      </span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          contentSectionsOpen.title ? 'rotate-0' : '-rotate-90'
+                        }`}
                       />
-                      <div className="flex items-center gap-1 flex-1">
-                        {TEXT_COLOR_PRESETS.map((c) => (
-                          <button
-                            key={c}
-                            style={{ backgroundColor: c }}
-                            onClick={() => onUpdateNode(selectedNode.id, { bodyColor: c })}
-                            className="w-4 h-4 rounded-full border border-slate-300 shadow-2xs hover:scale-110 transition-transform"
-                            title={c}
+                    </div>
+                  </button>
+
+                  {contentSectionsOpen.title && (
+                    <div className="px-3.5 pb-3.5 pt-1 space-y-2.5 border-t border-slate-200/60 animate-in fade-in duration-150">
+                      <textarea
+                        value={selectedNode.text}
+                        onChange={(e) => onUpdateNode(selectedNode.id, { text: e.target.value })}
+                        rows={2}
+                        className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 resize-y shadow-2xs"
+                        placeholder="Escribe el título..."
+                      />
+
+                      <div className="space-y-2 pt-1 border-t border-slate-200/80">
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                          <span>Formato del Título</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                            <button
+                              title="Negrita"
+                              onClick={() => onUpdateNode(selectedNode.id, { bold: !selectedNode.bold })}
+                              className={`p-1.5 transition-colors ${
+                                selectedNode.bold ? 'bg-blue-100 text-blue-700 font-bold' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <Bold className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              title="Cursiva"
+                              onClick={() => onUpdateNode(selectedNode.id, { italic: !selectedNode.italic })}
+                              className={`p-1.5 transition-colors border-l border-slate-200 ${
+                                selectedNode.italic ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <Italic className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                            <button
+                              title="Alinear a la izquierda"
+                              onClick={() => onUpdateNode(selectedNode.id, { textAlign: 'left' })}
+                              className={`p-1.5 transition-colors ${
+                                (selectedNode.textAlign || 'left') === 'left' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <AlignLeft className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              title="Alinear al centro"
+                              onClick={() => onUpdateNode(selectedNode.id, { textAlign: 'center' })}
+                              className={`p-1.5 transition-colors border-l border-slate-200 ${
+                                selectedNode.textAlign === 'center' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <AlignCenter className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              title="Alinear a la derecha"
+                              onClick={() => onUpdateNode(selectedNode.id, { textAlign: 'right' })}
+                              className={`p-1.5 transition-colors border-l border-slate-200 ${
+                                selectedNode.textAlign === 'right' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <AlignRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <select
+                            value={selectedNode.fontSize || 14}
+                            onChange={(e) => onUpdateNode(selectedNode.id, { fontSize: parseInt(e.target.value, 10) })}
+                            className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium outline-none focus:border-blue-500 shadow-2xs"
+                          >
+                            <option value={12}>12 px</option>
+                            <option value={14}>14 px</option>
+                            <option value={16}>16 px</option>
+                            <option value={18}>18 px</option>
+                            <option value={20}>20 px</option>
+                            <option value={24}>24 px</option>
+                          </select>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-slate-500">Color:</span>
+                          <input
+                            type="color"
+                            value={selectedNode.textColor || '#0f172a'}
+                            onChange={(e) => onUpdateNode(selectedNode.id, { textColor: e.target.value })}
+                            className="w-5 h-5 rounded border border-slate-200 cursor-pointer p-0 shadow-2xs"
+                            title="Seleccionar color personalizado"
                           />
-                        ))}
+                          <div className="flex items-center gap-1 flex-1">
+                            {TEXT_COLOR_PRESETS.map((c) => (
+                              <button
+                                key={c}
+                                style={{ backgroundColor: c }}
+                                onClick={() => onUpdateNode(selectedNode.id, { textColor: c })}
+                                className="w-4 h-4 rounded-full border border-slate-300 shadow-2xs hover:scale-110 transition-transform"
+                                title={c}
+                              />
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => onUpdateNode(selectedNode.id, { textColor: undefined })}
+                            className="text-[10px] text-slate-400 hover:text-slate-700 underline"
+                          >
+                            Auto
+                          </button>
+                        </div>
                       </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. SECCIÓN: CUERPO DEL NODO */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
+                  <div className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors select-none">
+                    <button
+                      type="button"
+                      onClick={() => toggleContentSection('body')}
+                      className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                    >
+                      <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <FileText className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+                          Cuerpo del Nodo
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-normal block truncate">
+                          Explicación detallada o subtexto
+                        </span>
+                      </div>
+                    </button>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* Visibility Eye Toggle */}
                       <button
-                        onClick={() => onUpdateNode(selectedNode.id, { bodyColor: undefined })}
-                        className="text-[10px] text-slate-400 hover:text-slate-700 underline"
+                        type="button"
+                        title={selectedNode.hideBody ? 'Mostrar cuerpo en el lienzo' : 'Ocultar cuerpo en el lienzo'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpdateNode(selectedNode.id, { hideBody: !selectedNode.hideBody });
+                        }}
+                        className={`p-1 rounded-md transition-colors cursor-pointer ${
+                          selectedNode.hideBody
+                            ? 'bg-rose-100 text-rose-600 hover:bg-rose-200'
+                            : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                        }`}
                       >
-                        Auto
+                        {selectedNode.hideBody ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        selectedNode.hideBody
+                          ? 'text-rose-700 bg-rose-50'
+                          : selectedNode.body ? 'text-emerald-700 bg-emerald-100' : 'text-slate-400 bg-slate-100'
+                      }`}>
+                        {selectedNode.hideBody ? 'Oculto' : selectedNode.body ? 'Visible' : 'Vacío'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleContentSection('body')}
+                        className="p-0.5 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      >
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            contentSectionsOpen.body ? 'rotate-0' : '-rotate-90'
+                          }`}
+                        />
                       </button>
                     </div>
                   </div>
+
+                  {contentSectionsOpen.body && (
+                    <div className="px-3.5 pb-3.5 pt-1 space-y-2.5 border-t border-slate-200/60 animate-in fade-in duration-150">
+                      <textarea
+                        value={selectedNode.body || ''}
+                        onChange={(e) => onUpdateNode(selectedNode.id, { body: e.target.value || undefined })}
+                        rows={3}
+                        className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs font-normal text-slate-700 outline-none focus:border-blue-500 resize-y shadow-2xs"
+                        placeholder="Escribe una pequeña explicación o detalle sobre el título del nodo..."
+                      />
+
+                      <div className="space-y-2 pt-1 border-t border-slate-200/80">
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                          <span>Formato del Cuerpo</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                            <button
+                              title="Negrita"
+                              onClick={() => onUpdateNode(selectedNode.id, { bodyBold: !selectedNode.bodyBold })}
+                              className={`p-1.5 transition-colors ${
+                                selectedNode.bodyBold ? 'bg-blue-100 text-blue-700 font-bold' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <Bold className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              title="Cursiva"
+                              onClick={() => onUpdateNode(selectedNode.id, { bodyItalic: !selectedNode.bodyItalic })}
+                              className={`p-1.5 transition-colors border-l border-slate-200 ${
+                                selectedNode.bodyItalic ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <Italic className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                            <button
+                              title="Alinear a la izquierda"
+                              onClick={() => onUpdateNode(selectedNode.id, { bodyAlign: 'left' })}
+                              className={`p-1.5 transition-colors ${
+                                (selectedNode.bodyAlign || 'left') === 'left' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <AlignLeft className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              title="Alinear al centro"
+                              onClick={() => onUpdateNode(selectedNode.id, { bodyAlign: 'center' })}
+                              className={`p-1.5 transition-colors border-l border-slate-200 ${
+                                selectedNode.bodyAlign === 'center' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <AlignCenter className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              title="Alinear a la derecha"
+                              onClick={() => onUpdateNode(selectedNode.id, { bodyAlign: 'right' })}
+                              className={`p-1.5 transition-colors border-l border-slate-200 ${
+                                selectedNode.bodyAlign === 'right' ? 'bg-blue-100 text-blue-700' : 'hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              <AlignRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <select
+                            value={selectedNode.bodyFontSize || 11}
+                            onChange={(e) => onUpdateNode(selectedNode.id, { bodyFontSize: parseInt(e.target.value, 10) })}
+                            className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium outline-none focus:border-blue-500 shadow-2xs"
+                          >
+                            <option value={9}>9 px</option>
+                            <option value={10}>10 px</option>
+                            <option value={11}>11 px (por defecto)</option>
+                            <option value={12}>12 px</option>
+                            <option value={14}>14 px</option>
+                            <option value={16}>16 px</option>
+                          </select>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] text-slate-500">Color:</span>
+                          <input
+                            type="color"
+                            value={selectedNode.bodyColor || '#475569'}
+                            onChange={(e) => onUpdateNode(selectedNode.id, { bodyColor: e.target.value })}
+                            className="w-5 h-5 rounded border border-slate-200 cursor-pointer p-0 shadow-2xs"
+                            title="Seleccionar color personalizado"
+                          />
+                          <div className="flex items-center gap-1 flex-1">
+                            {TEXT_COLOR_PRESETS.map((c) => (
+                              <button
+                                key={c}
+                                style={{ backgroundColor: c }}
+                                onClick={() => onUpdateNode(selectedNode.id, { bodyColor: c })}
+                                className="w-4 h-4 rounded-full border border-slate-300 shadow-2xs hover:scale-110 transition-transform"
+                                title={c}
+                              />
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => onUpdateNode(selectedNode.id, { bodyColor: undefined })}
+                            className="text-[10px] text-slate-400 hover:text-slate-700 underline"
+                          >
+                            Auto
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* 3. IMAGEN DEL NODO (Insertar imagen JPG, PNG, SVG, WebP o URL) */}
-                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-3.5 space-y-3 shadow-2xs">
-                  {/* Hidden File Input for Attached Content Image Upload */}
+                {/* 3. SECCIÓN: IMAGEN DEL NODO */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
                   <input
                     ref={imageFileInputRef}
                     type="file"
@@ -721,277 +837,390 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                     }}
                   />
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors select-none">
+                    <button
+                      type="button"
+                      onClick={() => toggleContentSection('image')}
+                      className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                    >
                       <div className="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
                         <ImageIcon className="w-3.5 h-3.5" />
                       </div>
-                      <div>
-                        <label className="font-semibold text-slate-800 text-xs block">
-                          Imagen de Contenido del Nodo
+                      <div className="min-w-0">
+                        <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+                          Imagen de Contenido
                         </label>
-                        <span className="text-[10px] text-slate-400 font-normal block">
-                          Insertada en el cuerpo del nodo (arriba o abajo del texto)
+                        <span className="text-[10px] text-slate-400 font-normal block truncate">
+                          Insertada junto al texto
                         </span>
                       </div>
-                    </div>
-                    {selectedNode.imageUrl && (
-                      <span className="text-[9.5px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
-                        Adjunta
+                    </button>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* Visibility Eye Toggle */}
+                      <button
+                        type="button"
+                        title={selectedNode.hideImage ? 'Mostrar imagen en el lienzo' : 'Ocultar imagen en el lienzo'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onUpdateNode(selectedNode.id, { hideImage: !selectedNode.hideImage });
+                        }}
+                        className={`p-1 rounded-md transition-colors cursor-pointer ${
+                          selectedNode.hideImage
+                            ? 'bg-rose-100 text-rose-600 hover:bg-rose-200'
+                            : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                        }`}
+                      >
+                        {selectedNode.hideImage ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      </button>
+
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        selectedNode.hideImage
+                          ? 'text-rose-700 bg-rose-50'
+                          : selectedNode.imageUrl ? 'text-purple-700 bg-purple-100' : 'text-slate-400 bg-slate-100'
+                      }`}>
+                        {selectedNode.hideImage ? 'Oculta' : selectedNode.imageUrl ? 'Visible' : 'Sin imagen'}
                       </span>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => toggleContentSection('image')}
+                        className="p-0.5 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      >
+                        <ChevronDown
+                          className={`w-4 h-4 transition-transform duration-200 ${
+                            contentSectionsOpen.image ? 'rotate-0' : '-rotate-90'
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
 
-                  {selectedNode.imageUrl ? (
-                    <div className="space-y-3 pt-1 border-t border-slate-200/70">
-                      {/* Preview card */}
-                      <div className="relative rounded-xl border border-slate-200 bg-white p-2.5 flex items-center gap-3 shadow-2xs">
-                        <div className="w-14 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                          <img
-                            src={selectedNode.imageUrl}
-                            alt="Imagen de contenido"
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <span className="text-[11px] font-bold text-slate-800 block truncate">
-                            Imagen de contenido
-                          </span>
-                          <span className="text-[10px] text-slate-500 block truncate">
-                            Posición: {
-                              selectedNode.imagePosition === 'bottom' ? 'Debajo del texto' :
-                              selectedNode.imagePosition === 'left' ? 'A la izquierda' :
-                              selectedNode.imagePosition === 'right' ? 'A la derecha' :
-                              selectedNode.imagePosition === 'between' ? 'Entre título y cuerpo' :
-                              'Arriba del texto'
-                            }
-                          </span>
+                  {contentSectionsOpen.image && (
+                    <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-slate-200/60 animate-in fade-in duration-150">
+                      {selectedNode.imageUrl ? (
+                        <div className="space-y-3">
+                          <div className="relative rounded-xl border border-slate-200 bg-white p-2.5 flex items-center gap-3 shadow-2xs">
+                            <div className="w-14 h-14 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                              <img
+                                src={selectedNode.imageUrl}
+                                alt="Imagen de contenido"
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[11px] font-bold text-slate-800 block truncate">
+                                Imagen de contenido
+                              </span>
+                              <span className="text-[10px] text-slate-500 block truncate">
+                                Posición: {
+                                  selectedNode.imagePosition === 'bottom' ? 'Debajo del texto' :
+                                  selectedNode.imagePosition === 'left' ? 'A la izquierda' :
+                                  selectedNode.imagePosition === 'right' ? 'A la derecha' :
+                                  selectedNode.imagePosition === 'between' ? 'Entre título y cuerpo' :
+                                  'Arriba del texto'
+                                }
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => onUpdateNode(selectedNode.id, { imageUrl: undefined })}
+                                className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-red-600 hover:text-red-700 font-semibold hover:underline cursor-pointer"
+                              >
+                                <Trash2 className="w-3 h-3" /> Quitar imagen de contenido
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                              Posición respecto al texto
+                            </label>
+                            <div className="grid grid-cols-3 gap-1.5 mb-1.5">
+                              {[
+                                { id: 'top', label: '⬆️ Arriba', tip: 'Sobre el título del nodo' },
+                                { id: 'between', label: '↕️ Entre texto', tip: 'Entre el título y el cuerpo' },
+                                { id: 'bottom', label: '⬇️ Abajo', tip: 'Bajo el cuerpo del nodo' },
+                              ].map((pos) => (
+                                <button
+                                  key={pos.id}
+                                  type="button"
+                                  title={pos.tip}
+                                  onClick={() => {
+                                    onUpdateNode(selectedNode.id, { imagePosition: pos.id as any });
+                                  }}
+                                  className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer text-center truncate ${
+                                    (selectedNode.imagePosition || 'top') === pos.id
+                                      ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
+                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  {pos.label}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {[
+                                { id: 'left', label: '⬅️ Izquierda', tip: 'Al lado izquierdo del texto' },
+                                { id: 'right', label: '➡️ Derecha', tip: 'Al lado derecho del texto' },
+                              ].map((pos) => (
+                                <button
+                                  key={pos.id}
+                                  type="button"
+                                  title={pos.tip}
+                                  onClick={() => {
+                                    onUpdateNode(selectedNode.id, { imagePosition: pos.id as any });
+                                  }}
+                                  className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer text-center truncate ${
+                                    selectedNode.imagePosition === pos.id
+                                      ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
+                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  {pos.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex items-center justify-between text-[11px] mb-1">
+                              <span className="font-semibold text-slate-600">
+                                Ancho / Escala de la imagen
+                              </span>
+                              <span className="text-purple-700 font-mono font-bold text-[10.5px] bg-purple-50 px-1.5 py-0.2 rounded">
+                                {selectedNode.imageWidth || 140}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="60"
+                              max="400"
+                              step="10"
+                              value={selectedNode.imageWidth || 140}
+                              onChange={(e) => {
+                                onUpdateNode(selectedNode.id, { imageWidth: Number(e.target.value) });
+                              }}
+                              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                            />
+                            <div className="flex items-center justify-between text-[9px] text-slate-400 px-0.5 mt-0.5">
+                              <span>Pequeña (60px)</span>
+                              <span>Mediana (200px)</span>
+                              <span>Grande (400px)</span>
+                            </div>
+                          </div>
+
                           <button
                             type="button"
-                            onClick={() => onUpdateNode(selectedNode.id, { imageUrl: undefined })}
-                            className="mt-1 inline-flex items-center gap-1 text-[10.5px] text-red-600 hover:text-red-700 font-semibold hover:underline cursor-pointer"
+                            onClick={() => imageFileInputRef.current?.click()}
+                            className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                           >
-                            <Trash2 className="w-3 h-3" /> Quitar imagen de contenido
+                            <Upload className="w-3.5 h-3.5 text-purple-600" />
+                            <span>Cambiar Imagen de Contenido...</span>
                           </button>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => imageFileInputRef.current?.click()}
+                            className="w-full py-3 border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/50 hover:bg-purple-50/90 rounded-2xl text-purple-700 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
+                              <Upload className="w-4 h-4" />
+                            </div>
+                            <span>Subir Imagen desde el equipo</span>
+                            <span className="text-[10px] text-slate-400 font-normal">
+                              Archivos JPG, PNG, SVG o WebP
+                            </span>
+                          </button>
 
-                      {/* Image Position Selector: Top, Bottom, Left, Right, Between */}
-                      <div>
-                        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                          Posición respecto al texto
-                        </label>
-                        <div className="grid grid-cols-3 gap-1.5 mb-1.5">
-                          {[
-                            { id: 'top', label: '⬆️ Arriba', tip: 'Sobre el título del nodo' },
-                            { id: 'between', label: '↕️ Entre texto', tip: 'Entre el título y el cuerpo' },
-                            { id: 'bottom', label: '⬇️ Abajo', tip: 'Bajo el cuerpo del nodo' },
-                          ].map((pos) => (
-                            <button
-                              key={pos.id}
-                              type="button"
-                              title={pos.tip}
-                              onClick={() => {
-                                onUpdateNode(selectedNode.id, { imagePosition: pos.id as any });
+                          <div className="flex items-center gap-1.5 pt-0.5">
+                            <input
+                              type="url"
+                              placeholder="O pegar URL de imagen (Enter)..."
+                              className="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-purple-500 shadow-2xs"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const val = (e.target as HTMLInputElement).value.trim();
+                                  if (val) {
+                                    onUpdateNode(selectedNode.id, {
+                                      imageUrl: val,
+                                      imagePosition: selectedNode.imagePosition || 'top',
+                                      imageWidth: selectedNode.imageWidth || 140,
+                                    });
+                                    (e.target as HTMLInputElement).value = '';
+                                  }
+                                }
                               }}
-                              className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer text-center truncate ${
-                                (selectedNode.imagePosition || 'top') === pos.id
-                                  ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
-                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              {pos.label}
-                            </button>
-                          ))}
+                            />
+                          </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {[
-                            { id: 'left', label: '⬅️ Izquierda', tip: 'Al lado izquierdo del texto' },
-                            { id: 'right', label: '➡️ Derecha', tip: 'Al lado derecho del texto' },
-                          ].map((pos) => (
-                            <button
-                              key={pos.id}
-                              type="button"
-                              title={pos.tip}
-                              onClick={() => {
-                                onUpdateNode(selectedNode.id, { imagePosition: pos.id as any });
-                              }}
-                              className={`py-1.5 px-1 rounded-lg border text-[10.5px] font-semibold transition-all cursor-pointer text-center truncate ${
-                                selectedNode.imagePosition === pos.id
-                                  ? 'bg-purple-100 text-purple-800 border-purple-300 font-bold shadow-2xs'
-                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              {pos.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Image Width Slider */}
-                      <div>
-                        <div className="flex items-center justify-between text-[11px] mb-1">
-                          <span className="font-semibold text-slate-600">
-                            Ancho / Escala de la imagen
-                          </span>
-                          <span className="text-purple-700 font-mono font-bold text-[10.5px] bg-purple-50 px-1.5 py-0.2 rounded">
-                            {selectedNode.imageWidth || 140}px
-                          </span>
-                        </div>
-                        <input
-                          type="range"
-                          min="60"
-                          max="400"
-                          step="10"
-                          value={selectedNode.imageWidth || 140}
-                          onChange={(e) => {
-                            onUpdateNode(selectedNode.id, { imageWidth: Number(e.target.value) });
-                          }}
-                          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                        />
-                        <div className="flex items-center justify-between text-[9px] text-slate-400 px-0.5 mt-0.5">
-                          <span>Pequeña (60px)</span>
-                          <span>Mediana (200px)</span>
-                          <span>Grande (400px)</span>
-                        </div>
-                      </div>
-
-                      {/* Change image button */}
-                      <button
-                        type="button"
-                        onClick={() => imageFileInputRef.current?.click()}
-                        className="w-full py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                      >
-                        <Upload className="w-3.5 h-3.5 text-purple-600" />
-                        <span>Cambiar Imagen de Contenido...</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 pt-1 border-t border-slate-200/70">
-                      <button
-                        type="button"
-                        onClick={() => imageFileInputRef.current?.click()}
-                        className="w-full py-3 border-2 border-dashed border-purple-200 hover:border-purple-400 bg-purple-50/50 hover:bg-purple-50/90 rounded-2xl text-purple-700 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer group"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xs">
-                          <Upload className="w-4 h-4" />
-                        </div>
-                        <span>Subir Imagen desde el equipo</span>
-                        <span className="text-[10px] text-slate-400 font-normal">
-                          Archivos JPG, PNG, SVG o WebP
-                        </span>
-                      </button>
-
-                      {/* URL input fallback */}
-                      <div className="flex items-center gap-1.5 pt-0.5">
-                        <input
-                          type="url"
-                          placeholder="O pegar URL de imagen (Enter)..."
-                          className="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-purple-500 shadow-2xs"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              const val = (e.target as HTMLInputElement).value.trim();
-                              if (val) {
-                                onUpdateNode(selectedNode.id, {
-                                  imageUrl: val,
-                                  imagePosition: selectedNode.imagePosition || 'top',
-                                  imageWidth: selectedNode.imageWidth || 140,
-                                });
-                                (e.target as HTMLInputElement).value = '';
-                              }
-                            }
-                          }}
-                        />
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
 
-                {/* 4. METADATA: Enlace, Progreso y Etiquetas */}
-                <div className="space-y-3 pt-2">
-                  {/* Hyperlink */}
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Enlace Web o Correo</label>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="url"
-                        value={selectedNode.link || ''}
-                        onChange={(e) => onUpdateNode(selectedNode.id, { link: e.target.value || undefined })}
-                        placeholder="https://ejemplo.com"
-                        className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-blue-500"
-                      />
-                      {selectedNode.link && (
-                        <a
-                          href={selectedNode.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Progress Percentage */}
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Progreso de Tarea</label>
-                    <div className="flex items-center gap-1.5">
-                      {[undefined, 0, 25, 50, 75, 100].map((p) => (
-                        <button
-                          key={String(p)}
-                          onClick={() => onUpdateNode(selectedNode.id, { progress: p })}
-                          className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
-                            selectedNode.progress === p
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'border-slate-200 hover:bg-slate-50 text-slate-600'
-                          }`}
-                        >
-                          {p === undefined ? '—' : `${p}%`}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Tags */}
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Etiquetas (#Tags en parte baja)</label>
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <input
-                        type="text"
-                        value={newTagInput}
-                        onChange={(e) => setNewTagInput(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
-                        placeholder="Nueva etiqueta..."
-                        className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-blue-500"
-                      />
-                      <button
-                        onClick={handleAddTag}
-                        className="px-2.5 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-1"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Agregar
-                      </button>
-                    </div>
-
-                    {selectedNode.tags && selectedNode.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {selectedNode.tags.map((t) => (
-                          <span
-                            key={t}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-[11px]"
-                          >
-                            #{t}
-                            <button
-                              onClick={() => handleRemoveTag(t)}
-                              className="hover:text-red-500 ml-0.5"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
+                {/* 4. SECCIÓN: METADATOS Y ENLACE */}
+                <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
+                  <button
+                    type="button"
+                    onClick={() => toggleContentSection('metadata')}
+                    className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors cursor-pointer select-none"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <LinkIcon className="w-3.5 h-3.5" />
                       </div>
-                    )}
-                  </div>
+                      <div className="min-w-0">
+                        <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+                          Enlace, Progreso y Tags
+                        </label>
+                        <span className="text-[10px] text-slate-400 font-normal block truncate">
+                          Metadatos asociados al nodo
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                        {selectedNode.link ? 'Con link' : selectedNode.tags?.length ? `${selectedNode.tags.length} tags` : 'General'}
+                      </span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          contentSectionsOpen.metadata ? 'rotate-0' : '-rotate-90'
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  {contentSectionsOpen.metadata && (
+                    <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-slate-200/60 animate-in fade-in duration-150">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="font-semibold text-slate-700 text-xs">Enlace Web o Correo</label>
+                          {selectedNode.link && (
+                            <button
+                              type="button"
+                              title={selectedNode.hideLink ? 'Mostrar insignia de enlace en el nodo' : 'Ocultar insignia de enlace'}
+                              onClick={() => onUpdateNode(selectedNode.id, { hideLink: !selectedNode.hideLink })}
+                              className={`p-1 rounded text-xs flex items-center gap-1 cursor-pointer transition-colors ${
+                                selectedNode.hideLink ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              }`}
+                            >
+                              {selectedNode.hideLink ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              <span className="text-[10px]">{selectedNode.hideLink ? 'Oculto' : 'Visible'}</span>
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="url"
+                            value={selectedNode.link || ''}
+                            onChange={(e) => onUpdateNode(selectedNode.id, { link: e.target.value || undefined })}
+                            placeholder="https://ejemplo.com"
+                            className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-blue-500"
+                          />
+                          {selectedNode.link && (
+                            <a
+                              href={selectedNode.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="font-semibold text-slate-700 text-xs">Progreso de Tarea</label>
+                          {selectedNode.progress !== undefined && (
+                            <button
+                              type="button"
+                              title={selectedNode.hideProgress ? 'Mostrar progreso en el nodo' : 'Ocultar progreso'}
+                              onClick={() => onUpdateNode(selectedNode.id, { hideProgress: !selectedNode.hideProgress })}
+                              className={`p-1 rounded text-xs flex items-center gap-1 cursor-pointer transition-colors ${
+                                selectedNode.hideProgress ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              }`}
+                            >
+                              {selectedNode.hideProgress ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              <span className="text-[10px]">{selectedNode.hideProgress ? 'Oculto' : 'Visible'}</span>
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {[undefined, 0, 25, 50, 75, 100].map((p) => (
+                            <button
+                              key={String(p)}
+                              onClick={() => onUpdateNode(selectedNode.id, { progress: p })}
+                              className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+                                selectedNode.progress === p
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'border-slate-200 hover:bg-slate-50 text-slate-600'
+                              }`}
+                            >
+                              {p === undefined ? '—' : `${p}%`}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="font-semibold text-slate-700 text-xs">Etiquetas (#Tags en parte baja)</label>
+                          {selectedNode.tags && selectedNode.tags.length > 0 && (
+                            <button
+                              type="button"
+                              title={selectedNode.hideTags ? 'Mostrar etiquetas en el nodo' : 'Ocultar etiquetas en el nodo'}
+                              onClick={() => onUpdateNode(selectedNode.id, { hideTags: !selectedNode.hideTags })}
+                              className={`p-1 rounded text-xs flex items-center gap-1 cursor-pointer transition-colors ${
+                                selectedNode.hideTags ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              }`}
+                            >
+                              {selectedNode.hideTags ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              <span className="text-[10px]">{selectedNode.hideTags ? 'Ocultas' : 'Visibles'}</span>
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <input
+                            type="text"
+                            value={newTagInput}
+                            onChange={(e) => setNewTagInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+                            placeholder="Nueva etiqueta..."
+                            className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-blue-500"
+                          />
+                          <button
+                            onClick={handleAddTag}
+                            className="px-2.5 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-1"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Agregar
+                          </button>
+                        </div>
+
+                        {selectedNode.tags && selectedNode.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedNode.tags.map((t) => (
+                              <span
+                                key={t}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-[11px]"
+                              >
+                                #{t}
+                                <button
+                                  onClick={() => handleRemoveTag(t)}
+                                  className="hover:text-red-500 ml-0.5"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1341,41 +1570,192 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
 
                       {/* 2. OPCIÓN: COLOR SÓLIDO */}
                       {(!selectedNode.bgType || selectedNode.bgType === 'color') && (
-                        <div className="space-y-2">
+                        <div className="space-y-3 pt-1 border-t border-slate-200/70 animate-in fade-in duration-150">
+                          {/* Header with HEX code and native color picker circle */}
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="color"
-                                value={selectedNode.color || '#ffffff'}
-                                onChange={(e) => onUpdateNode(selectedNode.id, { color: e.target.value })}
-                                className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0"
-                              />
-                              <span className="text-[11px] font-mono text-slate-600">
+                            <label className="text-[11px] font-semibold text-slate-700">
+                              Color de Fondo
+                            </label>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[10px] font-mono text-slate-400 uppercase">
                                 {selectedNode.color || '#ffffff'}
                               </span>
+                              <label className="relative cursor-pointer">
+                                <input
+                                  type="color"
+                                  value={selectedNode.color?.startsWith('#') && selectedNode.color.length === 7 ? selectedNode.color : '#ffffff'}
+                                  onChange={(e) => onUpdateNode(selectedNode.id, { color: e.target.value })}
+                                  className="sr-only"
+                                />
+                                <div
+                                  style={{ backgroundColor: selectedNode.color || '#ffffff' }}
+                                  className="w-5 h-5 rounded-lg border border-slate-300 shadow-2xs flex items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+                                />
+                              </label>
                             </div>
                           </div>
+
+                          {/* Palette swatches for node background */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {[
+                              '#ffffff', '#f8fafc', '#eff6ff', '#f0fdf4', '#fefce8', '#fff7ed', '#faf5ff', '#ecfeff',
+                              '#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#475569', '#0f172a'
+                            ].map((c) => {
+                              const currentColor = (selectedNode.color || '#ffffff').toLowerCase();
+                              const isSelected = currentColor === c.toLowerCase();
+                              return (
+                                <button
+                                  key={c}
+                                  type="button"
+                                  style={{ backgroundColor: c }}
+                                  onClick={() => onUpdateNode(selectedNode.id, { color: c })}
+                                  className={`w-6 h-6 rounded-lg border transition-transform cursor-pointer ${
+                                    isSelected
+                                      ? 'ring-2 ring-emerald-500 scale-110 border-white shadow-xs'
+                                      : 'border-slate-300/80 hover:scale-105'
+                                  }`}
+                                  title={c}
+                                />
+                              );
+                            })}
+                          </div>
+
+                          {/* Reset to theme default button if custom color is applied */}
+                          {selectedNode.color && (
+                            <button
+                              type="button"
+                              onClick={() => onUpdateNode(selectedNode.id, { color: undefined })}
+                              className="inline-flex items-center gap-1 text-[10px] text-slate-500 hover:text-slate-800 font-semibold hover:underline cursor-pointer pt-1"
+                            >
+                              <RotateCcw className="w-3 h-3" /> Restablecer color por defecto
+                            </button>
+                          )}
                         </div>
                       )}
 
                       {/* 3. OPCIÓN: DEGRADADO */}
                       {selectedNode.bgType === 'gradient' && (
-                        <div className="space-y-3 pt-1 border-t border-slate-200/70">
-                          <div className="grid grid-cols-2 gap-2">
-                            <input
-                              type="color"
-                              value={selectedNode.gradientColor1 || selectedNode.color || '#3b82f6'}
-                              onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor1: e.target.value })}
-                              className="w-full h-8 rounded-lg cursor-pointer"
-                            />
-                            <input
-                              type="color"
-                              value={selectedNode.gradientColor2 || '#8b5cf6'}
-                              onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor2: e.target.value })}
-                              className="w-full h-8 rounded-lg cursor-pointer"
-                            />
+                        <div className="space-y-3 pt-1 border-t border-slate-200/70 animate-in fade-in duration-150">
+                          {/* Color 1 Selector */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[11px] font-semibold text-slate-700">
+                                Color Inicial (1)
+                              </label>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-mono text-slate-400 uppercase">
+                                  {selectedNode.gradientColor1 || selectedNode.color || '#3b82f6'}
+                                </span>
+                                <label className="relative cursor-pointer">
+                                  <input
+                                    type="color"
+                                    value={selectedNode.gradientColor1 || selectedNode.color || '#3b82f6'}
+                                    onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor1: e.target.value })}
+                                    className="sr-only"
+                                  />
+                                  <div
+                                    style={{ backgroundColor: selectedNode.gradientColor1 || selectedNode.color || '#3b82f6' }}
+                                    className="w-5 h-5 rounded-lg border border-slate-300 shadow-2xs hover:scale-105 transition-transform cursor-pointer"
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                            {/* Quick swatches for Color 1 */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#0f172a'].map((c) => (
+                                <button
+                                  key={c}
+                                  type="button"
+                                  style={{ backgroundColor: c }}
+                                  onClick={() => onUpdateNode(selectedNode.id, { gradientColor1: c })}
+                                  className={`w-5 h-5 rounded-md border transition-transform cursor-pointer ${
+                                    (selectedNode.gradientColor1 || '#3b82f6').toLowerCase() === c.toLowerCase()
+                                      ? 'ring-2 ring-purple-500 scale-110 border-white'
+                                      : 'border-slate-300 hover:scale-105'
+                                  }`}
+                                />
+                              ))}
+                            </div>
                           </div>
-                          <div>
+
+                          {/* Color 2 Selector */}
+                          <div className="space-y-1.5 pt-2 border-t border-slate-200/60">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[11px] font-semibold text-slate-700">
+                                Color Final (2)
+                              </label>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-mono text-slate-400 uppercase">
+                                  {selectedNode.gradientColor2 || '#8b5cf6'}
+                                </span>
+                                <label className="relative cursor-pointer">
+                                  <input
+                                    type="color"
+                                    value={selectedNode.gradientColor2 || '#8b5cf6'}
+                                    onChange={(e) => onUpdateNode(selectedNode.id, { gradientColor2: e.target.value })}
+                                    className="sr-only"
+                                  />
+                                  <div
+                                    style={{ backgroundColor: selectedNode.gradientColor2 || '#8b5cf6' }}
+                                    className="w-5 h-5 rounded-lg border border-slate-300 shadow-2xs hover:scale-105 transition-transform cursor-pointer"
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                            {/* Quick swatches for Color 2 */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {['#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#10b981', '#06b6d4', '#6366f1', '#1e293b'].map((c) => (
+                                <button
+                                  key={c}
+                                  type="button"
+                                  style={{ backgroundColor: c }}
+                                  onClick={() => onUpdateNode(selectedNode.id, { gradientColor2: c })}
+                                  className={`w-5 h-5 rounded-md border transition-transform cursor-pointer ${
+                                    (selectedNode.gradientColor2 || '#8b5cf6').toLowerCase() === c.toLowerCase()
+                                      ? 'ring-2 ring-purple-500 scale-110 border-white'
+                                      : 'border-slate-300 hover:scale-105'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Gradient Presets */}
+                          <div className="pt-2 border-t border-slate-200/60">
+                            <label className="text-[11px] font-semibold text-slate-700 block mb-1.5">
+                              Combinaciones Populares
+                            </label>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {[
+                                { name: 'Océano', c1: '#2563eb', c2: '#06b6d4' },
+                                { name: 'Atardecer', c1: '#f97316', c2: '#ec4899' },
+                                { name: 'Esmeralda', c1: '#059669', c2: '#10b981' },
+                                { name: 'Neón', c1: '#8b5cf6', c2: '#f43f5e' },
+                                { name: 'Índigo', c1: '#4f46e5', c2: '#7c3aed' },
+                                { name: 'Carbón', c1: '#1e293b', c2: '#0f172a' },
+                              ].map((preset) => (
+                                <button
+                                  key={preset.name}
+                                  type="button"
+                                  onClick={() =>
+                                    onUpdateNode(selectedNode.id, {
+                                      gradientColor1: preset.c1,
+                                      gradientColor2: preset.c2,
+                                    })
+                                  }
+                                  style={{
+                                    background: `linear-gradient(to right, ${preset.c1}, ${preset.c2})`,
+                                  }}
+                                  className="h-6 rounded-lg text-[9.5px] font-bold text-white shadow-2xs hover:scale-105 transition-transform cursor-pointer text-center leading-6"
+                                >
+                                  {preset.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Direction selector */}
+                          <div className="pt-2 border-t border-slate-200/60">
                             <label className="text-[11px] font-semibold text-slate-700 block mb-1">
                               Dirección del Degradado
                             </label>
@@ -1409,18 +1789,177 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
                         </div>
                       )}
 
-                      {/* 4. OPCIÓN: PATRÓN */}
+                      {/* 4. OPCIÓN: PATRÓN / TRAMA */}
                       {selectedNode.bgType === 'pattern' && (
-                        <div className="space-y-3 pt-1 border-t border-slate-200/70">
-                          <input
-                            type="range"
-                            min="8"
-                            max="36"
-                            step="2"
-                            value={selectedNode.nodePatternSize || 16}
-                            onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternSize: Number(e.target.value) })}
-                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                          />
+                        <div className="space-y-3 pt-1 border-t border-slate-200/70 animate-in fade-in duration-150">
+                          {/* 1. Selector de estilo de patrón */}
+                          <div>
+                            <label className="text-[11px] font-semibold text-slate-700 block mb-1.5">
+                              Estilo de Trama / Patrón
+                            </label>
+                            <div className="grid grid-cols-4 gap-1">
+                              {[
+                                { id: 'dots', label: 'Puntos', icon: '⁖' },
+                                { id: 'lines', label: 'Líneas', icon: '≡' },
+                                { id: 'squares', label: 'Cuadrícula', icon: '▦' },
+                                { id: 'stripes', label: 'Rayas', icon: '▨' },
+                                { id: 'triangles', label: 'Triángulos', icon: '▲' },
+                                { id: 'hexagons', label: 'Hexágonos', icon: '⬡' },
+                                { id: 'cross', label: 'Cruces', icon: '✚' },
+                              ].map((pat) => {
+                                const currentPat = selectedNode.nodePattern || 'dots';
+                                const isSelected = currentPat === pat.id;
+                                return (
+                                  <button
+                                    key={pat.id}
+                                    type="button"
+                                    onClick={() => onUpdateNode(selectedNode.id, { nodePattern: pat.id as NodePatternStyle })}
+                                    className={`py-1.5 px-1 rounded-xl border text-center transition-all cursor-pointer ${
+                                      isSelected
+                                        ? 'bg-emerald-50 border-emerald-500 text-emerald-800 font-bold shadow-2xs'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                    }`}
+                                  >
+                                    <span className="text-xs font-bold block">{pat.icon}</span>
+                                    <span className="text-[9.5px] block leading-tight truncate">{pat.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* 2. Color de la Trama / Líneas */}
+                          <div className="space-y-1.5 pt-2 border-t border-slate-200/60">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[11px] font-semibold text-slate-700">
+                                Color de Líneas / Trama
+                              </label>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-mono text-slate-400 uppercase">
+                                  {selectedNode.nodePatternColor || '#475569'}
+                                </span>
+                                <label className="relative cursor-pointer">
+                                  <input
+                                    type="color"
+                                    value={selectedNode.nodePatternColor || '#475569'}
+                                    onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternColor: e.target.value })}
+                                    className="sr-only"
+                                  />
+                                  <div
+                                    style={{ backgroundColor: selectedNode.nodePatternColor || '#475569' }}
+                                    className="w-5 h-5 rounded-lg border border-slate-300 shadow-2xs hover:scale-105 transition-transform cursor-pointer"
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                            {/* Palette swatches for pattern color */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {[
+                                '#94a3b8', '#cbd5e1', '#64748b', '#3b82f6', '#38bdf8', '#06b6d4',
+                                '#10b981', '#22c55e', '#f59e0b', '#fbbf24', '#8b5cf6', '#a855f7',
+                                '#ec4899', '#ffffff', '#475569', '#334155'
+                              ].map((pc) => {
+                                const currentPC = (selectedNode.nodePatternColor || '#475569').toLowerCase();
+                                return (
+                                  <button
+                                    key={pc}
+                                    type="button"
+                                    style={{ backgroundColor: pc }}
+                                    onClick={() => onUpdateNode(selectedNode.id, { nodePatternColor: pc })}
+                                    className={`w-6 h-6 rounded-lg border transition-transform cursor-pointer ${
+                                      currentPC === pc.toLowerCase()
+                                        ? 'ring-2 ring-emerald-500 scale-110 border-white shadow-xs'
+                                        : 'border-slate-300/80 hover:scale-105'
+                                    }`}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* 3. Tamaño / Espaciado de Trama */}
+                          <div className="space-y-1 pt-2 border-t border-slate-200/60">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[11px] font-semibold text-slate-700">
+                                Tamaño / Espaciado de Trama
+                              </label>
+                              <span className="text-[10px] font-medium text-slate-400">
+                                {selectedNode.nodePatternSize || 16} px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="8"
+                              max="36"
+                              step="2"
+                              value={selectedNode.nodePatternSize || 16}
+                              onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternSize: Number(e.target.value) })}
+                              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600 focus:outline-none"
+                            />
+                            <div className="grid grid-cols-4 gap-1 pt-1">
+                              {[
+                                { label: 'Fino', val: 10 },
+                                { label: 'Estándar', val: 16 },
+                                { label: 'Medio', val: 24 },
+                                { label: 'Grande', val: 32 },
+                              ].map((p) => (
+                                <button
+                                  key={p.label}
+                                  type="button"
+                                  onClick={() => onUpdateNode(selectedNode.id, { nodePatternSize: p.val })}
+                                  className={`py-1 rounded-lg border text-[10px] transition-all cursor-pointer ${
+                                    (selectedNode.nodePatternSize || 16) === p.val
+                                      ? 'bg-emerald-50 border-emerald-400 text-emerald-800 font-bold'
+                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  {p.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* 4. Opacidad / Visibilidad de Trama */}
+                          <div className="space-y-1 pt-2 border-t border-slate-200/60">
+                            <div className="flex items-center justify-between">
+                              <label className="text-[11px] font-semibold text-slate-700">
+                                Opacidad / Visibilidad de Trama
+                              </label>
+                              <span className="text-[10px] font-medium text-slate-400">
+                                {Math.round((selectedNode.nodePatternOpacity ?? 0.4) * 100)}%
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0.1"
+                              max="1"
+                              step="0.05"
+                              value={selectedNode.nodePatternOpacity ?? 0.4}
+                              onChange={(e) => onUpdateNode(selectedNode.id, { nodePatternOpacity: Number(e.target.value) })}
+                              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600 focus:outline-none"
+                            />
+                            <div className="grid grid-cols-4 gap-1 pt-1">
+                              {[
+                                { label: 'Sutil (20%)', val: 0.2 },
+                                { label: 'Equilibrado (40%)', val: 0.4 },
+                                { label: 'Marcado (70%)', val: 0.7 },
+                                { label: 'Máximo (100%)', val: 1.0 },
+                              ].map((p) => (
+                                <button
+                                  key={p.label}
+                                  type="button"
+                                  onClick={() => onUpdateNode(selectedNode.id, { nodePatternOpacity: p.val })}
+                                  className={`py-1 rounded-lg border text-[9.5px] transition-all cursor-pointer ${
+                                    Math.abs((selectedNode.nodePatternOpacity ?? 0.4) - p.val) < 0.05
+                                      ? 'bg-emerald-50 border-emerald-400 text-emerald-800 font-bold'
+                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  {p.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       )}
 
