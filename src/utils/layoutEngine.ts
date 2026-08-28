@@ -1819,10 +1819,16 @@ export function computeCloudBounds(
 
   const basePadding = 18;
   const padding = basePadding + maxChildCloudExtra;
+  const extraPadX = node.cloud.paddingX !== undefined ? node.cloud.paddingX : 0;
+  const extraPadY = node.cloud.paddingY !== undefined ? node.cloud.paddingY : 0;
+
+  const finalPadX = Math.max(4, padding + extraPadX);
+  const finalPadY = Math.max(4, padding + extraPadY);
+
   return {
-    x: minX - padding,
-    y: minY - padding,
-    width: maxX - minX + padding * 2,
-    height: maxY - minY + padding * 2,
+    x: minX - finalPadX,
+    y: minY - finalPadY,
+    width: maxX - minX + finalPadX * 2,
+    height: maxY - minY + finalPadY * 2,
   };
 }

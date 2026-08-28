@@ -27,12 +27,46 @@ export type LayoutType =
 
 export type NodeSide = 'left' | 'right' | 'root' | 'bottom' | 'top' | 'radial' | 'circular';
 
-export type CloudShape = 'arc' | 'rectangle' | 'round-rectangle' | 'star';
+export type CloudShape =
+  | 'arc'
+  | 'rectangle'
+  | 'round-rectangle'
+  | 'star'
+  | 'cloud-scallop'
+  | 'bubble'
+  | 'hexagon'
+  | 'oval';
 
 export interface NodeCloud {
   enabled: boolean;
   color: string;
   shape: CloudShape;
+  opacity?: number; // 0 to 1
+  
+  // Background types (Solid, Gradient, Pattern, Image)
+  bgType?: 'color' | 'gradient' | 'pattern' | 'image';
+  gradientColor1?: string;
+  gradientColor2?: string;
+  gradientDirection?: NodeGradientDirection;
+  cloudPattern?: NodePatternStyle;
+  cloudPatternColor?: string;
+  cloudPatternSize?: number;
+  cloudPatternOpacity?: number;
+
+  // Background image
+  bgImageUrl?: string;
+  bgImageMode?: NodeBgImageMode;
+  bgImageOpacity?: number;
+
+  // Dimension adjustments (ancho y alto extra de la nube)
+  paddingX?: number; // margen horizontal extra (-100 a +300 px)
+  paddingY?: number; // margen vertical extra (-100 a +300 px)
+
+  // Border & Stroke Options
+  borderColor?: string;
+  borderWidth?: number;
+  borderDash?: 'solid' | 'dashed' | 'dotted';
+  shadow?: boolean;
 }
 
 export type NodeBackgroundType = 'color' | 'transparent' | 'gradient' | 'pattern' | 'image';

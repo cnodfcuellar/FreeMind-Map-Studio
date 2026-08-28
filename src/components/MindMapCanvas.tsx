@@ -29,6 +29,9 @@ import {
   Copy,
   Scissors,
   Clipboard,
+  Sparkles,
+  GitFork,
+  MoveHorizontal,
 } from 'lucide-react';
 import { calculateConnectorGeometry } from '../utils/connectorUtils';
 
@@ -53,6 +56,8 @@ interface MindMapCanvasProps {
   onCopyNode: (id: string) => void;
   onCutNode: (id: string) => void;
   onPasteNode: (targetParentId: string) => void;
+  onApplyStyleToChildren?: (nodeId: string) => void;
+  onApplyStyleToSiblings?: (nodeId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
 }
 
@@ -84,6 +89,8 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   onCopyNode,
   onCutNode,
   onPasteNode,
+  onApplyStyleToChildren,
+  onApplyStyleToSiblings,
   onUpdateConnector,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -659,6 +666,11 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
 
           {/* Group 1: Clouds (rendered behind edges and nodes, outer clouds first) */}
           <g id="clouds-group">
+            {/* Filter for cloud drop shadow */}
+            <filter id="cloud-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#0f172a" floodOpacity="0.08" />
+            </filter>
+
             {(Object.values(mindMap.nodes) as MindNode[])
               .filter(node => Boolean(node.cloud?.enabled))
               .map(node => ({
@@ -668,33 +680,297 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               .filter((item): item is { node: MindNode; bounds: NonNullable<ReturnType<typeof computeCloudBounds>> } => Boolean(item.bounds))
               .sort((a, b) => (b.bounds.width * b.bounds.height) - (a.bounds.width * a.bounds.height))
               .map(({ node, bounds }) => {
-                const cloudColor = node.cloud?.color || 'rgba(59, 130, 246, 0.08)';
-                let strokeColor = '#93c5fd';
-                if (cloudColor.startsWith('rgba')) {
-                  strokeColor = cloudColor.replace(/[\d.]+\)$/, '0.45)');
-                } else if (cloudColor.startsWith('rgb')) {
-                  strokeColor = cloudColor.replace('rgb', 'rgba').replace(')', ', 0.45)');
-                } else if (cloudColor.startsWith('#')) {
-                  strokeColor = cloudColor;
+                const cloud = node.cloud!;
+                const shape = cloud.shape || 'cloud-scallop';
+                // Extract clean hex/rgb color if it was stored as rgba string
+                let rawColor = cloud.color || '#3b82f6';
+                let calculatedOpacity = cloud.opacity !== undefined ? cloud.opacity : 0.08;
+                if (rawColor.startsWith('rgba')) {
+                  const match = rawColor.match(/rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/);
+                  if (match) {
+                    rawColor = `rgb(${match[1]}, ${match[2]}, ${match[3]})`;
+                    if (cloud.opacity === undefined) {
+                      calculatedOpacity = Math.min(0.12, parseFloat(match[4]));
+                    }
+                  }
+                }
+                const opacity = calculatedOpacity;
+                const bgType = cloud.bgType || 'color';
+
+                const strokeColor = cloud.borderColor || rawColor || '#3b82f6';
+                const strokeWidth = cloud.borderWidth !== undefined ? cloud.borderWidth : 1.5;
+                const strokeDash = cloud.borderDash || 'dashed';
+                const strokeDasharray =
+                  strokeDash === 'dashed'
+                    ? '8 5'
+                    : strokeDash === 'dotted'
+                    ? '2 4'
+                    : undefined;
+
+                // Fill color or SVG definitions
+                let fillVal = rawColor;
+                const gradId = `cloud-grad-${node.id}`;
+                const patternId = `cloud-pat-${node.id}`;
+                const clipId = `cloud-clip-${node.id}`;
+
+                if (bgType === 'gradient') {
+                  fillVal = `url(#${gradId})`;
+                } else if (bgType === 'pattern') {
+                  fillVal = `url(#${patternId})`;
                 }
 
-                const shape = node.cloud?.shape || 'round-rectangle';
-                const cornerRadius = shape === 'rectangle' ? 8 : shape === 'arc' ? 32 : 20;
+                // Path generators for 8 geometric shapes
+                const x = bounds.x;
+                const y = bounds.y;
+                const w = bounds.width;
+                const h = bounds.height;
+                const cx = x + w / 2;
+                const cy = y + h / 2;
+
+                let shapePath = '';
+                if (shape === 'rectangle') {
+                  shapePath = `M ${x} ${y} h ${w} v ${h} h ${-w} Z`;
+                } else if (shape === 'round-rectangle') {
+                  const r = Math.min(24, Math.min(w, h) / 4);
+                  shapePath = `M ${x + r} ${y} h ${w - 2 * r} a ${r} ${r} 0 0 1 ${r} ${r} v ${h - 2 * r} a ${r} ${r} 0 0 1 ${-r} ${r} h ${-(w - 2 * r)} a ${r} ${r} 0 0 1 ${-r} ${-r} v ${-(h - 2 * r)} a ${r} ${r} 0 0 1 ${r} ${-r} Z`;
+                } else if (shape === 'arc') {
+                  const r = Math.min(36, Math.min(w, h) / 3);
+                  shapePath = `M ${x + r} ${y} h ${w - 2 * r} a ${r} ${r} 0 0 1 ${r} ${r} v ${h - 2 * r} a ${r} ${r} 0 0 1 ${-r} ${r} h ${-(w - 2 * r)} a ${r} ${r} 0 0 1 ${-r} ${-r} v ${-(h - 2 * r)} a ${r} ${r} 0 0 1 ${r} ${-r} Z`;
+                } else if (shape === 'bubble') {
+                  // Globo de diálogo estilo cómic orgánico ultra-redondeado con cola prominente
+                  const r = Math.min(w / 2, h / 2, 48);
+                  const tailW = Math.max(32, Math.min(56, w * 0.25));
+                  const tailH = Math.max(28, Math.min(48, h * 0.35));
+                  const tailBaseX = x + Math.max(r, Math.min(w * 0.25, 60));
+                  const tailTipX = tailBaseX - 22;
+                  const tailTipY = y + h + tailH;
+
+                  shapePath = `
+                    M ${x + r} ${y}
+                    h ${w - 2 * r}
+                    a ${r} ${r} 0 0 1 ${r} ${r}
+                    v ${h - 2 * r}
+                    a ${r} ${r} 0 0 1 ${-r} ${r}
+                    H ${tailBaseX + tailW}
+                    L ${tailTipX} ${tailTipY}
+                    L ${tailBaseX} ${y + h}
+                    H ${x + r}
+                    a ${r} ${r} 0 0 1 ${-r} ${-r}
+                    v ${-(h - 2 * r)}
+                    a ${r} ${r} 0 0 1 ${r} ${-r}
+                    Z
+                  `.replace(/\s+/g, ' ').trim();
+                } else if (shape === 'oval') {
+                  const rx = w / 2;
+                  const ry = h / 2;
+                  shapePath = `M ${cx - rx} ${cy} a ${rx} ${ry} 0 1 0 ${rx * 2} 0 a ${rx} ${ry} 0 1 0 ${-rx * 2} 0 Z`;
+                } else if (shape === 'hexagon') {
+                  const cut = Math.min(32, w / 5);
+                  shapePath = `M ${x + cut} ${y} L ${x + w - cut} ${y} L ${x + w} ${cy} L ${x + w - cut} ${y + h} L ${x + cut} ${y + h} L ${x} ${cy} Z`;
+                } else if (shape === 'star') {
+                  const pts: string[] = [];
+                  const numPoints = 12;
+                  const rxOuter = w / 2;
+                  const ryOuter = h / 2;
+                  const rxInner = rxOuter * 0.88;
+                  const ryInner = ryOuter * 0.88;
+                  for (let p = 0; p < numPoints * 2; p++) {
+                    const angle = (p * Math.PI) / numPoints - Math.PI / 2;
+                    const rxVal = p % 2 === 0 ? rxOuter : rxInner;
+                    const ryVal = p % 2 === 0 ? ryOuter : ryInner;
+                    pts.push(`${cx + rxVal * Math.cos(angle)},${cy + ryVal * Math.sin(angle)}`);
+                  }
+                  shapePath = `M ${pts.join(' L ')} Z`;
+                } else {
+                  // shape === 'cloud-scallop' (Festoneado de nubes con arcos esponjosos)
+                  const step = Math.max(28, Math.min(44, (w + h) / 16));
+                  const nx = Math.max(2, Math.round(w / step));
+                  const ny = Math.max(2, Math.round(h / step));
+                  const stepX = w / nx;
+                  const stepY = h / ny;
+
+                  const scallops: string[] = [`M ${x} ${y + stepY / 2}`];
+                  // Top edge
+                  for (let i = 0; i < nx; i++) {
+                    const x1 = x + i * stepX;
+                    const x2 = x + (i + 1) * stepX;
+                    scallops.push(`Q ${x1 + stepX / 2} ${y - stepX * 0.28}, ${x2} ${y}`);
+                  }
+                  // Right edge
+                  for (let i = 0; i < ny; i++) {
+                    const y1 = y + i * stepY;
+                    const y2 = y + (i + 1) * stepY;
+                    scallops.push(`Q ${x + w + stepY * 0.28} ${y1 + stepY / 2}, ${x + w} ${y2}`);
+                  }
+                  // Bottom edge
+                  for (let i = 0; i < nx; i++) {
+                    const x1 = x + w - i * stepX;
+                    const x2 = x + w - (i + 1) * stepX;
+                    scallops.push(`Q ${x1 - stepX / 2} ${y + h + stepX * 0.28}, ${x2} ${y + h}`);
+                  }
+                  // Left edge
+                  for (let i = 0; i < ny; i++) {
+                    const y1 = y + h - i * stepY;
+                    const y2 = y + h - (i + 1) * stepY;
+                    scallops.push(`Q ${x - stepY * 0.28} ${y1 - stepY / 2}, ${x} ${y2}`);
+                  }
+                  shapePath = `${scallops.join(' ')} Z`;
+                }
 
                 return (
-                  <rect
-                    key={`cloud-${node.id}`}
-                    x={bounds.x}
-                    y={bounds.y}
-                    width={bounds.width}
-                    height={bounds.height}
-                    rx={cornerRadius}
-                    ry={cornerRadius}
-                    fill={cloudColor}
-                    stroke={strokeColor}
-                    strokeWidth="1.75"
-                    strokeDasharray={shape === 'arc' ? '6 4' : '4 3'}
-                  />
+                  <g key={`cloud-group-${node.id}`} filter={cloud.shadow ? 'url(#cloud-drop-shadow)' : undefined}>
+                    <defs>
+                      {/* Gradient def */}
+                      {bgType === 'gradient' && (
+                        <linearGradient
+                          id={gradId}
+                          x1={cloud.gradientDirection === 'to-r' ? '0%' : cloud.gradientDirection === 'to-b' ? '0%' : '0%'}
+                          y1={cloud.gradientDirection === 'to-r' ? '0%' : cloud.gradientDirection === 'to-b' ? '0%' : '0%'}
+                          x2={cloud.gradientDirection === 'to-r' ? '100%' : cloud.gradientDirection === 'to-b' ? '0%' : '100%'}
+                          y2={cloud.gradientDirection === 'to-r' ? '0%' : cloud.gradientDirection === 'to-b' ? '100%' : '100%'}
+                        >
+                          <stop offset="0%" stopColor={cloud.gradientColor1 || cloud.color || '#3b82f6'} />
+                          <stop offset="100%" stopColor={cloud.gradientColor2 || '#8b5cf6'} />
+                        </linearGradient>
+                      )}
+
+                      {/* Pattern def */}
+                      {bgType === 'pattern' && (
+                        <pattern
+                          id={patternId}
+                          width={cloud.cloudPatternSize || 16}
+                          height={cloud.cloudPatternSize || 16}
+                          patternUnits="userSpaceOnUse"
+                        >
+                          {(cloud.cloudPattern === 'dots' || !cloud.cloudPattern) && (
+                            <circle
+                              cx={(cloud.cloudPatternSize || 16) / 2}
+                              cy={(cloud.cloudPatternSize || 16) / 2}
+                              r={Math.max(2, (cloud.cloudPatternSize || 16) / 8)}
+                              fill={cloud.cloudPatternColor || cloud.color || '#3b82f6'}
+                              fillOpacity={cloud.cloudPatternOpacity ?? 0.8}
+                            />
+                          )}
+                          {cloud.cloudPattern === 'lines' && (
+                            <line
+                              x1="0"
+                              y1={(cloud.cloudPatternSize || 16) / 2}
+                              x2={cloud.cloudPatternSize || 16}
+                              y2={(cloud.cloudPatternSize || 16) / 2}
+                              stroke={cloud.cloudPatternColor || cloud.color || '#3b82f6'}
+                              strokeWidth="1.5"
+                              strokeOpacity={cloud.cloudPatternOpacity ?? 0.8}
+                            />
+                          )}
+                          {cloud.cloudPattern === 'stripes' && (
+                            <path
+                              d={`M 0 0 L ${cloud.cloudPatternSize || 16} ${cloud.cloudPatternSize || 16} M 0 ${cloud.cloudPatternSize || 16} L ${cloud.cloudPatternSize || 16} 0`}
+                              stroke={cloud.cloudPatternColor || cloud.color || '#3b82f6'}
+                              strokeWidth="1.5"
+                              strokeOpacity={cloud.cloudPatternOpacity ?? 0.8}
+                            />
+                          )}
+                          {cloud.cloudPattern === 'squares' && (
+                            <rect
+                              x="0"
+                              y="0"
+                              width={cloud.cloudPatternSize || 16}
+                              height={cloud.cloudPatternSize || 16}
+                              fill="none"
+                              stroke={cloud.cloudPatternColor || cloud.color || '#3b82f6'}
+                              strokeWidth="1.2"
+                              strokeOpacity={cloud.cloudPatternOpacity ?? 0.8}
+                            />
+                          )}
+                          {cloud.cloudPattern === 'triangles' && (
+                            <polygon
+                              points={`0,${cloud.cloudPatternSize || 16} ${(cloud.cloudPatternSize || 16) / 2},0 ${cloud.cloudPatternSize || 16},${cloud.cloudPatternSize || 16}`}
+                              fill="none"
+                              stroke={cloud.cloudPatternColor || cloud.color || '#3b82f6'}
+                              strokeWidth="1"
+                              strokeOpacity={cloud.cloudPatternOpacity ?? 0.8}
+                            />
+                          )}
+                          {cloud.cloudPattern === 'hexagons' && (
+                            <polygon
+                              points={`
+                                ${(cloud.cloudPatternSize || 16) * 0.25},0 
+                                ${(cloud.cloudPatternSize || 16) * 0.75},0 
+                                ${cloud.cloudPatternSize || 16},${(cloud.cloudPatternSize || 16) * 0.5} 
+                                ${(cloud.cloudPatternSize || 16) * 0.75},${cloud.cloudPatternSize || 16} 
+                                ${(cloud.cloudPatternSize || 16) * 0.25},${cloud.cloudPatternSize || 16} 
+                                0,${(cloud.cloudPatternSize || 16) * 0.5}
+                              `.replace(/\s+/g, ' ').trim()}
+                              fill="none"
+                              stroke={cloud.cloudPatternColor || cloud.color || '#3b82f6'}
+                              strokeWidth="1"
+                              strokeOpacity={cloud.cloudPatternOpacity ?? 0.8}
+                            />
+                          )}
+                          {cloud.cloudPattern === 'cross' && (
+                            <path
+                              d={`M ${(cloud.cloudPatternSize || 16) / 2} 0 v ${cloud.cloudPatternSize || 16} M 0 ${(cloud.cloudPatternSize || 16) / 2} h ${cloud.cloudPatternSize || 16}`}
+                              stroke={cloud.cloudPatternColor || cloud.color || '#3b82f6'}
+                              strokeWidth="1.5"
+                              strokeOpacity={cloud.cloudPatternOpacity ?? 0.8}
+                            />
+                          )}
+                        </pattern>
+                      )}
+
+                      {/* ClipPath for Cloud Image background */}
+                      <clipPath id={clipId}>
+                        <path d={shapePath} />
+                      </clipPath>
+                    </defs>
+
+                    {/* Base Background Tint Layer */}
+                    <path
+                      d={shapePath}
+                      fill={bgType === 'pattern' ? (cloud.color || '#3b82f6') : (bgType === 'image' ? (cloud.color || '#3b82f6') : fillVal)}
+                      fillOpacity={bgType === 'pattern' ? Math.max(0.04, opacity * 0.5) : opacity}
+                    />
+
+                    {/* Pattern Overlay Layer when bgType is pattern */}
+                    {bgType === 'pattern' && (
+                      <path
+                        d={shapePath}
+                        fill={`url(#${patternId})`}
+                        fillOpacity={1}
+                      />
+                    )}
+
+                    {/* Stroke Outline & Dropshadow */}
+                    <path
+                      d={shapePath}
+                      fill="none"
+                      stroke={strokeWidth > 0 ? strokeColor : 'none'}
+                      strokeWidth={strokeWidth}
+                      strokeDasharray={strokeDasharray}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+
+                    {/* Image Background clipped to cloud shape */}
+                    {bgType === 'image' && cloud.bgImageUrl && (
+                      <image
+                        href={cloud.bgImageUrl}
+                        x={x}
+                        y={y}
+                        width={w}
+                        height={h}
+                        preserveAspectRatio={
+                          cloud.bgImageMode === 'contain'
+                            ? 'xMidYMid meet'
+                            : cloud.bgImageMode === 'tile'
+                            ? 'none'
+                            : 'xMidYMid slice'
+                        }
+                        opacity={opacity}
+                        clipPath={`url(#${clipId})`}
+                      />
+                    )}
+                  </g>
                 );
               })}
           </g>
@@ -1025,6 +1301,31 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               >
                 <Cloud className="w-3.5 h-3.5 text-amber-500" /> Alternar Nube de Rama
               </button>
+
+              <div className="my-1 border-t border-slate-100" />
+
+              {/* Style propagation actions */}
+              <button
+                onClick={() => {
+                  onApplyStyleToChildren?.(contextMenu.nodeId!);
+                  setContextMenu((prev) => ({ ...prev, visible: false }));
+                }}
+                className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              >
+                <GitFork className="w-3.5 h-3.5 text-blue-600" /> Aplicar Estilo a Hijos
+              </button>
+
+              {contextMenu.nodeId !== mindMap.rootId && (
+                <button
+                  onClick={() => {
+                    onApplyStyleToSiblings?.(contextMenu.nodeId!);
+                    setContextMenu((prev) => ({ ...prev, visible: false }));
+                  }}
+                  className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                >
+                  <MoveHorizontal className="w-3.5 h-3.5 text-indigo-600" /> Aplicar Estilo a Hermanos
+                </button>
+              )}
 
               {contextMenu.nodeId !== mindMap.rootId && (
                 <>

@@ -13,6 +13,7 @@ import {
   NodeGradientDirection,
   NodePatternStyle,
   NodeBgImageMode,
+  CloudShape,
 } from '../types/mindmap';
 import { AVAILABLE_ICONS, renderNodeIcon } from '../utils/iconMap';
 import {
@@ -101,6 +102,8 @@ interface ToolPanelProps {
   onUpdateMapEdgeDash?: (dash: 'solid' | 'dashed' | 'dotted') => void;
   onApplyEdgeStyleToAllNodes?: (edgeStyle: EdgeStyle) => void;
   onApplyEdgeProfileToAllNodes?: (edgeProfile: EdgeProfile) => void;
+  onApplyStyleToChildren?: (nodeId: string) => void;
+  onApplyStyleToSiblings?: (nodeId: string) => void;
   onOpenConnectorModal?: (fromId?: string) => void;
   onDeleteConnector?: (connectorId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
@@ -171,6 +174,8 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
   onUpdateMapEdgeDash,
   onApplyEdgeStyleToAllNodes,
   onApplyEdgeProfileToAllNodes,
+  onApplyStyleToChildren,
+  onApplyStyleToSiblings,
   onOpenConnectorModal,
   onDeleteConnector,
   onUpdateConnector,
@@ -264,6 +269,27 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
     border: false,
     edge: false,
   });
+
+  const [cloudSectionsOpen, setCloudSectionsOpen] = useState<Record<string, boolean>>({
+    shape: false,
+    fill: false,
+    border: false,
+  });
+
+  const toggleCloudSection = (section: string) => {
+    setCloudSectionsOpen(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  const handleExpandAllCloudSections = (expand: boolean) => {
+    setCloudSectionsOpen({
+      shape: expand,
+      fill: expand,
+      border: expand,
+    });
+  };
 
   const toggleFormatSection = (section: string) => {
     setFormatSectionsOpen(prev => ({
@@ -1228,6 +1254,59 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
             {/* FORMAT TAB (Estilos & Forma) */}
             {activeTab === 'format' && selectedNode && (
               <div className="space-y-3.5">
+                {/* Style Propagation Quick Actions (Aplicar a Hijos / Aplicar a Hermanos) */}
+                <div className="p-2.5 bg-gradient-to-r from-blue-50 to-indigo-50/80 border border-blue-200/80 rounded-2xl shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-blue-900 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                      Propagar Estilos del Nodo
+                    </span>
+                    <span className="text-[10px] text-blue-600/80 font-medium">1 clic</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Botón: Aplicar a Hijos */}
+                    <button
+                      type="button"
+                      disabled={!selectedNode.children || selectedNode.children.length === 0}
+                      onClick={() => onApplyStyleToChildren?.(selectedNode.id)}
+                      title={
+                        selectedNode.children && selectedNode.children.length > 0
+                          ? `Copiar estilo a ${selectedNode.children.length} hijo(s) y sus descendientes`
+                          : 'Este nodo no tiene nodos hijos'
+                      }
+                      className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+                        selectedNode.children && selectedNode.children.length > 0
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-md active:scale-95'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                      }`}
+                    >
+                      <GitFork className="w-3.5 h-3.5" />
+                      <span>Aplicar a Hijos</span>
+                    </button>
+
+                    {/* Botón: Aplicar a Hermanos */}
+                    <button
+                      type="button"
+                      disabled={!selectedNode.parentId}
+                      onClick={() => onApplyStyleToSiblings?.(selectedNode.id)}
+                      title={
+                        selectedNode.parentId
+                          ? 'Copiar estilo a todos los nodos hermanos del mismo nivel'
+                          : 'El nodo raíz no tiene hermanos'
+                      }
+                      className={`flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+                        selectedNode.parentId
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-md active:scale-95'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                      }`}
+                    >
+                      <MoveHorizontal className="w-3.5 h-3.5" />
+                      <span>Aplicar a Hermanos</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Global Collapsible Toolbar for Format Tab */}
                 <div className="flex items-center justify-between pb-0.5">
                   <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider">
@@ -2859,70 +2938,777 @@ export const ToolPanel: React.FC<ToolPanelProps> = ({
               </div>
             )}
 
-            {/* CLOUDS TAB */}
+            {/* CLOUDS TAB (Nube de Agrupación de Rama Avanzada) */}
             {activeTab === 'clouds' && selectedNode && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <label className="font-semibold text-slate-700">Nube de Agrupación</label>
+              <div className="space-y-3.5">
+                {/* Header Switch */}
+                <div className="p-3 bg-gradient-to-r from-sky-50 to-blue-50/80 border border-sky-200/80 rounded-2xl shadow-2xs flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-2xs">
+                      <Cloud className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <label className="font-bold text-slate-800 text-xs block cursor-pointer">
+                        Nube de Agrupación
+                      </label>
+                      <span className="text-[10px] text-slate-500 font-normal block">
+                        Envuelve el nodo y toda su rama
+                      </span>
+                    </div>
+                  </div>
+
                   <input
                     type="checkbox"
                     checked={Boolean(selectedNode.cloud?.enabled)}
                     onChange={(e) =>
                       onUpdateNode(selectedNode.id, {
                         cloud: e.target.checked
-                          ? { enabled: true, color: 'rgba(59, 130, 246, 0.1)', shape: 'round-rectangle' }
+                          ? {
+                              enabled: true,
+                              color: '#3b82f6',
+                              shape: 'cloud-scallop',
+                              opacity: 0.08,
+                              bgType: 'color',
+                              borderColor: '#3b82f6',
+                              borderWidth: 1.5,
+                              borderDash: 'dashed',
+                              shadow: true,
+                            }
                           : undefined,
                       })
                     }
-                    className="w-4 h-4 accent-blue-600 rounded cursor-pointer"
+                    className="w-5 h-5 accent-sky-600 rounded-md cursor-pointer"
                   />
                 </div>
 
                 {selectedNode.cloud?.enabled && (
-                  <>
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1.5">Color de la Nube</label>
-                      <div className="grid grid-cols-4 gap-2">
-                        {[
-                          'rgba(59, 130, 246, 0.12)',
-                          'rgba(34, 197, 94, 0.12)',
-                          'rgba(245, 158, 11, 0.12)',
-                          'rgba(236, 72, 153, 0.12)',
-                          'rgba(168, 85, 247, 0.12)',
-                          'rgba(6, 182, 212, 0.12)',
-                          'rgba(239, 68, 68, 0.12)',
-                          'rgba(100, 116, 139, 0.12)',
-                        ].map((col) => (
-                          <button
-                            key={col}
-                            style={{ backgroundColor: col }}
-                            onClick={() =>
-                              onUpdateNode(selectedNode.id, {
-                                cloud: { ...selectedNode.cloud!, color: col },
-                              })
-                            }
-                            className="h-8 rounded-lg border border-slate-300 shadow-2xs hover:scale-105 transition-transform"
-                          />
-                        ))}
+                  <div className="space-y-3.5 animate-in fade-in duration-150">
+                    {/* Global Collapsible Toolbar for Clouds Tab */}
+                    <div className="flex items-center justify-between pb-0.5">
+                      <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider">
+                        Ajustes de la Nube
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleExpandAllCloudSections(true)}
+                          className="text-[10.5px] text-sky-600 hover:text-sky-800 font-semibold hover:underline cursor-pointer"
+                        >
+                          Desplegar todo
+                        </button>
+                        <span className="text-slate-300 text-[10px]">|</span>
+                        <button
+                          type="button"
+                          onClick={() => handleExpandAllCloudSections(false)}
+                          className="text-[10.5px] text-slate-500 hover:text-slate-700 font-medium hover:underline cursor-pointer"
+                        >
+                          Plegar todo
+                        </button>
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1.5">Forma de la Nube</label>
-                      <select
-                        value={selectedNode.cloud.shape || 'round-rectangle'}
-                        onChange={(e) =>
-                          onUpdateNode(selectedNode.id, {
-                            cloud: { ...selectedNode.cloud!, shape: e.target.value as any },
-                          })
-                        }
-                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-blue-500"
+                    {/* 1. SECCIÓN: FORMA Y DIMENSIONES DE LA NUBE */}
+                    <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
+                      <button
+                        type="button"
+                        onClick={() => toggleCloudSection('shape')}
+                        className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors cursor-pointer select-none"
                       >
-                        <option value="round-rectangle">Rectángulo Redondeado</option>
-                        <option value="arc">Burbuja Suave / Arco</option>
-                      </select>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                            <LayoutGrid className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+                              Forma y Dimensiones de la Nube
+                            </label>
+                            <span className="text-[10px] text-slate-400 font-normal block truncate">
+                              8 estilos de silueta, ancho y alto
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-semibold text-sky-700 bg-sky-100/70 px-2 py-0.5 rounded-full capitalize">
+                            {selectedNode.cloud.shape || 'cloud-scallop'}
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                              cloudSectionsOpen.shape ? 'rotate-0' : '-rotate-90'
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {cloudSectionsOpen.shape && (
+                        <div className="px-3.5 pb-3.5 pt-1 space-y-2.5 border-t border-slate-200/60 animate-in fade-in duration-150">
+                          <div className="grid grid-cols-4 gap-1.5">
+                            {[
+                              { id: 'cloud-scallop', label: 'Nube festoneada', icon: '☁️' },
+                              { id: 'arc', label: 'Arco suave', icon: '🫧' },
+                              { id: 'round-rectangle', label: 'Redondeado', icon: '▢' },
+                              { id: 'rectangle', label: 'Rectángulo', icon: '▭' },
+                              { id: 'bubble', label: 'Burbuja', icon: '💬' },
+                              { id: 'hexagon', label: 'Hexágono', icon: '⬡' },
+                              { id: 'star', label: 'Estelar', icon: '⭐' },
+                              { id: 'oval', label: 'Óvalo', icon: '⬭' },
+                            ].map((shp) => (
+                              <button
+                                key={shp.id}
+                                type="button"
+                                onClick={() =>
+                                  onUpdateNode(selectedNode.id, {
+                                    cloud: { ...selectedNode.cloud!, shape: shp.id as CloudShape },
+                                  })
+                                }
+                                className={`p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                                  (selectedNode.cloud?.shape || 'cloud-scallop') === shp.id
+                                    ? 'bg-sky-600 text-white border-sky-600 font-bold shadow-2xs scale-[1.02]'
+                                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                                }`}
+                              >
+                                <span className="text-base">{shp.icon}</span>
+                                <span className="text-[9.5px] leading-tight truncate w-full text-center">
+                                  {shp.label}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Dimension Sliders: Anchar (Horizontal) y Alargar (Vertical) */}
+                          <div className="pt-2 border-t border-slate-200/70 space-y-2.5">
+                            {/* 1. Anchar Nube (Horizontal) */}
+                            <div className="space-y-1 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                              <div className="flex items-center justify-between text-[11px]">
+                                <div className="flex items-center gap-1.5">
+                                  <MoveHorizontal className="w-3.5 h-3.5 text-sky-600" />
+                                  <span className="font-semibold text-slate-700">Anchar Nube (Horizontal):</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-mono text-sky-700 font-bold bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200 text-[10.5px]">
+                                    {(selectedNode.cloud.paddingX ?? 0) >= 0 ? `+${selectedNode.cloud.paddingX ?? 0}` : selectedNode.cloud.paddingX}px
+                                  </span>
+                                  {(selectedNode.cloud.paddingX ?? 0) !== 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onUpdateNode(selectedNode.id, {
+                                          cloud: { ...selectedNode.cloud!, paddingX: 0 },
+                                        })
+                                      }
+                                      className="text-[10px] text-sky-600 hover:text-sky-800 underline cursor-pointer"
+                                      title="Restablecer ancho original"
+                                    >
+                                      Reset
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              <input
+                                type="range"
+                                min="-14"
+                                max="200"
+                                step="2"
+                                value={selectedNode.cloud.paddingX ?? 0}
+                                onChange={(e) =>
+                                  onUpdateNode(selectedNode.id, {
+                                    cloud: { ...selectedNode.cloud!, paddingX: Number(e.target.value) },
+                                  })
+                                }
+                                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                              />
+                              <div className="flex justify-between text-[9px] text-slate-400">
+                                <span>Ajustada (-14px)</span>
+                                <span>Normal (0px)</span>
+                                <span>Muy Ancha (+200px)</span>
+                              </div>
+                            </div>
+
+                            {/* 2. Alargar Nube (Vertical) */}
+                            <div className="space-y-1 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                              <div className="flex items-center justify-between text-[11px]">
+                                <div className="flex items-center gap-1.5">
+                                  <MoveVertical className="w-3.5 h-3.5 text-sky-600" />
+                                  <span className="font-semibold text-slate-700">Alargar Nube (Vertical):</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-mono text-sky-700 font-bold bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200 text-[10.5px]">
+                                    {(selectedNode.cloud.paddingY ?? 0) >= 0 ? `+${selectedNode.cloud.paddingY ?? 0}` : selectedNode.cloud.paddingY}px
+                                  </span>
+                                  {(selectedNode.cloud.paddingY ?? 0) !== 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onUpdateNode(selectedNode.id, {
+                                          cloud: { ...selectedNode.cloud!, paddingY: 0 },
+                                        })
+                                      }
+                                      className="text-[10px] text-sky-600 hover:text-sky-800 underline cursor-pointer"
+                                      title="Restablecer alto original"
+                                    >
+                                      Reset
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              <input
+                                type="range"
+                                min="-14"
+                                max="200"
+                                step="2"
+                                value={selectedNode.cloud.paddingY ?? 0}
+                                onChange={(e) =>
+                                  onUpdateNode(selectedNode.id, {
+                                    cloud: { ...selectedNode.cloud!, paddingY: Number(e.target.value) },
+                                  })
+                                }
+                                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                              />
+                              <div className="flex justify-between text-[9px] text-slate-400">
+                                <span>Ajustada (-14px)</span>
+                                <span>Normal (0px)</span>
+                                <span>Muy Larga (+200px)</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </>
+
+                    {/* 2. SECCIÓN: RELLENO Y OPACIDAD DE LA NUBE */}
+                    <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
+                      <button
+                        type="button"
+                        onClick={() => toggleCloudSection('fill')}
+                        className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors cursor-pointer select-none"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                            <Paintbrush className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+                              Relleno y Opacidad de la Nube
+                            </label>
+                            <span className="text-[10px] text-slate-400 font-normal block truncate">
+                              Color, degradado, tramas e imagen
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-semibold text-sky-700 bg-sky-100/70 px-2 py-0.5 rounded-full capitalize">
+                            {selectedNode.cloud.bgType || 'color'} • {Math.round((selectedNode.cloud.opacity !== undefined ? selectedNode.cloud.opacity : 0.08) * 100)}%
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                              cloudSectionsOpen.fill ? 'rotate-0' : '-rotate-90'
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {cloudSectionsOpen.fill && (
+                        <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-slate-200/60 animate-in fade-in duration-150">
+                          {/* Tipo de Fondo Selector Tabs */}
+                          <div className="grid grid-cols-4 gap-1 p-0.5 bg-slate-200/70 rounded-xl">
+                            {[
+                              { id: 'color', label: 'Sólido' },
+                              { id: 'gradient', label: 'Degradado' },
+                              { id: 'pattern', label: 'Trama' },
+                              { id: 'image', label: 'Imagen' },
+                            ].map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                onClick={() =>
+                                  onUpdateNode(selectedNode.id, {
+                                    cloud: {
+                                      ...selectedNode.cloud!,
+                                      bgType: t.id as any,
+                                      ...(t.id === 'gradient' && !selectedNode.cloud?.gradientColor1
+                                        ? {
+                                            gradientColor1: selectedNode.cloud?.color || '#3b82f6',
+                                            gradientColor2: '#8b5cf6',
+                                            gradientDirection: 'to-br',
+                                          }
+                                        : {}),
+                                      ...(t.id === 'pattern' && !selectedNode.cloud?.cloudPattern
+                                        ? {
+                                            cloudPattern: 'dots',
+                                            cloudPatternColor: '#3b82f6',
+                                            cloudPatternSize: 16,
+                                            cloudPatternOpacity: 0.5,
+                                          }
+                                        : {}),
+                                    },
+                                  })
+                                }
+                                className={`py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                  (selectedNode.cloud?.bgType || 'color') === t.id
+                                    ? 'bg-white text-slate-800 shadow-2xs'
+                                    : 'text-slate-500 hover:text-slate-800'
+                                }`}
+                              >
+                                {t.label}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* A. SÓLIDO: Color Picker & Presets */}
+                          {(selectedNode.cloud.bgType || 'color') === 'color' && (
+                            <div className="space-y-2 pt-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-slate-600 font-medium">Color de Relleno</span>
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    type="color"
+                                    value={
+                                      selectedNode.cloud.color.startsWith('#') && selectedNode.cloud.color.length === 7
+                                        ? selectedNode.cloud.color
+                                        : '#3b82f6'
+                                    }
+                                    onChange={(e) =>
+                                      onUpdateNode(selectedNode.id, {
+                                        cloud: { ...selectedNode.cloud!, color: e.target.value },
+                                      })
+                                    }
+                                    className="w-6 h-6 rounded-lg border border-slate-300 cursor-pointer p-0"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-8 gap-1.5">
+                                {[
+                                  '#3b82f6', '#06b6d4', '#10b981', '#22c55e',
+                                  '#eab308', '#f97316', '#ef4444', '#ec4899',
+                                  '#a855f7', '#6366f1', '#64748b', '#0f172a',
+                                  '#ffffff', '#f1f5f9', '#fef08a', '#bbf7d0',
+                                ].map((col) => (
+                                  <button
+                                    key={col}
+                                    type="button"
+                                    style={{ backgroundColor: col }}
+                                    onClick={() =>
+                                      onUpdateNode(selectedNode.id, {
+                                        cloud: { ...selectedNode.cloud!, color: col },
+                                      })
+                                    }
+                                    className={`w-full aspect-square rounded-lg border transition-transform cursor-pointer ${
+                                      selectedNode.cloud?.color === col
+                                        ? 'ring-2 ring-sky-500 scale-110 border-white shadow-xs'
+                                        : 'border-slate-300/80 hover:scale-105'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* B. DEGRADADO */}
+                          {selectedNode.cloud.bgType === 'gradient' && (
+                            <div className="space-y-2 pt-1">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <span className="text-[10px] text-slate-500 font-medium block mb-1">Color Inicio</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="color"
+                                      value={selectedNode.cloud.gradientColor1 || '#3b82f6'}
+                                      onChange={(e) =>
+                                        onUpdateNode(selectedNode.id, {
+                                          cloud: { ...selectedNode.cloud!, gradientColor1: e.target.value },
+                                        })
+                                      }
+                                      className="w-7 h-7 rounded-lg border border-slate-300 cursor-pointer p-0"
+                                    />
+                                    <span className="text-[11px] font-mono text-slate-600 uppercase">
+                                      {selectedNode.cloud.gradientColor1 || '#3b82f6'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-slate-500 font-medium block mb-1">Color Fin</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="color"
+                                      value={selectedNode.cloud.gradientColor2 || '#8b5cf6'}
+                                      onChange={(e) =>
+                                        onUpdateNode(selectedNode.id, {
+                                          cloud: { ...selectedNode.cloud!, gradientColor2: e.target.value },
+                                        })
+                                      }
+                                      className="w-7 h-7 rounded-lg border border-slate-300 cursor-pointer p-0"
+                                    />
+                                    <span className="text-[11px] font-mono text-slate-600 uppercase">
+                                      {selectedNode.cloud.gradientColor2 || '#8b5cf6'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] text-slate-500 font-medium block mb-1">Dirección</span>
+                                <div className="grid grid-cols-4 gap-1">
+                                  {[
+                                    { id: 'to-r', label: 'Horizontal →' },
+                                    { id: 'to-b', label: 'Vertical ↓' },
+                                    { id: 'to-br', label: 'Diagonal ↘' },
+                                    { id: 'radial', label: 'Radial ◉' },
+                                  ].map((dir) => (
+                                    <button
+                                      key={dir.id}
+                                      type="button"
+                                      onClick={() =>
+                                        onUpdateNode(selectedNode.id, {
+                                          cloud: { ...selectedNode.cloud!, gradientDirection: dir.id as any },
+                                        })
+                                      }
+                                      className={`py-1 px-1 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer truncate ${
+                                        (selectedNode.cloud?.gradientDirection || 'to-br') === dir.id
+                                          ? 'bg-sky-600 text-white border-sky-600'
+                                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                      }`}
+                                    >
+                                      {dir.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* C. TRAMA / PATTERN */}
+                          {selectedNode.cloud.bgType === 'pattern' && (
+                            <div className="space-y-2 pt-1">
+                              <div>
+                                <span className="text-[10px] text-slate-500 font-medium block mb-1">Patrón Geométrico</span>
+                                <div className="grid grid-cols-4 gap-1">
+                                  {[
+                                    { id: 'dots', label: 'Puntos' },
+                                    { id: 'lines', label: 'Líneas' },
+                                    { id: 'squares', label: 'Cuadrícula' },
+                                    { id: 'stripes', label: 'Rayas' },
+                                    { id: 'triangles', label: 'Triángulos' },
+                                    { id: 'hexagons', label: 'Hexágonos' },
+                                    { id: 'cross', label: 'Cruces' },
+                                  ].map((pat) => (
+                                    <button
+                                      key={pat.id}
+                                      type="button"
+                                      onClick={() =>
+                                        onUpdateNode(selectedNode.id, {
+                                          cloud: { ...selectedNode.cloud!, cloudPattern: pat.id as any },
+                                        })
+                                      }
+                                      className={`py-1 px-1 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer truncate ${
+                                        (selectedNode.cloud?.cloudPattern || 'dots') === pat.id
+                                          ? 'bg-sky-600 text-white border-sky-600'
+                                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                      }`}
+                                    >
+                                      {pat.label}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between pt-1">
+                                <span className="text-[11px] text-slate-600 font-medium">Color de la Trama</span>
+                                <input
+                                  type="color"
+                                  value={selectedNode.cloud.cloudPatternColor || '#3b82f6'}
+                                  onChange={(e) =>
+                                    onUpdateNode(selectedNode.id, {
+                                      cloud: { ...selectedNode.cloud!, cloudPatternColor: e.target.value },
+                                    })
+                                  }
+                                  className="w-6 h-6 rounded-lg border border-slate-300 cursor-pointer p-0"
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* D. IMAGEN */}
+                          {selectedNode.cloud.bgType === 'image' && (
+                            <div className="space-y-2 pt-1">
+                              {selectedNode.cloud.bgImageUrl ? (
+                                <div className="relative rounded-xl border border-slate-200 bg-white p-2.5 flex items-center gap-3">
+                                  <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                                    <img
+                                      src={selectedNode.cloud.bgImageUrl}
+                                      alt="Fondo de la nube"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-[11px] font-bold text-slate-800 block truncate">
+                                      Imagen de Fondo en Nube
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onUpdateNode(selectedNode.id, {
+                                          cloud: { ...selectedNode.cloud!, bgImageUrl: undefined, bgType: 'color' },
+                                        })
+                                      }
+                                      className="mt-0.5 inline-flex items-center gap-1 text-[10.5px] text-red-600 hover:text-red-700 font-semibold hover:underline cursor-pointer"
+                                    >
+                                      <Trash2 className="w-3 h-3" /> Quitar imagen
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <label className="w-full py-3 border-2 border-dashed border-sky-200 hover:border-sky-400 bg-sky-50/50 hover:bg-sky-50/90 rounded-2xl text-sky-700 text-xs font-semibold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer">
+                                  <Upload className="w-4 h-4" />
+                                  <span>Subir Imagen para Fondo de Nube</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="sr-only"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = () => {
+                                          onUpdateNode(selectedNode.id, {
+                                            cloud: {
+                                              ...selectedNode.cloud!,
+                                              bgImageUrl: reader.result as string,
+                                              bgImageMode: 'cover',
+                                            },
+                                          });
+                                        };
+                                        reader.readAsDataURL(file);
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              )}
+
+                              {selectedNode.cloud.bgImageUrl && (
+                                <div>
+                                  <span className="text-[10px] text-slate-500 font-medium block mb-1">Ajuste de Imagen</span>
+                                  <div className="grid grid-cols-3 gap-1">
+                                    {[
+                                      { id: 'cover', label: 'Cubrir (Cover)' },
+                                      { id: 'contain', label: 'Contener' },
+                                      { id: 'tile', label: 'Mosaico' },
+                                    ].map((mode) => (
+                                      <button
+                                        key={mode.id}
+                                        type="button"
+                                        onClick={() =>
+                                          onUpdateNode(selectedNode.id, {
+                                            cloud: { ...selectedNode.cloud!, bgImageMode: mode.id as any },
+                                          })
+                                        }
+                                        className={`py-1 px-1 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer truncate ${
+                                          (selectedNode.cloud?.bgImageMode || 'cover') === mode.id
+                                            ? 'bg-sky-600 text-white border-sky-600'
+                                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        }`}
+                                      >
+                                        {mode.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Opacidad del Relleno de la Nube */}
+                          <div className="pt-2 border-t border-slate-200/70 space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-semibold text-slate-700">Opacidad del Relleno:</span>
+                              <span className="font-mono text-sky-700 font-bold bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200 text-[11px]">
+                                {Math.round((selectedNode.cloud.opacity !== undefined ? selectedNode.cloud.opacity : 0.08) * 100)}%
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="5"
+                              max="100"
+                              step="5"
+                              value={Math.round((selectedNode.cloud.opacity !== undefined ? selectedNode.cloud.opacity : 0.08) * 100)}
+                              onChange={(e) =>
+                                onUpdateNode(selectedNode.id, {
+                                  cloud: { ...selectedNode.cloud!, opacity: Number(e.target.value) / 100 },
+                                })
+                              }
+                              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                            />
+                            <div className="flex justify-between text-[9px] text-slate-400">
+                              <span>Sutil (5%)</span>
+                              <span>Medio (50%)</span>
+                              <span>Opaco (100%)</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 3. SECCIÓN: BORDE Y CONTORNO DE LA NUBE */}
+                    <div className="bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all">
+                      <button
+                        type="button"
+                        onClick={() => toggleCloudSection('border')}
+                        className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors cursor-pointer select-none"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                            <Square className="w-3.5 h-3.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <label className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+                              Contorno y Borde de la Nube
+                            </label>
+                            <span className="text-[10px] text-slate-400 font-normal block truncate">
+                              Color, trazo, grosor y sombras
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[10px] font-semibold text-sky-700 bg-sky-100/70 px-2 py-0.5 rounded-full capitalize">
+                            {selectedNode.cloud.borderWidth ?? 1.5}px • {selectedNode.cloud.borderDash || 'dashed'}
+                          </span>
+                          <ChevronDown
+                            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                              cloudSectionsOpen.border ? 'rotate-0' : '-rotate-90'
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      {cloudSectionsOpen.border && (
+                        <div className="px-3.5 pb-3.5 pt-1 space-y-2.5 border-t border-slate-200/60 animate-in fade-in duration-150">
+                          {/* Color del Borde */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] text-slate-600 font-medium">Color de Borde</span>
+                              <div className="flex items-center gap-1.5">
+                                <input
+                                  type="color"
+                                  value={
+                                    selectedNode.cloud.borderColor &&
+                                    selectedNode.cloud.borderColor.startsWith('#') &&
+                                    selectedNode.cloud.borderColor.length === 7
+                                      ? selectedNode.cloud.borderColor
+                                      : '#3b82f6'
+                                  }
+                                  onChange={(e) =>
+                                    onUpdateNode(selectedNode.id, {
+                                      cloud: { ...selectedNode.cloud!, borderColor: e.target.value },
+                                    })
+                                  }
+                                  className="w-6 h-6 rounded-lg border border-slate-300 cursor-pointer p-0"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-8 gap-1.5">
+                              {[
+                                '#3b82f6', '#06b6d4', '#10b981', '#22c55e',
+                                '#eab308', '#f97316', '#ef4444', '#ec4899',
+                                '#a855f7', '#6366f1', '#64748b', '#0f172a',
+                                '#94a3b8', '#cbd5e1', '#e2e8f0', '#000000',
+                              ].map((col) => (
+                                <button
+                                  key={col}
+                                  type="button"
+                                  style={{ backgroundColor: col }}
+                                  onClick={() =>
+                                    onUpdateNode(selectedNode.id, {
+                                      cloud: { ...selectedNode.cloud!, borderColor: col },
+                                    })
+                                  }
+                                  className={`w-full aspect-square rounded-lg border transition-transform cursor-pointer ${
+                                    (selectedNode.cloud?.borderColor || '#3b82f6') === col
+                                      ? 'ring-2 ring-sky-500 scale-110 border-white shadow-xs'
+                                      : 'border-slate-300/80 hover:scale-105'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Trazo del Borde (Sólido, Discontinuo, Punteado) */}
+                          <div className="grid grid-cols-2 gap-2 pt-1">
+                            <div>
+                              <span className="text-[10px] text-slate-500 font-medium block mb-1">Estilo de Trazo</span>
+                              <div className="grid grid-cols-3 gap-1">
+                                {[
+                                  { id: 'solid', label: 'Sólido' },
+                                  { id: 'dashed', label: 'Guiones' },
+                                  { id: 'dotted', label: 'Puntos' },
+                                ].map((dst) => (
+                                  <button
+                                    key={dst.id}
+                                    type="button"
+                                    onClick={() =>
+                                      onUpdateNode(selectedNode.id, {
+                                        cloud: { ...selectedNode.cloud!, borderDash: dst.id as any },
+                                      })
+                                    }
+                                    className={`py-1 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer ${
+                                      (selectedNode.cloud?.borderDash || 'dashed') === dst.id
+                                        ? 'bg-sky-600 text-white border-sky-600'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                    }`}
+                                  >
+                                    {dst.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div>
+                              <span className="text-[10px] text-slate-500 font-medium block mb-1">
+                                Grosor: {selectedNode.cloud.borderWidth ?? 1.5}px
+                              </span>
+                              <div className="flex gap-1">
+                                {[0, 1, 2, 3, 4].map((w) => (
+                                  <button
+                                    key={w}
+                                    type="button"
+                                    onClick={() =>
+                                      onUpdateNode(selectedNode.id, {
+                                        cloud: { ...selectedNode.cloud!, borderWidth: w },
+                                      })
+                                    }
+                                    className={`flex-1 py-1 rounded-lg border text-center text-xs font-semibold cursor-pointer ${
+                                      (selectedNode.cloud?.borderWidth ?? 1.5) === w
+                                        ? 'bg-sky-600 text-white border-sky-600'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                    }`}
+                                  >
+                                    {w === 0 ? 'Sin' : `${w}px`}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Sombra de la Nube */}
+                          <div className="pt-2 border-t border-slate-200/70 flex items-center justify-between">
+                            <span className="text-xs font-semibold text-slate-700">Sombra Difuminada Suave</span>
+                            <input
+                              type="checkbox"
+                              checked={Boolean(selectedNode.cloud.shadow)}
+                              onChange={(e) =>
+                                onUpdateNode(selectedNode.id, {
+                                  cloud: { ...selectedNode.cloud!, shadow: e.target.checked },
+                                })
+                              }
+                              className="w-4 h-4 accent-sky-600 rounded cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             )}

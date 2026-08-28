@@ -456,6 +456,111 @@ export default function App() {
     [clipboard, selectedNodeId, mindMap, pushHistory]
   );
 
+  // Helper to extract visual style bundle from a node
+  const extractNodeStyleBundle = (sourceNode: MindNode): Partial<MindNode> => {
+    return {
+      shape: sourceNode.shape,
+      color: sourceNode.color,
+      bgType: sourceNode.bgType,
+      gradientColor1: sourceNode.gradientColor1,
+      gradientColor2: sourceNode.gradientColor2,
+      gradientDirection: sourceNode.gradientDirection,
+      nodePattern: sourceNode.nodePattern,
+      nodePatternColor: sourceNode.nodePatternColor,
+      nodePatternSize: sourceNode.nodePatternSize,
+      nodePatternOpacity: sourceNode.nodePatternOpacity,
+      borderColor: sourceNode.borderColor,
+      borderWidth: sourceNode.borderWidth,
+      borderDash: sourceNode.borderDash,
+      borderStyle: sourceNode.borderStyle,
+      textColor: sourceNode.textColor,
+      fontSize: sourceNode.fontSize,
+      bold: sourceNode.bold,
+      italic: sourceNode.italic,
+      fontFamily: sourceNode.fontFamily,
+      textAlign: sourceNode.textAlign,
+      edgeColor: sourceNode.edgeColor,
+      edgeStyle: sourceNode.edgeStyle,
+      edgeWidth: sourceNode.edgeWidth,
+      edgeDash: sourceNode.edgeDash,
+      edgeProfile: sourceNode.edgeProfile,
+      customWidth: sourceNode.customWidth,
+      customHeight: sourceNode.customHeight,
+    };
+  };
+
+  // Apply style to all children & descendants of a node
+  const handleApplyStyleToChildren = useCallback(
+    (nodeId?: string) => {
+      const targetId = nodeId || selectedNodeId;
+      if (!targetId) return;
+
+      const sourceNode = mindMap.nodes[targetId];
+      if (!sourceNode || !sourceNode.children || sourceNode.children.length === 0) return;
+
+      pushHistory(mindMap);
+      const styleBundle = extractNodeStyleBundle(sourceNode);
+
+      const updatedNodes = { ...mindMap.nodes };
+
+      // Recursive helper to update all subchildren
+      const applyRecursively = (childId: string) => {
+        const childNode = updatedNodes[childId];
+        if (childNode) {
+          updatedNodes[childId] = {
+            ...childNode,
+            ...styleBundle,
+          };
+          (childNode.children || []).forEach(applyRecursively);
+        }
+      };
+
+      sourceNode.children.forEach(applyRecursively);
+
+      setMindMap((prev) => ({
+        ...prev,
+        nodes: updatedNodes,
+        updatedAt: Date.now(),
+      }));
+    },
+    [selectedNodeId, mindMap, pushHistory]
+  );
+
+  // Apply style to all siblings of a node (same hierarchical parent)
+  const handleApplyStyleToSiblings = useCallback(
+    (nodeId?: string) => {
+      const targetId = nodeId || selectedNodeId;
+      if (!targetId || targetId === mindMap.rootId) return;
+
+      const sourceNode = mindMap.nodes[targetId];
+      if (!sourceNode || !sourceNode.parentId) return;
+
+      const parentNode = mindMap.nodes[sourceNode.parentId];
+      if (!parentNode || !parentNode.children || parentNode.children.length <= 1) return;
+
+      pushHistory(mindMap);
+      const styleBundle = extractNodeStyleBundle(sourceNode);
+
+      const updatedNodes = { ...mindMap.nodes };
+
+      parentNode.children.forEach((siblingId) => {
+        if (siblingId !== targetId && updatedNodes[siblingId]) {
+          updatedNodes[siblingId] = {
+            ...updatedNodes[siblingId],
+            ...styleBundle,
+          };
+        }
+      });
+
+      setMindMap((prev) => ({
+        ...prev,
+        nodes: updatedNodes,
+        updatedAt: Date.now(),
+      }));
+    },
+    [selectedNodeId, mindMap, pushHistory]
+  );
+
   // Global Keyboard Shortcuts (Freeplane style)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -743,7 +848,19 @@ export default function App() {
           if (selectedNodeId) {
             const curr = mindMap.nodes[selectedNodeId];
             updateNode(selectedNodeId, {
-              cloud: curr?.cloud?.enabled ? undefined : { enabled: true, color: 'rgba(59, 130, 246, 0.1)', shape: 'round-rectangle' },
+              cloud: curr?.cloud?.enabled
+                ? undefined
+                : {
+                    enabled: true,
+                    color: '#3b82f6',
+                    shape: 'cloud-scallop',
+                    opacity: 0.08,
+                    bgType: 'color',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1.5,
+                    borderDash: 'dashed',
+                    shadow: true,
+                  },
             });
           }
         }}
@@ -810,7 +927,19 @@ export default function App() {
           if (selectedNodeId) {
             const curr = mindMap.nodes[selectedNodeId];
             updateNode(selectedNodeId, {
-              cloud: curr?.cloud?.enabled ? undefined : { enabled: true, color: 'rgba(59, 130, 246, 0.1)', shape: 'round-rectangle' },
+              cloud: curr?.cloud?.enabled
+                ? undefined
+                : {
+                    enabled: true,
+                    color: '#3b82f6',
+                    shape: 'cloud-scallop',
+                    opacity: 0.08,
+                    bgType: 'color',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1.5,
+                    borderDash: 'dashed',
+                    shadow: true,
+                  },
             });
           }
         }}
@@ -901,12 +1030,26 @@ export default function App() {
             onToggleCloud={(nid) => {
               const curr = mindMap.nodes[nid];
               updateNode(nid, {
-                cloud: curr?.cloud?.enabled ? undefined : { enabled: true, color: 'rgba(59, 130, 246, 0.1)', shape: 'round-rectangle' },
+                cloud: curr?.cloud?.enabled
+                  ? undefined
+                  : {
+                      enabled: true,
+                      color: '#3b82f6',
+                      shape: 'cloud-scallop',
+                      opacity: 0.08,
+                      bgType: 'color',
+                      borderColor: '#3b82f6',
+                      borderWidth: 1.5,
+                      borderDash: 'dashed',
+                      shadow: true,
+                    },
               });
             }}
             onCopyNode={handleCopyNode}
             onCutNode={handleCutNode}
             onPasteNode={handlePasteNode}
+            onApplyStyleToChildren={handleApplyStyleToChildren}
+            onApplyStyleToSiblings={handleApplyStyleToSiblings}
             onUpdateConnector={(connectorId, updates) => {
               pushHistory(mindMap);
               setMindMap((m) => ({
@@ -928,6 +1071,8 @@ export default function App() {
           isOpen={isToolPanelOpen}
           onClose={() => setIsToolPanelOpen(false)}
           onUpdateNode={updateNode}
+          onApplyStyleToChildren={handleApplyStyleToChildren}
+          onApplyStyleToSiblings={handleApplyStyleToSiblings}
           onUpdateMapTheme={(themeId) => {
             pushHistory(mindMap);
             setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));
