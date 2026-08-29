@@ -26,6 +26,7 @@ interface NodeComponentProps {
     hideAllTags?: boolean;
     hideAllIcons?: boolean;
     hideAllLinks?: boolean;
+    showAllNotesInline?: boolean;
   };
   onSelect: (id: string, e: React.MouseEvent) => void;
   onDoubleClick: (id: string) => void;
@@ -108,6 +109,20 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const textColor = isRoot
     ? (node.textColor || theme.rootText)
     : (node.textColor || theme.nodeText);
+
+  // Helper to detect if background is dark or light for automatic high-contrast notes
+  const isDarkNodeBackground = (() => {
+    const rawCol = (node.color || bgColor || (isRoot ? '#1d4ed8' : '#ffffff')).replace('#', '');
+    if (rawCol.length === 3 || rawCol.length === 6) {
+      const r = parseInt(rawCol.length === 3 ? rawCol[0] + rawCol[0] : rawCol.substring(0, 2), 16);
+      const g = parseInt(rawCol.length === 3 ? rawCol[1] + rawCol[1] : rawCol.substring(2, 4), 16);
+      const b = parseInt(rawCol.length === 3 ? rawCol[2] + rawCol[2] : rawCol.substring(4, 6), 16);
+      // Perceived luminance (ITU-R BT.709)
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance < 0.52;
+    }
+    return isRoot;
+  })();
 
   const borderStyle = node.borderDash || node.borderStyle || 'solid';
   const borderColor = node.borderColor || (isRoot ? 'transparent' : branchColor || theme.nodeBorder);
@@ -777,6 +792,28 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
                   {node.body}
                 </div>
               )}
+
+              {/* Inline Note (Notas visibles debajo del cuerpo sin tooltip con contraste automático) */}
+              {(node.showNoteInline || globalVisibility?.showAllNotesInline) && node.note && node.note.trim().length > 0 && (
+                <div
+                  className={`mt-2 pt-2 border-t rounded-lg p-2.5 text-xs select-text w-full shadow-2xs transition-all ${
+                    isDarkNodeBackground
+                      ? 'border-white/20 bg-black/35 text-slate-100 backdrop-blur-xs'
+                      : 'border-amber-500/20 bg-amber-50/70 text-slate-800'
+                  }`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div
+                    className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider mb-1.5 ${
+                      isDarkNodeBackground ? 'text-amber-300' : 'text-amber-700'
+                    }`}
+                  >
+                    <FileText className="w-3 h-3" />
+                    <span>Nota</span>
+                  </div>
+                  <MarkdownView content={node.note} isDark={isDarkNodeBackground} />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -797,15 +834,23 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           </div>
         )}
 
-        {/* Note indicator */}
+        {/* Note indicator icon button */}
         {node.note && (
           <button
-            title={`Nota: ${node.note}`}
+            title={
+              node.showNoteInline || globalVisibility?.showAllNotesInline
+                ? undefined
+                : `Nota: ${node.note}`
+            }
             onClick={(e) => {
               e.stopPropagation();
               onOpenNote(node.id);
             }}
-            className="shrink-0 p-0.5 text-amber-500 hover:text-amber-600 dark:text-amber-400 transition-colors cursor-pointer"
+            className={`shrink-0 p-0.5 transition-colors cursor-pointer ${
+              node.showNoteInline || globalVisibility?.showAllNotesInline
+                ? 'text-amber-600 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-900/40 rounded'
+                : 'text-amber-500 hover:text-amber-600 dark:text-amber-400'
+            }`}
           >
             <FileText className="w-3.5 h-3.5" />
           </button>
@@ -926,8 +971,12 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         </button>
       )}
 
-      {/* Floating Note Hover Tooltip Preview Card (Full content without scrollbars) */}
-      {node.note && node.note.trim().length > 0 && isHovered && !isEditing && (
+      {/* Floating Note Hover Tooltip Preview Card (Only when notes are NOT shown inline) */}
+      {node.note &&
+        node.note.trim().length > 0 &&
+        isHovered &&
+        !isEditing &&
+        !(node.showNoteInline || globalVisibility?.showAllNotesInline) && (
         <div
           className={`absolute left-1/2 -translate-x-1/2 w-max min-w-[200px] max-w-[340px] sm:max-w-[420px] bg-slate-900/95 text-slate-100 dark:bg-slate-800/98 dark:text-slate-100 p-3.5 rounded-xl shadow-2xl border border-slate-700/80 backdrop-blur-md text-left z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none ${
             layout.side === 'top' ? 'top-full mt-2.5' : 'bottom-full mb-2.5'

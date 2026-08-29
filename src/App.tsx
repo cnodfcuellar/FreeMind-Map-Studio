@@ -74,10 +74,13 @@ export default function App() {
     handleCopyNode,
     handleCutNode,
     handlePasteNode,
+    focusTarget,
+    setFocusTarget,
     handleApplyStyleToChildren,
     handleApplyStyleToSiblings,
     handleApplyIconsToChildren,
     handleApplyIconsToSiblings,
+    handleRandomizeEdgeColors,
   } = store;
 
   // Estado local de Modales
@@ -290,7 +293,10 @@ export default function App() {
             isOpen={isOutlineOpen}
             isFullscreen={isOutlineFullscreen}
             onToggleFullscreen={() => setIsOutlineFullscreen((f) => !f)}
-            onSelectNode={(id) => setSelectedNodeId(id)}
+            onSelectNode={(id) => {
+              setSelectedNodeId(id);
+              setFocusTarget({ nodeId: id, timestamp: Date.now() });
+            }}
             onUpdateText={(id, text) => updateNode(id, { text })}
             onUpdateBody={(id, body) => updateNode(id, { body })}
             onAddChild={(pid) => handleAddChild(pid)}
@@ -334,6 +340,7 @@ export default function App() {
             selectedNodeId={selectedNodeId}
             editingNodeId={editingNodeId}
             searchMatches={searchMatches}
+            focusTarget={focusTarget}
             onSelectNode={(id) => setSelectedNodeId(id)}
             onStartEditing={(id) => setEditingNodeId(id)}
             onFinishEditing={() => setEditingNodeId(null)}
@@ -396,6 +403,7 @@ export default function App() {
           onApplyStyleToSiblings={handleApplyStyleToSiblings}
           onApplyIconsToChildren={handleApplyIconsToChildren}
           onApplyIconsToSiblings={handleApplyIconsToSiblings}
+          onRandomizeEdgeColors={handleRandomizeEdgeColors}
           onUpdateMapTheme={(themeId) => {
             pushHistory(mindMap);
             setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));

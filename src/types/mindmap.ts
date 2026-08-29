@@ -146,6 +146,7 @@ export interface MindNode {
   progressPosition?: 'left' | 'top';
   link?: string; // URL, mailto:, #nodeId
   note?: string; // Rich Markdown note
+  showNoteInline?: boolean; // When true, displays the note inline below the body instead of only in tooltips
   details?: string; // Additional details
 
   // Node Element Visibility Overrides (Eye Toggles)
@@ -242,6 +243,7 @@ export interface MindMap {
   hideAllTags?: boolean;
   hideAllIcons?: boolean;
   hideAllLinks?: boolean;
+  showAllNotesInline?: boolean;
 
   createdAt: number;
   updatedAt: number;

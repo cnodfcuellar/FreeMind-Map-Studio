@@ -14,6 +14,8 @@ import {
   Columns,
   Eye,
   Edit3,
+  LayoutList,
+  MessageSquareOff,
 } from 'lucide-react';
 
 interface NotesTabProps {
@@ -47,42 +49,67 @@ export const NotesTab: React.FC<NotesTabProps> = ({ selectedNode, onUpdateNode }
 
   return (
     <div className="space-y-3">
-      {/* Selector de modo de vista */}
-      <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+      {/* Selector de modo de vista y Toggle Mostrar debajo del cuerpo */}
+      <div className="flex items-center justify-between pb-1 border-b border-slate-200 gap-2 flex-wrap">
         <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider">
           Nota Markdown
         </span>
-        <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs">
+        <div className="flex items-center gap-1.5">
+          {/* Botón: Mostrar debajo del cuerpo / Desactivar Tooltip */}
           <button
             type="button"
-            onClick={() => setViewMode('edit')}
-            className={`p-1.5 rounded-md transition-all cursor-pointer ${
-              viewMode === 'edit' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-500 hover:text-slate-800'
+            onClick={() =>
+              onUpdateNode(selectedNode.id, {
+                showNoteInline: !selectedNode.showNoteInline,
+              })
+            }
+            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10.5px] font-semibold transition-all cursor-pointer border shadow-2xs ${
+              selectedNode.showNoteInline
+                ? 'bg-amber-500 text-white border-amber-600 shadow-amber-500/20'
+                : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
             }`}
-            title="Solo editor"
+            title={
+              selectedNode.showNoteInline
+                ? 'Nota visible debajo del cuerpo en el lienzo (Tooltips desactivados)'
+                : 'Mostrar nota debajo del cuerpo del nodo (Desactiva tooltips)'
+            }
           >
-            <Edit3 className="w-3.5 h-3.5" />
+            <LayoutList className="w-3.5 h-3.5" />
+            <span>{selectedNode.showNoteInline ? 'Debajo del Cuerpo ✓' : 'Mostrar en Nodo'}</span>
           </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('split')}
-            className={`p-1.5 rounded-md transition-all cursor-pointer ${
-              viewMode === 'split' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-500 hover:text-slate-800'
-            }`}
-            title="Vista dividida"
-          >
-            <Columns className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('preview')}
-            className={`p-1.5 rounded-md transition-all cursor-pointer ${
-              viewMode === 'preview' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-500 hover:text-slate-800'
-            }`}
-            title="Solo vista previa"
-          >
-            <Eye className="w-3.5 h-3.5" />
-          </button>
+
+          <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setViewMode('edit')}
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                viewMode === 'edit' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-500 hover:text-slate-800'
+              }`}
+              title="Solo editor"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('split')}
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                viewMode === 'split' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-500 hover:text-slate-800'
+              }`}
+              title="Vista dividida"
+            >
+              <Columns className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('preview')}
+              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                viewMode === 'preview' ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-slate-500 hover:text-slate-800'
+              }`}
+              title="Solo vista previa"
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 

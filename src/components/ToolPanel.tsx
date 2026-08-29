@@ -43,6 +43,7 @@ export interface ToolPanelProps {
   onUpdateMapEdgeDash?: (dash: 'solid' | 'dashed' | 'dotted') => void;
   onApplyEdgeStyleToAllNodes?: (edgeStyle: EdgeStyle) => void;
   onApplyEdgeProfileToAllNodes?: (edgeProfile: EdgeProfile) => void;
+  onRandomizeEdgeColors?: () => void;
   onApplyStyleToChildren?: (nodeId: string) => void;
   onApplyStyleToSiblings?: (nodeId: string) => void;
   onApplyIconsToChildren?: (nodeId: string) => void;
@@ -227,6 +228,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
                 onUpdateMapEdgeDash={props.onUpdateMapEdgeDash}
                 onApplyEdgeStyleToAllNodes={props.onApplyEdgeStyleToAllNodes}
                 onApplyEdgeProfileToAllNodes={props.onApplyEdgeProfileToAllNodes}
+                onRandomizeEdgeColors={props.onRandomizeEdgeColors}
                 onUpdateMapGaps={props.onUpdateMapGaps}
                 onOpenConnectorModal={props.onOpenConnectorModal}
                 onDeleteConnector={props.onDeleteConnector}

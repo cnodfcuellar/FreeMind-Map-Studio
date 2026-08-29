@@ -147,9 +147,32 @@ export function estimateNodeSize(
       bodyHeight = bodyLines.length * (bodyFontSize * 1.4) + 6;
     }
   }
-  
-  const contentWidth = Math.max(titleWidth, bodyWidth);
-  const contentHeight = titleHeight + bodyHeight;
+
+  // Inline Note dimensions (when showNoteInline is active)
+  const isNoteInline = Boolean((node.showNoteInline || mapOptions?.showAllNotesInline) && node.note && node.note.trim().length > 0);
+  let noteInlineWidth = 0;
+  let noteInlineHeight = 0;
+  if (isNoteInline) {
+    const noteLines = (node.note || '').split('\n');
+    const noteCharWidth = 6.2;
+    if (customW && customW > 0) {
+      const availNoteWidth = Math.max(customW - (paddingX * 2), 40);
+      const noteCharsPerLine = Math.max(Math.floor(availNoteWidth / noteCharWidth), 1);
+      let wrappedNoteLines = 0;
+      for (const nl of noteLines) {
+        wrappedNoteLines += Math.max(Math.ceil((nl.length || 1) / noteCharsPerLine), 1);
+      }
+      noteInlineWidth = availNoteWidth;
+      noteInlineHeight = wrappedNoteLines * 16 + 14;
+    } else {
+      const maxNoteLineLength = Math.max(...noteLines.map(l => l.length), 1);
+      noteInlineWidth = Math.min(Math.max(maxNoteLineLength * noteCharWidth, 60), 400);
+      noteInlineHeight = Math.min(noteLines.length * 16 + 14, 250);
+    }
+  }
+
+  const contentWidth = Math.max(titleWidth, bodyWidth, noteInlineWidth);
+  const contentHeight = titleHeight + bodyHeight + noteInlineHeight;
 
   let width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, linkMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
   let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + iconExtraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + iconExtraHeight + linkExtraHeight + imageExtraHeight));

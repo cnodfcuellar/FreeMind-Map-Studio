@@ -56,6 +56,7 @@ interface MindMapCanvasProps {
   onCopyNode: (id: string) => void;
   onCutNode: (id: string) => void;
   onPasteNode: (targetParentId: string) => void;
+  focusTarget?: { nodeId: string; timestamp: number } | null;
   onApplyStyleToChildren?: (nodeId: string) => void;
   onApplyStyleToSiblings?: (nodeId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
@@ -89,6 +90,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   onCopyNode,
   onCutNode,
   onPasteNode,
+  focusTarget,
   onApplyStyleToChildren,
   onApplyStyleToSiblings,
   onUpdateConnector,
@@ -156,6 +158,26 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   const layoutMap = React.useMemo(() => {
     return computeMindMapLayout(mindMap, { x: 0, y: 0 });
   }, [mindMap]);
+
+  // Center and Zoom on a specific target node (e.g. from Outline Panel click)
+  useEffect(() => {
+    if (!focusTarget || !containerRef.current) return;
+    const layout = layoutMap.get(focusTarget.nodeId);
+    if (!layout) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const nodeCenterX = layout.x + layout.width / 2;
+    const nodeCenterY = layout.y + layout.height / 2;
+
+    // Smooth target zoom (1.1x to 1.25x for close inspection, or maintain at least 1.05)
+    const targetZoom = Math.max(zoom, 1.15);
+
+    setZoom(targetZoom);
+    setPan({
+      x: rect.width / 2 - nodeCenterX * targetZoom,
+      y: rect.height / 2 - nodeCenterY * targetZoom,
+    });
+  }, [focusTarget, layoutMap]);
 
   // Fit View / Center Function
   const handleFitView = useCallback(() => {
@@ -1119,6 +1141,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   hideAllTags: mindMap.hideAllTags,
                   hideAllIcons: mindMap.hideAllIcons,
                   hideAllLinks: mindMap.hideAllLinks,
+                  showAllNotesInline: mindMap.showAllNotesInline,
                 }}
                 onSelect={(id) => onSelectNode(id)}
                 onDoubleClick={(id) => onStartEditing(id)}

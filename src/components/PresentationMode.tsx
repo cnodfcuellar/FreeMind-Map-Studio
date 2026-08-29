@@ -18,97 +18,139 @@ import {
   Network,
   BookOpen,
   CornerUpLeft,
+  ArrowUpRight,
+  ChevronsRight,
+  CornerLeftUp,
+  Compass,
+  MapPin,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
+import { THEMES } from '../utils/themes';
+import { computeMindMapLayout } from '../utils/layoutEngine';
+import { CalculatedNodeLayout } from '../types/mindmap';
 
 interface PresentationThemeConfig {
   id: string;
   name: string;
-  bgClass: string;
-  textClass: string;
-  accentClass: string;
-  cardBgClass: string;
-  cardBorderClass: string;
+  backgroundColor: string;
+  textColor: string;
+  accentColor: string;
+  cardBgColor: string;
+  cardBorderColor: string;
   previewColor: string;
   badgeBg: string;
+  isLight: boolean;
+  branchColors: string[];
 }
 
+/**
+ * Presentation Themes synchronized with all MindMap Themes from the app.
+ */
 const PRESENTATION_THEMES: PresentationThemeConfig[] = [
   {
-    id: 'dark-studio',
-    name: 'Estudio Oscuro',
-    bgClass: 'bg-slate-950',
-    textClass: 'text-white',
-    accentClass: 'text-blue-400',
-    cardBgClass: 'bg-slate-900/95',
-    cardBorderClass: 'border-slate-800',
+    id: 'default',
+    name: 'Clásico Azul',
+    backgroundColor: '#f8fafc',
+    textColor: '#0f172a',
+    accentColor: '#2563eb',
+    cardBgColor: '#ffffff',
+    cardBorderColor: '#cbd5e1',
+    previewColor: '#2563eb',
+    badgeBg: 'bg-blue-100 border-blue-300 text-blue-800',
+    isLight: true,
+    branchColors: THEMES.default.branchColors,
+  },
+  {
+    id: 'rainbow',
+    name: 'Arcoíris Vibrante',
+    backgroundColor: '#ffffff',
+    textColor: '#0f172a',
+    accentColor: '#3b82f6',
+    cardBgColor: '#f8fafc',
+    cardBorderColor: '#e2e8f0',
+    previewColor: '#0f172a',
+    badgeBg: 'bg-indigo-100 border-indigo-300 text-indigo-800',
+    isLight: true,
+    branchColors: THEMES.rainbow.branchColors,
+  },
+  {
+    id: 'dark',
+    name: 'Modo Oscuro',
+    backgroundColor: '#0f172a',
+    textColor: '#f8fafc',
+    accentColor: '#38bdf8',
+    cardBgColor: '#1e293b',
+    cardBorderColor: '#334155',
     previewColor: '#0f172a',
     badgeBg: 'bg-blue-950/80 border-blue-800/60 text-blue-300',
+    isLight: false,
+    branchColors: THEMES.dark.branchColors,
   },
   {
-    id: 'midnight-oled',
-    name: 'Medianoche OLED',
-    bgClass: 'bg-black',
-    textClass: 'text-slate-100',
-    accentClass: 'text-cyan-400',
-    cardBgClass: 'bg-zinc-950',
-    cardBorderClass: 'border-zinc-800',
-    previewColor: '#000000',
-    badgeBg: 'bg-cyan-950/80 border-cyan-800/60 text-cyan-300',
+    id: 'forest',
+    name: 'Bosque Esmeralda',
+    backgroundColor: '#f0fdf4',
+    textColor: '#064e3b',
+    accentColor: '#059669',
+    cardBgColor: '#ffffff',
+    cardBorderColor: '#a7f3d0',
+    previewColor: '#047857',
+    badgeBg: 'bg-emerald-100 border-emerald-300 text-emerald-800',
+    isLight: true,
+    branchColors: THEMES.forest.branchColors,
   },
   {
-    id: 'cyberpunk-purple',
-    name: 'Cyberpunk Neón',
-    bgClass: 'bg-[#120726]',
-    textClass: 'text-purple-100',
-    accentClass: 'text-pink-400',
-    cardBgClass: 'bg-[#1e0d3d]/95',
-    cardBorderClass: 'border-purple-800/60',
-    previewColor: '#1e0d3d',
-    badgeBg: 'bg-purple-950/80 border-purple-800/60 text-purple-300',
-  },
-  {
-    id: 'navy-executive',
-    name: 'Azul Ejecutivo',
-    bgClass: 'bg-[#09152b]',
-    textClass: 'text-slate-100',
-    accentClass: 'text-amber-400',
-    cardBgClass: 'bg-[#102347]/95',
-    cardBorderClass: 'border-blue-900/60',
-    previewColor: '#0a192f',
-    badgeBg: 'bg-amber-950/80 border-amber-800/60 text-amber-300',
-  },
-  {
-    id: 'emerald-forest',
-    name: 'Esmeralda Natural',
-    bgClass: 'bg-[#051c14]',
-    textClass: 'text-emerald-50',
-    accentClass: 'text-emerald-400',
-    cardBgClass: 'bg-[#0b2f22]/95',
-    cardBorderClass: 'border-emerald-800/60',
-    previewColor: '#064e3b',
-    badgeBg: 'bg-emerald-950/80 border-emerald-800/60 text-emerald-300',
-  },
-  {
-    id: 'sunset-warm',
+    id: 'sunset',
     name: 'Atardecer Cálido',
-    bgClass: 'bg-[#210c14]',
-    textClass: 'text-orange-50',
-    accentClass: 'text-orange-400',
-    cardBgClass: 'bg-[#3b1523]/95',
-    cardBorderClass: 'border-rose-900/60',
-    previewColor: '#881337',
-    badgeBg: 'bg-orange-950/80 border-orange-800/60 text-orange-300',
+    backgroundColor: '#fffbeb',
+    textColor: '#431407',
+    accentColor: '#ea580c',
+    cardBgColor: '#ffffff',
+    cardBorderColor: '#fed7aa',
+    previewColor: '#ea580c',
+    badgeBg: 'bg-orange-100 border-orange-300 text-orange-800',
+    isLight: true,
+    branchColors: THEMES.sunset.branchColors,
   },
   {
-    id: 'light-clean',
-    name: 'Luz Minimalista',
-    bgClass: 'bg-slate-100',
-    textClass: 'text-slate-900',
-    accentClass: 'text-blue-600',
-    cardBgClass: 'bg-white',
-    cardBorderClass: 'border-slate-300 shadow-sm',
-    previewColor: '#f8fafc',
-    badgeBg: 'bg-blue-100 border-blue-300 text-blue-800',
+    id: 'minimal',
+    name: 'Minimalista Mono',
+    backgroundColor: '#fafafa',
+    textColor: '#18181b',
+    accentColor: '#27272a',
+    cardBgColor: '#ffffff',
+    cardBorderColor: '#e4e4e7',
+    previewColor: '#18181b',
+    badgeBg: 'bg-zinc-200 border-zinc-300 text-zinc-800',
+    isLight: true,
+    branchColors: THEMES.minimal.branchColors,
+  },
+  {
+    id: 'blueprint',
+    name: 'Plano Técnico Blueprint',
+    backgroundColor: '#0a2540',
+    textColor: '#f0f9ff',
+    accentColor: '#38bdf8',
+    cardBgColor: '#0f3863',
+    cardBorderColor: '#0284c7',
+    previewColor: '#0284c7',
+    badgeBg: 'bg-sky-950/80 border-sky-800/60 text-sky-300',
+    isLight: false,
+    branchColors: THEMES.blueprint.branchColors,
+  },
+  {
+    id: 'honeycomb',
+    name: 'Panal Creativo',
+    backgroundColor: '#fffdf5',
+    textColor: '#78350f',
+    accentColor: '#d97706',
+    cardBgColor: '#ffffff',
+    cardBorderColor: '#fde68a',
+    previewColor: '#d97706',
+    badgeBg: 'bg-amber-100 border-amber-300 text-amber-800',
+    isLight: true,
+    branchColors: THEMES.honeycomb.branchColors,
   },
 ];
 
@@ -258,14 +300,53 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   onClose,
   onEditNode,
 }) => {
-  // Presentation customization options
-  const [themeId, setThemeId] = useState<string>('dark-studio');
+  // Presentation customization options synchronized with current mindMap theme
+  const [themeId, setThemeId] = useState<string>(mindMap.themeId || 'default');
   const [showNotes, setShowNotes] = useState<boolean>(true);
   const [imageSize, setImageSize] = useState<'small' | 'medium' | 'large' | 'hidden'>('medium');
   const [showChildrenCards, setShowChildrenCards] = useState<boolean>(true);
   const [showConnectorsCards, setShowConnectorsCards] = useState<boolean>(true);
+  const [showMiniMap, setShowMiniMap] = useState<boolean>(true);
   const [contentAlign, setContentAlign] = useState<'center' | 'left'>('center');
   const [fontSizeScale, setFontSizeScale] = useState<'normal' | 'large' | 'compact'>('normal');
+
+  // Compute full layout for radar mini-map in presentation
+  const layoutMap = useMemo(() => {
+    return computeMindMapLayout(mindMap, { x: 0, y: 0 });
+  }, [mindMap]);
+
+  // Compute map bounding box for the presentation mini-map
+  const mapBounds = useMemo(() => {
+    if (!layoutMap || layoutMap.size === 0) {
+      return { minX: -200, maxX: 200, minY: -200, maxY: 200, width: 400, height: 400 };
+    }
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    layoutMap.forEach((layout) => {
+      minX = Math.min(minX, layout.x - 30);
+      maxX = Math.max(maxX, layout.x + layout.width + 30);
+      minY = Math.min(minY, layout.y - 30);
+      maxY = Math.max(maxY, layout.y + layout.height + 30);
+    });
+
+    const pad = 40;
+    minX -= pad;
+    maxX += pad;
+    minY -= pad;
+    maxY += pad;
+
+    return {
+      minX,
+      maxX,
+      minY,
+      maxY,
+      width: Math.max(100, maxX - minX),
+      height: Math.max(100, maxY - minY),
+    };
+  }, [layoutMap]);
 
   // Generate sequential unmixed slides:
   // For each node:
@@ -358,7 +439,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
     return PRESENTATION_THEMES.find((t) => t.id === themeId) || PRESENTATION_THEMES[0];
   }, [themeId]);
 
-  const isLight = themeId === 'light-clean';
+  const isLight = currentTheme.isLight;
   const currentSlide = slides[currentIndex] || slides[0];
   const currentNode = currentSlide?.node;
 
@@ -391,6 +472,40 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       const prevIdx = jumpHistory[jumpHistory.length - 1];
       setJumpHistory((prev) => prev.slice(0, prev.length - 1));
       setCurrentIndex(prevIdx);
+    }
+  };
+
+  // 1. Ir al Inicio del Tema / Nodo Padre
+  const handleGoToParent = () => {
+    if (!currentNode || !currentNode.parentId) return;
+    handleJumpToNode(currentNode.parentId);
+  };
+
+  // 2. Ir al Siguiente Tema (siguiente hermano o salto de rama al siguiente tema)
+  const handleGoToNextTopic = () => {
+    if (!currentNode) return;
+
+    // Buscar si tiene siguiente hermano
+    if (currentNode.parentId) {
+      const parent = mindMap.nodes[currentNode.parentId];
+      if (parent && parent.children) {
+        const currentSiblingIndex = parent.children.indexOf(currentNode.id);
+        if (currentSiblingIndex !== -1 && currentSiblingIndex < parent.children.length - 1) {
+          const nextSiblingId = parent.children[currentSiblingIndex + 1];
+          handleJumpToNode(nextSiblingId);
+          return;
+        }
+      }
+    }
+
+    // Si no hay siguiente hermano directo, buscar el siguiente slide que sea de un nodo distinto
+    const nextDistinctSlideIdx = slides.findIndex((s, idx) => idx > currentIndex && s.node.id !== currentNode.id && s.phase === 'body');
+    if (nextDistinctSlideIdx !== -1) {
+      setJumpHistory((prev) => [...prev, currentIndex]);
+      setCurrentIndex(nextDistinctSlideIdx);
+    } else {
+      // Si estamos en la última diapositiva o cerca, avanzar si es posible
+      handleNext();
     }
   };
 
@@ -481,7 +596,11 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 h-screen w-screen overflow-hidden ${currentTheme.bgClass} ${currentTheme.textClass} z-50 flex flex-col justify-between p-4 sm:p-6 select-none animate-in fade-in duration-200 transition-colors`}
+      style={{
+        backgroundColor: currentTheme.backgroundColor,
+        color: currentTheme.textColor,
+      }}
+      className={`fixed inset-0 h-screen w-screen overflow-hidden z-50 flex flex-col justify-between p-4 sm:p-6 select-none animate-in fade-in duration-200 transition-colors`}
     >
       {/* 1. TOP HEADER BAR */}
       <header className="flex items-center justify-between gap-3 w-full shrink-0 h-10">
@@ -619,7 +738,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 <Palette className="w-3.5 h-3.5 text-purple-500" />
                 <span>Tema de la Presentación</span>
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {PRESENTATION_THEMES.map((th) => {
                   const isSelected = themeId === th.id;
                   return (
@@ -627,20 +746,32 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       key={th.id}
                       type="button"
                       onClick={() => setThemeId(th.id)}
-                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-left flex flex-col justify-between gap-1.5 transition-all cursor-pointer ${
                         isSelected
-                          ? 'border-blue-500 ring-2 ring-blue-400/50 scale-102 font-bold shadow-md'
-                          : 'border-slate-600/40 opacity-85 hover:opacity-100'
+                          ? 'border-blue-500 ring-2 ring-blue-400/60 font-bold shadow-md bg-blue-50/20'
+                          : isLight
+                          ? 'border-slate-200 bg-slate-50/70 hover:bg-slate-100'
+                          : 'border-slate-800 bg-slate-950/70 hover:bg-slate-800'
                       }`}
-                      style={{ backgroundColor: th.previewColor }}
                     >
-                      <div
-                        className="w-3.5 h-3.5 rounded-full shrink-0 border border-white/40"
-                        style={{ backgroundColor: th.previewColor }}
-                      />
-                      <span className="text-[11px] truncate font-semibold text-white drop-shadow-sm">
-                        {th.name}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div
+                          className="w-3.5 h-3.5 rounded-full shrink-0 border border-slate-300 shadow-2xs"
+                          style={{ backgroundColor: th.previewColor }}
+                        />
+                        <span className={`text-[11px] truncate font-semibold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                          {th.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-0.5">
+                        {th.branchColors.slice(0, 4).map((c, i) => (
+                          <div
+                            key={i}
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
                     </button>
                   );
                 })}
@@ -750,6 +881,32 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     type="checkbox"
                     checked={showConnectorsCards}
                     onChange={(e) => setShowConnectorsCards(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className={`w-9 h-5 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 ${isLight ? 'bg-slate-300' : 'bg-slate-700'}`}></div>
+                </label>
+              </div>
+            </div>
+
+            {/* F. MOSTRAR MINIMAPA RADAR */}
+            <div className={`space-y-2 pt-2.5 border-t ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-blue-500" />
+                  <div>
+                    <span className={`text-xs font-bold block ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                      MiniMapa en Esquina Inferior
+                    </span>
+                    <span className={`text-[10.5px] block ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+                      Muestra el minimapa del mapa con el nodo actual resaltado
+                    </span>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showMiniMap}
+                    onChange={(e) => setShowMiniMap(e.target.checked)}
                     className="sr-only peer"
                   />
                   <div className={`w-9 h-5 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 ${isLight ? 'bg-slate-300' : 'bg-slate-700'}`}></div>
@@ -1092,7 +1249,11 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 <div
                   key={child.id}
                   onClick={() => handleJumpToNode(child.id)}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-xl ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-blue-500`}
+                  style={{
+                    backgroundColor: currentTheme.cardBgColor,
+                    borderColor: currentTheme.cardBorderColor,
+                  }}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-xl hover:border-blue-500`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     {child.icons && child.icons.length > 0 ? (
@@ -1141,7 +1302,11 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                       <div
                         key={conn.id}
                         onClick={() => handleJumpToNode(targetId)}
-                        className={`p-2.5 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-md flex items-center justify-between gap-2 ${currentTheme.cardBgClass} ${currentTheme.cardBorderClass} hover:border-pink-500`}
+                        style={{
+                          backgroundColor: currentTheme.cardBgColor,
+                          borderColor: currentTheme.cardBorderColor,
+                        }}
+                        className={`p-2.5 rounded-xl border transition-all cursor-pointer group hover:scale-102 hover:shadow-md flex items-center justify-between gap-2 hover:border-pink-500`}
                       >
                         <div className="min-w-0 flex-1">
                           <div className={`flex items-center gap-1 text-[10px] font-bold ${isLight ? 'text-pink-700' : 'text-pink-400'}`}>
@@ -1171,20 +1336,43 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
       </main>
 
       {/* 4. BOTTOM NAVIGATION BAR */}
-      <footer className="flex items-center justify-between max-w-2xl mx-auto w-full shrink-0 h-12">
-        <button
-          disabled={currentIndex === 0}
-          onClick={handlePrev}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-semibold text-xs transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-            isLight
-              ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-200'
-              : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
-          }`}
-        >
-          <ChevronLeft className="w-4 h-4" /> Anterior
-        </button>
+      <footer className="flex items-center justify-between max-w-4xl mx-auto w-full shrink-0 h-12 gap-2 sm:gap-4 px-2">
+        {/* Left cluster: Anterior + Inicio del Tema (Padre) */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button
+            disabled={currentIndex === 0}
+            onClick={handlePrev}
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl border font-semibold text-xs transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs ${
+              isLight
+                ? 'bg-white border-slate-300 text-slate-800 hover:bg-slate-200'
+                : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
+            title="Diapositiva anterior (Flecha Izquierda)"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Anterior</span>
+          </button>
 
-        <div className="flex items-center gap-1.5 overflow-hidden max-w-xs px-2">
+          {!isRoot && currentNode.parentId && (
+            <button
+              onClick={handleGoToParent}
+              className={`flex items-center gap-1 px-2.5 sm:px-3 py-2 rounded-xl border font-semibold text-xs transition-all cursor-pointer shadow-2xs ${
+                isLight
+                  ? 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100'
+                  : 'bg-blue-950/80 border-blue-800/80 text-blue-300 hover:bg-blue-900'
+              }`}
+              title="Ir al inicio del tema (Nodo Padre)"
+            >
+              <CornerLeftUp className="w-3.5 h-3.5" />
+              <span className="truncate max-w-[120px] sm:max-w-[160px]">
+                Inicio: {parentNode?.text || 'Padre'}
+              </span>
+            </button>
+          )}
+        </div>
+
+        {/* Center: Slide indicator dots */}
+        <div className="flex items-center gap-1 overflow-hidden max-w-xs px-1">
           {slides.map((_, idx) => (
             <button
               key={idx}
@@ -1196,18 +1384,214 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                   ? 'w-2 bg-slate-400 hover:bg-slate-500'
                   : 'w-2 bg-slate-800 hover:bg-slate-700'
               }`}
+              title={`Diapositiva ${idx + 1}`}
             />
           ))}
         </div>
 
-        <button
-          disabled={currentIndex === slides.length - 1}
-          onClick={handleNext}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 disabled:hover:bg-blue-600 disabled:cursor-not-allowed transition-all text-xs font-semibold shadow-lg shadow-blue-900/40 cursor-pointer"
-        >
-          Siguiente <ChevronRight className="w-4 h-4" />
-        </button>
+        {/* Right cluster: Siguiente Tema + Siguiente */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button
+            onClick={handleGoToNextTopic}
+            disabled={currentIndex >= slides.length - 1}
+            className={`flex items-center gap-1 px-2.5 sm:px-3 py-2 rounded-xl border font-semibold text-xs transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs ${
+              isLight
+                ? 'bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100'
+                : 'bg-purple-950/80 border-purple-800/80 text-purple-300 hover:bg-purple-900'
+            }`}
+            title="Saltar al siguiente tema o rama hermana"
+          >
+            <span>Siguiente Tema</span>
+            <ChevronsRight className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            disabled={currentIndex === slides.length - 1}
+            onClick={handleNext}
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-30 disabled:hover:bg-blue-600 disabled:cursor-not-allowed transition-all text-xs font-semibold shadow-md shadow-blue-900/40 cursor-pointer"
+            title="Siguiente diapositiva (Flecha Derecha o Espacio)"
+          >
+            <span className="hidden sm:inline">Siguiente</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </footer>
+
+      {/* 5. RADAR MINIMAP (CENTRO SUPERIOR, TRASLÚCIDO Y CON ULTRA-RESALTE DEL NODO ACTIVO) */}
+      {showMiniMap && layoutMap.size > 0 && (
+        <div className="fixed top-2 left-1/2 -translate-x-1/2 z-40 animate-in fade-in slide-in-from-top-2 duration-200 pointer-events-auto">
+          <div
+            className={`px-3 py-2 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-200 group hover:opacity-100 hover:scale-102 ${
+              isLight
+                ? 'bg-white/50 border-slate-300/50 opacity-80'
+                : 'bg-black/45 border-white/15 opacity-75'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              {/* Canvas SVG MiniMapa Agrandado y Translúcido */}
+              <div className="relative w-52 sm:w-68 md:w-80 h-14 sm:h-16 md:h-18 overflow-hidden rounded-xl">
+                <svg
+                  className="w-full h-full"
+                  viewBox={`${mapBounds.minX} ${mapBounds.minY} ${mapBounds.width} ${mapBounds.height}`}
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  {/* 1. Aristas tenues traslúcidas */}
+                  <g id="presentation-minimap-edges">
+                    {(Array.from(layoutMap.values()) as CalculatedNodeLayout[]).map((childLayout) => {
+                      const childNode = mindMap.nodes[childLayout.id];
+                      if (!childNode || !childNode.parentId) return null;
+                      const parentLayout = layoutMap.get(childNode.parentId);
+                      if (!parentLayout) return null;
+
+                      const branchColor =
+                        childNode.edgeColor ||
+                        currentTheme.branchColors[childLayout.branchIndex % currentTheme.branchColors.length] ||
+                        '#38bdf8';
+
+                      let pathData = '';
+                      if (childLayout.side === 'left') {
+                        const startX = parentLayout.x;
+                        const startY = parentLayout.y + parentLayout.height / 2;
+                        const endX = childLayout.x + childLayout.width;
+                        const endY = childLayout.y + childLayout.height / 2;
+                        const midX = (startX + endX) / 2;
+                        pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+                      } else if (childLayout.side === 'bottom') {
+                        const startX = parentLayout.x + parentLayout.width / 2;
+                        const startY = parentLayout.y + parentLayout.height;
+                        const endX = childLayout.x + childLayout.width / 2;
+                        const endY = childLayout.y;
+                        const midY = (startY + endY) / 2;
+                        pathData = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
+                      } else if (childLayout.side === 'top') {
+                        const startX = parentLayout.x + parentLayout.width / 2;
+                        const startY = parentLayout.y;
+                        const endX = childLayout.x + childLayout.width / 2;
+                        const endY = childLayout.y + childLayout.height;
+                        const midY = (startY + endY) / 2;
+                        pathData = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
+                      } else {
+                        const startX = parentLayout.x + parentLayout.width;
+                        const startY = parentLayout.y + parentLayout.height / 2;
+                        const endX = childLayout.x;
+                        const endY = childLayout.y + childLayout.height / 2;
+                        const midX = (startX + endX) / 2;
+                        pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+                      }
+
+                      return (
+                        <path
+                          key={`pm-edge-${childNode.parentId}-${childNode.id}`}
+                          d={pathData}
+                          fill="none"
+                          stroke={branchColor}
+                          strokeWidth={1.5}
+                          strokeOpacity={0.4}
+                          strokeLinecap="round"
+                        />
+                      );
+                    })}
+                  </g>
+
+                  {/* 2. Nodos del Mapa con ULTRA-RESALTE del Nodo Activo */}
+                  <g id="presentation-minimap-nodes">
+                    {(Array.from(layoutMap.values()) as CalculatedNodeLayout[]).map((l) => {
+                      const node = mindMap.nodes[l.id];
+                      const isCurrent = currentNode.id === l.id;
+                      const isRootNode = l.depth === 0;
+
+                      const minW = isRootNode ? 40 : l.depth === 1 ? 28 : 20;
+                      const minH = isRootNode ? 22 : l.depth === 1 ? 16 : 12;
+                      const renderW = Math.max(l.width, minW);
+                      const renderH = Math.max(l.height, minH);
+                      const renderX = l.x - (renderW - l.width) / 2;
+                      const renderY = l.y - (renderH - l.height) / 2;
+
+                      const branchColor =
+                        currentTheme.branchColors[l.branchIndex % currentTheme.branchColors.length] || '#38bdf8';
+
+                      let nodeFill = node?.color;
+                      if (!nodeFill || nodeFill === '#ffffff' || nodeFill === '#f8fafc') {
+                        nodeFill = isRootNode ? '#3b82f6' : branchColor;
+                      }
+
+                      return (
+                        <g
+                          key={`pm-node-${l.id}`}
+                          onClick={() => handleJumpToNode(l.id)}
+                          className="cursor-pointer"
+                        >
+                          {/* Super Glow Halo exterior si es el nodo actual */}
+                          {isCurrent && (
+                            <>
+                              {/* Halo difuso 1 */}
+                              <rect
+                                x={renderX - 12}
+                                y={renderY - 12}
+                                width={renderW + 24}
+                                height={renderH + 24}
+                                rx={12}
+                                fill="#38bdf8"
+                                fillOpacity={0.35}
+                                className="animate-ping"
+                              />
+                              {/* Halo sólido 2 */}
+                              <rect
+                                x={renderX - 6}
+                                y={renderY - 6}
+                                width={renderW + 12}
+                                height={renderH + 12}
+                                rx={8}
+                                fill="#2563eb"
+                                fillOpacity={0.65}
+                                className="animate-pulse"
+                              />
+                            </>
+                          )}
+
+                          {/* Nodo base */}
+                          <rect
+                            x={renderX}
+                            y={renderY}
+                            width={renderW}
+                            height={renderH}
+                            rx={isRootNode ? 6 : 4}
+                            fill={isCurrent ? '#ffffff' : nodeFill}
+                            fillOpacity={isCurrent ? 1 : 0.6}
+                            stroke={isCurrent ? '#2563eb' : '#64748b'}
+                            strokeWidth={isCurrent ? 3 : 1}
+                            strokeOpacity={isCurrent ? 1 : 0.5}
+                          />
+
+                          {/* Pin / Baliza brillante en el nodo actual */}
+                          {isCurrent && (
+                            <circle
+                              cx={renderX + renderW / 2}
+                              cy={renderY + renderH / 2}
+                              r={3.5}
+                              fill="#ef4444"
+                              stroke="#ffffff"
+                              strokeWidth={1.5}
+                            />
+                          )}
+                        </g>
+                      );
+                    })}
+                  </g>
+                </svg>
+              </div>
+
+              {/* Título o Etiqueta Compacta del Nodo Activo */}
+              <div className="flex items-center gap-1 shrink-0 border-l border-slate-300/30 pl-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                <span className={`text-[10px] font-bold truncate max-w-[90px] sm:max-w-[120px] ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                  {currentNode.text}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

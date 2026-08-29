@@ -1,67 +1,65 @@
 # FreeMind Map Studio — Arquitectura Completa del Proyecto
 
-**Version:** 2.0  **Fecha:** 2026-08-28  
+**Version:** 2.2  **Fecha:** 2026-08-29  
 **Stack:** React 19 + TypeScript 5.8 + Vite 6 + Tailwind CSS v4 + Zustand 5  
 **Gestor de paquetes:** pnpm  
-**Persistencia:** localStorage (sin backend)  
+**Persistencia:** localStorage (sin backend, 100% offline)  
 **Patron de arquitectura:** Atomic Design + Store centralizado (Zustand)
 
 ---
 
 ## 1. Vision General
 
-FreeMind Map Studio es una aplicacion de mapas mentales completamente offline que corre
-en el navegador sin ningun servidor. El estado completo se gestiona mediante un store
-reactivo global (Zustand) y se persiste en `localStorage` automaticamente en cada cambio.
+FreeMind Map Studio es una aplicacion de mapas mentales completamente offline que corre en el navegador sin ningun servidor. El estado completo se gestiona mediante un store reactivo global (Zustand) y se persiste en `localStorage` automaticamente en cada cambio.
 
 ```
 USUARIO
-  |
-  v
+  │
+  ▼
 App.tsx  (orquestador, delegador de composicion)
-  |           |               |              |
-  v           v               v              v
+  │           │               │              │
+  ▼           ▼               ▼              ▼
 MenuBar   MindMapCanvas   ToolPanel   PresentationMode
 ToolBar   (lienzo SVG)    (inspector) (slides 100vh)
-FilterBar    |                |
-StatusBar    v                v
+FilterBar    │                │
+StatusBar    ▼                ▼
          NodeComponent   6 Tabs (Organismos)
-         MiniMap            |
-                            v
-                    Moleculas + Atomos
+         MiniMap              │
+                              ▼
+                      Moleculas + Atomos
 ```
 
 ### 1.1. Diagrama de Capas (Atomic Design)
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  PAGINA (App.tsx)                                    │
-│  Orquestador: compone organismos, gestiona modales  │
-├─────────────────────────────────────────────────────┤
-│  ORGANISMOS (componentes de pagina completa)         │
-│  MenuBar · ToolBar · FilterBar · MindMapCanvas      │
-│  ToolPanel · PresentationMode · OutlineView          │
-│  StatusBar · MiniMap · Modals/                       │
-│  ├── organisms/toolpanel/  (6 tabs)                  │
-│  ├── organisms/canvas/     (2 sub-componentes)       │
-│  └── organisms/presentation/ (controles + temas)     │
-├─────────────────────────────────────────────────────┤
-│  MOLECULAS (combinaciones reutilizables)             │
-│  FontFormatToolbar · ShapeSelector · TagManager      │
-├─────────────────────────────────────────────────────┤
-│  ATOMOS (elementos UI primitivos)                    │
-│  CollapsibleSection · ColorPicker · SliderInput      │
-│  ToggleButton · ToggleButtonGroup                    │
-├─────────────────────────────────────────────────────┤
-│  HOOKS (logica reutilizable)                         │
-│  useMindMapStore · useSearchFilter                   │
-│  useKeyboardShortcuts                                │
-├─────────────────────────────────────────────────────┤
-│  UTILS (funciones puras, sin estado)                 │
-│  layoutEngine · themes · storage · freeplaneConverter│
-│  htmlExporter · connectorUtils · markdownRenderer    │
-│  iconMap · vectorIconPack · sampleMaps               │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  PAGINA (App.tsx)                                               │
+│  Orquestador: compone organismos, gestiona modales y foco       │
+├─────────────────────────────────────────────────────────────────┤
+│  ORGANISMOS (componentes de pagina completa)                    │
+│  MenuBar · ToolBar · FilterBar · MindMapCanvas · OutlineView    │
+│  ToolPanel · PresentationMode · StatusBar · MiniMap · Modals/   │
+│  ├── organisms/toolpanel/  (6 tabs especializados)              │
+│  │   ├── ContentTab · FormatTab · NotesTab                      │
+│  │   └── IconsTab · CloudsTab · ThemeTab                        │
+│  ├── organisms/canvas/     (CanvasContextMenu, ZoomControls)    │
+│  └── organisms/presentation/ (controles + 7 temas visuales)     │
+├─────────────────────────────────────────────────────────────────┤
+│  MOLECULAS (combinaciones reutilizables)                        │
+│  FontFormatToolbar · ShapeSelector · TagManager                 │
+├─────────────────────────────────────────────────────────────────┤
+│  ATOMOS (elementos UI primitivos)                               │
+│  CollapsibleSection · ColorPicker · SliderInput                 │
+│  ToggleButton · ToggleButtonGroup                              │
+├─────────────────────────────────────────────────────────────────┤
+│  HOOKS (logica reutilizable y store)                            │
+│  useMindMapStore · useSearchFilter · useKeyboardShortcuts       │
+├─────────────────────────────────────────────────────────────────┤
+│  UTILS (funciones puras, sin estado)                            │
+│  layoutEngine · themes · storage · freeplaneConverter           │
+│  htmlExporter · connectorUtils · markdownRenderer               │
+│  iconMap · vectorIconPack · sampleMaps · additionalTemplates    │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -75,8 +73,10 @@ Store Global (useMindMapStore — Zustand)
   [historyFuture: MindMap[]]  -- pila redo
   [selectedNodeId: string]    -- nodo actualmente seleccionado
   [editingNodeId: string]     -- nodo en modo edicion de texto
+  [focusTarget: {...} | null] -- senal de auto-zoom y centrado de nodo
   [isPresentationMode: bool]  -- activa overlay de presentacion
   [isOutlineOpen: bool]       -- panel esquema izquierdo
+  [isOutlineFullscreen: bool] -- esquema en pantalla completa
   [isToolPanelOpen: bool]     -- panel propiedades derecho
   [isFilterBarOpen: bool]     -- barra de busqueda
   [clipboard: {...}]          -- portapapeles de nodo/subtree
@@ -88,15 +88,231 @@ Flujo de mutacion:
                  --> useEffect --> saveCurrentMap() --> localStorage
 ```
 
-### 2.1. Diferencia con la v1
+### 2.1. Propagacion de Estilos y de Iconos
 
-En la version 1, App.tsx contenia TODO el estado como `useState` y propagaba
-handlers y datos via props (prop drilling). En la version 2:
+El store desacopla deliberadamente la propagacion de estilo general de la de iconos:
 
-- El estado se centraliza en `useMindMapStore.ts` (Zustand)
-- Los hooks `useKeyboardShortcuts` y `useSearchFilter` encapsulan logica
-- Los componentes acceden al store directamente via `useMindMapStore()`
-- App.tsx actua como compositor/orquestador sin logica de negocio pesada
+1. **`handleApplyStyleToChildren / handleApplyStyleToSiblings`**:
+   - Propaga exclusivamente el `extractNodeStyleBundle` (forma, colores de fondo, degradados, tramas, imagen de fondo, bordes, aristas, tipografia de titulo y cuerpo).
+2. **`handleApplyIconsToChildren / handleApplyIconsToSiblings`**:
+   - Propaga exclusivamente el `iconBundle` (`icons`, `iconColor`, `iconSize`, `iconPosition`), sin alterar fondos, bordes ni geometrias de los nodos.
+
+---
+
+## 3. Modelo de Datos (`types/mindmap.ts`)
+
+### 3.1. `MindNode` (Nodo del Mapa Mental)
+
+```typescript
+export interface MindNode {
+  id: string;
+  text: string;
+  parentId: string | null;
+  children: string[];
+  folded?: boolean;
+  side?: NodeSide; // 'left' | 'right' | 'root' | 'bottom' | 'top' | 'radial' | 'circular'
+  
+  // Geometria y Formas (10 opciones)
+  shape?: NodeShape; // 'bubble' | 'fork' | 'rectangle' | 'square' | 'oval' | 'circle' | 'hexagon' | 'pill' | 'arrow' | 'star'
+  customWidth?: number;
+  customHeight?: number;
+  
+  // Fondo y Relleno
+  color?: string; // Color solido o base
+  bgType?: NodeBackgroundType; // 'color' | 'transparent' | 'gradient' | 'pattern' | 'image'
+  gradientColor1?: string;
+  gradientColor2?: string;
+  gradientDirection?: NodeGradientDirection; // 'to-r' | 'to-b' | 'to-br' | 'radial'
+  nodePattern?: NodePatternStyle; // 'dots' | 'lines' | 'squares' | 'stripes' | 'triangles' | 'hexagons' | 'cross'
+  nodePatternColor?: string;
+  nodePatternSize?: number;
+  nodePatternOpacity?: number;
+
+  // Imagen de Fondo del Nodo
+  bgImageUrl?: string;
+  bgImageMode?: NodeBgImageMode; // 'fit' | 'cover' | 'contain' | 'tile'
+  bgImageOpacity?: number;
+
+  // Bordes
+  borderColor?: string;
+  borderWidth?: number;
+  borderDash?: 'solid' | 'dashed' | 'dotted';
+  borderStyle?: 'solid' | 'dashed' | 'dotted';
+
+  // Imagen Adjunta de Contenido
+  imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imagePosition?: 'top' | 'bottom' | 'left' | 'right' | 'between' | 'background' | 'fit';
+
+  // Tipografia de Titulo
+  textColor?: string;
+  fontSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+  fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right';
+
+  // Tipografia de Cuerpo (Body)
+  body?: string;
+  bodyFontSize?: number;
+  bodyBold?: boolean;
+  bodyItalic?: boolean;
+  bodyColor?: string;
+  bodyFontFamily?: string;
+  bodyAlign?: 'left' | 'center' | 'right';
+  
+  // Aristas hacia hijos
+  edgeColor?: string;
+  edgeStyle?: EdgeStyle; // 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden'
+  edgeWidth?: number;
+  edgeDash?: 'solid' | 'dashed' | 'dotted';
+  edgeProfile?: EdgeProfile; // 'uniform' | 'tapered' | 'spindle' | 'hourglass'
+  
+  // Iconos y Enriquecimiento
+  icons?: string[];
+  iconPosition?: 'left' | 'top';
+  iconColor?: string; // Tinte de color SVG para iconos vectoriales
+  iconSize?: number;  // Escala en px (10px a 36px)
+  tags?: string[];
+  progress?: number;  // 0 a 100
+  progressPosition?: 'left' | 'top';
+  link?: string;
+  note?: string;      // Markdown extenso
+  details?: string;
+
+  // Visibilidad de elementos (Ojos)
+  hideBody?: boolean;
+  hideImage?: boolean;
+  hideTags?: boolean;
+  hideIcons?: boolean;
+  hideLink?: boolean;
+  hideProgress?: boolean;
+  
+  // Nube / Agrupador
+  cloud?: NodeCloud;
+}
+```
+
+### 3.2. `MindMap` (Estructura Global del Mapa)
+
+```typescript
+export interface MindMap {
+  id: string;
+  title: string;
+  rootId: string;
+  nodes: Record<string, MindNode>;
+  layout: LayoutType;
+  themeId: string;
+  
+  // Fondo Global del Lienzo
+  backgroundColor?: string;
+  backgroundPattern?: BackgroundPatternStyle; // 'none' | 'dots' | 'lines' | 'squares' | 'triangles' | 'hexagons'
+  backgroundPatternColor?: string;
+  backgroundPatternSize?: number;
+  backgroundPatternOpacity?: number;
+
+  // Aristas Globales
+  edgeStyle?: EdgeStyle;
+  edgeProfile?: EdgeProfile;
+  edgeWidth?: number;
+  edgeDash?: 'solid' | 'dashed' | 'dotted';
+  edgeColor?: string;
+
+  // Espaciados
+  horizontalGap?: number;
+  verticalGap?: number;
+
+  // Conectores cruzados
+  connectors?: Connector[];
+
+  createdAt: number;
+  updatedAt: number;
+}
+```
+
+---
+
+## 4. Componentes y Arquitectura UI
+
+### 4.1. `NodeComponent.tsx` (Renderizado de Nodos)
+
+- **Forma Burbuja (`bubble`)**:
+  - Incorpora una cola/punta triangular exterior SVG (`12x16px`) que apunta directamente hacia el lateral de su rama de conexion (`side === 'left'` o `'right'`).
+  - Mantiene el contenido interno (imagenes, titulo, cuerpo, tags, links) perfectamente centrado y contenido sin recortes ni desbordamientos.
+- **Forma Horquilla (`fork`)**:
+  - Mantiene su linea base de apoyo tradicional de Freeplane respetando plenamente los fondos personalizados del nodo (color, degradado, trama o imagen de fondo), sin forzar transparencias indeseadas.
+- **Formas Poligonales SVG**:
+  - Hexagonos, flechas de direccion y estrellas de 5 puntas renderizadas con SVG vectorial nítido.
+- **Iconos Vectoriales con Tinte y Escala**:
+  - `renderNodeIcon(iconId, className, node.iconColor, node.iconSize)` aplica estilos CSS en tiempo real (`color`, `width`, `height`).
+- **Fondos Desacoplados**:
+  - Capa inferior de imagen de fondo (`bgImageUrl`) independiente de la imagen adjunta de contenido (`imageUrl`).
+
+### 4.2. `MindMapCanvas.tsx` (Lienzo Infinito SVG/HTML)
+
+- Pan y Zoom continuos con aceleracion por hardware (`translate3d`, `scale`).
+- **Auto-Zoom al Enfocar**: Recibe `focusTarget: { nodeId, timestamp }` y traslada el centro de la camara sobre el nodo seleccionado con un nivel de zoom cercano (`~1.15x`).
+- Renderizado de aristas curvas, ahusadas (*tapered*), de huso (*spindle*) o reloj de arena (*hourglass*).
+- Renderizado de nubes poligonales y festoneadas con borde personalizable.
+- Gestion de arrastre (Drag & Drop) para reordenar y re-emparentar ramas.
+
+### 4.3. `OutlineView.tsx` (Panel de Esquema)
+
+- Vista estructurada en arbol de texto editable con atajos rapidos.
+- Al hacer clic en cualquier fila de nodo, emite una senal `setFocusTarget` que enfoca y hace zoom inmediatamente en el lienzo sobre dicho nodo.
+- Soporta busqueda, filtrado de texto, plegado/desplegado y modo pantalla completa.
+
+### 4.4. `ToolPanel.tsx` y los 6 Tabs Organismos
+
+1. **`ContentTab.tsx`**:
+   - Titulo, cuerpo de texto (`body`), tipografia independiente, alineacion, imagen adjunta de contenido y toggle de visibilidad (ojos).
+2. **`FormatTab.tsx`**:
+   - Selector de 10 formas, fondos solidos/degradados/tramas/imagen de fondo, bordes con tarjetas visuales de 3 estilos (`solid`, `dashed`, `dotted`), aristas individuales y propagacion de estilo a hijos/hermanos.
+3. **`NotesTab.tsx`**:
+   - Editor Markdown enriquecido, enlace externo/interno, barra de progreso interactiva (0% a 100%).
+4. **`IconsTab.tsx`**:
+   - Seccion plegable **"Color y Tamaño de Iconos"** (`CollapsibleSection`).
+   - Selector de color (`ColorPicker`) con paleta de colores sugeridos.
+   - Deslizador de tamaño (`SliderInput`) de `10px` a `36px`.
+   - Botones de **"Copiar a Hijos"** y **"Copiar a Hermanos"** aislados exclusivamente para la configuracion de iconos.
+   - Buscador rapido y galeria de categorias con mas de 500 iconos vectoriales Lucide.
+5. **`CloudsTab.tsx`**:
+   - Nubes de agrupacion con selector de 8 formas, fondos avanzados y tarjetas visuales de 3 columnas para estilo de borde.
+6. **`ThemeTab.tsx`**:
+   - Temas visuales globales, algoritmos de diseño (*Layout*), aristas globales y seccion **"Fondo del Lienzo"** con tarjetas visuales de 6 patrones de rejilla (*Liso, Puntos, Líneas, Cuadros, Triángulos, Panal*), selector de color del trazo del patron, tamaño y opacidad.
+
+---
+
+## 5. Utilidades del Sistema (`src/utils/`)
+
+| Archivo | Responsabilidad |
+| :--- | :--- |
+| **`layoutEngine.ts`** | Calculo matematico de coordenadas de nodos, arboles bilaterales, radiales y verticales, curvas de conexion y nubes. |
+| **`iconMap.tsx`** | Mapeo de identificadores a iconos vectoriales con soporte dinamico de `customColor` y `customSize`. |
+| **`vectorIconPack.tsx`** | Repositorio de mas de 500 iconos clasificados en 20 categorias con indexacion y busqueda. |
+| **`freeplaneConverter.ts`** | Parser y serializador bidireccional XML compatible con Freeplane / FreeMind (`.mm`). |
+| **`htmlExporter.ts`** | Generador de archivo HTML autonomo 100% portable con visor interactivo embebido. |
+| **`connectorUtils.ts`** | Geometria de lineas de conexion cruzada con control interactivo de curvatura y flechas. |
+| **`storage.ts`** | Capa de persistencia local en `localStorage` con indexacion de mapas guardados. |
+| **`sampleMaps.ts` & `additionalTemplates.ts`** | Catalogo completo de plantillas tematicas actualizadas con todas las funciones visuales activas. |
+
+---
+
+## 6. Atajos de Teclado Globales
+
+- **`Tab` / `Insert`**: Crear nuevo nodo hijo.
+- **`Enter`**: Crear nuevo nodo hermano.
+- **`F2` / `Doble Clic`**: Editar texto del nodo.
+- **`Espacio`**: Plegar / Desplegar rama.
+- **`Delete` / `Backspace`**: Eliminar nodo seleccionado.
+- **`Ctrl + Z` / `Ctrl + Y`**: Deshacer / Rehacer historial.
+- **`Ctrl + C` / `Ctrl + X` / `Ctrl + V`**: Copiar / Cortar / Pegar ramas completas.
+- **`Alt + O`**: Alternar panel de Esquema (*Outline*).
+- **`Alt + P`**: Alternar panel de Propiedades (*ToolPanel*).
+- **`Ctrl + F`**: Barra de busqueda y filtrado interactivo.
+- **`F5`**: Iniciar Modo Presentacion en pantalla completa.
+- **`Ctrl + +` / `Ctrl + -` / `Ctrl + 0`**: Zoom In / Zoom Out / Ajustar vista al 100%.
 
 ---
 

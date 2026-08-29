@@ -25,6 +25,7 @@ import {
   GitFork,
   CircleDot,
   Check,
+  Dices,
 } from 'lucide-react';
 
 interface ThemeTabProps {
@@ -40,6 +41,7 @@ interface ThemeTabProps {
   onUpdateMapEdgeDash?: (dash: 'solid' | 'dashed' | 'dotted') => void;
   onApplyEdgeStyleToAllNodes?: (edgeStyle: EdgeStyle) => void;
   onApplyEdgeProfileToAllNodes?: (edgeProfile: EdgeProfile) => void;
+  onRandomizeEdgeColors?: () => void;
   onUpdateMapGaps?: (gaps: { horizontal?: number; vertical?: number }) => void;
   onOpenConnectorModal?: (fromId?: string) => void;
   onDeleteConnector?: (connectorId: string) => void;
@@ -79,6 +81,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
   onUpdateMapEdgeDash,
   onApplyEdgeStyleToAllNodes,
   onApplyEdgeProfileToAllNodes,
+  onRandomizeEdgeColors,
   onUpdateMapGaps,
   onOpenConnectorModal,
   onDeleteConnector,
@@ -470,6 +473,107 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                 </button>
               );
             })}
+          </div>
+
+          {/* Color de Aristas Global & Modo Multicolor & Randomizador */}
+          <div className="pt-2 border-t border-slate-200/80 space-y-2">
+            <div className="flex items-center justify-between gap-1.5 flex-wrap">
+              <span className="text-[11px] font-semibold text-slate-700">Color de Aristas</span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onUpdateMapEdgeColor) onUpdateMapEdgeColor(undefined);
+                  }}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10.5px] font-semibold transition-all cursor-pointer border ${
+                    !mindMap?.edgeColor
+                      ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white border-transparent shadow-2xs'
+                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                  }`}
+                  title="Cada rama principal tiene su propio color del tema"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Multicolor</span>
+                </button>
+
+                {onRandomizeEdgeColors && (
+                  <button
+                    type="button"
+                    onClick={onRandomizeEdgeColors}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10.5px] font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                    title="Aleatorizar colores en todos los enlaces del mapa con una paleta amplia y vibrante"
+                  >
+                    <Dices className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Randomizar</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <ColorPicker
+              label="Color Uniforme de Ramas"
+              value={mindMap?.edgeColor}
+              onChange={(c) => onUpdateMapEdgeColor && onUpdateMapEdgeColor(c)}
+              onClear={() => onUpdateMapEdgeColor && onUpdateMapEdgeColor(undefined)}
+            />
+
+            {/* Paleta rápida de colores populares para aristas */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+              <span className="text-[10px] text-slate-400 shrink-0 font-medium">Sugeridos:</span>
+              {[
+                { col: '#3b82f6', label: 'Azul' },
+                { col: '#8b5cf6', label: 'Púrpura' },
+                { col: '#10b981', label: 'Verde' },
+                { col: '#f59e0b', label: 'Ámbar' },
+                { col: '#ef4444', label: 'Rojo' },
+                { col: '#ec4899', label: 'Rosa' },
+                { col: '#475569', label: 'Pizarra' },
+                { col: '#0f172a', label: 'Oscuro' },
+              ].map((item) => (
+                <button
+                  key={item.col}
+                  type="button"
+                  title={item.label}
+                  onClick={() => onUpdateMapEdgeColor && onUpdateMapEdgeColor(item.col)}
+                  className={`w-4.5 h-4.5 rounded-full shrink-0 border transition-transform hover:scale-115 cursor-pointer shadow-2xs ${
+                    mindMap?.edgeColor === item.col ? 'ring-2 ring-blue-500 ring-offset-1 border-white' : 'border-slate-300'
+                  }`}
+                  style={{ backgroundColor: item.col }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Estilo de Trazo Global (Sólido / Guiones / Puntos) */}
+          <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+            <span className="text-[11px] font-semibold text-slate-600 block">Estilo de Línea Global</span>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { id: 'solid' as const, label: 'Sólido', preview: 'border-t-2 border-slate-600' },
+                { id: 'dashed' as const, label: 'Guiones', preview: 'border-t-2 border-dashed border-slate-600' },
+                { id: 'dotted' as const, label: 'Puntos', preview: 'border-t-2 border-dotted border-slate-600' },
+              ].map((opt) => {
+                const currentDash = mindMap?.edgeDash || 'solid';
+                const isSelected = currentDash === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onUpdateMapEdgeDash && onUpdateMapEdgeDash(opt.id)}
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="w-8 my-1">
+                      <div className={`w-full ${opt.preview}`} />
+                    </div>
+                    <span className="text-[10px] mt-0.5 text-center truncate w-full">{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <SliderInput

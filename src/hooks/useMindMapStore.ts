@@ -19,6 +19,7 @@ interface MindMapStore {
   historyFuture: MindMap[];
   selectedNodeId: string | null;
   editingNodeId: string | null;
+  focusTarget: { nodeId: string; timestamp: number } | null;
 
   // Modos de visualización y paneles
   isOutlineOpen: boolean;
@@ -37,6 +38,7 @@ interface MindMapStore {
   setMindMap: (mapOrUpdater: MindMap | ((prev: MindMap) => MindMap)) => void;
   setSelectedNodeId: (id: string | null) => void;
   setEditingNodeId: (id: string | null) => void;
+  setFocusTarget: (target: { nodeId: string; timestamp: number } | null) => void;
   setIsOutlineOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
   setIsOutlineFullscreen: (fullscreen: boolean | ((prev: boolean) => boolean)) => void;
   setIsPresentationMode: (mode: boolean | ((prev: boolean) => boolean)) => void;
@@ -69,8 +71,9 @@ interface MindMapStore {
   handleApplyStyleToSiblings: (nodeId?: string) => void;
 
   // Propagación exclusiva de iconos y su color
-  handleApplyIconsToChildren: (nodeId?: string) => void;
-  handleApplyIconsToSiblings: (nodeId?: string) => void;
+  handleApplyIconsToChildren?: (nodeId?: string) => void;
+  handleApplyIconsToSiblings?: (nodeId?: string) => void;
+  handleRandomizeEdgeColors: () => void;
 }
 
 const extractNodeStyleBundle = (sourceNode: MindNode): Partial<MindNode> => {
@@ -114,6 +117,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => {
     historyFuture: [],
     selectedNodeId: initialMap.rootId,
     editingNodeId: null,
+    focusTarget: null,
     isOutlineOpen: false,
     isOutlineFullscreen: false,
     isPresentationMode: false,
@@ -136,6 +140,7 @@ export const useMindMapStore = create<MindMapStore>((set, get) => {
 
     setSelectedNodeId: (id) => set({ selectedNodeId: id }),
     setEditingNodeId: (id) => set({ editingNodeId: id }),
+    setFocusTarget: (target) => set({ focusTarget: target }),
     setIsOutlineOpen: (val) =>
       set((s) => ({ isOutlineOpen: typeof val === 'function' ? val(s.isOutlineOpen) : val })),
     setIsOutlineFullscreen: (val) =>
@@ -657,6 +662,49 @@ export const useMindMapStore = create<MindMapStore>((set, get) => {
 
       const nextMap: MindMap = {
         ...mindMap,
+        nodes: updatedNodes,
+        updatedAt: Date.now(),
+      };
+
+      set({ mindMap: nextMap });
+      saveCurrentMap(nextMap);
+    },
+
+    handleRandomizeEdgeColors: () => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+
+      // Paleta amplia y vibrante de 24 colores armónicos para ramificaciones
+      const VIBRANT_PALETTE = [
+        '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e',
+        '#10b981', '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
+        '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e', '#fb7185',
+        '#38bdf8', '#4ade80', '#fbbf24', '#c084fc', '#f472b6', '#2dd4bf'
+      ];
+
+      // Shuffle determinístico/aleatorio de colores
+      const shuffled = [...VIBRANT_PALETTE].sort(() => Math.random() - 0.5);
+
+      const updatedNodes: Record<string, MindNode> = {};
+      let colorIdx = 0;
+
+      // Asignar colores distribuidos por ramas y niveles para máxima variedad
+      Object.entries(mindMap.nodes).forEach(([id, node]) => {
+        if (id === mindMap.rootId) {
+          updatedNodes[id] = { ...(node as MindNode), edgeColor: undefined };
+        } else {
+          const assignedColor = shuffled[colorIdx % shuffled.length];
+          colorIdx++;
+          updatedNodes[id] = {
+            ...(node as MindNode),
+            edgeColor: assignedColor,
+          };
+        }
+      });
+
+      const nextMap: MindMap = {
+        ...mindMap,
+        edgeColor: undefined, // asegura modo multicolor activo
         nodes: updatedNodes,
         updatedAt: Date.now(),
       };
