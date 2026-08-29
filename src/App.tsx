@@ -130,162 +130,168 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-slate-100 overflow-hidden font-sans text-slate-900">
-      {/* 1. Menu Bar */}
-      <MenuBar
-        mindMap={mindMap}
-        canUndo={historyPast.length > 0}
-        canRedo={historyFuture.length > 0}
-        isOutlineMode={isOutlineOpen}
-        onNewMap={() => {
-          pushHistory(mindMap);
-          setMindMap({
-            ...BLANK_MAP,
-            id: `map-${Date.now()}`,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          });
-          setSelectedNodeId('root');
-        }}
-        onOpenTemplates={() => setIsTemplatesModalOpen(true)}
-        onOpenSavedMaps={() => setIsSavedMapsModalOpen(true)}
-        onSaveMap={() => saveCurrentMap(mindMap)}
-        onOpenExportModal={() => setIsExportModalOpen(true)}
-        onOpenImportModal={() => setIsExportModalOpen(true)}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onAddChild={() => handleAddChild()}
-        onAddSibling={() => handleAddSibling()}
-        onDeleteNode={() => handleDeleteNode()}
-        onToggleOutline={() => setIsOutlineOpen((o) => !o)}
-        onStartPresentation={() => setIsPresentationMode(true)}
-        onShowComingSoon={(data) => setComingSoonModalData(data)}
-        onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
-        onToggleFullscreen={() => {
-          if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-          } else {
-            document.exitFullscreen();
-          }
-        }}
-        onFoldAll={handleFoldAll}
-        onUnfoldAll={handleUnfoldAll}
-        onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
-        onToggleCloud={() => {
-          if (selectedNodeId) {
-            const curr = mindMap.nodes[selectedNodeId];
-            updateNode(selectedNodeId, {
-              cloud: curr?.cloud?.enabled
-                ? undefined
-                : {
-                    enabled: true,
-                    color: '#3b82f6',
-                    shape: 'cloud-scallop',
-                    opacity: 0.08,
-                    bgType: 'color',
-                    borderColor: '#3b82f6',
-                    borderWidth: 1.5,
-                    borderDash: 'dashed',
-                    shadow: true,
-                  },
+      {/* 1. Menu Bar (Hidden during Presentation) */}
+      {!isPresentationMode && (
+        <MenuBar
+          mindMap={mindMap}
+          canUndo={historyPast.length > 0}
+          canRedo={historyFuture.length > 0}
+          isOutlineMode={isOutlineOpen}
+          onNewMap={() => {
+            pushHistory(mindMap);
+            setMindMap({
+              ...BLANK_MAP,
+              id: `map-${Date.now()}`,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
             });
-          }
-        }}
-        onTitleChange={(newTitle) => setMindMap((m) => ({ ...m, title: newTitle, updatedAt: Date.now() }))}
-        onOpenIconPack={() => setIsIconPackModalOpen(true)}
-        onChangeTheme={(themeId) => {
-          pushHistory(mindMap);
-          setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));
-        }}
-        onChangeShape={(shape) => {
-          if (selectedNode) updateNode(selectedNode.id, { shape });
-        }}
-        onResetFormat={() => {
-          if (selectedNode) {
-            updateNode(selectedNode.id, {
-              shape: 'bubble',
-              color: undefined,
-              textColor: undefined,
-              borderColor: undefined,
-              borderWidth: undefined,
-              edgeStyle: undefined,
-              edgeWidth: undefined,
-              edgeColor: undefined,
-              edgeDash: undefined,
-              edgeProfile: undefined,
-            });
-          }
-        }}
-      />
+            setSelectedNodeId('root');
+          }}
+          onOpenTemplates={() => setIsTemplatesModalOpen(true)}
+          onOpenSavedMaps={() => setIsSavedMapsModalOpen(true)}
+          onSaveMap={() => saveCurrentMap(mindMap)}
+          onOpenExportModal={() => setIsExportModalOpen(true)}
+          onOpenImportModal={() => setIsExportModalOpen(true)}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onAddChild={() => handleAddChild()}
+          onAddSibling={() => handleAddSibling()}
+          onDeleteNode={() => handleDeleteNode()}
+          onToggleOutline={() => setIsOutlineOpen((o) => !o)}
+          onStartPresentation={() => setIsPresentationMode(true)}
+          onShowComingSoon={(data) => setComingSoonModalData(data)}
+          onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+          onToggleFullscreen={() => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen();
+            } else {
+              document.exitFullscreen();
+            }
+          }}
+          onFoldAll={handleFoldAll}
+          onUnfoldAll={handleUnfoldAll}
+          onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
+          onToggleCloud={() => {
+            if (selectedNodeId) {
+              const curr = mindMap.nodes[selectedNodeId];
+              updateNode(selectedNodeId, {
+                cloud: curr?.cloud?.enabled
+                  ? undefined
+                  : {
+                      enabled: true,
+                      color: '#3b82f6',
+                      shape: 'cloud-scallop',
+                      opacity: 0.08,
+                      bgType: 'color',
+                      borderColor: '#3b82f6',
+                      borderWidth: 1.5,
+                      borderDash: 'dashed',
+                      shadow: true,
+                    },
+              });
+            }
+          }}
+          onTitleChange={(newTitle) => setMindMap((m) => ({ ...m, title: newTitle, updatedAt: Date.now() }))}
+          onOpenIconPack={() => setIsIconPackModalOpen(true)}
+          onChangeTheme={(themeId) => {
+            pushHistory(mindMap);
+            setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));
+          }}
+          onChangeShape={(shape) => {
+            if (selectedNode) updateNode(selectedNode.id, { shape });
+          }}
+          onResetFormat={() => {
+            if (selectedNode) {
+              updateNode(selectedNode.id, {
+                shape: 'bubble',
+                color: undefined,
+                textColor: undefined,
+                borderColor: undefined,
+                borderWidth: undefined,
+                edgeStyle: undefined,
+                edgeWidth: undefined,
+                edgeColor: undefined,
+                edgeDash: undefined,
+                edgeProfile: undefined,
+              });
+            }
+          }}
+        />
+      )}
 
-      {/* 2. Tool Bar */}
-      <ToolBar
-        selectedNode={selectedNode}
-        canUndo={historyPast.length > 0}
-        canRedo={historyFuture.length > 0}
-        isOutlineMode={isOutlineOpen}
-        isFilterBarOpen={isFilterBarOpen}
-        isToolPanelOpen={isToolPanelOpen}
-        mindMap={mindMap}
-        onToggleGlobalVisibility={(key) => {
-          pushHistory(mindMap);
-          setMindMap((m) => ({
-            ...m,
-            [key]: !m[key],
-            updatedAt: Date.now(),
-          }));
-        }}
-        onAddChild={() => handleAddChild()}
-        onAddSibling={() => handleAddSibling()}
-        onDeleteNode={() => handleDeleteNode()}
-        onToggleFold={() => handleToggleFold()}
-        onToggleBold={() => selectedNode && updateNode(selectedNode.id, { bold: !selectedNode.bold })}
-        onToggleItalic={() => selectedNode && updateNode(selectedNode.id, { italic: !selectedNode.italic })}
-        onChangeShape={(shape: NodeShape) => selectedNode && updateNode(selectedNode.id, { shape })}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onToggleOutline={() => setIsOutlineOpen((o) => !o)}
-        onStartPresentation={(mode) => {
-          setPresentationType(mode === 'classic' ? 'classic' : 'dynamic');
-          setIsPresentationMode(true);
-        }}
-        onShowComingSoon={(data) => setComingSoonModalData(data)}
-        onToggleFilterBar={() => setIsFilterBarOpen((f) => !f)}
-        onToggleToolPanel={() => setIsToolPanelOpen((t) => !t)}
-        onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
-        onToggleCloud={() => {
-          if (selectedNodeId) {
-            const curr = mindMap.nodes[selectedNodeId];
-            updateNode(selectedNodeId, {
-              cloud: curr?.cloud?.enabled
-                ? undefined
-                : {
-                    enabled: true,
-                    color: '#3b82f6',
-                    shape: 'cloud-scallop',
-                    opacity: 0.08,
-                    bgType: 'color',
-                    borderColor: '#3b82f6',
-                    borderWidth: 1.5,
-                    borderDash: 'dashed',
-                    shadow: true,
-                  },
-            });
-          }
-        }}
-        onOpenExportModal={() => setIsExportModalOpen(true)}
-        onOpenIconPackModal={() => setIsIconPackModalOpen(true)}
-      />
+      {/* 2. Tool Bar (Hidden during Presentation) */}
+      {!isPresentationMode && (
+        <ToolBar
+          selectedNode={selectedNode}
+          canUndo={historyPast.length > 0}
+          canRedo={historyFuture.length > 0}
+          isOutlineMode={isOutlineOpen}
+          isFilterBarOpen={isFilterBarOpen}
+          isToolPanelOpen={isToolPanelOpen}
+          mindMap={mindMap}
+          onToggleGlobalVisibility={(key) => {
+            pushHistory(mindMap);
+            setMindMap((m) => ({
+              ...m,
+              [key]: !m[key],
+              updatedAt: Date.now(),
+            }));
+          }}
+          onAddChild={() => handleAddChild()}
+          onAddSibling={() => handleAddSibling()}
+          onDeleteNode={() => handleDeleteNode()}
+          onToggleFold={() => handleToggleFold()}
+          onToggleBold={() => selectedNode && updateNode(selectedNode.id, { bold: !selectedNode.bold })}
+          onToggleItalic={() => selectedNode && updateNode(selectedNode.id, { italic: !selectedNode.italic })}
+          onChangeShape={(shape: NodeShape) => selectedNode && updateNode(selectedNode.id, { shape })}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          onToggleOutline={() => setIsOutlineOpen((o) => !o)}
+          onStartPresentation={(mode) => {
+            setPresentationType(mode === 'classic' ? 'classic' : 'dynamic');
+            setIsPresentationMode(true);
+          }}
+          onShowComingSoon={(data) => setComingSoonModalData(data)}
+          onToggleFilterBar={() => setIsFilterBarOpen((f) => !f)}
+          onToggleToolPanel={() => setIsToolPanelOpen((t) => !t)}
+          onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
+          onToggleCloud={() => {
+            if (selectedNodeId) {
+              const curr = mindMap.nodes[selectedNodeId];
+              updateNode(selectedNodeId, {
+                cloud: curr?.cloud?.enabled
+                  ? undefined
+                  : {
+                      enabled: true,
+                      color: '#3b82f6',
+                      shape: 'cloud-scallop',
+                      opacity: 0.08,
+                      bgType: 'color',
+                      borderColor: '#3b82f6',
+                      borderWidth: 1.5,
+                      borderDash: 'dashed',
+                      shadow: true,
+                    },
+              });
+            }
+          }}
+          onOpenExportModal={() => setIsExportModalOpen(true)}
+          onOpenIconPackModal={() => setIsIconPackModalOpen(true)}
+        />
+      )}
 
-      {/* 3. Filter Bar */}
-      <FilterBar
-        filterOptions={filterOptions}
-        availableTags={availableTags}
-        matchCount={searchMatches ? searchMatches.size : 0}
-        isOpen={isFilterBarOpen}
-        onClose={() => setIsFilterBarOpen(false)}
-        onUpdateFilter={(up) => setFilterOptions((f) => ({ ...f, ...up }))}
-        onClearFilter={() => setFilterOptions({ query: '', showAncestors: true, showDescendants: true })}
-      />
+      {/* 3. Filter Bar (Hidden during Presentation) */}
+      {!isPresentationMode && (
+        <FilterBar
+          filterOptions={filterOptions}
+          availableTags={availableTags}
+          matchCount={searchMatches ? searchMatches.size : 0}
+          isOpen={isFilterBarOpen}
+          onClose={() => setIsFilterBarOpen(false)}
+          onUpdateFilter={(up) => setFilterOptions((f) => ({ ...f, ...up }))}
+          onClearFilter={() => setFilterOptions({ query: '', showAncestors: true, showDescendants: true })}
+        />
+      )}
 
       {/* 4. Main Workspace (Canvas with Side Outline & ToolPanel) */}
       <main className="flex-1 flex overflow-hidden relative z-10">
@@ -651,16 +657,18 @@ export default function App() {
         }}
       />
 
-      {/* 7. Status Bar */}
-      <StatusBar
-        totalNodes={Object.keys(mindMap.nodes).length}
-        selectedNodeText={selectedNode?.text || null}
-        selectedNodeId={selectedNodeId}
-        zoom={100}
-        positionX={0}
-        positionY={0}
-        mode={editingNodeId ? 'Editando' : 'Listo'}
-      />
+      {/* 7. Status Bar (Hidden during Presentation) */}
+      {!isPresentationMode && (
+        <StatusBar
+          totalNodes={Object.keys(mindMap.nodes).length}
+          selectedNodeText={selectedNode?.text || null}
+          selectedNodeId={selectedNodeId}
+          zoom={100}
+          positionX={0}
+          positionY={0}
+          mode={editingNodeId ? 'Editando' : 'Listo'}
+        />
+      )}
     </div>
   );
 }

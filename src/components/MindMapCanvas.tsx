@@ -1605,41 +1605,39 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               </div>
             </div>
 
-            {/* Editor Floating Tools Bar */}
+            {/* Editor Floating Tools Pill (Floating cleanly at top center) */}
             {presMode === 'editor' && (
-              <div className="pointer-events-auto h-11 px-4 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between text-xs shadow-md">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-semibold mr-1">Modo de Creación:</span>
-                  <button
-                    onClick={() => setEditorTool('pick_nodes')}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                      editorTool === 'pick_nodes' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                  >
-                    <CheckSquare className="w-3.5 h-3.5" />
-                    <span>1. Seleccionar Nodos</span>
-                  </button>
+              <div className="pointer-events-auto absolute top-16 left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-700/80 shadow-2xl flex items-center gap-2 text-xs z-40">
+                <span className="text-slate-400 font-semibold mr-1">Crear marco:</span>
+                <button
+                  onClick={() => setEditorTool('pick_nodes')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold transition-all cursor-pointer ${
+                    editorTool === 'pick_nodes' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  <span>1. Seleccionar Nodos</span>
+                </button>
 
-                  <button
-                    onClick={() => setEditorTool('draw_frame')}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                      editorTool === 'draw_frame' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                  >
-                    <Crop className="w-3.5 h-3.5" />
-                    <span>2. Dibujar Recuadro</span>
-                  </button>
+                <button
+                  onClick={() => setEditorTool('draw_frame')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold transition-all cursor-pointer ${
+                    editorTool === 'draw_frame' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <Crop className="w-3.5 h-3.5" />
+                  <span>2. Dibujar Recuadro</span>
+                </button>
 
-                  <button
-                    onClick={() => setEditorTool('navigate')}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                      editorTool === 'navigate' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                    }`}
-                  >
-                    <MousePointer className="w-3.5 h-3.5" />
-                    <span>Navegar / Mover</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => setEditorTool('navigate')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold transition-all cursor-pointer ${
+                    editorTool === 'navigate' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                  }`}
+                >
+                  <MousePointer className="w-3.5 h-3.5" />
+                  <span>Navegar / Mover</span>
+                </button>
 
                 {stagedNodeIds.size > 0 && (
                   <div className="flex items-center gap-2">
