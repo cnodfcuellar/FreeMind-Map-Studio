@@ -771,10 +771,11 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
       <div
         id="canvas-viewport"
         style={{
-          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
           transformOrigin: '0 0',
+          transition: isPresentationMode && !isPanning && !isDrawingFrame ? 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
         }}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+        className="absolute top-0 left-0 w-full h-full pointer-events-none will-change-transform"
       >
         {/* SVG Rendering Layer for Background Patterns, Edges, Clouds and Connectors */}
         <svg
@@ -1366,34 +1367,43 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             const isMatch = searchMatches ? searchMatches.has(node.id) : false;
             const branchColor = getBranchColor(layout);
 
+            const isHighlighted = !isPresentationMode || isOverviewActive || activeHighlightedNodeIds.has(node.id);
+
             return (
-              <NodeComponent
+              <div
                 key={node.id}
-                node={node}
-                layout={layout}
-                isSelected={isSelected}
-                isEditing={isEditing}
-                theme={theme}
-                branchColor={branchColor}
-                isMatch={isMatch}
-                globalVisibility={{
-                  hideAllBodies: mindMap.hideAllBodies,
-                  hideAllImages: mindMap.hideAllImages,
-                  hideAllTags: mindMap.hideAllTags,
-                  hideAllIcons: mindMap.hideAllIcons,
-                  hideAllLinks: mindMap.hideAllLinks,
-                  showAllNotesInline: mindMap.showAllNotesInline,
+                style={{
+                  opacity: isHighlighted ? 1 : 0.18,
+                  transition: 'opacity 400ms ease-in-out',
                 }}
-                onSelect={(id) => onSelectNode(id)}
-                onDoubleClick={(id) => onStartEditing(id)}
-                onTextChange={onUpdateNodeText}
-                onFinishEditing={onFinishEditing}
-                onToggleFold={onToggleFoldNode}
-                onAddChild={onAddChildNode}
-                onOpenNote={onOpenNotePanel}
-                onDragStart={(id) => setDraggedNodeId(id)}
-                onDropOnNode={onReparentNode}
-              />
+              >
+                <NodeComponent
+                  node={node}
+                  layout={layout}
+                  isSelected={isSelected}
+                  isEditing={isEditing}
+                  theme={theme}
+                  branchColor={branchColor}
+                  isMatch={isMatch}
+                  globalVisibility={{
+                    hideAllBodies: mindMap.hideAllBodies,
+                    hideAllImages: mindMap.hideAllImages,
+                    hideAllTags: mindMap.hideAllTags,
+                    hideAllIcons: mindMap.hideAllIcons,
+                    hideAllLinks: mindMap.hideAllLinks,
+                    showAllNotesInline: mindMap.showAllNotesInline,
+                  }}
+                  onSelect={(id) => onSelectNode(id)}
+                  onDoubleClick={(id) => onStartEditing(id)}
+                  onTextChange={onUpdateNodeText}
+                  onFinishEditing={onFinishEditing}
+                  onToggleFold={onToggleFoldNode}
+                  onAddChild={onAddChildNode}
+                  onOpenNote={onOpenNotePanel}
+                  onDragStart={(id) => setDraggedNodeId(id)}
+                  onDropOnNode={onReparentNode}
+                />
+              </div>
             );
           })}
         </div>
