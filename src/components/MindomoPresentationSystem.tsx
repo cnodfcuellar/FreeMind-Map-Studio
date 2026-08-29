@@ -126,9 +126,10 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
       const vw = viewportContainerRef.current.clientWidth || window.innerWidth;
       const vh = viewportContainerRef.current.clientHeight || window.innerHeight;
 
-      const scaleX = (vw * 0.82) / bounds.width;
-      const scaleY = (vh * 0.78) / bounds.height;
-      const targetZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.25), 2.2);
+      // Adjust ratio to allow the node/branch to occupy the full prominent frame with tight margin
+      const scaleX = (vw * 0.92) / bounds.width;
+      const scaleY = (vh * 0.88) / bounds.height;
+      const targetZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.35), 3.2);
 
       const centerX = bounds.x + bounds.width / 2;
       const centerY = bounds.y + bounds.height / 2;

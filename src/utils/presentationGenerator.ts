@@ -51,7 +51,7 @@ export function generateDefaultPresentationSlides(
   // Slide 2: Root Node
   const rootNode = mindMap.nodes[mindMap.rootId];
   const rootLayout = layoutMap.get(mindMap.rootId)!;
-  const rootPadding = 100;
+  const rootPadding = 24;
   slides.push({
     id: 'slide-root',
     order: 2,
@@ -100,7 +100,7 @@ export function generateDefaultPresentationSlides(
       if (!mainNode || !layoutMap.has(mainChildId)) return;
 
       const branchBounds = getSubtreeBounds(mainChildId);
-      const bPadding = 80;
+      const bPadding = 32;
 
       // Add main branch full frame
       slides.push({
@@ -112,8 +112,8 @@ export function generateDefaultPresentationSlides(
         bounds: {
           x: branchBounds.minX - bPadding,
           y: branchBounds.minY - bPadding,
-          width: Math.max(300, branchBounds.maxX - branchBounds.minX + bPadding * 2),
-          height: Math.max(200, branchBounds.maxY - branchBounds.minY + bPadding * 2),
+          width: Math.max(200, branchBounds.maxX - branchBounds.minX + bPadding * 2),
+          height: Math.max(140, branchBounds.maxY - branchBounds.minY + bPadding * 2),
         },
         showNotes: Boolean(mainNode.note),
         color: mainNode.color || '#3b82f6',
@@ -127,7 +127,7 @@ export function generateDefaultPresentationSlides(
           if (!subNode || !subLayout) return;
 
           const subTreeBounds = getSubtreeBounds(subChildId);
-          const subPadding = 60;
+          const subPadding = 24;
 
           slides.push({
             id: `slide-sub-${subChildId}`,
@@ -138,8 +138,8 @@ export function generateDefaultPresentationSlides(
             bounds: {
               x: subTreeBounds.minX - subPadding,
               y: subTreeBounds.minY - subPadding,
-              width: Math.max(240, subTreeBounds.maxX - subTreeBounds.minX + subPadding * 2),
-              height: Math.max(160, subTreeBounds.maxY - subTreeBounds.minY + subPadding * 2),
+              width: Math.max(160, subTreeBounds.maxX - subTreeBounds.minX + subPadding * 2),
+              height: Math.max(100, subTreeBounds.maxY - subTreeBounds.minY + subPadding * 2),
             },
             showNotes: Boolean(subNode.note),
             color: subNode.color || mainNode.color || '#6366f1',
