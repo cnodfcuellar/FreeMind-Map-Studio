@@ -30,6 +30,11 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
+  Square,
+  MousePointer,
+  CheckSquare,
+  PlusSquare,
+  Crop,
 } from 'lucide-react';
 
 interface MindomoPresentationSystemProps {
@@ -43,7 +48,7 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
   mindMap,
   onUpdateMindMap,
   onClose,
-  initialMode = 'play',
+  initialMode = 'editor',
 }) => {
   // Mode: 'editor' (Frame Studio) or 'play' (Cinema Presentation)
   const [mode, setMode] = useState<'editor' | 'play'>(initialMode);
@@ -53,6 +58,13 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
   const [showNotesDrawer, setShowNotesDrawer] = useState<boolean>(true);
   const [isOverviewActive, setIsOverviewActive] = useState<boolean>(false);
   const [isFilmstripOpen, setIsFilmstripOpen] = useState<boolean>(true);
+
+  // Editor interactive tools: 'navigate' | 'pick_nodes' | 'draw_frame'
+  const [editorTool, setEditorTool] = useState<'navigate' | 'pick_nodes' | 'draw_frame'>('pick_nodes');
+  const [stagedNodeIds, setStagedNodeIds] = useState<Set<string>>(new Set());
+  const [isDrawingFrame, setIsDrawingFrame] = useState<boolean>(false);
+  const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null);
+  const [drawCurrent, setDrawCurrent] = useState<{ x: number; y: number } | null>(null);
 
   // Layout calculations
   const layoutMap = useMemo(() => {
@@ -321,6 +333,97 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
     setIsOverviewActive(false);
   };
 
+  // Create a customized frame from explicitly staged/selected nodes (Estilo Mindomo)
+  const handleCreateFrameFromStagedNodes = () => {
+    if (stagedNodeIds.size === 0) return;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const selectedIds = Array.from(stagedNodeIds);
+    let primaryTitle = 'Marco Personalizado';
+
+    selectedIds.forEach((nid, idx) => {
+      const l = layoutMap.get(nid);
+      const n = mindMap.nodes[nid];
+      if (l) {
+        minX = Math.min(minX, l.x);
+        maxX = Math.max(maxX, l.x + l.width);
+        minY = Math.min(minY, l.y);
+        maxY = Math.max(maxY, l.y + l.height);
+        if (idx === 0 && n?.text) {
+          primaryTitle = n.text;
+        }
+      }
+    });
+
+    if (minX === Infinity) return;
+
+    const pad = 24;
+    const newSlide: SlideFrame = {
+      id: `slide-custom-staged-${Date.now()}`,
+      order: slides.length + 1,
+      title: primaryTitle,
+      type: 'custom_area',
+      nodeIds: selectedIds,
+      nodeId: selectedIds[0],
+      bounds: {
+        x: minX - pad,
+        y: minY - pad,
+        width: Math.max(160, maxX - minX + pad * 2),
+        height: Math.max(100, maxY - minY + pad * 2),
+      },
+      showNotes: selectedIds.some((id) => Boolean(mindMap.nodes[id]?.note)),
+      color: '#3b82f6',
+    };
+
+    const updated = [...slides, newSlide];
+    updateSlides(updated);
+    setCurrentSlideIndex(updated.length - 1);
+    setIsOverviewActive(false);
+    setStagedNodeIds(new Set());
+  };
+
+  // Create a frame directly from a manually drawn box on the canvas
+  const handleCreateFrameFromDrawnBox = (box: { x: number; y: number; width: number; height: number }) => {
+    if (box.width < 40 || box.height < 40) return;
+
+    // Find all nodes that intersect or are inside this drawn box
+    const containedNodeIds: string[] = [];
+    layoutMap.forEach((l, nid) => {
+      const nRight = l.x + l.width;
+      const nBottom = l.y + l.height;
+      const bRight = box.x + box.width;
+      const bBottom = box.y + box.height;
+
+      // Intersect test
+      if (l.x < bRight && nRight > box.x && l.y < bBottom && nBottom > box.y) {
+        containedNodeIds.push(nid);
+      }
+    });
+
+    const firstNode = containedNodeIds.length > 0 ? mindMap.nodes[containedNodeIds[0]] : null;
+    const title = firstNode?.text || `Marco Libre ${slides.length + 1}`;
+
+    const newSlide: SlideFrame = {
+      id: `slide-drawn-${Date.now()}`,
+      order: slides.length + 1,
+      title,
+      type: 'custom_area',
+      nodeIds: containedNodeIds,
+      nodeId: containedNodeIds[0],
+      bounds: box,
+      showNotes: containedNodeIds.some((id) => Boolean(mindMap.nodes[id]?.note)),
+      color: '#8b5cf6',
+    };
+
+    const updated = [...slides, newSlide];
+    updateSlides(updated);
+    setCurrentSlideIndex(updated.length - 1);
+    setIsOverviewActive(false);
+  };
+
   // Delete slide
   const handleDeleteSlide = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -350,6 +453,13 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
       return new Set(Object.keys(mindMap.nodes));
     }
     const set = new Set<string>();
+
+    // 1. If explicit nodeIds list is defined by the user for this slide
+    if (activeSlide.nodeIds && activeSlide.nodeIds.length > 0) {
+      activeSlide.nodeIds.forEach((id) => set.add(id));
+    }
+
+    // 2. Main target node
     if (activeSlide.nodeId) {
       set.add(activeSlide.nodeId);
       // If branch type, highlight all descendants
@@ -440,17 +550,127 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
         </div>
       </div>
 
+      {/* 1.5. EDITOR FLOATING TOOLBAR (Estilo Mindomo) */}
+      {mode === 'editor' && (
+        <div className="h-11 px-4 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between z-30 shrink-0 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400 font-semibold mr-1">Modo de Creación:</span>
+
+            <button
+              onClick={() => setEditorTool('pick_nodes')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                editorTool === 'pick_nodes'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              <CheckSquare className="w-3.5 h-3.5" />
+              <span>1. Seleccionar Nodos</span>
+            </button>
+
+            <button
+              onClick={() => setEditorTool('draw_frame')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                editorTool === 'draw_frame'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              <Crop className="w-3.5 h-3.5" />
+              <span>2. Dibujar Recuadro</span>
+            </button>
+
+            <button
+              onClick={() => setEditorTool('navigate')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                editorTool === 'navigate'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              }`}
+            >
+              <MousePointer className="w-3.5 h-3.5" />
+              <span>Navegar / Mover</span>
+            </button>
+          </div>
+
+          {/* Staged Nodes Action: Crear marco con los nodos seleccionados */}
+          {stagedNodeIds.size > 0 && (
+            <div className="flex items-center gap-2 animate-in fade-in duration-200">
+              <span className="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                {stagedNodeIds.size} nodos seleccionados
+              </span>
+              <button
+                onClick={handleCreateFrameFromStagedNodes}
+                className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg hover:brightness-110 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Crear Marco con Selección</span>
+              </button>
+              <button
+                onClick={() => setStagedNodeIds(new Set())}
+                className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg cursor-pointer"
+                title="Desmarcar selección"
+              >
+                Limpiar
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* 2. MAIN CINEMA CANVAS VIEWPORT */}
       <div
         ref={viewportContainerRef}
-        className="relative flex-1 bg-slate-950 overflow-hidden cursor-grab active:cursor-grabbing"
+        onMouseDown={(e) => {
+          if (mode === 'editor' && editorTool === 'draw_frame') {
+            const rect = viewportContainerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            const worldX = (screenX - camera.panX) / camera.zoom;
+            const worldY = (screenY - camera.panY) / camera.zoom;
+            setIsDrawingFrame(true);
+            setDrawStart({ x: worldX, y: worldY });
+            setDrawCurrent({ x: worldX, y: worldY });
+          }
+        }}
+        onMouseMove={(e) => {
+          if (mode === 'editor' && editorTool === 'draw_frame' && isDrawingFrame) {
+            const rect = viewportContainerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            const worldX = (screenX - camera.panX) / camera.zoom;
+            const worldY = (screenY - camera.panY) / camera.zoom;
+            setDrawCurrent({ x: worldX, y: worldY });
+          }
+        }}
+        onMouseUp={() => {
+          if (mode === 'editor' && editorTool === 'draw_frame' && isDrawingFrame && drawStart && drawCurrent) {
+            const minX = Math.min(drawStart.x, drawCurrent.x);
+            const minY = Math.min(drawStart.y, drawCurrent.y);
+            const w = Math.abs(drawCurrent.x - drawStart.x);
+            const h = Math.abs(drawCurrent.y - drawStart.y);
+
+            setIsDrawingFrame(false);
+            setDrawStart(null);
+            setDrawCurrent(null);
+
+            if (w > 50 && h > 40) {
+              handleCreateFrameFromDrawnBox({ x: minX, y: minY, width: w, height: h });
+            }
+          }
+        }}
+        className={`relative flex-1 bg-slate-950 overflow-hidden ${
+          editorTool === 'draw_frame' && mode === 'editor' ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing'
+        }`}
       >
         {/* World Transform Layer (Vuelo de Cámara) */}
         <div
           style={{
             transform: `translate3d(${camera.panX}px, ${camera.panY}px, 0) scale(${camera.zoom})`,
             transformOrigin: '0 0',
-            transition: 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)',
+            transition: isDrawingFrame ? 'none' : 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)',
           }}
           className="absolute top-0 left-0 will-change-transform"
         >
@@ -583,13 +803,26 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
                     }}
                     onSelect={() => {
                       if (mode === 'editor') {
-                        // If a frame already exists for this node, focus it; otherwise add it as a new frame
-                        const existingIdx = slides.findIndex((s) => s.nodeId === node.id);
-                        if (existingIdx !== -1) {
-                          setCurrentSlideIndex(existingIdx);
-                          setIsOverviewActive(false);
+                        if (editorTool === 'pick_nodes') {
+                          // Toggle node in staged multi-selection
+                          setStagedNodeIds((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(node.id)) {
+                              next.delete(node.id);
+                            } else {
+                              next.add(node.id);
+                            }
+                            return next;
+                          });
                         } else {
-                          handleAddSlideFromSelectedNode(node.id, true);
+                          // Navigate / Focus existing or add individual
+                          const existingIdx = slides.findIndex((s) => s.nodeId === node.id);
+                          if (existingIdx !== -1) {
+                            setCurrentSlideIndex(existingIdx);
+                            setIsOverviewActive(false);
+                          } else {
+                            handleAddSlideFromSelectedNode(node.id, false);
+                          }
                         }
                       }
                     }}
@@ -602,10 +835,46 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
                     onDragStart={() => {}}
                     onDropOnNode={() => {}}
                   />
+                  {/* Staged Checkmark Badge in Editor Pick Mode */}
+                  {mode === 'editor' && editorTool === 'pick_nodes' && (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setStagedNodeIds((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(node.id)) next.delete(node.id);
+                          else next.add(node.id);
+                          return next;
+                        });
+                      }}
+                      style={{
+                        transform: `translate3d(${layout.x + layout.width - 10}px, ${layout.y - 10}px, 0)`,
+                      }}
+                      className={`absolute top-0 left-0 w-6 h-6 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all z-30 shadow-md ${
+                        stagedNodeIds.has(node.id)
+                          ? 'bg-blue-600 border-white text-white scale-110'
+                          : 'bg-slate-900/80 border-slate-500 text-transparent hover:border-blue-400 hover:text-blue-300'
+                      }`}
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
+
+          {/* Render Drawn Box in progress */}
+          {mode === 'editor' && editorTool === 'draw_frame' && isDrawingFrame && drawStart && drawCurrent && (
+            <div
+              style={{
+                transform: `translate3d(${Math.min(drawStart.x, drawCurrent.x)}px, ${Math.min(drawStart.y, drawCurrent.y)}px, 0)`,
+                width: Math.abs(drawCurrent.x - drawStart.x),
+                height: Math.abs(drawCurrent.y - drawStart.y),
+              }}
+              className="absolute top-0 left-0 rounded-2xl border-2 border-indigo-400 bg-indigo-500/20 pointer-events-none z-40 border-dashed"
+            />
+          )}
 
           {/* Render Slide Frames in Editor Mode */}
           {mode === 'editor' && (

@@ -258,6 +258,7 @@ export interface SlideFrame {
   title: string;
   type: 'node' | 'branch' | 'custom_area' | 'overview';
   nodeId?: string;
+  nodeIds?: string[]; // Specific set of user-selected nodes for this slide
   bounds: {
     x: number;
     y: number;
