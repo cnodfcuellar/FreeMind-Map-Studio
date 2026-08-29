@@ -431,35 +431,37 @@ export const MiniMap: React.FC<MiniMapProps> = ({
         </div>
       )}
 
-      {/* Zoom Controls HUD (Placed UNDER the minimap - Ultra-Crystal Glassmorphism) */}
-      <div className="flex items-center gap-1 bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-slate-900/80 px-2.5 py-1.5 rounded-2xl border border-white/30 dark:border-white/10 shadow-sm hover:shadow-xl text-slate-700 dark:text-slate-200 transition-all duration-300 opacity-60 hover:opacity-100">
+      {/* Zoom Controls HUD (Placed UNDER the minimap - High Visibility & Contrast) */}
+      <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-300/90 dark:border-slate-700 shadow-xl text-slate-800 dark:text-slate-100 transition-all duration-200 z-50">
         {/* Toggle MiniMap Button */}
         <button
           title={showMiniMap ? 'Ocultar MiniMapa' : 'Mostrar MiniMapa'}
           onClick={onToggleMiniMap}
           className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-            showMiniMap ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold' : 'hover:bg-black/5 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300'
+            showMiniMap
+              ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold'
+              : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
           }`}
         >
           <Compass className="w-4 h-4" />
         </button>
 
-        <div className="w-px h-4 bg-black/10 dark:bg-white/10 mx-0.5" />
+        <div className="w-px h-4.5 bg-slate-300 dark:bg-slate-700 mx-0.5" />
 
         {/* Zoom Out (-) */}
         <button
           title="Alejar Zoom (-)"
           onClick={onZoomOut}
-          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+          className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer active:scale-95"
         >
-          <ZoomOut className="w-4 h-4" />
+          <ZoomOut className="w-4 h-4 stroke-[2.2]" />
         </button>
 
         {/* Zoom Percentage (Click to Reset 100%) */}
         <button
           title="Restablecer al 100%"
           onClick={onResetZoom}
-          className="text-xs font-bold px-1.5 py-1 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg min-w-12 text-center font-mono text-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+          className="text-xs font-bold px-2 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg min-w-13 text-center font-mono text-slate-900 dark:text-slate-100 transition-colors cursor-pointer border border-slate-200/80 dark:border-slate-700/80"
         >
           {Math.round(zoom * 100)}%
         </button>
@@ -468,20 +470,20 @@ export const MiniMap: React.FC<MiniMapProps> = ({
         <button
           title="Acercar Zoom (+)"
           onClick={onZoomIn}
-          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+          className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer active:scale-95"
         >
-          <ZoomIn className="w-4 h-4" />
+          <ZoomIn className="w-4 h-4 stroke-[2.2]" />
         </button>
 
-        <div className="w-px h-4 bg-black/10 dark:bg-white/10 mx-0.5" />
+        <div className="w-px h-4.5 bg-slate-300 dark:bg-slate-700 mx-0.5" />
 
         {/* Center / Fit all */}
         <button
           title="Ajustar y Centrar todo el mapa"
           onClick={onFitView}
-          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+          className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer active:scale-95"
         >
-          <Maximize2 className="w-4 h-4" />
+          <Maximize2 className="w-4 h-4 stroke-[2.2]" />
         </button>
       </div>
     </div>
