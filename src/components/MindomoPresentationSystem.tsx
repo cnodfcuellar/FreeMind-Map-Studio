@@ -138,6 +138,30 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
     }
   }, [redoStack, undoStack, slides, mindMap, onUpdateMindMap, currentSlideIndex]);
 
+  // Current Active Theme & Canvas Background from MindMap
+  const theme = useMemo(() => {
+    return THEMES[mindMap.themeId || 'default'] || THEMES.default;
+  }, [mindMap.themeId]);
+
+  const effectiveBgColor = mindMap.backgroundColor || theme.background || '#f8fafc';
+  const effectivePattern = mindMap.backgroundPattern || theme.backgroundPattern || 'dots';
+  const effectivePatternColor = mindMap.backgroundPatternColor || theme.backgroundPatternColor || '#94a3b8';
+  const effectivePatternSize = mindMap.backgroundPatternSize || theme.backgroundPatternSize || 24;
+  const effectivePatternOpacity = mindMap.backgroundPatternOpacity ?? theme.backgroundPatternOpacity ?? 0.45;
+
+  // Triangular & Hexagonal geometry calculations for background patterns
+  const triangleW = effectivePatternSize;
+  const triangleH = effectivePatternSize * 1.7320508;
+  const triangleH2 = triangleH / 2;
+  const triangleW2 = triangleW / 2;
+
+  const hexW = effectivePatternSize;
+  const hexH = effectivePatternSize * 1.7320508;
+  const hexW2 = hexW / 2;
+  const hexH6 = effectivePatternSize * 0.28867513;
+  const hexH2 = effectivePatternSize * 0.8660254;
+  const hexH3 = effectivePatternSize * 1.1547005;
+
   // Viewport / Camera Transform & Panning
   const [camera, setCamera] = useState<{ panX: number; panY: number; zoom: number }>({
     panX: 0,
@@ -838,7 +862,7 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
           setIsPanning(false);
           setIsDrawingFrame(false);
         }}
-        className={`relative flex-1 bg-slate-950 overflow-hidden select-none ${
+        className={`relative flex-1 overflow-hidden select-none ${
           editorTool === 'draw_frame' && mode === 'editor'
             ? 'cursor-crosshair'
             : isPanning
@@ -847,6 +871,7 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
             ? 'cursor-grab'
             : 'cursor-default'
         }`}
+        style={{ backgroundColor: effectiveBgColor }}
       >
         {/* World Transform Layer (Vuelo de Cámara) */}
         <div
@@ -857,15 +882,132 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
           }}
           className="absolute top-0 left-0 will-change-transform"
         >
-          {/* Canvas SVG Layer (Clouds & Real Edges) */}
+          {/* Canvas SVG Layer (Patterns, Clouds & Real Edges) */}
           <svg
             className="overflow-visible absolute top-0 left-0 pointer-events-none"
             style={{ width: 1, height: 1 }}
           >
-            {/* Filter for cloud drop shadow */}
-            <filter id="pres-cloud-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
-              <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#0f172a" floodOpacity="0.15" />
-            </filter>
+            <defs>
+              {/* Filter for cloud drop shadow */}
+              <filter id="pres-cloud-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#0f172a" floodOpacity="0.15" />
+              </filter>
+
+              {/* Pattern 1: Dots (Puntos) */}
+              {effectivePattern === 'dots' && (
+                <pattern
+                  id="pres-canvas-bg-pattern"
+                  width={effectivePatternSize}
+                  height={effectivePatternSize}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <circle
+                    cx={effectivePatternSize / 2}
+                    cy={effectivePatternSize / 2}
+                    r={1.5}
+                    fill={effectivePatternColor}
+                    fillOpacity={effectivePatternOpacity}
+                  />
+                </pattern>
+              )}
+
+              {/* Pattern 2: Lines (Líneas horizontales) */}
+              {effectivePattern === 'lines' && (
+                <pattern
+                  id="pres-canvas-bg-pattern"
+                  width={effectivePatternSize}
+                  height={effectivePatternSize}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <line
+                    x1="0"
+                    y1={effectivePatternSize}
+                    x2={effectivePatternSize}
+                    y2={effectivePatternSize}
+                    stroke={effectivePatternColor}
+                    strokeWidth="1"
+                    strokeOpacity={effectivePatternOpacity}
+                  />
+                </pattern>
+              )}
+
+              {/* Pattern 3: Squares (Cuadrados / Cuadrícula) */}
+              {effectivePattern === 'squares' && (
+                <pattern
+                  id="pres-canvas-bg-pattern"
+                  width={effectivePatternSize}
+                  height={effectivePatternSize}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d={`M ${effectivePatternSize} 0 L 0 0 0 ${effectivePatternSize}`}
+                    fill="none"
+                    stroke={effectivePatternColor}
+                    strokeWidth="1"
+                    strokeOpacity={effectivePatternOpacity}
+                  />
+                </pattern>
+              )}
+
+              {/* Pattern 4: Triangles (Malla isométrica regular de triángulos equiláteros) */}
+              {effectivePattern === 'triangles' && (
+                <pattern
+                  id="pres-canvas-bg-pattern"
+                  width={triangleW}
+                  height={triangleH}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d={`M 0 0 L ${triangleW} 0 M 0 ${triangleH2} L ${triangleW} ${triangleH2} M 0 0 L ${triangleW} ${triangleH} M ${triangleW2} 0 L ${triangleW} ${triangleH2} M 0 ${triangleH2} L ${triangleW2} ${triangleH} M ${triangleW} 0 L 0 ${triangleH} M ${triangleW2} 0 L 0 ${triangleH2} M ${triangleW} ${triangleH2} L ${triangleW2} ${triangleH}`}
+                    fill="none"
+                    stroke={effectivePatternColor}
+                    strokeWidth="1"
+                    strokeOpacity={effectivePatternOpacity}
+                  />
+                </pattern>
+              )}
+
+              {/* Pattern 5: Hexagons (Malla hexagonal regular en panal de abejas) */}
+              {effectivePattern === 'hexagons' && (() => {
+                const R = effectivePatternSize;
+                const W = Number((R * 1.7320508).toFixed(2));
+                const H = Number((R * 3).toFixed(2));
+                const W2 = Number((W / 2).toFixed(2));
+                const r05 = Number((R * 0.5).toFixed(2));
+                const r10 = Number((R * 1.0).toFixed(2));
+                const d = `M 0,0 v ${r05} l ${W2},${r05} v ${r10} l -${W2},${r05} v ${r05} M ${W},0 v ${r05} l -${W2},${r05} v ${r10} l ${W2},${r05} v ${r05}`;
+                return (
+                  <pattern
+                    id="pres-canvas-bg-pattern"
+                    width={W}
+                    height={H}
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d={d}
+                      fill="none"
+                      stroke={effectivePatternColor}
+                      strokeWidth="1.2"
+                      strokeOpacity={effectivePatternOpacity}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  </pattern>
+                );
+              })()}
+            </defs>
+
+            {/* Background Pattern Layer */}
+            {effectivePattern !== 'none' && (
+              <rect
+                id="pres-canvas-pattern-plane"
+                x="-200000"
+                y="-200000"
+                width="400000"
+                height="400000"
+                fill="url(#pres-canvas-bg-pattern)"
+              />
+            )}
 
             {/* 1. Clouds Layer */}
             {(Object.values(mindMap.nodes) as MindNode[])
