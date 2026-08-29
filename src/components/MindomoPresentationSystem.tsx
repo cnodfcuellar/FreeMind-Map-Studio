@@ -135,12 +135,14 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
     }
   }, [redoStack, undoStack, slides, mindMap, onUpdateMindMap, currentSlideIndex]);
 
-  // Viewport / Camera Transform
+  // Viewport / Camera Transform & Panning
   const [camera, setCamera] = useState<{ panX: number; panY: number; zoom: number }>({
     panX: 0,
     panY: 0,
     zoom: 1,
   });
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const viewportContainerRef = useRef<HTMLDivElement>(null);
 
@@ -700,31 +702,68 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
       {/* 2. MAIN CINEMA CANVAS VIEWPORT */}
       <div
         ref={viewportContainerRef}
-        onMouseDown={(e) => {
-          if (mode === 'editor' && editorTool === 'draw_frame') {
+        onWheel={(e) => {
+          if (mode === 'editor' && editorTool === 'navigate') {
+            e.preventDefault();
+            const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
+            const newZoom = Math.min(Math.max(camera.zoom * zoomFactor, 0.15), 4.0);
+
             const rect = viewportContainerRef.current?.getBoundingClientRect();
             if (!rect) return;
-            const screenX = e.clientX - rect.left;
-            const screenY = e.clientY - rect.top;
-            const worldX = (screenX - camera.panX) / camera.zoom;
-            const worldY = (screenY - camera.panY) / camera.zoom;
-            setIsDrawingFrame(true);
-            setDrawStart({ x: worldX, y: worldY });
-            setDrawCurrent({ x: worldX, y: worldY });
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            const newPanX = mouseX - (mouseX - camera.panX) * (newZoom / camera.zoom);
+            const newPanY = mouseY - (mouseY - camera.panY) * (newZoom / camera.zoom);
+
+            setCamera({
+              panX: newPanX,
+              panY: newPanY,
+              zoom: newZoom,
+            });
+          }
+        }}
+        onMouseDown={(e) => {
+          if (mode === 'editor') {
+            if (editorTool === 'draw_frame') {
+              const rect = viewportContainerRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              const screenX = e.clientX - rect.left;
+              const screenY = e.clientY - rect.top;
+              const worldX = (screenX - camera.panX) / camera.zoom;
+              const worldY = (screenY - camera.panY) / camera.zoom;
+              setIsDrawingFrame(true);
+              setDrawStart({ x: worldX, y: worldY });
+              setDrawCurrent({ x: worldX, y: worldY });
+            } else if (editorTool === 'navigate' || e.button === 1 || e.altKey) {
+              setIsPanning(true);
+              setPanStart({ x: e.clientX - camera.panX, y: e.clientY - camera.panY });
+            }
           }
         }}
         onMouseMove={(e) => {
-          if (mode === 'editor' && editorTool === 'draw_frame' && isDrawingFrame) {
-            const rect = viewportContainerRef.current?.getBoundingClientRect();
-            if (!rect) return;
-            const screenX = e.clientX - rect.left;
-            const screenY = e.clientY - rect.top;
-            const worldX = (screenX - camera.panX) / camera.zoom;
-            const worldY = (screenY - camera.panY) / camera.zoom;
-            setDrawCurrent({ x: worldX, y: worldY });
+          if (mode === 'editor') {
+            if (editorTool === 'draw_frame' && isDrawingFrame) {
+              const rect = viewportContainerRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              const screenX = e.clientX - rect.left;
+              const screenY = e.clientY - rect.top;
+              const worldX = (screenX - camera.panX) / camera.zoom;
+              const worldY = (screenY - camera.panY) / camera.zoom;
+              setDrawCurrent({ x: worldX, y: worldY });
+            } else if (isPanning) {
+              setCamera((prev) => ({
+                ...prev,
+                panX: e.clientX - panStart.x,
+                panY: e.clientY - panStart.y,
+              }));
+            }
           }
         }}
         onMouseUp={() => {
+          if (isPanning) {
+            setIsPanning(false);
+          }
           if (mode === 'editor' && editorTool === 'draw_frame' && isDrawingFrame && drawStart && drawCurrent) {
             const minX = Math.min(drawStart.x, drawCurrent.x);
             const minY = Math.min(drawStart.y, drawCurrent.y);
@@ -740,8 +779,18 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
             }
           }
         }}
-        className={`relative flex-1 bg-slate-950 overflow-hidden ${
-          editorTool === 'draw_frame' && mode === 'editor' ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing'
+        onMouseLeave={() => {
+          setIsPanning(false);
+          setIsDrawingFrame(false);
+        }}
+        className={`relative flex-1 bg-slate-950 overflow-hidden select-none ${
+          editorTool === 'draw_frame' && mode === 'editor'
+            ? 'cursor-crosshair'
+            : isPanning
+            ? 'cursor-grabbing'
+            : editorTool === 'navigate'
+            ? 'cursor-grab'
+            : 'cursor-default'
         }`}
       >
         {/* World Transform Layer (Vuelo de Cámara) */}
@@ -749,7 +798,7 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
           style={{
             transform: `translate3d(${camera.panX}px, ${camera.panY}px, 0) scale(${camera.zoom})`,
             transformOrigin: '0 0',
-            transition: isDrawingFrame ? 'none' : 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)',
+            transition: isDrawingFrame || isPanning ? 'none' : 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)',
           }}
           className="absolute top-0 left-0 will-change-transform"
         >
