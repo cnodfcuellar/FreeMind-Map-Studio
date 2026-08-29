@@ -76,6 +76,8 @@ export default function App() {
     handlePasteNode,
     handleApplyStyleToChildren,
     handleApplyStyleToSiblings,
+    handleApplyIconsToChildren,
+    handleApplyIconsToSiblings,
   } = store;
 
   // Estado local de Modales
@@ -392,6 +394,8 @@ export default function App() {
           onUpdateNode={updateNode}
           onApplyStyleToChildren={handleApplyStyleToChildren}
           onApplyStyleToSiblings={handleApplyStyleToSiblings}
+          onApplyIconsToChildren={handleApplyIconsToChildren}
+          onApplyIconsToSiblings={handleApplyIconsToSiblings}
           onUpdateMapTheme={(themeId) => {
             pushHistory(mindMap);
             setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));

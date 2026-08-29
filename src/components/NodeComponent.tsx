@@ -275,11 +275,30 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     };
 
     if (shape === 'fork') {
+      // Horquilla / Fork: Conserva el fondo elegido por el usuario (sólido, degradado, trama o imagen) con subrayado de base
+      const underlineColor = borderColor || branchColor || '#3b82f6';
+      const underlineWidth = Math.max(2.5, borderWidth || 2.5);
+      return {
+        ...bgStyles,
+        borderTop: 'none !important',
+        borderLeft: 'none !important',
+        borderRight: 'none !important',
+        borderBottom: `${underlineWidth}px ${borderStyle} ${underlineColor}`,
+        borderRadius: '0px',
+        boxShadow: 'none',
+        paddingBottom: '4px',
+      };
+    }
+    if (shape === 'bubble') {
+      // Burbuja / Bubble: Cápsula / globo totalmente cerrado con esquinas ultra-redondeadas y sombra envolvente
       return {
         ...baseStyle,
-        background: 'transparent',
-        borderBottom: `${Math.max(2, borderWidth || 2.5)}px ${borderStyle} ${borderColor || branchColor || '#3b82f6'}`,
-        borderRadius: 0,
+        borderRadius: isRoot ? '24px' : '16px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        paddingTop: '8px',
+        paddingBottom: '8px',
+        boxShadow: '0 4px 14px -2px rgba(0,0,0,0.10), 0 2px 6px -1px rgba(0,0,0,0.06)',
       };
     }
     if (shape === 'square') {
@@ -298,22 +317,22 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       return {
         ...baseStyle,
         borderRadius: '9999px',
-        paddingLeft: '16px',
-        paddingRight: '16px',
+        paddingLeft: '20px',
+        paddingRight: '20px',
       };
     }
     if (shape === 'oval') {
       return {
         ...baseStyle,
         borderRadius: '50%',
-        paddingLeft: '16px',
-        paddingRight: '16px',
+        paddingLeft: '20px',
+        paddingRight: '20px',
       };
     }
     if (shape === 'rectangle') {
       return {
         ...baseStyle,
-        borderRadius: '4px',
+        borderRadius: '0px',
       };
     }
     if (shape === 'hexagon') {
@@ -343,7 +362,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     // Default Bubble
     return {
       ...baseStyle,
-      borderRadius: isRoot ? '16px' : '10px',
+      borderRadius: isRoot ? '20px' : '14px',
     };
   };
 
@@ -375,8 +394,35 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       fillAttr = `url(#${patternId})`;
     }
 
+    // Determine speech bubble tail direction: pointing left for right-side nodes, pointing right for left-side nodes
+    const tailSide = layout.side === 'left' ? 'right' : 'left';
+    const tailW = isRoot ? 0 : 12;
+    const tailH = 10;
+    const r = 12; // corner radius
+
+    let pathD = '';
     let points = '';
-    if (shape === 'hexagon') {
+
+    if (shape === 'bubble') {
+      const pad = Math.max(effectiveBorderWidth / 2, 1);
+      const tailW = 16;
+      const tailH = Math.min(16, Math.max(12, h * 0.28));
+      const r = Math.min(18, Math.max(8, (h - 2 * pad) / 3));
+      
+      const bL = pad + (tailSide === 'left' ? tailW : 0);
+      const bR = w - pad - (tailSide === 'right' ? tailW : 0);
+      const bT = pad;
+      const bB = h - pad;
+      const midY = (bT + bB) / 2;
+
+      if (tailSide === 'left') {
+        // Speech bubble with clear triangle tail pointing to left
+        pathD = `M ${bL + r},${bT} L ${bR - r},${bT} A ${r} ${r} 0 0 1 ${bR},${bT + r} L ${bR},${bB - r} A ${r} ${r} 0 0 1 ${bR - r},${bB} L ${bL + r},${bB} A ${r} ${r} 0 0 1 ${bL},${bB - r} L ${bL},${midY + tailH / 2} L ${pad},${midY} L ${bL},${midY - tailH / 2} L ${bL},${bT + r} A ${r} ${r} 0 0 1 ${bL + r},${bT} Z`;
+      } else {
+        // Speech bubble with clear triangle tail pointing to right
+        pathD = `M ${bL + r},${bT} L ${bR - r},${bT} A ${r} ${r} 0 0 1 ${bR},${bT + r} L ${bR},${midY - tailH / 2} L ${w - pad},${midY} L ${bR},${midY + tailH / 2} L ${bR},${bB - r} A ${r} ${r} 0 0 1 ${bR - r},${bB} L ${bL + r},${bB} A ${r} ${r} 0 0 1 ${bL},${bB - r} L ${bL},${bT + r} A ${r} ${r} 0 0 1 ${bL + r},${bT} Z`;
+      }
+    } else if (shape === 'hexagon') {
       const inset = Math.min(w * 0.28, Math.max(28, h * 0.58));
       const pad = effectiveBorderWidth / 2;
       points = `${inset},${pad} ${w - inset},${pad} ${w - pad},${h / 2} ${w - inset},${h - pad} ${inset},${h - pad} ${pad},${h / 2}`;
@@ -457,15 +503,27 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
             </pattern>
           )}
         </defs>
-        <polygon
-          points={points}
-          fill={fillAttr}
-          stroke={effectiveBorderColor}
-          strokeWidth={effectiveBorderWidth}
-          strokeDasharray={strokeDash}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
+        {pathD ? (
+          <path
+            d={pathD}
+            fill={fillAttr}
+            stroke={effectiveBorderColor}
+            strokeWidth={effectiveBorderWidth}
+            strokeDasharray={strokeDash}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        ) : (
+          <polygon
+            points={points}
+            fill={fillAttr}
+            stroke={effectiveBorderColor}
+            strokeWidth={effectiveBorderWidth}
+            strokeDasharray={strokeDash}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        )}
       </svg>
     );
   };
@@ -480,7 +538,9 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         minHeight: `${layout.height}px`,
         ...getShapeStyle(),
       }}
-      className={`absolute select-none flex flex-col justify-center px-3 py-1.5 shadow-xs transition-shadow duration-150 group cursor-pointer ${
+      className={`absolute select-none flex flex-col justify-center shadow-xs transition-shadow duration-150 group cursor-pointer ${
+        isSvgShape || shape === 'fork' ? 'px-0 py-0' : 'px-3 py-1.5'
+      } ${
         isSelected ? 'ring-3 ring-blue-500 ring-offset-2 ring-offset-slate-50 shadow-md z-30' : 'hover:shadow-md z-10'
       } ${isMatch ? 'ring-2 ring-amber-400 bg-amber-50/90' : ''}`}
       onClick={(e) => onSelect(node.id, e)}
@@ -493,6 +553,50 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     >
       {/* SVG Shape background for Hexagon, Arrow, Star */}
       {renderSvgPolygonBackground()}
+
+      {/* Visible Speech Bubble Pointy Tail */}
+      {shape === 'bubble' && (() => {
+        const tailSide = layout.side === 'left' ? 'right' : 'left';
+        const fillCol = node.color || bgColor || '#ffffff';
+        const borderCol = borderWidth > 0 ? borderColor : 'transparent';
+        const bWidth = borderWidth || 1.5;
+        
+        return (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-0"
+            style={{
+              [tailSide === 'left' ? 'left' : 'right']: '-10px',
+              width: '12px',
+              height: '16px',
+            }}
+          >
+            <svg
+              viewBox="0 0 12 16"
+              className="w-full h-full overflow-visible"
+              style={{
+                transform: tailSide === 'right' ? 'scaleX(-1)' : 'none',
+              }}
+            >
+              <path
+                d="M 12 0 L 0 8 L 12 16 Z"
+                fill={fillCol}
+                stroke={borderCol}
+                strokeWidth={bWidth}
+                strokeLinejoin="round"
+              />
+              {/* Mask line to seamlessly merge tail with node body */}
+              <line
+                x1="12"
+                y1="1"
+                x2="12"
+                y2="15"
+                stroke={fillCol}
+                strokeWidth={bWidth + 2}
+              />
+            </svg>
+          </div>
+        );
+      })()}
 
       {/* Top Image if position is top, fit or default */}
       {!isImageHidden && node.imageUrl && (!node.imagePosition || node.imagePosition === 'top' || node.imagePosition === 'fit') && (
@@ -527,7 +631,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
             <div className="flex items-center gap-1 shrink-0">
               {node.icons.map((ic, idx) => (
                 <span key={idx} className="inline-flex items-center shrink-0">
-                  {renderNodeIcon(ic)}
+                  {renderNodeIcon(ic, 'w-3.5 h-3.5', node.iconColor, node.iconSize)}
                 </span>
               ))}
             </div>
@@ -566,7 +670,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
           <div className="flex items-center gap-1 shrink-0 mt-0.5">
             {node.icons.map((ic, idx) => (
               <span key={idx} className="inline-flex items-center shrink-0">
-                {renderNodeIcon(ic)}
+                {renderNodeIcon(ic, 'w-3.5 h-3.5', node.iconColor, node.iconSize)}
               </span>
             ))}
           </div>

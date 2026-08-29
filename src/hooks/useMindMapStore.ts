@@ -67,6 +67,10 @@ interface MindMapStore {
   // Propagación de estilos
   handleApplyStyleToChildren: (nodeId?: string) => void;
   handleApplyStyleToSiblings: (nodeId?: string) => void;
+
+  // Propagación exclusiva de iconos y su color
+  handleApplyIconsToChildren: (nodeId?: string) => void;
+  handleApplyIconsToSiblings: (nodeId?: string) => void;
 }
 
 const extractNodeStyleBundle = (sourceNode: MindNode): Partial<MindNode> => {
@@ -564,6 +568,89 @@ export const useMindMapStore = create<MindMapStore>((set, get) => {
           updatedNodes[siblingId] = {
             ...updatedNodes[siblingId],
             ...styleBundle,
+          };
+        }
+      });
+
+      const nextMap: MindMap = {
+        ...mindMap,
+        nodes: updatedNodes,
+        updatedAt: Date.now(),
+      };
+
+      set({ mindMap: nextMap });
+      saveCurrentMap(nextMap);
+    },
+
+    handleApplyIconsToChildren: (nodeId) => {
+      const { mindMap, selectedNodeId, pushHistory } = get();
+      const targetId = nodeId || selectedNodeId;
+      if (!targetId) return;
+
+      const sourceNode = mindMap.nodes[targetId];
+      if (!sourceNode || !sourceNode.children || sourceNode.children.length === 0) return;
+
+      pushHistory(mindMap);
+
+      const iconBundle = {
+        icons: sourceNode.icons ? [...sourceNode.icons] : [],
+        iconColor: sourceNode.iconColor,
+        iconSize: sourceNode.iconSize,
+        iconPosition: sourceNode.iconPosition,
+      };
+
+      const updatedNodes = { ...mindMap.nodes };
+
+      const applyRecursively = (childId: string) => {
+        const childNode = updatedNodes[childId];
+        if (childNode) {
+          updatedNodes[childId] = {
+            ...childNode,
+            ...iconBundle,
+          };
+          (childNode.children || []).forEach(applyRecursively);
+        }
+      };
+
+      sourceNode.children.forEach(applyRecursively);
+
+      const nextMap: MindMap = {
+        ...mindMap,
+        nodes: updatedNodes,
+        updatedAt: Date.now(),
+      };
+
+      set({ mindMap: nextMap });
+      saveCurrentMap(nextMap);
+    },
+
+    handleApplyIconsToSiblings: (nodeId) => {
+      const { mindMap, selectedNodeId, pushHistory } = get();
+      const targetId = nodeId || selectedNodeId;
+      if (!targetId || targetId === mindMap.rootId) return;
+
+      const sourceNode = mindMap.nodes[targetId];
+      if (!sourceNode || !sourceNode.parentId) return;
+
+      const parentNode = mindMap.nodes[sourceNode.parentId];
+      if (!parentNode || !parentNode.children || parentNode.children.length <= 1) return;
+
+      pushHistory(mindMap);
+
+      const iconBundle = {
+        icons: sourceNode.icons ? [...sourceNode.icons] : [],
+        iconColor: sourceNode.iconColor,
+        iconSize: sourceNode.iconSize,
+        iconPosition: sourceNode.iconPosition,
+      };
+
+      const updatedNodes = { ...mindMap.nodes };
+
+      parentNode.children.forEach((siblingId) => {
+        if (siblingId !== targetId && updatedNodes[siblingId]) {
+          updatedNodes[siblingId] = {
+            ...updatedNodes[siblingId],
+            ...iconBundle,
           };
         }
       });

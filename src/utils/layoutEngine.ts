@@ -176,6 +176,9 @@ export function estimateNodeSize(
     width = node.customWidth || baseW;
     // Double default star height so it's upright and tall rather than flat
     height = node.customHeight || Math.round(Math.max(height * 2.2, width * 0.95, 96));
+  } else if (node.shape === 'bubble') {
+    width = node.customWidth || (width + 36);
+    height = node.customHeight || (height + 20);
   } else if (node.shape === 'hexagon') {
     width = node.customWidth || (width + 48);
     height = node.customHeight || Math.max(height, 42);

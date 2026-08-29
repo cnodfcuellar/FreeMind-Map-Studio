@@ -222,15 +222,31 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
                 onChange={(bw) => updateCloudProps({ borderWidth: bw })}
               />
 
-              <ToggleButtonGroup<'solid' | 'dashed' | 'dotted'>
-                value={currentCloud.borderDash || 'dashed'}
-                onChange={(dash) => updateCloudProps({ borderDash: dash })}
-                options={[
-                  { value: 'solid', label: 'Sólido' },
-                  { value: 'dashed', label: 'Guiones' },
-                  { value: 'dotted', label: 'Puntos' },
-                ]}
-              />
+              <span className="text-[11px] font-semibold text-slate-600 block">Estilo de Línea</span>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { id: 'solid' as const, label: 'Sólido', stroke: 'border-solid' },
+                  { id: 'dashed' as const, label: 'Guiones', stroke: 'border-dashed' },
+                  { id: 'dotted' as const, label: 'Puntos', stroke: 'border-dotted' },
+                ].map((dash) => {
+                  const isSelected = (currentCloud.borderDash || 'dashed') === dash.id;
+                  return (
+                    <button
+                      key={dash.id}
+                      type="button"
+                      onClick={() => updateCloudProps({ borderDash: dash.id })}
+                      className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer select-none ${
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`w-8 border-t-2 ${dash.stroke} border-current my-1`} />
+                      <span className="text-[10px] text-center truncate w-full">{dash.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </CollapsibleSection>
         </div>

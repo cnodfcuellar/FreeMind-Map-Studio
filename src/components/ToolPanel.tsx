@@ -45,6 +45,8 @@ export interface ToolPanelProps {
   onApplyEdgeProfileToAllNodes?: (edgeProfile: EdgeProfile) => void;
   onApplyStyleToChildren?: (nodeId: string) => void;
   onApplyStyleToSiblings?: (nodeId: string) => void;
+  onApplyIconsToChildren?: (nodeId: string) => void;
+  onApplyIconsToSiblings?: (nodeId: string) => void;
   onOpenConnectorModal?: (fromId?: string) => void;
   onDeleteConnector?: (connectorId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
@@ -202,6 +204,8 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
                 selectedNode={selectedNode}
                 onUpdateNode={props.onUpdateNode}
                 onOpenIconPackModal={props.onOpenIconPackModal}
+                onApplyIconsToChildren={props.onApplyIconsToChildren}
+                onApplyIconsToSiblings={props.onApplyIconsToSiblings}
               />
             )}
 

@@ -8,12 +8,17 @@ import {
   TOTAL_VECTOR_ICONS_COUNT,
 } from '../../../utils/vectorIconPack';
 import { renderNodeIcon } from '../../../utils/iconMap';
-import { Search, Sparkles, X } from 'lucide-react';
+import { ColorPicker } from '../../atoms/ColorPicker';
+import { SliderInput } from '../../atoms/SliderInput';
+import { CollapsibleSection } from '../../atoms/CollapsibleSection';
+import { Search, Sparkles, X, Palette } from 'lucide-react';
 
 interface IconsTabProps {
   selectedNode: MindNode;
   onUpdateNode: (nodeId: string, updates: Partial<MindNode>) => void;
   onOpenIconPackModal?: () => void;
+  onApplyIconsToChildren?: (nodeId: string) => void;
+  onApplyIconsToSiblings?: (nodeId: string) => void;
 }
 
 const CATEGORY_EMOJIS: Record<string, string> = {
@@ -47,9 +52,12 @@ export const IconsTab: React.FC<IconsTabProps> = ({
   selectedNode,
   onUpdateNode,
   onOpenIconPackModal,
+  onApplyIconsToChildren,
+  onApplyIconsToSiblings,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [category, setCategory] = useState<VectorIconCategory | 'all'>('all');
+  const [isStyleSectionOpen, setIsStyleSectionOpen] = useState(true);
 
   const filteredIcons = useMemo(() => {
     return searchVectorIcons(searchQuery, category);
@@ -72,6 +80,105 @@ export const IconsTab: React.FC<IconsTabProps> = ({
 
   return (
     <div className="space-y-3.5">
+      {/* 1. Sección Plegable de Estilo y Tamaño de Iconos */}
+      <CollapsibleSection
+        title="Color y Tamaño de Iconos"
+        subtitle="Personalizar tinte, escala y propagación"
+        isOpen={isStyleSectionOpen}
+        onToggle={() => setIsStyleSectionOpen((prev) => !prev)}
+        icon={<Palette className="w-3.5 h-3.5" />}
+        badge={
+          selectedNode.iconColor ? (
+            <span
+              className="w-3.5 h-3.5 rounded-full border border-slate-300 shadow-2xs inline-block"
+              style={{ backgroundColor: selectedNode.iconColor }}
+            />
+          ) : undefined
+        }
+      >
+        <div className="space-y-3">
+          {/* Selector de Color */}
+          <ColorPicker
+            label="Tinte del Icono"
+            value={selectedNode.iconColor}
+            onChange={(color) => onUpdateNode(selectedNode.id, { iconColor: color })}
+            onClear={() => onUpdateNode(selectedNode.id, { iconColor: undefined })}
+          />
+
+          {/* Paleta rápida de colores populares para iconos */}
+          <div className="flex items-center gap-1.5 pt-0.5 overflow-x-auto pb-0.5">
+            <span className="text-[10px] text-slate-400 shrink-0 font-medium">Sugeridos:</span>
+            {[
+              { col: '#ef4444', label: 'Rojo' },
+              { col: '#f59e0b', label: 'Ámbar' },
+              { col: '#10b981', label: 'Verde' },
+              { col: '#3b82f6', label: 'Azul' },
+              { col: '#8b5cf6', label: 'Púrpura' },
+              { col: '#ec4899', label: 'Rosa' },
+              { col: '#475569', label: 'Pizarra' },
+            ].map((item) => (
+              <button
+                key={item.col}
+                type="button"
+                title={item.label}
+                onClick={() => onUpdateNode(selectedNode.id, { iconColor: item.col })}
+                className="w-4.5 h-4.5 rounded-full shrink-0 border border-slate-300 transition-transform hover:scale-115 cursor-pointer shadow-2xs"
+                style={{ backgroundColor: item.col }}
+              />
+            ))}
+            {selectedNode.iconColor && (
+              <button
+                type="button"
+                onClick={() => onUpdateNode(selectedNode.id, { iconColor: undefined })}
+                className="text-[10px] text-slate-400 hover:text-slate-600 underline ml-auto shrink-0 cursor-pointer"
+              >
+                Original
+              </button>
+            )}
+          </div>
+
+          {/* Barra deslizante para cambiar el tamaño de los iconos */}
+          <div className="pt-2 border-t border-slate-200/80 space-y-1">
+            <SliderInput
+              label="Tamaño del Icono"
+              value={selectedNode.iconSize || 14}
+              min={10}
+              max={36}
+              step={1}
+              unit="px"
+              badge={selectedNode.iconSize ? `${selectedNode.iconSize}px` : '14px (Estándar)'}
+              onChange={(sz) => onUpdateNode(selectedNode.id, { iconSize: sz })}
+              onReset={() => onUpdateNode(selectedNode.id, { iconSize: undefined })}
+            />
+          </div>
+
+          {/* Propagación exclusiva de iconos, tamaño y color a hijos o hermanos */}
+          <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+            <span className="text-[10.5px] font-semibold text-slate-600 block">Propagación de Iconos</span>
+            <div className="grid grid-cols-2 gap-1.5">
+              {onApplyIconsToChildren && (
+                <button
+                  type="button"
+                  onClick={() => onApplyIconsToChildren(selectedNode.id)}
+                  className="py-1.5 px-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[10.5px] font-semibold hover:bg-blue-100 transition-colors cursor-pointer text-center"
+                >
+                  Copiar a Hijos
+                </button>
+              )}
+              {onApplyIconsToSiblings && (
+                <button
+                  type="button"
+                  onClick={() => onApplyIconsToSiblings(selectedNode.id)}
+                  className="py-1.5 px-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10.5px] font-semibold hover:bg-slate-200 transition-colors cursor-pointer text-center"
+                >
+                  Copiar a Hermanos
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </CollapsibleSection>
+
       {/* Iconos actualmente asignados al nodo */}
       {selectedNode.icons && selectedNode.icons.length > 0 && (
         <div className="space-y-1.5 bg-blue-50/60 p-2.5 rounded-xl border border-blue-200/80 shadow-2xs">
@@ -91,7 +198,7 @@ export const IconsTab: React.FC<IconsTabProps> = ({
                 key={iconId}
                 className="inline-flex items-center gap-1 bg-white border border-blue-200 px-2 py-1 rounded-lg text-xs shadow-2xs"
               >
-                <span>{renderNodeIcon(iconId)}</span>
+                <span>{renderNodeIcon(iconId, 'w-3.5 h-3.5', selectedNode.iconColor)}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveIcon(iconId)}

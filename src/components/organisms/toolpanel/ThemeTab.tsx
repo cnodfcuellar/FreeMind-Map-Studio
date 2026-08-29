@@ -240,39 +240,132 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
           />
 
           <div className="space-y-1.5">
-            <span className="text-[11px] font-medium text-slate-700 block">Patrón de Cuadrícula</span>
-            <ToggleButtonGroup<BackgroundPatternStyle>
-              value={currentBgPattern}
-              onChange={(pat) => onUpdateMapBackground && onUpdateMapBackground({ backgroundPattern: pat })}
-              options={[
-                { value: 'none', label: 'Liso' },
-                { value: 'dots', label: 'Puntos' },
-                { value: 'lines', label: 'Líneas' },
-                { value: 'squares', label: 'Cuadros' },
-                { value: 'triangles', label: 'Malla' },
-                { value: 'hexagons', label: 'Panal' },
-              ]}
-            />
+            <span className="text-[11px] font-semibold text-slate-700 block">Patrón de Cuadrícula</span>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                {
+                  id: 'none' as BackgroundPatternStyle,
+                  label: 'Liso',
+                  icon: (
+                    <div className="w-6 h-4 rounded bg-slate-100 border border-slate-200" />
+                  ),
+                },
+                {
+                  id: 'dots' as BackgroundPatternStyle,
+                  label: 'Puntos',
+                  icon: (
+                    <div
+                      className="w-6 h-4 rounded border border-slate-200"
+                      style={{
+                        backgroundImage: 'radial-gradient(#64748b 1px, transparent 1px)',
+                        backgroundSize: '4px 4px',
+                      }}
+                    />
+                  ),
+                },
+                {
+                  id: 'lines' as BackgroundPatternStyle,
+                  label: 'Líneas',
+                  icon: (
+                    <div
+                      className="w-6 h-4 rounded border border-slate-200"
+                      style={{
+                        backgroundImage: 'linear-gradient(to right, #64748b 1px, transparent 1px)',
+                        backgroundSize: '5px 5px',
+                      }}
+                    />
+                  ),
+                },
+                {
+                  id: 'squares' as BackgroundPatternStyle,
+                  label: 'Cuadros',
+                  icon: (
+                    <div
+                      className="w-6 h-4 rounded border border-slate-200"
+                      style={{
+                        backgroundImage:
+                          'linear-gradient(to right, #64748b 1px, transparent 1px), linear-gradient(to bottom, #64748b 1px, transparent 1px)',
+                        backgroundSize: '5px 5px',
+                      }}
+                    />
+                  ),
+                },
+                {
+                  id: 'triangles' as BackgroundPatternStyle,
+                  label: 'Triángulos',
+                  icon: (
+                    <svg className="w-6 h-4" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.2">
+                      <polygon points="12,1 23,15 1,15" />
+                      <line x1="12" y1="1" x2="12" y2="15" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'hexagons' as BackgroundPatternStyle,
+                  label: 'Panal',
+                  icon: (
+                    <svg className="w-6 h-4" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.2">
+                      <polygon points="6,2 18,2 23,8 18,14 6,14 1,8" />
+                    </svg>
+                  ),
+                },
+              ].map((opt) => {
+                const isSelected = currentBgPattern === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() =>
+                      onUpdateMapBackground && onUpdateMapBackground({ backgroundPattern: opt.id })
+                    }
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center h-4 my-0.5">{opt.icon}</div>
+                    <span className="text-[10px] mt-1 text-center truncate w-full">{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <SliderInput
-            label="Tamaño del Patrón"
-            value={currentBgPatternSize}
-            min={12}
-            max={64}
-            step={2}
-            unit="px"
-            onChange={(sz) => onUpdateMapBackground && onUpdateMapBackground({ backgroundPatternSize: sz })}
-          />
+          {currentBgPattern !== 'none' && (
+            <>
+              <ColorPicker
+                label="Color del Trazo del Patrón"
+                value={currentBgPatternColor}
+                onChange={(c) =>
+                  onUpdateMapBackground && onUpdateMapBackground({ backgroundPatternColor: c })
+                }
+              />
 
-          <SliderInput
-            label="Opacidad del Patrón"
-            value={Math.round(currentBgPatternOpacity * 100)}
-            min={5}
-            max={100}
-            unit="%"
-            onChange={(op) => onUpdateMapBackground && onUpdateMapBackground({ backgroundPatternOpacity: op / 100 })}
-          />
+              <SliderInput
+                label="Tamaño del Patrón"
+                value={currentBgPatternSize}
+                min={12}
+                max={64}
+                step={2}
+                unit="px"
+                onChange={(sz) =>
+                  onUpdateMapBackground && onUpdateMapBackground({ backgroundPatternSize: sz })
+                }
+              />
+
+              <SliderInput
+                label="Opacidad del Patrón"
+                value={Math.round(currentBgPatternOpacity * 100)}
+                min={5}
+                max={100}
+                unit="%"
+                onChange={(op) =>
+                  onUpdateMapBackground && onUpdateMapBackground({ backgroundPatternOpacity: op / 100 })
+                }
+              />
+            </>
+          )}
         </div>
       </CollapsibleSection>
 

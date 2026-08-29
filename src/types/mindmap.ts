@@ -139,6 +139,8 @@ export interface MindNode {
   // Metadata & Features
   icons?: string[];
   iconPosition?: 'left' | 'top';
+  iconColor?: string;
+  iconSize?: number;
   tags?: string[];
   progress?: number; // 0 to 100
   progressPosition?: 'left' | 'top';

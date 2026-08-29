@@ -83,44 +83,54 @@ export const AVAILABLE_ICONS: IconDefinition[] = [
 ];
 
 /**
- * Universal vector icon renderer supporting all 500+ vector SVG icons
+ * Universal vector icon renderer supporting all 500+ vector SVG icons with optional custom color and size
  */
-export function renderNodeIcon(iconId: string, className = 'w-3.5 h-3.5'): React.ReactNode {
+export function renderNodeIcon(iconId: string, className = 'w-3.5 h-3.5', customColor?: string, customSize?: number): React.ReactNode {
+  const style: React.CSSProperties = {
+    ...(customColor ? { color: customColor } : {}),
+    ...(customSize ? { width: `${customSize}px`, height: `${customSize}px` } : {}),
+  };
+
   // 1. Check in 500+ vector icon repository
   const vectorItem = getVectorIconItem(iconId);
   if (vectorItem) {
     const IconComponent = vectorItem.icon;
-    return <IconComponent className={className} />;
+    return <IconComponent className={className} style={style} />;
   }
 
   // 2. Fallback check in available icons list
   const found = AVAILABLE_ICONS.find(i => i.id === iconId);
-  if (found) return found.icon;
+  if (found) {
+    if (customColor || customSize) {
+      return <span style={style} className="inline-flex items-center justify-center">{found.icon}</span>;
+    }
+    return found.icon;
+  }
   
   // 3. Fallback for common aliases and legacy names
   switch (iconId) {
     case 'idea':
-    case 'lightbulb': return <Lightbulb className={`${className} text-amber-500`} />;
-    case 'check': return <Check className={`${className} text-emerald-600`} />;
-    case 'star': return <Star className={`${className} text-amber-500 fill-amber-400`} />;
-    case 'flag-red': return <Flag className={`${className} text-red-500 fill-red-500`} />;
-    case 'flag-yellow': return <Flag className={`${className} text-yellow-500 fill-yellow-400`} />;
-    case 'flag-blue': return <Flag className={`${className} text-blue-500 fill-blue-400`} />;
-    case 'keyboard': return <Keyboard className={`${className} text-slate-600`} />;
-    case 'sparkles': return <Sparkles className={`${className} text-indigo-500`} />;
-    case 'activity': return <Activity className={`${className} text-blue-600`} />;
-    case 'file-text': return <FileText className={`${className} text-slate-600`} />;
-    case 'link': return <Link className={`${className} text-blue-500`} />;
-    case 'layout': return <Layout className={`${className} text-slate-600`} />;
-    case 'presentation': return <Presentation className={`${className} text-purple-600`} />;
-    case 'file-code': return <FileCode className={`${className} text-orange-600`} />;
-    case 'globe': return <Globe className={`${className} text-emerald-600`} />;
-    case 'image': return <Image className={`${className} text-blue-500`} />;
-    case 'database': return <Database className={`${className} text-indigo-600`} />;
-    case 'shield-check': return <ShieldCheck className={`${className} text-emerald-600`} />;
-    case 'check-circle': return <CheckCircle className={`${className} text-emerald-600`} />;
+    case 'lightbulb': return <Lightbulb className={`${className} ${customColor ? '' : 'text-amber-500'}`} style={style} />;
+    case 'check': return <Check className={`${className} ${customColor ? '' : 'text-emerald-600'}`} style={style} />;
+    case 'star': return <Star className={`${className} ${customColor ? '' : 'text-amber-500 fill-amber-400'}`} style={style} />;
+    case 'flag-red': return <Flag className={`${className} ${customColor ? '' : 'text-red-500 fill-red-500'}`} style={style} />;
+    case 'flag-yellow': return <Flag className={`${className} ${customColor ? '' : 'text-yellow-500 fill-yellow-400'}`} style={style} />;
+    case 'flag-blue': return <Flag className={`${className} ${customColor ? '' : 'text-blue-500 fill-blue-400'}`} style={style} />;
+    case 'keyboard': return <Keyboard className={`${className} ${customColor ? '' : 'text-slate-600'}`} style={style} />;
+    case 'sparkles': return <Sparkles className={`${className} ${customColor ? '' : 'text-indigo-500'}`} style={style} />;
+    case 'activity': return <Activity className={`${className} ${customColor ? '' : 'text-blue-600'}`} style={style} />;
+    case 'file-text': return <FileText className={`${className} ${customColor ? '' : 'text-slate-600'}`} style={style} />;
+    case 'link': return <Link className={`${className} ${customColor ? '' : 'text-blue-500'}`} style={style} />;
+    case 'layout': return <Layout className={`${className} ${customColor ? '' : 'text-slate-600'}`} style={style} />;
+    case 'presentation': return <Presentation className={`${className} ${customColor ? '' : 'text-purple-600'}`} style={style} />;
+    case 'file-code': return <FileCode className={`${className} ${customColor ? '' : 'text-orange-600'}`} style={style} />;
+    case 'globe': return <Globe className={`${className} ${customColor ? '' : 'text-emerald-600'}`} style={style} />;
+    case 'image': return <Image className={`${className} ${customColor ? '' : 'text-blue-500'}`} style={style} />;
+    case 'database': return <Database className={`${className} ${customColor ? '' : 'text-indigo-600'}`} style={style} />;
+    case 'shield-check': return <ShieldCheck className={`${className} ${customColor ? '' : 'text-emerald-600'}`} style={style} />;
+    case 'check-circle': return <CheckCircle className={`${className} ${customColor ? '' : 'text-emerald-600'}`} style={style} />;
     default:
-      return <span className="text-xs">{iconId}</span>;
+      return <span className="text-xs" style={style}>{iconId}</span>;
   }
 }
 

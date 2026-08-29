@@ -23,16 +23,74 @@ interface ShapeItem {
 }
 
 const SHAPES: ShapeItem[] = [
-  { id: 'bubble', name: 'Burbuja', icon: <MessageSquare className="w-4 h-4" /> },
-  { id: 'fork', name: 'Horquilla', icon: <GitFork className="w-4 h-4" /> },
-  { id: 'rectangle', name: 'Rectángulo', icon: <Square className="w-4 h-4" /> },
-  { id: 'square', name: 'Cuadrado', icon: <Square className="w-4 h-4" /> },
-  { id: 'oval', name: 'Óvalo', icon: <Circle className="w-4 h-4 scale-x-125" /> },
-  { id: 'circle', name: 'Círculo', icon: <Circle className="w-4 h-4" /> },
-  { id: 'pill', name: 'Píldora', icon: <Pill className="w-4 h-4" /> },
-  { id: 'hexagon', name: 'Hexágono', icon: <Hexagon className="w-4 h-4" /> },
-  { id: 'arrow', name: 'Flecha', icon: <ArrowRight className="w-4 h-4" /> },
-  { id: 'star', name: 'Estrella', icon: <Star className="w-4 h-4" /> },
+  {
+    id: 'bubble',
+    name: 'Burbuja',
+    icon: (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'fork',
+    name: 'Horquilla',
+    icon: (
+      <div className="w-5 h-3.5 flex flex-col justify-end">
+        <div className="w-full h-0.5 bg-current rounded-full" />
+      </div>
+    ),
+  },
+  {
+    id: 'rectangle',
+    name: 'Rectángulo',
+    icon: (
+      <div className="w-5 h-3.5 rounded-none border-2 border-current" />
+    ),
+  },
+  {
+    id: 'square',
+    name: 'Cuadrado',
+    icon: (
+      <div className="w-4 h-4 rounded-none border-2 border-current" />
+    ),
+  },
+  {
+    id: 'oval',
+    name: 'Óvalo',
+    icon: (
+      <div className="w-5 h-3 rounded-[50%] border-2 border-current" />
+    ),
+  },
+  {
+    id: 'circle',
+    name: 'Círculo',
+    icon: (
+      <div className="w-4 h-4 rounded-full border-2 border-current" />
+    ),
+  },
+  {
+    id: 'pill',
+    name: 'Píldora',
+    icon: (
+      <div className="w-5 h-2.5 rounded-full border-2 border-current" />
+    ),
+  },
+  {
+    id: 'hexagon',
+    name: 'Hexágono',
+    icon: <Hexagon className="w-4 h-4" />,
+  },
+  {
+    id: 'arrow',
+    name: 'Flecha',
+    icon: <ArrowRight className="w-4 h-4" />,
+  },
+  {
+    id: 'star',
+    name: 'Estrella',
+    icon: <Star className="w-4 h-4" />,
+  },
 ];
 
 export const ShapeSelector: React.FC<ShapeSelectorProps> = ({
