@@ -37,6 +37,9 @@ import {
   Crop,
   Undo2,
   Redo2,
+  ZoomIn,
+  ZoomOut,
+  Maximize,
 } from 'lucide-react';
 
 interface MindomoPresentationSystemProps {
@@ -672,6 +675,58 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
               <MousePointer className="w-3.5 h-3.5" />
               <span>Navegar / Mover</span>
             </button>
+
+            {/* Zoom Controls Bar */}
+            <div className="flex items-center bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60 ml-2">
+              <button
+                onClick={() => {
+                  setCamera((prev) => ({
+                    ...prev,
+                    zoom: Math.max(0.2, Math.min(3.5, prev.zoom * 0.85)),
+                  }));
+                }}
+                title="Alejar Zoom (-)"
+                className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setCamera((prev) => ({
+                    ...prev,
+                    zoom: 1,
+                  }));
+                }}
+                title="Restablecer Zoom al 100%"
+                className="px-2 py-0.5 text-[11px] font-mono font-bold text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors cursor-pointer"
+              >
+                {Math.round(camera.zoom * 100)}%
+              </button>
+
+              <button
+                onClick={() => {
+                  setCamera((prev) => ({
+                    ...prev,
+                    zoom: Math.max(0.2, Math.min(3.5, prev.zoom * 1.15)),
+                  }));
+                }}
+                title="Acercar Zoom (+)"
+                className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => {
+                  flyCameraToBounds(overviewBounds, true);
+                }}
+                title="Ajustar Mapa Completo a Pantalla"
+                className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-700 transition-colors cursor-pointer ml-0.5"
+              >
+                <Maximize className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {/* Staged Nodes Action: Crear marco con los nodos seleccionados */}
