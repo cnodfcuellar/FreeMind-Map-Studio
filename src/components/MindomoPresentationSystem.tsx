@@ -270,23 +270,46 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
   };
 
   // Add custom frame from selected node
-  const handleAddSlideFromSelectedNode = (nodeId: string) => {
+  const handleAddSlideFromSelectedNode = (nodeId: string, includeChildren: boolean = true) => {
     const l = layoutMap.get(nodeId);
     const n = mindMap.nodes[nodeId];
     if (!l || !n) return;
 
-    const pad = 70;
+    // Helper to calculate exact branch subtree bounds if node has children
+    let minX = l.x;
+    let maxX = l.x + l.width;
+    let minY = l.y;
+    let maxY = l.y + l.height;
+
+    if (includeChildren && n.children && n.children.length > 0) {
+      const collect = (cid: string) => {
+        const cl = layoutMap.get(cid);
+        const cn = mindMap.nodes[cid];
+        if (cl) {
+          minX = Math.min(minX, cl.x);
+          maxX = Math.max(maxX, cl.x + cl.width);
+          minY = Math.min(minY, cl.y);
+          maxY = Math.max(maxY, cl.y + cl.height);
+        }
+        if (cn?.children) {
+          cn.children.forEach(collect);
+        }
+      };
+      n.children.forEach(collect);
+    }
+
+    const pad = 24;
     const newSlide: SlideFrame = {
-      id: `slide-custom-${Date.now()}`,
+      id: `slide-custom-${nodeId}-${Date.now()}`,
       order: slides.length + 1,
       title: n.text || 'Nuevo Marco',
-      type: 'node',
+      type: includeChildren && n.children && n.children.length > 0 ? 'branch' : 'node',
       nodeId: n.id,
       bounds: {
-        x: l.x - pad,
-        y: l.y - pad,
-        width: l.width + pad * 2,
-        height: l.height + pad * 2,
+        x: minX - pad,
+        y: minY - pad,
+        width: Math.max(160, maxX - minX + pad * 2),
+        height: Math.max(100, maxY - minY + pad * 2),
       },
       showNotes: Boolean(n.note),
       color: n.color || '#3b82f6',
@@ -295,6 +318,7 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
     const updated = [...slides, newSlide];
     updateSlides(updated);
     setCurrentSlideIndex(updated.length - 1);
+    setIsOverviewActive(false);
   };
 
   // Delete slide
@@ -559,7 +583,14 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
                     }}
                     onSelect={() => {
                       if (mode === 'editor') {
-                        handleAddSlideFromSelectedNode(node.id);
+                        // If a frame already exists for this node, focus it; otherwise add it as a new frame
+                        const existingIdx = slides.findIndex((s) => s.nodeId === node.id);
+                        if (existingIdx !== -1) {
+                          setCurrentSlideIndex(existingIdx);
+                          setIsOverviewActive(false);
+                        } else {
+                          handleAddSlideFromSelectedNode(node.id, true);
+                        }
                       }
                     }}
                     onDoubleClick={() => {}}
