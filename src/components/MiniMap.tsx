@@ -206,16 +206,16 @@ export const MiniMap: React.FC<MiniMapProps> = ({
       className="absolute bottom-5 right-5 z-40 flex flex-col items-end gap-2 select-none pointer-events-auto"
       onMouseUp={handleMouseUp}
     >
-      {/* MiniMap Canvas Card (Toggleable) */}
+      {/* MiniMap Canvas Card (Toggleable & Semitransparent Glassmorphism) */}
       {showMiniMap && layoutMap.size > 0 && (
         <div
-          className={`bg-white/95 backdrop-blur-md p-2 rounded-2xl border border-slate-200 shadow-xl ${sizeConfig.cardWidth} flex flex-col overflow-hidden transition-all duration-200 animate-in fade-in zoom-in-95`}
+          className={`bg-white/65 dark:bg-slate-900/65 backdrop-blur-md hover:bg-white/90 dark:hover:bg-slate-900/90 p-2 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-2xl ${sizeConfig.cardWidth} flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 group`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-1 py-0.5 mb-1.5 text-slate-500 gap-1">
+          <div className="flex items-center justify-between px-1 py-0.5 mb-1.5 text-slate-500 dark:text-slate-400 gap-1">
             <div className="flex items-center gap-1.5 min-w-0">
-              <Compass className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider truncate">
+              <Compass className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider truncate">
                 MiniMapa
               </span>
             </div>
@@ -223,7 +223,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
             <div className="flex items-center gap-1">
               {/* Size Selector (S / M / L) */}
               <div
-                className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200/70 text-[9px] font-bold font-mono"
+                className="flex items-center bg-slate-200/50 dark:bg-slate-800/50 p-0.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50 text-[9px] font-bold font-mono"
                 title="Tamaño del MiniMapa"
               >
                 {(['compact', 'medium', 'large'] as MiniMapSize[]).map((s) => {
@@ -236,8 +236,8 @@ export const MiniMap: React.FC<MiniMapProps> = ({
                       title={`Tamaño ${s === 'compact' ? 'Pequeño' : s === 'medium' ? 'Mediano' : 'Grande'}`}
                       className={`px-1.5 py-0.5 rounded transition-all cursor-pointer ${
                         isCurrent
-                          ? 'bg-white text-blue-600 shadow-xs font-black'
-                          : 'text-slate-500 hover:text-slate-800'
+                          ? 'bg-white/90 dark:bg-slate-700/90 text-blue-600 dark:text-blue-400 shadow-xs font-black'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       {label}
@@ -250,7 +250,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
               <button
                 onClick={onToggleMiniMap}
                 title="Minimizar MiniMapa"
-                className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-pointer"
               >
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
@@ -259,7 +259,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
 
           {/* SVG Map View Area */}
           <div
-            className={`relative w-full ${sizeConfig.svgHeight} bg-slate-50/80 rounded-xl border border-slate-200/80 overflow-hidden shadow-inner cursor-crosshair transition-all duration-200`}
+            className={`relative w-full ${sizeConfig.svgHeight} bg-slate-100/50 dark:bg-slate-800/40 rounded-xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden shadow-inner cursor-crosshair transition-all duration-200`}
           >
             <svg
               ref={svgRef}
@@ -431,26 +431,26 @@ export const MiniMap: React.FC<MiniMapProps> = ({
         </div>
       )}
 
-      {/* Zoom Controls HUD (Placed UNDER the minimap) */}
-      <div className="flex items-center gap-1 bg-white/95 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-slate-200 shadow-xl text-slate-700">
+      {/* Zoom Controls HUD (Placed UNDER the minimap - Semitransparent Glassmorphism) */}
+      <div className="flex items-center gap-1 bg-white/65 dark:bg-slate-900/65 backdrop-blur-md hover:bg-white/90 dark:hover:bg-slate-900/90 px-2.5 py-1.5 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl text-slate-700 dark:text-slate-200 transition-all duration-300">
         {/* Toggle MiniMap Button */}
         <button
           title={showMiniMap ? 'Ocultar MiniMapa' : 'Mostrar MiniMapa'}
           onClick={onToggleMiniMap}
-          className={`p-1.5 rounded-xl transition-colors ${
-            showMiniMap ? 'bg-blue-50 text-blue-600 font-bold' : 'hover:bg-slate-100 text-slate-600'
+          className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+            showMiniMap ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold' : 'hover:bg-slate-200/50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-300'
           }`}
         >
           <Compass className="w-4 h-4" />
         </button>
 
-        <div className="w-px h-4 bg-slate-200 mx-0.5" />
+        <div className="w-px h-4 bg-slate-200/70 dark:bg-slate-700/70 mx-0.5" />
 
         {/* Zoom Out (-) */}
         <button
           title="Alejar Zoom (-)"
           onClick={onZoomOut}
-          className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-700 hover:text-slate-900 transition-colors"
+          className="p-1.5 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
@@ -459,7 +459,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
         <button
           title="Restablecer al 100%"
           onClick={onResetZoom}
-          className="text-xs font-bold px-1.5 py-1 hover:bg-slate-100 rounded-lg min-w-12 text-center font-mono text-slate-800 transition-colors"
+          className="text-xs font-bold px-1.5 py-1 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-lg min-w-12 text-center font-mono text-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
         >
           {Math.round(zoom * 100)}%
         </button>
@@ -468,18 +468,18 @@ export const MiniMap: React.FC<MiniMapProps> = ({
         <button
           title="Acercar Zoom (+)"
           onClick={onZoomIn}
-          className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-700 hover:text-slate-900 transition-colors"
+          className="p-1.5 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
 
-        <div className="w-px h-4 bg-slate-200 mx-0.5" />
+        <div className="w-px h-4 bg-slate-200/70 dark:bg-slate-700/70 mx-0.5" />
 
         {/* Center / Fit all */}
         <button
           title="Ajustar y Centrar todo el mapa"
           onClick={onFitView}
-          className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-700 hover:text-blue-600 transition-colors"
+          className="p-1.5 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
         >
           <Maximize2 className="w-4 h-4" />
         </button>
