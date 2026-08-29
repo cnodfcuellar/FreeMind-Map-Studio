@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  MindMap,
   MindNode,
   NodeShape,
   EdgeStyle,
   EdgeProfile,
   LayoutType,
-  FilterOptions,
   Connector,
   BackgroundPatternStyle,
 } from './types/mindmap';
 import { THEMES } from './utils/themes';
-import { TUTORIAL_MAP, BLANK_MAP } from './utils/sampleMaps';
-import { loadCurrentMap, saveCurrentMap } from './utils/storage';
+import { BLANK_MAP } from './utils/sampleMaps';
+import { saveCurrentMap } from './utils/storage';
 import { ListTree, Sliders } from 'lucide-react';
 
-// Components
+// Store Zustand & Hooks
+import { useMindMapStore } from './hooks/useMindMapStore';
+import { useSearchFilter } from './hooks/useSearchFilter';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+
+// Componentes Principales
 import { MenuBar } from './components/MenuBar';
 import { ToolBar } from './components/ToolBar';
 import { FilterBar } from './components/FilterBar';
@@ -25,7 +28,7 @@ import { OutlineView } from './components/OutlineView';
 import { PresentationMode } from './components/PresentationMode';
 import { StatusBar } from './components/StatusBar';
 
-// Modals
+// Modales
 import { ExportImportModal } from './components/Modals/ExportImportModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
 import { TemplatesModal } from './components/Modals/TemplatesModal';
@@ -35,771 +38,88 @@ import { IconPackModal } from './components/Modals/IconPackModal';
 import { ComingSoonModal, ComingSoonModalData } from './components/Modals/ComingSoonModal';
 
 export default function App() {
-  // MindMap State & History
-  const [mindMap, setMindMap] = useState<MindMap>(() => loadCurrentMap());
-  const [historyPast, setHistoryPast] = useState<MindMap[]>([]);
-  const [historyFuture, setHistoryFuture] = useState<MindMap[]>([]);
+  const store = useMindMapStore();
+  const {
+    mindMap,
+    setMindMap,
+    historyPast,
+    historyFuture,
+    selectedNodeId,
+    setSelectedNodeId,
+    editingNodeId,
+    setEditingNodeId,
+    isOutlineOpen,
+    setIsOutlineOpen,
+    isOutlineFullscreen,
+    setIsOutlineFullscreen,
+    isPresentationMode,
+    setIsPresentationMode,
+    isToolPanelOpen,
+    setIsToolPanelOpen,
+    isFilterBarOpen,
+    setIsFilterBarOpen,
+    filterOptions,
+    setFilterOptions,
+    pushHistory,
+    handleUndo,
+    handleRedo,
+    updateNode,
+    handleAddChild,
+    handleAddSibling,
+    handleDeleteNode,
+    handleToggleFold,
+    handleFoldAll,
+    handleUnfoldAll,
+    handleReparentNode,
+    handleCopyNode,
+    handleCutNode,
+    handlePasteNode,
+    handleApplyStyleToChildren,
+    handleApplyStyleToSiblings,
+  } = store;
 
-  // Selection & Mode State
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(mindMap.rootId);
-  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
-  const [isOutlineOpen, setIsOutlineOpen] = useState<boolean>(false);
-  const [isOutlineFullscreen, setIsOutlineFullscreen] = useState<boolean>(false);
-  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
-  const [isToolPanelOpen, setIsToolPanelOpen] = useState<boolean>(true);
-  const [isFilterBarOpen, setIsFilterBarOpen] = useState<boolean>(false);
-  const [comingSoonModalData, setComingSoonModalData] = useState<ComingSoonModalData | null>(null);
-
-  // Filter State
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    query: '',
-    showAncestors: true,
-    showDescendants: true,
-  });
-
-  // Clipboard State (for Copy/Cut/Paste subtree)
-  const [clipboard, setClipboard] = useState<{ node: MindNode; subNodes: Record<string, MindNode>; isCut: boolean } | null>(null);
-
-  // Modals State
+  // Estado local de Modales
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
   const [isSavedMapsModalOpen, setIsSavedMapsModalOpen] = useState(false);
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
+  const [comingSoonModalData, setComingSoonModalData] = useState<ComingSoonModalData | null>(null);
 
-  // Auto-Save whenever mindMap changes
-  useEffect(() => {
-    saveCurrentMap(mindMap);
-  }, [mindMap]);
+  const isAnyModalOpen = Boolean(
+    isExportModalOpen ||
+      isShortcutsModalOpen ||
+      isTemplatesModalOpen ||
+      isSavedMapsModalOpen ||
+      isIconPackModalOpen ||
+      connectorSourceId ||
+      comingSoonModalData
+  );
 
-  // Current Active Theme
+  const handleCloseModals = () => {
+    setIsExportModalOpen(false);
+    setIsShortcutsModalOpen(false);
+    setIsTemplatesModalOpen(false);
+    setIsSavedMapsModalOpen(false);
+    setIsIconPackModalOpen(false);
+    setConnectorSourceId(null);
+    setComingSoonModalData(null);
+  };
+
+  // Atajos de teclado globales
+  useKeyboardShortcuts({
+    isAnyModalOpen,
+    onCloseModals: handleCloseModals,
+  });
+
+  // Tema activo y Filtro
   const currentTheme = useMemo(() => {
     return THEMES[mindMap.themeId] || THEMES.default;
   }, [mindMap.themeId]);
 
-  // Push state to Undo History
-  const pushHistory = useCallback((current: MindMap) => {
-    setHistoryPast((past) => [...past.slice(-40), current]);
-    setHistoryFuture([]);
-  }, []);
+  const { searchMatches, availableTags } = useSearchFilter(mindMap, filterOptions);
 
-  const handleUndo = useCallback(() => {
-    if (historyPast.length === 0) return;
-    const previous = historyPast[historyPast.length - 1];
-    const newPast = historyPast.slice(0, -1);
-
-    setHistoryFuture((future) => [mindMap, ...future]);
-    setHistoryPast(newPast);
-    setMindMap(previous);
-  }, [historyPast, mindMap]);
-
-  const handleRedo = useCallback(() => {
-    if (historyFuture.length === 0) return;
-    const next = historyFuture[0];
-    const newFuture = historyFuture.slice(1);
-
-    setHistoryPast((past) => [...past, mindMap]);
-    setHistoryFuture(newFuture);
-    setMindMap(next);
-  }, [historyFuture, mindMap]);
-
-  // Node Mutations
-  const updateNode = useCallback(
-    (nodeId: string, updates: Partial<MindNode>) => {
-      setMindMap((prev) => {
-        const existing = prev.nodes[nodeId];
-        if (!existing) return prev;
-
-        pushHistory(prev);
-
-        return {
-          ...prev,
-          updatedAt: Date.now(),
-          nodes: {
-            ...prev.nodes,
-            [nodeId]: {
-              ...existing,
-              ...updates,
-            },
-          },
-        };
-      });
-    },
-    [pushHistory]
-  );
-
-  const handleUpdateNodeText = useCallback(
-    (id: string, text: string) => {
-      updateNode(id, { text });
-    },
-    [updateNode]
-  );
-
-  // Add Child Node (Tab / Insert)
-  const handleAddChild = useCallback(
-    (parentId?: string) => {
-      const targetParentId = parentId || selectedNodeId || mindMap.rootId;
-      const targetParent = mindMap.nodes[targetParentId];
-      if (!targetParent) return;
-
-      pushHistory(mindMap);
-
-      const newId = `node-${Date.now()}`;
-      const isParentRoot = targetParent.id === mindMap.rootId;
-
-      // Determine side if parent is root
-      let side = targetParent.side;
-      if (isParentRoot) {
-        const rightCount = targetParent.children.filter((cid) => mindMap.nodes[cid]?.side === 'right').length;
-        const leftCount = targetParent.children.filter((cid) => mindMap.nodes[cid]?.side === 'left').length;
-        side = rightCount <= leftCount ? 'right' : 'left';
-      }
-
-      const newNode: MindNode = {
-        id: newId,
-        text: 'Nueva Idea',
-        parentId: targetParentId,
-        children: [],
-        side,
-        shape: 'bubble',
-      };
-
-      setMindMap((prev) => ({
-        ...prev,
-        updatedAt: Date.now(),
-        nodes: {
-          ...prev.nodes,
-          [targetParentId]: {
-            ...targetParent,
-            folded: false,
-            children: [...targetParent.children, newId],
-          },
-          [newId]: newNode,
-        },
-      }));
-
-      setSelectedNodeId(newId);
-      setEditingNodeId(newId);
-    },
-    [selectedNodeId, mindMap, pushHistory]
-  );
-
-  // Add Sibling Node (Enter)
-  const handleAddSibling = useCallback(
-    (siblingId?: string) => {
-      const targetSiblingId = siblingId || selectedNodeId;
-      if (!targetSiblingId || targetSiblingId === mindMap.rootId) {
-        handleAddChild(mindMap.rootId);
-        return;
-      }
-
-      const siblingNode = mindMap.nodes[targetSiblingId];
-      if (!siblingNode || !siblingNode.parentId) return;
-
-      const parentNode = mindMap.nodes[siblingNode.parentId];
-      if (!parentNode) return;
-
-      pushHistory(mindMap);
-
-      const newId = `node-${Date.now()}`;
-      const siblingIndex = parentNode.children.indexOf(targetSiblingId);
-
-      const newNode: MindNode = {
-        id: newId,
-        text: 'Nueva Idea',
-        parentId: parentNode.id,
-        children: [],
-        side: siblingNode.side,
-        shape: siblingNode.shape || 'bubble',
-      };
-
-      const newChildren = [...parentNode.children];
-      newChildren.splice(siblingIndex + 1, 0, newId);
-
-      setMindMap((prev) => ({
-        ...prev,
-        updatedAt: Date.now(),
-        nodes: {
-          ...prev.nodes,
-          [parentNode.id]: {
-            ...parentNode,
-            children: newChildren,
-          },
-          [newId]: newNode,
-        },
-      }));
-
-      setSelectedNodeId(newId);
-      setEditingNodeId(newId);
-    },
-    [selectedNodeId, mindMap, pushHistory, handleAddChild]
-  );
-
-  // Delete Node (Delete / Backspace)
-  const handleDeleteNode = useCallback(
-    (nodeIdToDelete?: string) => {
-      const targetId = nodeIdToDelete || selectedNodeId;
-      if (!targetId || targetId === mindMap.rootId) return;
-
-      const nodeToDelete = mindMap.nodes[targetId];
-      if (!nodeToDelete || !nodeToDelete.parentId) return;
-
-      const parentNode = mindMap.nodes[nodeToDelete.parentId];
-      if (!parentNode) return;
-
-      pushHistory(mindMap);
-
-      // Collect all descendant IDs
-      const idsToDelete = new Set<string>();
-      function collect(id: string) {
-        idsToDelete.add(id);
-        const curr = mindMap.nodes[id];
-        if (curr?.children) {
-          curr.children.forEach(collect);
-        }
-      }
-      collect(targetId);
-
-      const remainingNodes = { ...mindMap.nodes };
-      idsToDelete.forEach((id) => delete remainingNodes[id]);
-
-      // Remove from parent's children array
-      remainingNodes[parentNode.id] = {
-        ...parentNode,
-        children: parentNode.children.filter((id) => id !== targetId),
-      };
-
-      // Also clean up any connectors attached to deleted nodes
-      const remainingConnectors = mindMap.connectors.filter(
-        (c) => !idsToDelete.has(c.fromId) && !idsToDelete.has(c.toId)
-      );
-
-      setMindMap((prev) => ({
-        ...prev,
-        updatedAt: Date.now(),
-        nodes: remainingNodes,
-        connectors: remainingConnectors,
-      }));
-
-      setSelectedNodeId(parentNode.id);
-    },
-    [selectedNodeId, mindMap, pushHistory]
-  );
-
-  // Fold / Unfold Branch (Space)
-  const handleToggleFold = useCallback(
-    (nodeId?: string) => {
-      const targetId = nodeId || selectedNodeId;
-      if (!targetId) return;
-      const node = mindMap.nodes[targetId];
-      if (!node || !node.children || node.children.length === 0) return;
-
-      updateNode(targetId, { folded: !node.folded });
-    },
-    [selectedNodeId, mindMap, updateNode]
-  );
-
-  const handleFoldAll = useCallback(() => {
-    pushHistory(mindMap);
-    const updatedNodes = { ...mindMap.nodes };
-    Object.keys(updatedNodes).forEach((id) => {
-      if (id !== mindMap.rootId && updatedNodes[id].children.length > 0) {
-        updatedNodes[id] = { ...updatedNodes[id], folded: true };
-      }
-    });
-    setMindMap((m) => ({ ...m, nodes: updatedNodes, updatedAt: Date.now() }));
-  }, [mindMap, pushHistory]);
-
-  const handleUnfoldAll = useCallback(() => {
-    pushHistory(mindMap);
-    const updatedNodes = { ...mindMap.nodes };
-    Object.keys(updatedNodes).forEach((id) => {
-      updatedNodes[id] = { ...updatedNodes[id], folded: false };
-    });
-    setMindMap((m) => ({ ...m, nodes: updatedNodes, updatedAt: Date.now() }));
-  }, [mindMap, pushHistory]);
-
-  // Reparent / Drag and Drop Node
-  const handleReparentNode = useCallback(
-    (draggedId: string, targetParentId: string) => {
-      if (draggedId === targetParentId || draggedId === mindMap.rootId) return;
-
-      const draggedNode = mindMap.nodes[draggedId];
-      const targetParent = mindMap.nodes[targetParentId];
-      if (!draggedNode || !targetParent || !draggedNode.parentId) return;
-
-      // Prevent dragging a parent inside its own descendant
-      function isDescendant(parentId: string, searchId: string): boolean {
-        const parent = mindMap.nodes[parentId];
-        if (!parent || !parent.children) return false;
-        if (parent.children.includes(searchId)) return true;
-        return parent.children.some((cid) => isDescendant(cid, searchId));
-      }
-      if (isDescendant(draggedId, targetParentId)) return;
-
-      pushHistory(mindMap);
-
-      const oldParent = mindMap.nodes[draggedNode.parentId];
-      const newOldParent = oldParent
-        ? {
-            ...oldParent,
-            children: oldParent.children.filter((id) => id !== draggedId),
-          }
-        : null;
-
-      const newSide = targetParent.id === mindMap.rootId ? draggedNode.side || 'right' : targetParent.side;
-
-      setMindMap((prev) => ({
-        ...prev,
-        updatedAt: Date.now(),
-        nodes: {
-          ...prev.nodes,
-          ...(newOldParent ? { [newOldParent.id]: newOldParent } : {}),
-          [targetParent.id]: {
-            ...targetParent,
-            children: [...targetParent.children, draggedId],
-          },
-          [draggedId]: {
-            ...draggedNode,
-            parentId: targetParent.id,
-            side: newSide,
-          },
-        },
-      }));
-    },
-    [mindMap, pushHistory]
-  );
-
-  // Copy / Cut / Paste Subtrees
-  const handleCopyNode = useCallback(
-    (nodeId?: string) => {
-      const targetId = nodeId || selectedNodeId;
-      if (!targetId) return;
-
-      const node = mindMap.nodes[targetId];
-      if (!node) return;
-
-      const subNodes: Record<string, MindNode> = {};
-      function collect(id: string) {
-        const n = mindMap.nodes[id];
-        if (n) {
-          subNodes[id] = { ...n };
-          n.children.forEach(collect);
-        }
-      }
-      collect(targetId);
-
-      setClipboard({ node, subNodes, isCut: false });
-    },
-    [selectedNodeId, mindMap]
-  );
-
-  const handleCutNode = useCallback(
-    (nodeId?: string) => {
-      const targetId = nodeId || selectedNodeId;
-      if (!targetId || targetId === mindMap.rootId) return;
-
-      handleCopyNode(targetId);
-      handleDeleteNode(targetId);
-    },
-    [selectedNodeId, mindMap.rootId, handleCopyNode, handleDeleteNode]
-  );
-
-  const handlePasteNode = useCallback(
-    (targetParentId?: string) => {
-      if (!clipboard) return;
-      const targetId = targetParentId || selectedNodeId || mindMap.rootId;
-      const targetParent = mindMap.nodes[targetId];
-      if (!targetParent) return;
-
-      pushHistory(mindMap);
-
-      const idMap = new Map<string, string>();
-      const newSubNodes: Record<string, MindNode> = {};
-
-      Object.keys(clipboard.subNodes).forEach((oldId) => {
-        idMap.set(oldId, `node-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`);
-      });
-
-      (Object.entries(clipboard.subNodes) as [string, MindNode][]).forEach(([oldId, origNode]) => {
-        const newId = idMap.get(oldId)!;
-        const newParentId = oldId === clipboard.node.id ? targetId : idMap.get(origNode.parentId!) || targetId;
-        const newChildren = origNode.children.map((cid) => idMap.get(cid)!).filter(Boolean);
-
-        newSubNodes[newId] = {
-          ...origNode,
-          id: newId,
-          parentId: newParentId,
-          children: newChildren,
-          side: targetParent.side,
-        };
-      });
-
-      const rootClonedId = idMap.get(clipboard.node.id)!;
-
-      setMindMap((prev) => ({
-        ...prev,
-        updatedAt: Date.now(),
-        nodes: {
-          ...prev.nodes,
-          ...newSubNodes,
-          [targetId]: {
-            ...targetParent,
-            children: [...targetParent.children, rootClonedId],
-          },
-        },
-      }));
-
-      setSelectedNodeId(rootClonedId);
-    },
-    [clipboard, selectedNodeId, mindMap, pushHistory]
-  );
-
-  // Helper to extract visual style bundle from a node
-  const extractNodeStyleBundle = (sourceNode: MindNode): Partial<MindNode> => {
-    return {
-      shape: sourceNode.shape,
-      color: sourceNode.color,
-      bgType: sourceNode.bgType,
-      gradientColor1: sourceNode.gradientColor1,
-      gradientColor2: sourceNode.gradientColor2,
-      gradientDirection: sourceNode.gradientDirection,
-      nodePattern: sourceNode.nodePattern,
-      nodePatternColor: sourceNode.nodePatternColor,
-      nodePatternSize: sourceNode.nodePatternSize,
-      nodePatternOpacity: sourceNode.nodePatternOpacity,
-      borderColor: sourceNode.borderColor,
-      borderWidth: sourceNode.borderWidth,
-      borderDash: sourceNode.borderDash,
-      borderStyle: sourceNode.borderStyle,
-      textColor: sourceNode.textColor,
-      fontSize: sourceNode.fontSize,
-      bold: sourceNode.bold,
-      italic: sourceNode.italic,
-      fontFamily: sourceNode.fontFamily,
-      textAlign: sourceNode.textAlign,
-      edgeColor: sourceNode.edgeColor,
-      edgeStyle: sourceNode.edgeStyle,
-      edgeWidth: sourceNode.edgeWidth,
-      edgeDash: sourceNode.edgeDash,
-      edgeProfile: sourceNode.edgeProfile,
-      customWidth: sourceNode.customWidth,
-      customHeight: sourceNode.customHeight,
-    };
-  };
-
-  // Apply style to all children & descendants of a node
-  const handleApplyStyleToChildren = useCallback(
-    (nodeId?: string) => {
-      const targetId = nodeId || selectedNodeId;
-      if (!targetId) return;
-
-      const sourceNode = mindMap.nodes[targetId];
-      if (!sourceNode || !sourceNode.children || sourceNode.children.length === 0) return;
-
-      pushHistory(mindMap);
-      const styleBundle = extractNodeStyleBundle(sourceNode);
-
-      const updatedNodes = { ...mindMap.nodes };
-
-      // Recursive helper to update all subchildren
-      const applyRecursively = (childId: string) => {
-        const childNode = updatedNodes[childId];
-        if (childNode) {
-          updatedNodes[childId] = {
-            ...childNode,
-            ...styleBundle,
-          };
-          (childNode.children || []).forEach(applyRecursively);
-        }
-      };
-
-      sourceNode.children.forEach(applyRecursively);
-
-      setMindMap((prev) => ({
-        ...prev,
-        nodes: updatedNodes,
-        updatedAt: Date.now(),
-      }));
-    },
-    [selectedNodeId, mindMap, pushHistory]
-  );
-
-  // Apply style to all siblings of a node (same hierarchical parent)
-  const handleApplyStyleToSiblings = useCallback(
-    (nodeId?: string) => {
-      const targetId = nodeId || selectedNodeId;
-      if (!targetId || targetId === mindMap.rootId) return;
-
-      const sourceNode = mindMap.nodes[targetId];
-      if (!sourceNode || !sourceNode.parentId) return;
-
-      const parentNode = mindMap.nodes[sourceNode.parentId];
-      if (!parentNode || !parentNode.children || parentNode.children.length <= 1) return;
-
-      pushHistory(mindMap);
-      const styleBundle = extractNodeStyleBundle(sourceNode);
-
-      const updatedNodes = { ...mindMap.nodes };
-
-      parentNode.children.forEach((siblingId) => {
-        if (siblingId !== targetId && updatedNodes[siblingId]) {
-          updatedNodes[siblingId] = {
-            ...updatedNodes[siblingId],
-            ...styleBundle,
-          };
-        }
-      });
-
-      setMindMap((prev) => ({
-        ...prev,
-        nodes: updatedNodes,
-        updatedAt: Date.now(),
-      }));
-    },
-    [selectedNodeId, mindMap, pushHistory]
-  );
-
-  // Global Keyboard Shortcuts (Freeplane style)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const activeEl = document.activeElement;
-      const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-
-      if (isTyping) {
-        if (e.key === 'Escape') {
-          (activeEl as HTMLElement).blur();
-          setEditingNodeId(null);
-        }
-        return;
-      }
-
-      // Modals Open Guard
-      if (
-        isExportModalOpen ||
-        isShortcutsModalOpen ||
-        isTemplatesModalOpen ||
-        isSavedMapsModalOpen ||
-        connectorSourceId
-      ) {
-        if (e.key === 'Escape') {
-          setIsExportModalOpen(false);
-          setIsShortcutsModalOpen(false);
-          setIsTemplatesModalOpen(false);
-          setIsSavedMapsModalOpen(false);
-          setConnectorSourceId(null);
-        }
-        return;
-      }
-
-      // Presentation Mode toggle (F5)
-      if (e.key === 'F5') {
-        e.preventDefault();
-        setIsPresentationMode((p) => !p);
-        return;
-      }
-
-      // Presentation Mode active guard
-      if (isPresentationMode) return;
-
-      // Undo / Redo
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) handleRedo();
-        else handleUndo();
-        return;
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
-        e.preventDefault();
-        handleRedo();
-        return;
-      }
-
-      // Copy / Cut / Paste
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
-        e.preventDefault();
-        handleCopyNode();
-        return;
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'x') {
-        e.preventDefault();
-        handleCutNode();
-        return;
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
-        e.preventDefault();
-        handlePasteNode();
-        return;
-      }
-
-      // Search & Filter (Ctrl + F)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
-        e.preventDefault();
-        setIsFilterBarOpen((f) => !f);
-        return;
-      }
-
-      // Outline Side Panel Toggle (Alt + O)
-      if (e.altKey && e.key.toLowerCase() === 'o') {
-        e.preventDefault();
-        setIsOutlineOpen((o) => !o);
-        return;
-      }
-
-      // ToolPanel Toggle (Alt + P)
-      if (e.altKey && e.key.toLowerCase() === 'p') {
-        e.preventDefault();
-        setIsToolPanelOpen((t) => !t);
-        return;
-      }
-
-      // Add Child (Tab / Insert)
-      if (e.key === 'Tab' || e.key === 'Insert') {
-        e.preventDefault();
-        handleAddChild();
-        return;
-      }
-
-      // Add Sibling (Enter)
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleAddSibling();
-        return;
-      }
-
-      // Edit Text (F2)
-      if (e.key === 'F2') {
-        e.preventDefault();
-        if (selectedNodeId) {
-          setEditingNodeId(selectedNodeId);
-        }
-        return;
-      }
-
-      // Fold / Unfold (Space)
-      if (e.key === ' ') {
-        e.preventDefault();
-        handleToggleFold();
-        return;
-      }
-
-      // Delete Node (Delete / Backspace)
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        handleDeleteNode();
-        return;
-      }
-
-      // Escape -> Select Root
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setSelectedNodeId(mindMap.rootId);
-        return;
-      }
-
-      // Arrow Keys Navigation
-      if (selectedNodeId && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        e.preventDefault();
-        const curr = mindMap.nodes[selectedNodeId];
-        if (!curr) return;
-
-        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-          if (curr.parentId) {
-            const parent = mindMap.nodes[curr.parentId];
-            if (parent && parent.children) {
-              const idx = parent.children.indexOf(curr.id);
-              if (e.key === 'ArrowUp' && idx > 0) {
-                setSelectedNodeId(parent.children[idx - 1]);
-              } else if (e.key === 'ArrowDown' && idx < parent.children.length - 1) {
-                setSelectedNodeId(parent.children[idx + 1]);
-              }
-            }
-          }
-        } else if (e.key === 'ArrowRight') {
-          if (curr.id === mindMap.rootId) {
-            const rightChild = curr.children.find((cid) => mindMap.nodes[cid]?.side === 'right');
-            if (rightChild) setSelectedNodeId(rightChild);
-          } else if (curr.side === 'right' && !curr.folded && curr.children.length > 0) {
-            setSelectedNodeId(curr.children[0]);
-          } else if (curr.side === 'left' && curr.parentId) {
-            setSelectedNodeId(curr.parentId);
-          }
-        } else if (e.key === 'ArrowLeft') {
-          if (curr.id === mindMap.rootId) {
-            const leftChild = curr.children.find((cid) => mindMap.nodes[cid]?.side === 'left');
-            if (leftChild) setSelectedNodeId(leftChild);
-          } else if (curr.side === 'left' && !curr.folded && curr.children.length > 0) {
-            setSelectedNodeId(curr.children[0]);
-          } else if (curr.side === 'right' && curr.parentId) {
-            setSelectedNodeId(curr.parentId);
-          }
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    selectedNodeId,
-    mindMap,
-    isPresentationMode,
-    isExportModalOpen,
-    isShortcutsModalOpen,
-    isTemplatesModalOpen,
-    isSavedMapsModalOpen,
-    connectorSourceId,
-    handleAddChild,
-    handleAddSibling,
-    handleDeleteNode,
-    handleToggleFold,
-    handleUndo,
-    handleRedo,
-    handleCopyNode,
-    handleCutNode,
-    handlePasteNode,
-  ]);
-
-  // Compute Search Matches
-  const searchMatches = useMemo(() => {
-    if (!filterOptions.query && !filterOptions.tag && filterOptions.minProgress === undefined) {
-      return undefined;
-    }
-
-    const matches = new Set<string>();
-    const q = filterOptions.query.toLowerCase().trim();
-
-    (Object.values(mindMap.nodes) as MindNode[]).forEach((n) => {
-      let isMatch = true;
-
-      if (q && !n.text.toLowerCase().includes(q) && !(n.note && n.note.toLowerCase().includes(q))) {
-        isMatch = false;
-      }
-      if (filterOptions.tag && (!n.tags || !n.tags.includes(filterOptions.tag))) {
-        isMatch = false;
-      }
-      if (filterOptions.minProgress !== undefined && (n.progress === undefined || n.progress < filterOptions.minProgress)) {
-        isMatch = false;
-      }
-
-      if (isMatch) {
-        matches.add(n.id);
-      }
-    });
-
-    return matches;
-  }, [mindMap.nodes, filterOptions]);
-
-  // Available Tags in Map
-  const availableTags = useMemo(() => {
-    const set = new Set<string>();
-    (Object.values(mindMap.nodes) as MindNode[]).forEach((n) => {
-      n.tags?.forEach((t) => set.add(t));
-    });
-    return Array.from(set);
-  }, [mindMap.nodes]);
-
-  // Selected Node Object
   const selectedNode = selectedNodeId ? mindMap.nodes[selectedNodeId] || null : null;
 
   return (
@@ -877,7 +197,7 @@ export default function App() {
           if (selectedNode) {
             updateNode(selectedNode.id, {
               shape: 'bubble',
-              backgroundColor: undefined,
+              color: undefined,
               textColor: undefined,
               borderColor: undefined,
               borderWidth: undefined,
@@ -885,7 +205,7 @@ export default function App() {
               edgeWidth: undefined,
               edgeColor: undefined,
               edgeDash: undefined,
-              edgeProfile: undefined
+              edgeProfile: undefined,
             });
           }
         }}
@@ -960,7 +280,7 @@ export default function App() {
 
       {/* 4. Main Workspace (Canvas with Side Outline & ToolPanel) */}
       <main className="flex-1 flex overflow-hidden relative z-10">
-        {/* Left: Outline Side Panel (can be hidden or shown) */}
+        {/* Left: Outline Side Panel */}
         {isOutlineOpen && (
           <OutlineView
             mindMap={mindMap}
@@ -969,7 +289,7 @@ export default function App() {
             isFullscreen={isOutlineFullscreen}
             onToggleFullscreen={() => setIsOutlineFullscreen((f) => !f)}
             onSelectNode={(id) => setSelectedNodeId(id)}
-            onUpdateText={handleUpdateNodeText}
+            onUpdateText={(id, text) => updateNode(id, { text })}
             onUpdateBody={(id, body) => updateNode(id, { body })}
             onAddChild={(pid) => handleAddChild(pid)}
             onAddSibling={(sid) => handleAddSibling(sid)}
@@ -981,7 +301,7 @@ export default function App() {
           />
         )}
 
-        {/* Floating Quick-Reveal Button when Outline Side Panel is hidden */}
+        {/* Floating Quick-Reveal Buttons */}
         {!isOutlineOpen && !isOutlineFullscreen && (
           <button
             onClick={() => setIsOutlineOpen(true)}
@@ -993,7 +313,6 @@ export default function App() {
           </button>
         )}
 
-        {/* Floating Quick-Reveal Button when Properties Panel is hidden */}
         {!isToolPanelOpen && !isOutlineFullscreen && (
           <button
             onClick={() => setIsToolPanelOpen(true)}
@@ -1005,7 +324,7 @@ export default function App() {
           </button>
         )}
 
-        {/* Main Canvas (visible unless Outline is in full-screen mode) */}
+        {/* Main Canvas */}
         {!isOutlineFullscreen && (
           <MindMapCanvas
             mindMap={mindMap}
@@ -1016,7 +335,7 @@ export default function App() {
             onSelectNode={(id) => setSelectedNodeId(id)}
             onStartEditing={(id) => setEditingNodeId(id)}
             onFinishEditing={() => setEditingNodeId(null)}
-            onUpdateNodeText={handleUpdateNodeText}
+            onUpdateNodeText={(id, text) => updateNode(id, { text })}
             onAddChildNode={(pid) => handleAddChild(pid)}
             onAddSiblingNode={(sid) => handleAddSibling(sid)}
             onDeleteNode={(nid) => handleDeleteNode(nid)}
@@ -1063,7 +382,7 @@ export default function App() {
           />
         )}
 
-        {/* Properties / Inspector ToolPanel */}
+        {/* Properties ToolPanel */}
         <ToolPanel
           selectedNode={selectedNode}
           currentTheme={currentTheme}

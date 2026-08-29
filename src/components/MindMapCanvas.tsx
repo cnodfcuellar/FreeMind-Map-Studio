@@ -633,23 +633,34 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               </pattern>
             )}
 
-            {/* Pattern 5: Hexagons (Malla hexagonal regular en panal de abejas) */}
-            {effectivePattern === 'hexagons' && (
-              <pattern
-                id="canvas-bg-pattern"
-                width={hexW}
-                height={hexH}
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  d={`M ${hexW2} 0 L 0 ${hexH6} L 0 ${hexH2} L ${hexW2} ${hexH3} L ${hexW2} ${hexH} M ${hexW2} 0 L ${hexW} ${hexH6} L ${hexW} ${hexH2} L ${hexW2} ${hexH3}`}
-                  fill="none"
-                  stroke={effectivePatternColor}
-                  strokeWidth="1"
-                  strokeOpacity={effectivePatternOpacity}
-                />
-              </pattern>
-            )}
+            {/* Pattern 5: Hexagons (Malla hexagonal regular en panal de abejas completo) */}
+            {effectivePattern === 'hexagons' && (() => {
+              const R = effectivePatternSize;
+              const W = Number((R * 1.7320508).toFixed(2));
+              const H = Number((R * 3).toFixed(2));
+              const W2 = Number((W / 2).toFixed(2));
+              const r05 = Number((R * 0.5).toFixed(2));
+              const r10 = Number((R * 1.0).toFixed(2));
+              const d = `M 0,0 v ${r05} l ${W2},${r05} v ${r10} l -${W2},${r05} v ${r05} M ${W},0 v ${r05} l -${W2},${r05} v ${r10} l ${W2},${r05} v ${r05}`;
+              return (
+                <pattern
+                  id="canvas-bg-pattern"
+                  width={W}
+                  height={H}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d={d}
+                    fill="none"
+                    stroke={effectivePatternColor}
+                    strokeWidth="1.2"
+                    strokeOpacity={effectivePatternOpacity}
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                </pattern>
+              );
+            })()}
           </defs>
 
           {/* Group 0: Dynamic Background Pattern Plane */}

@@ -191,25 +191,40 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         };
       }
       if (pat === 'triangles') {
-        const triH = Math.round(size * 1.732);
+        const triW = size;
+        const triH = Math.round(size * 1.7320508);
+        const triH2 = Math.round(triH / 2);
+        const triW2 = Math.round(triW / 2);
+        const triPath = `M 0 0 L ${triW} 0 M 0 ${triH2} L ${triW} ${triH2} M 0 0 L ${triW} ${triH} M ${triW2} 0 L ${triW} ${triH2} M 0 ${triH2} L ${triW2} ${triH} M ${triW} 0 L 0 ${triH} M ${triW2} 0 L 0 ${triH2} M ${triW} ${triH2} L ${triW2} ${triH}`;
         const triSvg = encodeURIComponent(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${triH}" viewBox="0 0 ${size} ${triH}"><path d="M 0 ${triH} L ${size/2} 0 L ${size} ${triH} Z" fill="none" stroke="${patColor}" stroke-width="1" stroke-opacity="${opacity}"/></svg>`
+          `<svg xmlns="http://www.w3.org/2000/svg" width="${triW}" height="${triH}" viewBox="0 0 ${triW} ${triH}"><path d="${triPath}" fill="none" stroke="${patColor}" stroke-width="1" stroke-opacity="${opacity}"/></svg>`
         );
         return {
           backgroundColor: baseColor,
           backgroundImage: `url("data:image/svg+xml,${triSvg}")`,
-          backgroundSize: `${size}px ${triH}px`,
+          backgroundSize: `${triW}px ${triH}px`,
         };
       }
       if (pat === 'hexagons') {
-        const hexH = Math.round(size * 1.732);
+        const R = size;
+        const W = Number((R * 1.7320508).toFixed(2));
+        const H = Number((R * 3).toFixed(2));
+        const W2 = Number((W / 2).toFixed(2));
+        const r05 = Number((R * 0.5).toFixed(2));
+        const r10 = Number((R * 1.0).toFixed(2));
+        
+        // Exact minimal repeating tile for regular honeycomb (3 continuous strokes)
+        const d = `M 0,0 v ${r05} l ${W2},${r05} v ${r10} l -${W2},${r05} v ${r05} M ${W},0 v ${r05} l -${W2},${r05} v ${r10} l ${W2},${r05} v ${r05} M 0,${R * 1.5} h 0`;
+        
         const hexSvg = encodeURIComponent(
-          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${hexH}" viewBox="0 0 ${size} ${hexH}"><path d="M 0 ${Math.round(size * 0.288)} L ${size/2} 0 L ${size} ${Math.round(size * 0.288)} L ${size} ${Math.round(size * 0.866)} L ${size/2} ${Math.round(size * 1.155)} L 0 ${Math.round(size * 0.866)} Z" fill="none" stroke="${patColor}" stroke-width="1" stroke-opacity="${opacity}"/></svg>`
+          `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+            <path d="${d}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>`
         );
         return {
           backgroundColor: baseColor,
           backgroundImage: `url("data:image/svg+xml,${hexSvg}")`,
-          backgroundSize: `${size}px ${hexH}px`,
+          backgroundSize: `${W}px ${H}px`,
         };
       }
       if (pat === 'cross') {
@@ -479,8 +494,8 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       {/* SVG Shape background for Hexagon, Arrow, Star */}
       {renderSvgPolygonBackground()}
 
-      {/* Top Image if position is top or default */}
-      {!isImageHidden && node.imageUrl && (!node.imagePosition || node.imagePosition === 'top') && (
+      {/* Top Image if position is top, fit or default */}
+      {!isImageHidden && node.imageUrl && (!node.imagePosition || node.imagePosition === 'top' || node.imagePosition === 'fit') && (
         <div className="w-full flex justify-center mb-1.5 overflow-hidden rounded-lg relative z-10">
           <img
             src={node.imageUrl}

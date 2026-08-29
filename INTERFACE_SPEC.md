@@ -3,7 +3,8 @@
 **Aplicacion:** FreeMind Map Studio  
 **Tipo:** Editor de Mapas Mentales Portable y Offline (Estilo Freeplane / Mindomo)  
 **Resolucion Base:** 1920 x 1080 px (Diseno adaptativo desde 1024px hasta 4K)  
-**Ultima actualizacion:** 2026-08-25  
+**Ultima actualizacion:** 2026-08-28  
+**Arquitectura:** Atomic Design + Zustand (Store Centralizado)
 
 ---
 
@@ -25,16 +26,16 @@
 |                                                                                            |     (ToolPanel Inspector)   |
 |                                  [4] LIENZO INFINITO SVG/HTML                              |     [Ancho: 340px - 380px]  |
 |                                      (MindMapCanvas)                                       |                             |
-|                                                                                            | [ Texto | Estilo | Meta ]   |
-|               +------------------+         +------------------+                            | [Titulo del Nodo]          |
-|               |  Rama Izquierda  |<------- |   NODO CENTRAL   | -------> +------------+  | [Cuerpo / Subtexto]        |
-|               |  (Bubble / Pill) |         |   (Root Bubble)  |          | Rama Decha |  | [Formas y Geometria]       |
-|               +------------------+         +------------------+          +------------+  | [Fondo y Colores]          |
-|                                                     |                                     | [Contornos y Bordes]       |
-|                                                     v                                     | [Imagenes]                 |
-|                                            +------------------+                           | [Aristas / Conexiones]     |
-|                                            | Sub-Rama Fork    |                           | [Nube Agrupacion]          |
-|                                            | (Underline)      |                           | [Metadatos y Notas]        |
+|                                                                                            | 6 Tabs (grid 6 columnas):   |
+|               +------------------+         +------------------+                            | [Contenido|Formato|Notas]   |
+|               |  Rama Izquierda  |<------- |   NODO CENTRAL   | -------> +------------+  | [Iconos|Nubes|Tema]        |
+|               |  (Bubble / Pill) |         |   (Root Bubble)  |          | Rama Decha |  |                             |
+|               +------------------+         +------------------+          +------------+  | Cada tab es un organismo   |
+|                                                     |                                     | independiente               |
+|                                                     v                                     |                             |
+|                                            +------------------+                           |                             |
+|                                            | Sub-Rama Fork    |                           |                             |
+|                                            | (Underline)      |                           |                             |
 |                                            +------------------+                           |                             |
 |                                                                                            |                             |
 | +------------------------------------+                                                     |                             |
@@ -158,27 +159,85 @@ Variantes Geometricas (10 formas):
 
 ---
 
-## 5. Panel Inspector de Propiedades (ToolPanel -- 350px)
+## 5. Panel Inspector de Propiedades (ToolPanel — 6 Tabs Organismo)
 
-Panel derecho en acordeon colapsable con 9 secciones y pestanas (Contenido / Estilo / Metadatos):
+Panel derecho con navegacion en grid de 6 columnas. Cada tab es un componente
+organismo independiente, compuesto de moleculas y atomos reutilizables.
 
-1. TITULO Y TEXTO PRINCIPAL: input, fuente, tamano, negrita, cursiva, alineacion, color texto
-2. CUERPO / SUBTEXTO: textarea, fuente, tamano, color de cuerpo
-3. FORMAS Y GEOMETRIA: 10 botones de forma, deslizador ancho (50-500px), alto (30-300px), boton "Auto"
-4. FONDO DEL NODO: 4 modos
-   - color: Selector RGB/Hex + paleta rapida de 6 colores + boton "Por defecto"
-   - transparent: Sin relleno, solo borde visible
-   - gradient: Color1 + Color2, 4 direcciones, 6 presets (Ocean/Sunset/Emerald/Neon/Indigo/Carbon)
-   - pattern: 7 estilos (dots/lines/squares/stripes/triangles/hexagons/cross), tamano 8-36px, opacidad 10-100%
-5. CONTORNOS Y BORDES: grosor (0/1/2/3.5/5px + deslizador), estilo (solid/dashed/dotted), color
-6. IMAGENES:
-   - Imagen de contenido (imageUrl): posicion top/bottom/left/right/between/background/fit, escala 60-300px
-   - Imagen de fondo (bgImageUrl): modo fit/cover/contain/tile, control opacidad
-7. ARISTAS / CONEXIONES: estilo bezier/linear/sharp/horizontal/hidden, perfil uniform/tapered/spindle/hourglass, grosor, color, trama
-8. NUBE DE AGRUPACION: on/off, forma arc/rect/round-rect/star, color RGBA
-9. METADATOS Y NOTAS: progreso 0-100%, iconos, tags, URL, nota Markdown
+### 5.1. Tab "Contenido" (ContentTab)
+Titulo y texto principal:
+- Input de titulo con tipografia configurable
+- FontFormatToolbar (molecula): Bold / Italic / Fuente / Tamano / Color
+- Alineacion: izquierda / centro / derecha
 
-Botones globales: "Desplegar todo" / "Plegar todo". Badge de estado en cada seccion.
+Cuerpo / Subtexto:
+- Textarea para el body
+- FontFormatToolbar independiente para cuerpo
+- Alineacion independiente
+
+### 5.2. Tab "Formato" (FormatTab)
+Forma y Geometria:
+- ShapeSelector (molecula): grid de 10 formas con preview visual
+- SliderInput (atomo): ancho (50-500px) con boton 'Auto'
+- SliderInput (atomo): alto (30-300px) con boton 'Auto'
+- Para square/circle: un solo slider actualiza ambas dimensiones
+
+Fondo del Nodo (4 modos via ToggleButtonGroup):
+- COLOR SOLIDO: ColorPicker (atomo) + paleta rapida de 6 colores + boton 'Por defecto'
+- TRANSPARENTE: Sin controles adicionales
+- DEGRADADO: 2 ColorPickers + 4 ToggleButtons de direccion + 6 presets
+- TRAMA: 7 ToggleButtons de patron + ColorPicker + SliderInput tamano + SliderInput opacidad
+
+Contornos y Bordes:
+- 5 ToggleButtons de grosor predefinido: 0 / 1 / 2 / 3.5 / 5px
+- SliderInput continuo de grosor (0-8px)
+- 3 ToggleButtons de estilo: solid / dashed / dotted
+- ColorPicker de borde
+- Checkbox 'Auto (color de rama)'
+
+Imagenes:
+- Imagen de Contenido (imageUrl): URL + 7 posiciones + SliderInput escala + boton Eliminar
+- Imagen de Fondo (bgImageUrl): URL + 4 modos + SliderInput opacidad + boton Eliminar
+
+Aristas del Nodo (override individual):
+- 5 ToggleButtons de estilo: bezier / linear / sharp / horizontal / hidden
+- 4 ToggleButtons de perfil: uniform / tapered / spindle / hourglass
+- SliderInput de grosor + ColorPicker + 3 ToggleButtons de patron linea
+- Boton 'Heredar del mapa'
+
+### 5.3. Tab "Notas" (NotesTab)
+- Barra de progreso: SliderInput 0-100 + input numerico
+- Enlace URL: campo de texto libre
+- Nota Markdown: textarea con preview renderizado
+- Boton aplicar estilo a hijos / hermanos
+
+### 5.4. Tab "Iconos" (IconsTab)
+- Grid de iconos basicos del iconMap (toggle individual)
+- Boton para abrir IconPackModal completo
+- Indicador de iconos activos
+
+### 5.5. Tab "Nubes" (CloudsTab)
+- ToggleButton ON/OFF para activar/desactivar nube
+- 4 ToggleButtons de forma: arc / rectangle / round-rectangle / star
+- ColorPicker RGBA para color de nube
+
+### 5.6. Tab "Tema" (ThemeTab — Config del Mapa)
+Tema visual:
+- Selector de 9 temas con preview (cambia toda la paleta de colores)
+
+Layout:
+- Selector de 9 algoritmos de disposicion con iconos
+
+Fondo del lienzo:
+- 12 presets de fondo + color personalizado + patron personalizado
+
+Aristas globales:
+- Estilo, perfil, grosor, color, patron de linea
+- Botones: 'Aplicar a todos los nodos'
+
+Espaciado:
+- SliderInput horizontal gap
+- SliderInput vertical gap
 
 ---
 
@@ -230,7 +289,7 @@ Notas Markdown           | ~9 lineas / ~550 chars          | "Notas (Parte X de 
 Subtemas / Hijos         | Maximo 6 tarjetas por slide     | "Subtemas (X-Y de N)"
 Imagen del nodo          | Siempre visible en Fase 1       | Miniatura en cabecera de Fases 2 y 3
 
-### 6.3. Barra Superior del Modo Presentacion
+### 6.3. Barra Superior del Modo Presentacion (PresentationControls organismo)
 
     [Logo Presentacion] [Badge Fase] [<-- Volver*] [Editar] [N/Total] [X Cerrar]
 
@@ -248,7 +307,7 @@ Boton Editar: abre modal de opciones (tecla E).
 ### 6.4. Modal de Opciones de Presentacion
 
 Opciones configurables en tiempo real:
-- TEMA DE PRESENTACION: 7 temas visuales
+- TEMA DE PRESENTACION: 7 temas visuales (definidos en presentationThemes.ts)
 - NOTAS DEL PRESENTADOR: ON/OFF
 - TAMANO DE IMAGENES ADJUNTAS: Pequenya / Mediana / Grande / Ocultar
 - DIAPOSITIVAS DE SUB-NODOS HIJOS: ON/OFF
@@ -317,6 +376,8 @@ circular            | Circular              | Disposicion circular equilibrada
 ---
 
 ## 9. Atajos Globales de Teclado
+
+Manejados por el hook `useKeyboardShortcuts`, que se conecta directamente al store Zustand.
 
 Atajo de Teclado          | Accion en la Interfaz
 ------------------------- | -------------------------------------------------
@@ -409,9 +470,9 @@ minimal   | Minimalista Mono     | #fafafa | Claro
 blueprint | Plano Tecnico        | #0a2540 | Oscuro
 honeycomb | Panal Creativo       | #fffdf5 | Claro
 
-### 10.8. Filtrado y Busqueda (FilterBar)
+### 10.8. Filtrado y Busqueda (useSearchFilter hook)
 
-Filtros acumulativos disponibles:
+Filtros acumulativos disponibles (calculados via useMemo en useSearchFilter):
 - Texto: busqueda en titulo, cuerpo y notas del nodo
 - Tags: filtrar por etiqueta especifica
 - Progreso: rango 0-100%
@@ -422,6 +483,7 @@ Filtros acumulativos disponibles:
 - Mostrar Descendientes: incluye sub-arbol del nodo encontrado
 
 ### 10.9. Historial de Deshacer / Rehacer
+- Gestionado dentro del store Zustand (useMindMapStore)
 - Profundidad de historial: 40 estados
 - Cada mutacion (anadir, borrar, mover, editar, formatear) es una entrada independiente
 - Ctrl+Z (deshacer) / Ctrl+Y (rehacer)
@@ -445,48 +507,123 @@ Importar desde:
 - Posicionamiento libre por coordenadas x,y independiente del layout automatico
 - Ideal para notas adicionales o etiquetas visuales en el lienzo
 
+### 10.12. Propagacion de Estilos
+- Aplicar estilo del nodo seleccionado a todos sus hijos directos
+- Aplicar estilo del nodo seleccionado a todos sus hermanos
+- Se propagan: forma, colores, fondo, bordes, tipografia, aristas, dimensiones
+
 ---
 
-## 11. Arquitectura de Archivos del Proyecto
+## 11. Arquitectura de Componentes (Atomic Design)
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ PAGINA: App.tsx (consume Zustand, compone organismos, gestiona modales)│
+├────────────────────────────────────────────────────────────────────────┤
+│ ORGANISMOS DE PAGINA:                                                  │
+│   MenuBar · ToolBar · FilterBar · MindMapCanvas · ToolPanel            │
+│   PresentationMode · OutlineView · StatusBar · MiniMap · Modals/       │
+├────────────────────────────────────────────────────────────────────────┤
+│ ORGANISMOS INTERNOS:                                                   │
+│   toolpanel/ → ContentTab · FormatTab · NotesTab · IconsTab            │
+│                CloudsTab · ThemeTab                                     │
+│   canvas/   → CanvasContextMenu · CanvasZoomControls                   │
+│   presentation/ → PresentationControls · presentationThemes            │
+├────────────────────────────────────────────────────────────────────────┤
+│ MOLECULAS:                                                             │
+│   FontFormatToolbar · ShapeSelector · TagManager                       │
+├────────────────────────────────────────────────────────────────────────┤
+│ ATOMOS:                                                                │
+│   CollapsibleSection · ColorPicker · SliderInput                       │
+│   ToggleButton · ToggleButtonGroup                                     │
+├────────────────────────────────────────────────────────────────────────┤
+│ HOOKS:                                                                 │
+│   useMindMapStore (Zustand) · useSearchFilter · useKeyboardShortcuts   │
+├────────────────────────────────────────────────────────────────────────┤
+│ UTILS:                                                                 │
+│   layoutEngine · themes · storage · freeplaneConverter · htmlExporter  │
+│   connectorUtils · markdownRenderer · iconMap · vectorIconPack         │
+│   sampleMaps · additionalTemplates · templateIllustrations             │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 12. Arquitectura de Archivos del Proyecto
 
 ```
 src/
-|-- App.tsx                       Orquestador principal + logica de estado global
-|-- index.css                     Estilos globales
-|-- main.tsx                      Punto de entrada React
-|-- types/
-|   +-- mindmap.ts                Tipos TypeScript: MindNode, MindMap, Connector, etc.
-|-- components/
-|   |-- MenuBar.tsx               Barra de menu superior
-|   |-- ToolBar.tsx               Barra de herramientas rapidas
-|   |-- FilterBar.tsx             Barra de busqueda y filtros colapsable
-|   |-- MindMapCanvas.tsx         Lienzo SVG/HTML infinito con pan/zoom
-|   |-- NodeComponent.tsx         Renderizado de cada nodo (todas las formas)
-|   |-- ToolPanel.tsx             Panel inspector lateral derecho 350px
-|   |-- OutlineView.tsx           Vista de esquema en arbol (panel izquierdo)
-|   |-- PresentationMode.tsx      Modo presentacion clasica: 3 fases, auto-paginacion,
-|   |                             jump history stack, 7 temas, opciones configurables
-|   |-- MiniMap.tsx               Minimapa radar flotante
-|   |-- StatusBar.tsx             Barra de estado inferior
-|   +-- Modals/
-|       |-- ExportImportModal.tsx    Exportar / Importar mapas
-|       |-- ShortcutsModal.tsx       Referencia de atajos de teclado
-|       |-- TemplatesModal.tsx       Plantillas predefinidas
-|       |-- SavedMapsModal.tsx       Mis mapas guardados en localStorage
-|       |-- ConnectorModal.tsx       Crear/editar conectores flotantes
-|       |-- IconPackModal.tsx        Paquete de iconos vectoriales premium
-|       +-- ComingSoonModal.tsx      Modal Proximamente para modos elaborado/dinamico
-+-- utils/
-    |-- themes.ts                 9 temas de mapa + 12 fondos de lienzo
-    |-- iconMap.tsx               Mapeo string de icono a componente SVG/Emoji
-    |-- vectorIconPack.tsx        Pack de iconos vectoriales premium
-    |-- markdownRenderer.tsx      Renderer Markdown adaptativo claro/oscuro
-    |-- layoutEngine.ts           Motor de layout automatico (9 algoritmos)
-    |-- connectorUtils.ts         Calcular rutas de conectores Bezier
-    |-- freeplaneConverter.ts     Parser e importer de archivos .mm Freeplane
-    |-- htmlExporter.ts           Exportador a HTML autonomo
-    |-- storage.ts                Persistencia en localStorage
-    |-- sampleMaps.ts             Mapa tutorial + mapa en blanco
-    |-- additionalTemplates.ts    Plantillas adicionales predefinidas
-    +-- templateIllustrations.ts  Ilustraciones SVG para las plantillas
+├── App.tsx                              Pagina / Orquestador (consume Zustand)
+├── main.tsx                             ReactDOM.createRoot
+├── index.css                            Estilos globales + Tailwind v4
+│
+├── types/
+│   └── mindmap.ts                       Tipos TypeScript: MindMap, MindNode, Connector, etc.
+│
+├── hooks/
+│   ├── useMindMapStore.ts               Store Zustand centralizado (toda la logica)
+│   ├── useSearchFilter.ts               Hook de filtro/busqueda reactivo
+│   └── useKeyboardShortcuts.ts          Hook de atajos de teclado globales
+│
+├── components/
+│   ├── MenuBar.tsx                      Barra de menu superior
+│   ├── ToolBar.tsx                      Barra de herramientas rapidas
+│   ├── FilterBar.tsx                    Barra de busqueda y filtros colapsable
+│   ├── MindMapCanvas.tsx                Lienzo SVG/HTML infinito con pan/zoom
+│   ├── NodeComponent.tsx                Renderizado de cada nodo (10 formas)
+│   ├── ToolPanel.tsx                    Contenedor de 6 tabs-organismo
+│   ├── PresentationMode.tsx             Modo presentacion (3 fases, 7 temas)
+│   ├── OutlineView.tsx                  Vista de esquema en arbol
+│   ├── MiniMap.tsx                      Minimapa radar flotante
+│   ├── StatusBar.tsx                    Barra de estado inferior
+│   │
+│   ├── atoms/                           Primitivos UI reutilizables
+│   │   ├── CollapsibleSection.tsx
+│   │   ├── ColorPicker.tsx
+│   │   ├── SliderInput.tsx
+│   │   ├── ToggleButton.tsx
+│   │   └── ToggleButtonGroup.tsx
+│   │
+│   ├── molecules/                       Combinaciones de atomos
+│   │   ├── FontFormatToolbar.tsx
+│   │   ├── ShapeSelector.tsx
+│   │   └── TagManager.tsx
+│   │
+│   ├── organisms/                       Secciones funcionales complejas
+│   │   ├── toolpanel/
+│   │   │   ├── ContentTab.tsx
+│   │   │   ├── FormatTab.tsx
+│   │   │   ├── NotesTab.tsx
+│   │   │   ├── IconsTab.tsx
+│   │   │   ├── CloudsTab.tsx
+│   │   │   └── ThemeTab.tsx
+│   │   ├── canvas/
+│   │   │   ├── CanvasContextMenu.tsx
+│   │   │   └── CanvasZoomControls.tsx
+│   │   └── presentation/
+│   │       ├── PresentationControls.tsx
+│   │       └── presentationThemes.ts
+│   │
+│   └── Modals/
+│       ├── ExportImportModal.tsx
+│       ├── ShortcutsModal.tsx
+│       ├── TemplatesModal.tsx
+│       ├── SavedMapsModal.tsx
+│       ├── ConnectorModal.tsx
+│       ├── IconPackModal.tsx
+│       └── ComingSoonModal.tsx
+│
+└── utils/
+    ├── layoutEngine.ts                  Motor de layout (9 algoritmos)
+    ├── themes.ts                        9 temas de mapa + 12 fondos de lienzo
+    ├── markdownRenderer.tsx             Parser Markdown propio (sin librerias)
+    ├── connectorUtils.ts                Calcular rutas de conectores Bezier
+    ├── freeplaneConverter.ts            Import/Export Freeplane .mm XML
+    ├── htmlExporter.ts                  Exportador a HTML autonomo
+    ├── storage.ts                       Persistencia en localStorage
+    ├── sampleMaps.ts                    Mapa tutorial + mapa en blanco
+    ├── additionalTemplates.ts           Plantillas adicionales predefinidas
+    ├── templateIllustrations.ts         Ilustraciones SVG para las plantillas
+    ├── iconMap.tsx                       String icono -> componente React
+    └── vectorIconPack.tsx               Pack de iconos vectoriales premium
 ```
