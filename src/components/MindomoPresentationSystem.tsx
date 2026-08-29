@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { MindMap, MindNode, SlideFrame, CalculatedNodeLayout } from '../types/mindmap';
-import { computeMindMapLayout } from '../utils/layoutEngine';
+import { MindMap, MindNode, SlideFrame, CalculatedNodeLayout, Connector } from '../types/mindmap';
+import {
+  computeMindMapLayout,
+  computeCloudBounds,
+  generateEdgePath,
+  generateRibbonEdgePath,
+} from '../utils/layoutEngine';
 import { generateDefaultPresentationSlides } from '../utils/presentationGenerator';
+import { THEMES } from '../utils/themes';
+import { NodeComponent } from './NodeComponent';
 import { MarkdownView } from '../utils/markdownRenderer';
 import {
   Play,
@@ -375,12 +382,59 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
           }}
           className="absolute top-0 left-0 will-change-transform"
         >
-          {/* Canvas SVG Edges Layer */}
+          {/* Canvas SVG Layer (Clouds & Real Edges) */}
           <svg
             className="overflow-visible absolute top-0 left-0 pointer-events-none"
             style={{ width: 1, height: 1 }}
           >
-            {Array.from(layoutMap.values()).map((childLayout) => {
+            {/* Filter for cloud drop shadow */}
+            <filter id="pres-cloud-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#0f172a" floodOpacity="0.15" />
+            </filter>
+
+            {/* 1. Clouds Layer */}
+            {(Object.values(mindMap.nodes) as MindNode[])
+              .filter((node) => Boolean(node.cloud?.enabled))
+              .map((node) => ({
+                node,
+                bounds: computeCloudBounds(node.id, mindMap.nodes, layoutMap),
+              }))
+              .filter(
+                (item): item is { node: MindNode; bounds: NonNullable<ReturnType<typeof computeCloudBounds>> } =>
+                  Boolean(item.bounds)
+              )
+              .sort((a, b) => b.bounds.width * b.bounds.height - a.bounds.width * a.bounds.height)
+              .map(({ node, bounds }) => {
+                const cloud = node.cloud!;
+                const isHighlighted = isOverviewActive || activeHighlightedNodeIds.has(node.id);
+                const x = bounds.x;
+                const y = bounds.y;
+                const w = bounds.width;
+                const h = bounds.height;
+                const r = Math.min(24, Math.min(w, h) / 4);
+                const shapePath = `M ${x + r} ${y} h ${w - 2 * r} a ${r} ${r} 0 0 1 ${r} ${r} v ${h - 2 * r} a ${r} ${r} 0 0 1 ${-r} ${r} h ${-(w - 2 * r)} a ${r} ${r} 0 0 1 ${-r} ${-r} v ${-(h - 2 * r)} a ${r} ${r} 0 0 1 ${r} ${-r} Z`;
+
+                return (
+                  <g
+                    key={`pres-cloud-${node.id}`}
+                    filter={cloud.shadow ? 'url(#pres-cloud-drop-shadow)' : undefined}
+                    opacity={isHighlighted ? 1 : 0.15}
+                    className="transition-opacity duration-500"
+                  >
+                    <path
+                      d={shapePath}
+                      fill={cloud.color || '#3b82f6'}
+                      fillOpacity={cloud.opacity || 0.12}
+                      stroke={cloud.borderColor || cloud.color || '#3b82f6'}
+                      strokeWidth={cloud.borderWidth || 1.5}
+                      strokeDasharray={cloud.borderDash === 'dashed' ? '8 5' : undefined}
+                    />
+                  </g>
+                );
+              })}
+
+            {/* 2. Hierarchical Tree Edges Layer */}
+            {(Array.from(layoutMap.values()) as CalculatedNodeLayout[]).map((childLayout) => {
               const childNode = mindMap.nodes[childLayout.id];
               if (!childNode || !childNode.parentId || !layoutMap.has(childNode.parentId)) {
                 return null;
@@ -390,77 +444,89 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
                 isOverviewActive ||
                 (activeHighlightedNodeIds.has(childNode.id) && activeHighlightedNodeIds.has(childNode.parentId));
 
-              const startX =
-                childLayout.side === 'left' ? parentLayout.x : parentLayout.x + parentLayout.width;
-              const startY = parentLayout.y + parentLayout.height / 2;
-              const endX =
-                childLayout.side === 'left' ? childLayout.x + childLayout.width : childLayout.x;
-              const endY = childLayout.y + childLayout.height / 2;
-              const midX = (startX + endX) / 2;
+              const theme = THEMES[mindMap.themeId || 'default'] || THEMES.default;
+              const branchColors = theme.branchColors || THEMES.default.branchColors;
+              const branchColor = branchColors[childLayout.branchIndex % branchColors.length] || '#38bdf8';
+              const color = childNode.edgeColor || mindMap.edgeColor || branchColor;
 
-              const pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+              const effectiveStyle = childNode.edgeStyle || mindMap.edgeStyle || 'bezier';
+              const edgePath = generateEdgePath(parentLayout, childLayout, effectiveStyle, childNode.shape);
+              if (!edgePath) return null;
+
+              const defaultWidth = childLayout.depth === 1 ? 2.5 : 1.75;
+              const width = childNode.edgeWidth || mindMap.edgeWidth || defaultWidth;
 
               return (
                 <path
                   key={`pres-edge-${childNode.id}`}
-                  d={pathData}
+                  d={edgePath}
                   fill="none"
-                  stroke={isHighlighted ? '#38bdf8' : '#334155'}
-                  strokeWidth={isHighlighted ? (childLayout.depth === 1 ? 3.5 : 2.5) : 1.5}
-                  strokeOpacity={isHighlighted ? 0.9 : 0.2}
+                  stroke={color}
+                  strokeWidth={isHighlighted ? width * 1.3 : width}
+                  strokeOpacity={isHighlighted ? 0.95 : 0.15}
+                  strokeDasharray={childNode.edgeDash === 'dashed' ? '8 5' : undefined}
                   className="transition-all duration-500"
                 />
               );
             })}
           </svg>
 
-          {/* Render All Nodes with Spotlight Dimming */}
-          {Array.from(layoutMap.values()).map((layout) => {
-            const node = mindMap.nodes[layout.id];
-            if (!node) return null;
-            const isHighlighted = isOverviewActive || activeHighlightedNodeIds.has(node.id);
-            const isTargetNode = activeSlide?.nodeId === node.id;
+          {/* Render All Real Nodes using NodeComponent */}
+          <div id="pres-nodes-layer" className="absolute top-0 left-0 pointer-events-auto">
+            {(Array.from(layoutMap.values()) as CalculatedNodeLayout[]).map((layout) => {
+              const node = mindMap.nodes[layout.id];
+              if (!node) return null;
+              const isHighlighted = isOverviewActive || activeHighlightedNodeIds.has(node.id);
+              const isTargetNode = activeSlide?.nodeId === node.id;
+              const theme = THEMES[mindMap.themeId || 'default'] || THEMES.default;
+              const branchColors = theme.branchColors || THEMES.default.branchColors;
+              const branchColor = branchColors[layout.branchIndex % branchColors.length] || '#38bdf8';
 
-            return (
-              <div
-                key={`pres-node-${node.id}`}
-                style={{
-                  transform: `translate3d(${layout.x}px, ${layout.y}px, 0)`,
-                  width: layout.width,
-                  height: layout.height,
-                  opacity: isHighlighted ? 1 : 0.18,
-                  filter: isHighlighted ? 'none' : 'blur(1px)',
-                  transition: 'opacity 500ms ease, filter 500ms ease, box-shadow 500ms ease',
-                }}
-                className={`absolute top-0 left-0 rounded-2xl flex flex-col justify-center px-4 py-2 text-center select-none shadow-md ${
-                  isTargetNode ? 'ring-4 ring-blue-500/80 shadow-2xl scale-105' : ''
-                }`}
-                style-extra=""
-              >
+              return (
                 <div
+                  key={`pres-node-wrapper-${node.id}`}
                   style={{
-                    backgroundColor: node.color || (layout.depth === 0 ? '#1d4ed8' : '#ffffff'),
-                    color: node.textColor || (layout.depth === 0 ? '#ffffff' : '#0f172a'),
-                    borderColor: node.borderColor || '#3b82f6',
-                    borderWidth: node.borderWidth || 2,
-                    borderStyle: 'solid',
+                    opacity: isHighlighted ? 1 : 0.18,
+                    filter: isHighlighted ? 'none' : 'blur(1px)',
+                    transition: 'opacity 500ms ease, filter 500ms ease',
                   }}
-                  className="w-full h-full rounded-xl flex flex-col items-center justify-center p-2.5 shadow-sm"
+                  className={`transition-all duration-500 ${
+                    isTargetNode ? 'scale-105 z-20 shadow-[0_0_25px_rgba(59,130,246,0.5)]' : ''
+                  }`}
                 >
-                  <span className="font-bold text-sm leading-snug line-clamp-2">{node.text}</span>
-                  {node.body && (
-                    <span className="text-[11px] opacity-80 line-clamp-1 mt-0.5">{node.body}</span>
-                  )}
-                  {node.note && (
-                    <div className="flex items-center gap-1 mt-1 text-[9px] font-semibold bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded">
-                      <FileText className="w-2.5 h-2.5" />
-                      <span>Nota</span>
-                    </div>
-                  )}
+                  <NodeComponent
+                    node={node}
+                    layout={layout}
+                    isSelected={isTargetNode}
+                    isEditing={false}
+                    theme={theme}
+                    branchColor={branchColor}
+                    globalVisibility={{
+                      hideAllBodies: mindMap.hideAllBodies,
+                      hideAllImages: mindMap.hideAllImages,
+                      hideAllTags: mindMap.hideAllTags,
+                      hideAllIcons: mindMap.hideAllIcons,
+                      hideAllLinks: mindMap.hideAllLinks,
+                      showAllNotesInline: mindMap.showAllNotesInline,
+                    }}
+                    onSelect={() => {
+                      if (mode === 'editor') {
+                        handleAddSlideFromSelectedNode(node.id);
+                      }
+                    }}
+                    onDoubleClick={() => {}}
+                    onTextChange={() => {}}
+                    onFinishEditing={() => {}}
+                    onToggleFold={() => {}}
+                    onAddChild={() => {}}
+                    onOpenNote={() => setShowNotesDrawer(true)}
+                    onDragStart={() => {}}
+                    onDropOnNode={() => {}}
+                  />
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
 
           {/* Render Slide Frames in Editor Mode */}
           {mode === 'editor' && (
