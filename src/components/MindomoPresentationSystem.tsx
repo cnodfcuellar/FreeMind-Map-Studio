@@ -232,6 +232,42 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
     setIsOverviewActive(false);
   };
 
+  // Start from scratch: Clears all frames and creates only the initial Overview/Root slide
+  const handleClearAndStartFromScratch = () => {
+    const rootNode = mindMap.nodes[mindMap.rootId];
+    const rootLayout = layoutMap.get(mindMap.rootId);
+    const pad = 100;
+    const initialSlide: SlideFrame = rootLayout
+      ? {
+          id: 'slide-root-initial',
+          order: 1,
+          title: `🎯 ${rootNode?.text || 'Inicio'}`,
+          type: 'node',
+          nodeId: mindMap.rootId,
+          bounds: {
+            x: rootLayout.x - pad,
+            y: rootLayout.y - pad,
+            width: rootLayout.width + pad * 2,
+            height: rootLayout.height + pad * 2,
+          },
+          showNotes: Boolean(rootNode?.note),
+          color: rootNode?.color || '#2563eb',
+        }
+      : {
+          id: 'slide-overview-initial',
+          order: 1,
+          title: `🗺️ ${mindMap.title || 'Inicio'}`,
+          type: 'overview',
+          bounds: overviewBounds,
+          showNotes: false,
+          color: '#3b82f6',
+        };
+
+    updateSlides([initialSlide]);
+    setCurrentSlideIndex(0);
+    setIsOverviewActive(false);
+  };
+
   // Add custom frame from selected node
   const handleAddSlideFromSelectedNode = (nodeId: string) => {
     const l = layoutMap.get(nodeId);
@@ -348,14 +384,25 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
         {/* Right Exit / Options */}
         <div className="flex items-center gap-2">
           {mode === 'editor' && (
-            <button
-              onClick={handleRegenerateAutoSlides}
-              title="Regenerar marcos automáticamente según la estructura del mapa"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer border border-slate-700"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
-              <span className="hidden sm:inline">Auto-generar</span>
-            </button>
+            <>
+              <button
+                onClick={handleClearAndStartFromScratch}
+                title="Borrar todos los marcos existentes y empezar a crearlos desde cero manualmente"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 text-xs font-semibold transition-colors cursor-pointer border border-red-800/60"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                <span>Empezar de Cero</span>
+              </button>
+
+              <button
+                onClick={handleRegenerateAutoSlides}
+                title="Generar marcos automáticamente según la jerarquía del mapa mental"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer border border-slate-700"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
+                <span className="hidden sm:inline">Auto-generar</span>
+              </button>
+            </>
           )}
 
           <button
@@ -597,6 +644,14 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
         {/* Filmstrip Strip */}
         {isFilmstripOpen && (
           <div className="px-4 py-2 overflow-x-auto flex items-center gap-2 border-b border-slate-800/80 scrollbar-thin">
+            {mode === 'editor' && (
+              <div className="flex items-center gap-1.5 shrink-0 pr-2 border-r border-slate-700/60">
+                <span className="text-[11px] font-semibold text-blue-400">
+                  💡 Haz clic en cualquier nodo para agregarlo como nuevo marco
+                </span>
+              </div>
+            )}
+
             {slides.map((s, idx) => {
               const isCurrent = idx === currentSlideIndex;
               return (
