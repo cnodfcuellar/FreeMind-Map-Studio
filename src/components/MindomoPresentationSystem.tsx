@@ -35,6 +35,8 @@ import {
   CheckSquare,
   PlusSquare,
   Crop,
+  Undo2,
+  Redo2,
 } from 'lucide-react';
 
 interface MindomoPresentationSystemProps {
@@ -79,17 +81,59 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
     return generateDefaultPresentationSlides(mindMap, layoutMap);
   });
 
-  // Keep mindMap in sync when slides are modified
+  // Undo / Redo History Stacks
+  const [undoStack, setUndoStack] = useState<SlideFrame[][]>([]);
+  const [redoStack, setRedoStack] = useState<SlideFrame[][]>([]);
+
+  // Keep mindMap in sync when slides are modified (pushing to undo stack)
   const updateSlides = useCallback(
-    (newSlides: SlideFrame[]) => {
+    (newSlides: SlideFrame[], addToHistory: boolean = true) => {
+      if (addToHistory) {
+        setUndoStack((prev) => [...prev.slice(-25), slides]);
+        setRedoStack([]);
+      }
       setSlides(newSlides);
       onUpdateMindMap({
         ...mindMap,
         presentationSlides: newSlides,
       });
     },
-    [mindMap, onUpdateMindMap]
+    [mindMap, onUpdateMindMap, slides]
   );
+
+  // Undo Action
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return;
+    const previous = undoStack[undoStack.length - 1];
+    const newUndo = undoStack.slice(0, -1);
+    setRedoStack((prev) => [...prev, slides]);
+    setUndoStack(newUndo);
+    setSlides(previous);
+    onUpdateMindMap({
+      ...mindMap,
+      presentationSlides: previous,
+    });
+    if (currentSlideIndex >= previous.length) {
+      setCurrentSlideIndex(Math.max(0, previous.length - 1));
+    }
+  }, [undoStack, redoStack, slides, mindMap, onUpdateMindMap, currentSlideIndex]);
+
+  // Redo Action
+  const handleRedo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    const newRedo = redoStack.slice(0, -1);
+    setUndoStack((prev) => [...prev, slides]);
+    setRedoStack(newRedo);
+    setSlides(next);
+    onUpdateMindMap({
+      ...mindMap,
+      presentationSlides: next,
+    });
+    if (currentSlideIndex >= next.length) {
+      setCurrentSlideIndex(Math.max(0, next.length - 1));
+    }
+  }, [redoStack, undoStack, slides, mindMap, onUpdateMindMap, currentSlideIndex]);
 
   // Viewport / Camera Transform
   const [camera, setCamera] = useState<{ panX: number; panY: number; zoom: number }>({
@@ -203,6 +247,21 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
         return;
       }
 
+      // Undo / Redo shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+        return;
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        handleRedo();
+        return;
+      }
+
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         handleNextSlide();
@@ -226,7 +285,7 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleNextSlide, handlePrevSlide, handleToggleOverview, onClose]);
+  }, [handleNextSlide, handlePrevSlide, handleToggleOverview, handleUndo, handleRedo, onClose]);
 
   // Auto-play timer
   useEffect(() => {
@@ -520,6 +579,26 @@ export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps>
         <div className="flex items-center gap-2">
           {mode === 'editor' && (
             <>
+              {/* Deshacer / Rehacer */}
+              <div className="flex items-center bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60 mr-1">
+                <button
+                  onClick={handleUndo}
+                  disabled={undoStack.length === 0}
+                  title="Deshacer (Ctrl+Z)"
+                  className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                >
+                  <Undo2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleRedo}
+                  disabled={redoStack.length === 0}
+                  title="Rehacer (Ctrl+Y / Ctrl+Shift+Z)"
+                  className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                >
+                  <Redo2 className="w-4 h-4" />
+                </button>
+              </div>
+
               <button
                 onClick={handleClearAndStartFromScratch}
                 title="Borrar todos los marcos existentes y empezar a crearlos desde cero manualmente"
