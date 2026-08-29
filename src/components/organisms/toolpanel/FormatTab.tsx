@@ -18,6 +18,9 @@ import {
   ArrowDown,
   ArrowDownRight,
   Disc,
+  Upload,
+  Trash2,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface FormatTabProps {
@@ -284,14 +287,71 @@ export const FormatTab: React.FC<FormatTabProps> = ({
           )}
 
           {bgType === 'image' && (
-            <div className="space-y-2.5">
-              <input
-                type="text"
-                placeholder="URL de imagen de fondo..."
-                value={selectedNode.bgImageUrl || ''}
-                onChange={(e) => onUpdateNode(selectedNode.id, { bgImageUrl: e.target.value })}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800 outline-none focus:border-blue-500 shadow-2xs"
-              />
+            <div className="space-y-3">
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  placeholder="URL de imagen (https://...)"
+                  value={selectedNode.bgImageUrl || ''}
+                  onChange={(e) => onUpdateNode(selectedNode.id, { bgImageUrl: e.target.value })}
+                  className="flex-1 min-w-0 bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800 outline-none focus:border-blue-500 shadow-2xs"
+                />
+                
+                {/* Botón Explorar Archivo Local */}
+                <label
+                  title="Examinar e insertar imagen local"
+                  className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors border border-blue-200/80 shrink-0 cursor-pointer shadow-2xs flex items-center justify-center"
+                >
+                  <Upload className="w-4 h-4" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          const result = ev.target?.result as string;
+                          if (result) {
+                            onUpdateNode(selectedNode.id, { bgImageUrl: result, bgType: 'image' });
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+
+                {/* Botón Eliminar Imagen de Fondo */}
+                {selectedNode.bgImageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => onUpdateNode(selectedNode.id, { bgImageUrl: undefined })}
+                    title="Eliminar imagen de fondo"
+                    className="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors border border-red-200/80 shrink-0 cursor-pointer shadow-2xs"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Vista previa miniatura si existe imagen */}
+              {selectedNode.bgImageUrl && (
+                <div className="relative rounded-lg overflow-hidden border border-slate-200 h-24 bg-slate-100 flex items-center justify-center">
+                  <img
+                    src={selectedNode.bgImageUrl}
+                    alt="Fondo del nodo"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+                  <span className="absolute bottom-1 right-2 text-[10px] text-white font-medium bg-black/60 px-1.5 py-0.5 rounded shadow">
+                    Vista previa
+                  </span>
+                </div>
+              )}
+
               <span className="text-[11px] font-semibold text-slate-600 block">Modo de Ajuste</span>
               <div className="grid grid-cols-3 gap-1.5">
                 {[

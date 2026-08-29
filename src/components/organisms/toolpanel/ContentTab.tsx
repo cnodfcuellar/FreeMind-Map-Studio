@@ -18,6 +18,7 @@ import {
   Minus,
   Plus,
   Trash2,
+  Upload,
   ArrowUp,
   ArrowDown,
   ArrowLeft,
@@ -253,6 +254,33 @@ export const ContentTab: React.FC<ContentTabProps> = ({
               onChange={(e) => onUpdateNode(selectedNode.id, { imageUrl: e.target.value || undefined })}
               className="flex-1 min-w-0 bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800 outline-none focus:border-blue-500 shadow-2xs"
             />
+            {/* Botón Examinar Archivo Local */}
+            <label
+              title="Examinar e insertar imagen local"
+              className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors border border-blue-200/80 shrink-0 cursor-pointer shadow-2xs flex items-center justify-center"
+            >
+              <Upload className="w-4 h-4" />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      const result = ev.target?.result as string;
+                      if (result) {
+                        onUpdateNode(selectedNode.id, { imageUrl: result, imagePosition: selectedNode.imagePosition || 'top' });
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                  e.target.value = '';
+                }}
+              />
+            </label>
+
             {selectedNode.imageUrl && (
               <button
                 type="button"

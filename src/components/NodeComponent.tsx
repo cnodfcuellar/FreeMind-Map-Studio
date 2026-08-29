@@ -244,7 +244,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     }
 
     if (bgType === 'image' || node.bgImageUrl) {
-      const bgImg = node.bgImageUrl || (bgType === 'image' ? node.imageUrl : undefined);
+      const bgImg = node.bgImageUrl;
       if (bgImg) {
         const mode = node.bgImageMode || 'cover';
         const bgSize = mode === 'fit' || mode === 'contain' ? 'contain' : mode === 'tile' ? 'auto' : 'cover';
@@ -362,7 +362,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
     const gradId = `grad-${node.id}`;
     const patternId = `pat-${node.id}`;
     const bgImgId = `bg-img-${node.id}`;
-    const bgImg = node.bgImageUrl || (bgType === 'image' ? node.imageUrl : undefined);
+    const bgImg = node.bgImageUrl;
 
     let fillAttr = node.color || bgColor || '#ffffff';
     if (bgType === 'transparent') {
