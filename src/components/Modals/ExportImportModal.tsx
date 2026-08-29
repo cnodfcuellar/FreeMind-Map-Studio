@@ -147,30 +147,35 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           {activeTab === 'export' ? (
             <div className="space-y-3">
               {/* Freeplane .mm */}
-              <div className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between opacity-80">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
                     <FileCode className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-slate-800">
-                      Formato Freeplane / FreeMind (.mm)
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm text-slate-800">
+                        Formato Freeplane / FreeMind (.mm)
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                        Próximamente
+                      </span>
+                    </div>
                     <p className="text-xs text-slate-500">
                       Archivo XML estándar compatible con Freeplane, FreeMind y Mindomo.
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={handleExportFreeplaneMM}
-                  className="px-3.5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-xs transition-colors shrink-0"
+                  disabled
+                  className="px-3.5 py-2 bg-slate-200 text-slate-500 rounded-lg font-semibold text-xs cursor-not-allowed shrink-0"
                 >
-                  Descargar .mm
+                  Próximamente
                 </button>
               </div>
 
               {/* Standalone HTML */}
-              <div className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between opacity-80">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
                     <Globe className="w-5 h-5" />
@@ -180,8 +185,8 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
                       <h3 className="font-semibold text-sm text-slate-800">
                         HTML Portable (Autónomo)
                       </h3>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                        Recomendado
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                        Próximamente
                       </span>
                     </div>
                     <p className="text-xs text-slate-500">
@@ -190,56 +195,66 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
                   </div>
                 </div>
                 <button
-                  onClick={handleExportPortableHTML}
-                  className="px-3.5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-semibold text-xs transition-colors shrink-0"
+                  disabled
+                  className="px-3.5 py-2 bg-slate-200 text-slate-500 rounded-lg font-semibold text-xs cursor-not-allowed shrink-0"
                 >
-                  Descargar .html
+                  Próximamente
                 </button>
               </div>
 
               {/* Markdown Outline */}
-              <div className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between opacity-80">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-slate-800">
-                      Esquema Markdown (.md)
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm text-slate-800">
+                        Esquema Markdown (.md)
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                        Próximamente
+                      </span>
+                    </div>
                     <p className="text-xs text-slate-500">
                       Ideal para Obsidian, Notion o editores de texto plano.
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={handleExportMarkdown}
-                  className="px-3.5 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-semibold text-xs transition-colors shrink-0"
+                  disabled
+                  className="px-3.5 py-2 bg-slate-200 text-slate-500 rounded-lg font-semibold text-xs cursor-not-allowed shrink-0"
                 >
-                  Descargar .md
+                  Próximamente
                 </button>
               </div>
 
               {/* JSON Backup */}
-              <div className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center justify-between opacity-80">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-sm text-slate-800">
-                      Copia Completa JSON
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm text-slate-800">
+                        Copia Completa JSON
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                        Próximamente
+                      </span>
+                    </div>
                     <p className="text-xs text-slate-500">
                       Estructura íntegra con todas las posiciones, colores y notas.
                     </p>
                   </div>
                 </div>
                 <button
-                  onClick={handleExportJSON}
-                  className="px-3.5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold text-xs transition-colors shrink-0"
+                  disabled
+                  className="px-3.5 py-2 bg-slate-200 text-slate-500 rounded-lg font-semibold text-xs cursor-not-allowed shrink-0"
                 >
-                  Descargar .json
+                  Próximamente
                 </button>
               </div>
             </div>
