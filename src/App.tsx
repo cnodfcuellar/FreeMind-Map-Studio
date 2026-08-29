@@ -158,7 +158,10 @@ export default function App() {
           onAddSibling={() => handleAddSibling()}
           onDeleteNode={() => handleDeleteNode()}
           onToggleOutline={() => setIsOutlineOpen((o) => !o)}
-          onStartPresentation={() => setIsPresentationMode(true)}
+          onStartPresentation={(mode) => {
+            setPresentationType(mode === 'dynamic' ? 'dynamic' : 'classic');
+            setIsPresentationMode(true);
+          }}
           onShowComingSoon={(data) => setComingSoonModalData(data)}
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
           onToggleFullscreen={() => {

@@ -49,7 +49,7 @@ interface MenuBarProps {
   onAddSibling: () => void;
   onDeleteNode: () => void;
   onToggleOutline: () => void;
-  onStartPresentation: () => void;
+  onStartPresentation: (mode?: 'classic' | 'dynamic') => void;
   onShowComingSoon?: (data: { title: string; subtitle: string; mode: 'elaborate' | 'dynamic' }) => void;
   onOpenShortcuts: () => void;
   onToggleFullscreen: () => void;
@@ -432,10 +432,17 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                 <kbd className="text-[10px] text-slate-400 font-mono">Alt+O</kbd>
               </button>
               <button
-                onClick={() => { onStartPresentation(); setOpenMenu(null); }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-purple-50 hover:text-purple-700"
+                onClick={() => { onStartPresentation('classic'); setOpenMenu(null); }}
+                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-purple-50 hover:text-purple-700 cursor-pointer"
               >
                 <span className="flex items-center gap-2"><Presentation className="w-3.5 h-3.5 text-purple-600" /> Presentación Clásica</span>
+                <span className="text-[9px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full">Activo</span>
+              </button>
+              <button
+                onClick={() => { onStartPresentation('dynamic'); setOpenMenu(null); }}
+                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-pink-50 hover:text-pink-600 cursor-pointer"
+              >
+                <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-pink-600" /> Presentación Dinámica (Lienzo)</span>
                 <kbd className="text-[10px] text-slate-400 font-mono">F5</kbd>
               </button>
               <button
@@ -447,23 +454,9 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                     mode: 'elaborate',
                   });
                 }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600"
+                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
               >
                 <span className="flex items-center gap-2"><Map className="w-3.5 h-3.5 text-blue-600" /> Presentación Elaborada</span>
-                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">Pronto</span>
-              </button>
-              <button
-                onClick={() => {
-                  setOpenMenu(null);
-                  onShowComingSoon?.({
-                    title: 'Modo Dinámico',
-                    subtitle: 'Presentación Cinemática y Transiciones',
-                    mode: 'dynamic',
-                  });
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-pink-50 hover:text-pink-600"
-              >
-                <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-pink-600" /> Presentación Dinámica</span>
                 <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">Pronto</span>
               </button>
               <div className="my-1 border-t border-slate-100" />

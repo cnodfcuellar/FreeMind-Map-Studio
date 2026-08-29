@@ -48,7 +48,7 @@ interface ToolBarProps {
   onUndo: () => void;
   onRedo: () => void;
   onToggleOutline: () => void;
-  onStartPresentation: () => void;
+  onStartPresentation: (mode?: 'classic' | 'dynamic') => void;
   onShowComingSoon?: (data: { title: string; subtitle: string; mode: 'elaborate' | 'dynamic' }) => void;
   onToggleFilterBar: () => void;
   onToggleToolPanel: () => void;
@@ -535,7 +535,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
               <button
                 onClick={() => {
                   setIsPresentationMenuOpen(false);
-                  onStartPresentation();
+                  onStartPresentation('classic');
                 }}
                 className="w-full p-2 rounded-xl text-left hover:bg-purple-50 group flex items-start gap-2.5 transition-colors cursor-pointer"
               >
