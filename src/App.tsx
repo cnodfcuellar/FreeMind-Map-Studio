@@ -26,7 +26,6 @@ import { MindMapCanvas } from './components/MindMapCanvas';
 import { ToolPanel } from './components/ToolPanel';
 import { OutlineView } from './components/OutlineView';
 import { PresentationMode } from './components/PresentationMode';
-import { MindomoPresentationSystem } from './components/MindomoPresentationSystem';
 import { StatusBar } from './components/StatusBar';
 
 // Modales
@@ -383,6 +382,9 @@ export default function App() {
             onPasteNode={handlePasteNode}
             onApplyStyleToChildren={handleApplyStyleToChildren}
             onApplyStyleToSiblings={handleApplyStyleToSiblings}
+            isPresentationMode={isPresentationMode && presentationType === 'dynamic'}
+            onClosePresentation={() => setIsPresentationMode(false)}
+            onUpdateMindMap={(updated) => setMindMap(updated)}
             onUpdateConnector={(connectorId, updates) => {
               pushHistory(mindMap);
               setMindMap((m) => ({
@@ -548,16 +550,7 @@ export default function App() {
         />
       </main>
 
-      {/* 5. Presentation Mode Overlay (Dynamic Mindomo Canvas Zoom & Classic Slide Show) */}
-      {isPresentationMode && presentationType === 'dynamic' && (
-        <MindomoPresentationSystem
-          mindMap={mindMap}
-          onUpdateMindMap={(updated) => setMindMap(updated)}
-          onClose={() => setIsPresentationMode(false)}
-          initialMode="play"
-        />
-      )}
-
+      {/* 5. Presentation Mode Overlay (Classic Slide Show only, Dynamic runs inside MindMapCanvas) */}
       {isPresentationMode && presentationType === 'classic' && (
         <PresentationMode
           mindMap={mindMap}
