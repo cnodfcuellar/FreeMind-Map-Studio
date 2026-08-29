@@ -245,8 +245,28 @@ export interface MindMap {
   hideAllLinks?: boolean;
   showAllNotesInline?: boolean;
 
+  // Presentation Mode (Mindomo-style Custom Frames & Storyboard)
+  presentationSlides?: SlideFrame[];
+
   createdAt: number;
   updatedAt: number;
+}
+
+export interface SlideFrame {
+  id: string;
+  order: number;
+  title: string;
+  type: 'node' | 'branch' | 'custom_area' | 'overview';
+  nodeId?: string;
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  showNotes?: boolean;
+  color?: string; // Color identifier for frame badge
+  transitionDurationMs?: number;
 }
 
 export interface CalculatedNodeLayout {

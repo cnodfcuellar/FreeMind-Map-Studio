@@ -587,15 +587,11 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 </div>
               </button>
 
-              {/* 3. Dinámico */}
+              {/* 3. Dinámico (Mindomo Canvas Zoom & Frame Studio) */}
               <button
                 onClick={() => {
                   setIsPresentationMenuOpen(false);
-                  onShowComingSoon?.({
-                    title: 'Modo Dinámico',
-                    subtitle: 'Presentación Cinemática y Transiciones',
-                    mode: 'dynamic',
-                  });
+                  onStartPresentation('dynamic');
                 }}
                 className="w-full p-2 rounded-xl text-left hover:bg-pink-50 group flex items-start gap-2.5 transition-colors cursor-pointer"
               >
@@ -605,14 +601,14 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
                     <span className="font-bold text-xs text-slate-800 group-hover:text-pink-900">
-                      Dinámico
+                      Dinámico (Estilo Mindomo)
                     </span>
-                    <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold">
-                      Próximamente
+                    <span className="px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px] font-bold">
+                      Activo
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    Transiciones animadas 3D y auto-reproducción
+                    Vuelo de cámara sobre el lienzo con editor de marcos y foco Spotlight
                   </p>
                 </div>
               </button>

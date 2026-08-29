@@ -26,6 +26,7 @@ import { MindMapCanvas } from './components/MindMapCanvas';
 import { ToolPanel } from './components/ToolPanel';
 import { OutlineView } from './components/OutlineView';
 import { PresentationMode } from './components/PresentationMode';
+import { MindomoPresentationSystem } from './components/MindomoPresentationSystem';
 import { StatusBar } from './components/StatusBar';
 
 // Modales
@@ -90,6 +91,7 @@ export default function App() {
   const [isSavedMapsModalOpen, setIsSavedMapsModalOpen] = useState(false);
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
+  const [presentationType, setPresentationType] = useState<'classic' | 'dynamic'>('dynamic');
   const [comingSoonModalData, setComingSoonModalData] = useState<ComingSoonModalData | null>(null);
 
   const isAnyModalOpen = Boolean(
@@ -243,7 +245,10 @@ export default function App() {
         onUndo={handleUndo}
         onRedo={handleRedo}
         onToggleOutline={() => setIsOutlineOpen((o) => !o)}
-        onStartPresentation={() => setIsPresentationMode(true)}
+        onStartPresentation={(mode) => {
+          setPresentationType(mode === 'classic' ? 'classic' : 'dynamic');
+          setIsPresentationMode(true);
+        }}
         onShowComingSoon={(data) => setComingSoonModalData(data)}
         onToggleFilterBar={() => setIsFilterBarOpen((f) => !f)}
         onToggleToolPanel={() => setIsToolPanelOpen((t) => !t)}
@@ -543,8 +548,17 @@ export default function App() {
         />
       </main>
 
-      {/* 5. Presentation Mode Overlay */}
-      {isPresentationMode && (
+      {/* 5. Presentation Mode Overlay (Dynamic Mindomo Canvas Zoom & Classic Slide Show) */}
+      {isPresentationMode && presentationType === 'dynamic' && (
+        <MindomoPresentationSystem
+          mindMap={mindMap}
+          onUpdateMindMap={(updated) => setMindMap(updated)}
+          onClose={() => setIsPresentationMode(false)}
+          initialMode="play"
+        />
+      )}
+
+      {isPresentationMode && presentationType === 'classic' && (
         <PresentationMode
           mindMap={mindMap}
           onClose={() => setIsPresentationMode(false)}

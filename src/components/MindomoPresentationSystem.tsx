@@ -1,0 +1,637 @@
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { MindMap, MindNode, SlideFrame, CalculatedNodeLayout } from '../types/mindmap';
+import { computeMindMapLayout } from '../utils/layoutEngine';
+import { generateDefaultPresentationSlides } from '../utils/presentationGenerator';
+import { MarkdownView } from '../utils/markdownRenderer';
+import {
+  Play,
+  Plus,
+  Trash2,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Minimize2,
+  FileText,
+  Compass,
+  X,
+  Sliders,
+  Move,
+  Layers,
+  ArrowRight,
+  Check,
+  RotateCcw,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
+
+interface MindomoPresentationSystemProps {
+  mindMap: MindMap;
+  onUpdateMindMap: (updated: MindMap) => void;
+  onClose: () => void;
+  initialMode?: 'editor' | 'play';
+}
+
+export const MindomoPresentationSystem: React.FC<MindomoPresentationSystemProps> = ({
+  mindMap,
+  onUpdateMindMap,
+  onClose,
+  initialMode = 'play',
+}) => {
+  // Mode: 'editor' (Frame Studio) or 'play' (Cinema Presentation)
+  const [mode, setMode] = useState<'editor' | 'play'>(initialMode);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  const [isPlayingAuto, setIsPlayingAuto] = useState<boolean>(false);
+  const [autoPlayIntervalSec, setAutoPlayIntervalSec] = useState<number>(5);
+  const [showNotesDrawer, setShowNotesDrawer] = useState<boolean>(true);
+  const [isOverviewActive, setIsOverviewActive] = useState<boolean>(false);
+  const [isFilmstripOpen, setIsFilmstripOpen] = useState<boolean>(true);
+
+  // Layout calculations
+  const layoutMap = useMemo(() => {
+    return computeMindMapLayout(mindMap, { x: 0, y: 0 });
+  }, [mindMap]);
+
+  // Slides state (From mindMap or generated default)
+  const [slides, setSlides] = useState<SlideFrame[]>(() => {
+    if (mindMap.presentationSlides && mindMap.presentationSlides.length > 0) {
+      return mindMap.presentationSlides;
+    }
+    return generateDefaultPresentationSlides(mindMap, layoutMap);
+  });
+
+  // Keep mindMap in sync when slides are modified
+  const updateSlides = useCallback(
+    (newSlides: SlideFrame[]) => {
+      setSlides(newSlides);
+      onUpdateMindMap({
+        ...mindMap,
+        presentationSlides: newSlides,
+      });
+    },
+    [mindMap, onUpdateMindMap]
+  );
+
+  // Viewport / Camera Transform
+  const [camera, setCamera] = useState<{ panX: number; panY: number; zoom: number }>({
+    panX: 0,
+    panY: 0,
+    zoom: 1,
+  });
+
+  const viewportContainerRef = useRef<HTMLDivElement>(null);
+
+  // Current active slide
+  const activeSlide = slides[currentSlideIndex] || slides[0];
+  const activeNode = activeSlide?.nodeId ? mindMap.nodes[activeSlide.nodeId] : null;
+
+  // Overview bounds of entire map
+  const overviewBounds = useMemo(() => {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    layoutMap.forEach((l) => {
+      minX = Math.min(minX, l.bounds.minX);
+      minY = Math.min(minY, l.bounds.minY);
+      maxX = Math.max(maxX, l.bounds.maxX);
+      maxY = Math.max(maxY, l.bounds.maxY);
+    });
+
+    if (minX === Infinity) {
+      return { x: -300, y: -200, width: 600, height: 400 };
+    }
+
+    const pad = 120;
+    return {
+      x: minX - pad,
+      y: minY - pad,
+      width: Math.max(500, maxX - minX + pad * 2),
+      height: Math.max(350, maxY - minY + pad * 2),
+    };
+  }, [layoutMap]);
+
+  // Compute camera flight parameters to frame target bounds perfectly on screen
+  const flyCameraToBounds = useCallback(
+    (bounds: { x: number; y: number; width: number; height: number }, smooth: boolean = true) => {
+      if (!viewportContainerRef.current) return;
+      const vw = viewportContainerRef.current.clientWidth || window.innerWidth;
+      const vh = viewportContainerRef.current.clientHeight || window.innerHeight;
+
+      const scaleX = (vw * 0.82) / bounds.width;
+      const scaleY = (vh * 0.78) / bounds.height;
+      const targetZoom = Math.min(Math.max(Math.min(scaleX, scaleY), 0.25), 2.2);
+
+      const centerX = bounds.x + bounds.width / 2;
+      const centerY = bounds.y + bounds.height / 2;
+
+      const targetPanX = vw / 2 - centerX * targetZoom;
+      const targetPanY = vh / 2 - centerY * targetZoom;
+
+      setCamera({
+        panX: targetPanX,
+        panY: targetPanY,
+        zoom: targetZoom,
+      });
+    },
+    []
+  );
+
+  // Focus active slide
+  useEffect(() => {
+    if (isOverviewActive) {
+      flyCameraToBounds(overviewBounds, true);
+    } else if (activeSlide) {
+      flyCameraToBounds(activeSlide.bounds, true);
+    }
+  }, [currentSlideIndex, activeSlide, isOverviewActive, overviewBounds, flyCameraToBounds]);
+
+  // Window resize handler
+  useEffect(() => {
+    const handleResize = () => {
+      if (isOverviewActive) {
+        flyCameraToBounds(overviewBounds, false);
+      } else if (activeSlide) {
+        flyCameraToBounds(activeSlide.bounds, false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [activeSlide, isOverviewActive, overviewBounds, flyCameraToBounds]);
+
+  // Next / Prev navigation
+  const handleNextSlide = useCallback(() => {
+    setIsOverviewActive(false);
+    setCurrentSlideIndex((prev) => (prev < slides.length - 1 ? prev + 1 : 0));
+  }, [slides.length]);
+
+  const handlePrevSlide = useCallback(() => {
+    setIsOverviewActive(false);
+    setCurrentSlideIndex((prev) => (prev > 0 ? prev - 1 : slides.length - 1));
+  }, [slides.length]);
+
+  const handleToggleOverview = useCallback(() => {
+    setIsOverviewActive((prev) => !prev);
+  }, []);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        handleNextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+        e.preventDefault();
+        handlePrevSlide();
+      } else if (e.key.toLowerCase() === 'o' || e.key === 'Home') {
+        e.preventDefault();
+        handleToggleOverview();
+      } else if (e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        setShowNotesDrawer((prev) => !prev);
+      } else if (e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        setMode((m) => (m === 'play' ? 'editor' : 'play'));
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNextSlide, handlePrevSlide, handleToggleOverview, onClose]);
+
+  // Auto-play timer
+  useEffect(() => {
+    if (!isPlayingAuto || mode !== 'play') return;
+    const interval = setInterval(() => {
+      handleNextSlide();
+    }, autoPlayIntervalSec * 1000);
+    return () => clearInterval(interval);
+  }, [isPlayingAuto, autoPlayIntervalSec, mode, handleNextSlide]);
+
+  // Frame Auto-Generator Action
+  const handleRegenerateAutoSlides = () => {
+    const autoSlides = generateDefaultPresentationSlides(mindMap, layoutMap);
+    updateSlides(autoSlides);
+    setCurrentSlideIndex(0);
+    setIsOverviewActive(false);
+  };
+
+  // Add custom frame from selected node
+  const handleAddSlideFromSelectedNode = (nodeId: string) => {
+    const l = layoutMap.get(nodeId);
+    const n = mindMap.nodes[nodeId];
+    if (!l || !n) return;
+
+    const pad = 70;
+    const newSlide: SlideFrame = {
+      id: `slide-custom-${Date.now()}`,
+      order: slides.length + 1,
+      title: n.text || 'Nuevo Marco',
+      type: 'node',
+      nodeId: n.id,
+      bounds: {
+        x: l.x - pad,
+        y: l.y - pad,
+        width: l.width + pad * 2,
+        height: l.height + pad * 2,
+      },
+      showNotes: Boolean(n.note),
+      color: n.color || '#3b82f6',
+    };
+
+    const updated = [...slides, newSlide];
+    updateSlides(updated);
+    setCurrentSlideIndex(updated.length - 1);
+  };
+
+  // Delete slide
+  const handleDeleteSlide = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (slides.length <= 1) return;
+    const updated = slides.filter((_, idx) => idx !== index).map((s, idx) => ({ ...s, order: idx + 1 }));
+    updateSlides(updated);
+    if (currentSlideIndex >= updated.length) {
+      setCurrentSlideIndex(updated.length - 1);
+    }
+  };
+
+  // Move slide up / down in filmstrip
+  const handleMoveSlide = (fromIndex: number, toIndex: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (toIndex < 0 || toIndex >= slides.length) return;
+    const reordered = [...slides];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    const updated = reordered.map((s, idx) => ({ ...s, order: idx + 1 }));
+    updateSlides(updated);
+    setCurrentSlideIndex(toIndex);
+  };
+
+  // Node highlighting in presentation mode
+  const activeHighlightedNodeIds = useMemo(() => {
+    if (isOverviewActive || !activeSlide) {
+      return new Set(Object.keys(mindMap.nodes));
+    }
+    const set = new Set<string>();
+    if (activeSlide.nodeId) {
+      set.add(activeSlide.nodeId);
+      // If branch type, highlight all descendants
+      if (activeSlide.type === 'branch') {
+        const addChildren = (nid: string) => {
+          const n = mindMap.nodes[nid];
+          if (n && n.children) {
+            n.children.forEach((cid) => {
+              set.add(cid);
+              addChildren(cid);
+            });
+          }
+        };
+        addChildren(activeSlide.nodeId);
+      }
+    }
+    return set;
+  }, [activeSlide, isOverviewActive, mindMap.nodes]);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-950 text-white select-none flex flex-col overflow-hidden font-sans">
+      {/* 1. TOP HEADER HUD */}
+      <div className="h-14 px-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex items-center justify-between z-30 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-blue-600/20 text-blue-400 px-3 py-1 rounded-xl border border-blue-500/30 text-xs font-bold">
+            <Layers className="w-3.5 h-3.5" />
+            <span>Presentación Dinámica</span>
+          </div>
+
+          <span className="text-sm font-semibold text-slate-300 truncate max-w-[260px] sm:max-w-md">
+            {mindMap.title}
+          </span>
+        </div>
+
+        {/* Center Mode Switcher (Editor vs Presentar) */}
+        <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 text-xs font-bold">
+          <button
+            onClick={() => setMode('editor')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer ${
+              mode === 'editor' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Editor de Marcos</span>
+          </button>
+          <button
+            onClick={() => setMode('play')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer ${
+              mode === 'play' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Play className="w-3.5 h-3.5 fill-current" />
+            <span>Presentar (F5)</span>
+          </button>
+        </div>
+
+        {/* Right Exit / Options */}
+        <div className="flex items-center gap-2">
+          {mode === 'editor' && (
+            <button
+              onClick={handleRegenerateAutoSlides}
+              title="Regenerar marcos automáticamente según la estructura del mapa"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer border border-slate-700"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
+              <span className="hidden sm:inline">Auto-generar</span>
+            </button>
+          )}
+
+          <button
+            onClick={onClose}
+            title="Salir de la presentación (ESC)"
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* 2. MAIN CINEMA CANVAS VIEWPORT */}
+      <div
+        ref={viewportContainerRef}
+        className="relative flex-1 bg-slate-950 overflow-hidden cursor-grab active:cursor-grabbing"
+      >
+        {/* World Transform Layer (Vuelo de Cámara) */}
+        <div
+          style={{
+            transform: `translate3d(${camera.panX}px, ${camera.panY}px, 0) scale(${camera.zoom})`,
+            transformOrigin: '0 0',
+            transition: 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)',
+          }}
+          className="absolute top-0 left-0 will-change-transform"
+        >
+          {/* Canvas SVG Edges Layer */}
+          <svg
+            className="overflow-visible absolute top-0 left-0 pointer-events-none"
+            style={{ width: 1, height: 1 }}
+          >
+            {Array.from(layoutMap.values()).map((childLayout) => {
+              const childNode = mindMap.nodes[childLayout.id];
+              if (!childNode || !childNode.parentId || !layoutMap.has(childNode.parentId)) {
+                return null;
+              }
+              const parentLayout = layoutMap.get(childNode.parentId)!;
+              const isHighlighted =
+                isOverviewActive ||
+                (activeHighlightedNodeIds.has(childNode.id) && activeHighlightedNodeIds.has(childNode.parentId));
+
+              const startX =
+                childLayout.side === 'left' ? parentLayout.x : parentLayout.x + parentLayout.width;
+              const startY = parentLayout.y + parentLayout.height / 2;
+              const endX =
+                childLayout.side === 'left' ? childLayout.x + childLayout.width : childLayout.x;
+              const endY = childLayout.y + childLayout.height / 2;
+              const midX = (startX + endX) / 2;
+
+              const pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
+
+              return (
+                <path
+                  key={`pres-edge-${childNode.id}`}
+                  d={pathData}
+                  fill="none"
+                  stroke={isHighlighted ? '#38bdf8' : '#334155'}
+                  strokeWidth={isHighlighted ? (childLayout.depth === 1 ? 3.5 : 2.5) : 1.5}
+                  strokeOpacity={isHighlighted ? 0.9 : 0.2}
+                  className="transition-all duration-500"
+                />
+              );
+            })}
+          </svg>
+
+          {/* Render All Nodes with Spotlight Dimming */}
+          {Array.from(layoutMap.values()).map((layout) => {
+            const node = mindMap.nodes[layout.id];
+            if (!node) return null;
+            const isHighlighted = isOverviewActive || activeHighlightedNodeIds.has(node.id);
+            const isTargetNode = activeSlide?.nodeId === node.id;
+
+            return (
+              <div
+                key={`pres-node-${node.id}`}
+                style={{
+                  transform: `translate3d(${layout.x}px, ${layout.y}px, 0)`,
+                  width: layout.width,
+                  height: layout.height,
+                  opacity: isHighlighted ? 1 : 0.18,
+                  filter: isHighlighted ? 'none' : 'blur(1px)',
+                  transition: 'opacity 500ms ease, filter 500ms ease, box-shadow 500ms ease',
+                }}
+                className={`absolute top-0 left-0 rounded-2xl flex flex-col justify-center px-4 py-2 text-center select-none shadow-md ${
+                  isTargetNode ? 'ring-4 ring-blue-500/80 shadow-2xl scale-105' : ''
+                }`}
+                style-extra=""
+              >
+                <div
+                  style={{
+                    backgroundColor: node.color || (layout.depth === 0 ? '#1d4ed8' : '#ffffff'),
+                    color: node.textColor || (layout.depth === 0 ? '#ffffff' : '#0f172a'),
+                    borderColor: node.borderColor || '#3b82f6',
+                    borderWidth: node.borderWidth || 2,
+                    borderStyle: 'solid',
+                  }}
+                  className="w-full h-full rounded-xl flex flex-col items-center justify-center p-2.5 shadow-sm"
+                >
+                  <span className="font-bold text-sm leading-snug line-clamp-2">{node.text}</span>
+                  {node.body && (
+                    <span className="text-[11px] opacity-80 line-clamp-1 mt-0.5">{node.body}</span>
+                  )}
+                  {node.note && (
+                    <div className="flex items-center gap-1 mt-1 text-[9px] font-semibold bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded">
+                      <FileText className="w-2.5 h-2.5" />
+                      <span>Nota</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Render Slide Frames in Editor Mode */}
+          {mode === 'editor' && (
+            <div className="pointer-events-auto">
+              {slides.map((slide, idx) => {
+                const isSelected = idx === currentSlideIndex;
+                return (
+                  <div
+                    key={`editor-frame-${slide.id}`}
+                    onClick={() => setCurrentSlideIndex(idx)}
+                    style={{
+                      transform: `translate3d(${slide.bounds.x}px, ${slide.bounds.y}px, 0)`,
+                      width: slide.bounds.width,
+                      height: slide.bounds.height,
+                    }}
+                    className={`absolute top-0 left-0 rounded-3xl border-2 transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-blue-400 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.3)] ring-2 ring-blue-400/50'
+                        : 'border-dashed border-slate-600/60 bg-slate-800/5 hover:border-slate-400 hover:bg-slate-800/20'
+                    }`}
+                  >
+                    {/* Badge */}
+                    <div className="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-bold text-[10px] shadow-md flex items-center gap-1">
+                      <span>Slide {slide.order}</span>
+                      <span className="opacity-75">• {slide.title}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* 3. FLOATING PRESENTER NOTES DRAWER */}
+        {showNotesDrawer && activeNode?.note && (
+          <div className="absolute top-4 right-4 z-40 w-80 sm:w-96 max-h-[70vh] bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/80 shadow-2xl p-4 flex flex-col text-slate-200 animate-in fade-in slide-in-from-right-4 duration-200">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+              <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
+                <FileText className="w-4 h-4" />
+                <span>Notas del Orador ({activeNode.text})</span>
+              </div>
+              <button
+                onClick={() => setShowNotesDrawer(false)}
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto pr-1 text-xs space-y-2 leading-relaxed">
+              <MarkdownView markdown={activeNode.note} isDark={true} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 4. BOTTOM FILMSTRIP & CONTROLS HUD */}
+      <div className="bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex flex-col z-30 shrink-0">
+        {/* Progress Bar */}
+        <div className="w-full bg-slate-800 h-1 relative">
+          <div
+            style={{
+              width: `${((currentSlideIndex + 1) / Math.max(1, slides.length)) * 100}%`,
+            }}
+            className="h-full bg-blue-500 transition-all duration-300 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
+          />
+        </div>
+
+        {/* Filmstrip Strip */}
+        {isFilmstripOpen && (
+          <div className="px-4 py-2 overflow-x-auto flex items-center gap-2 border-b border-slate-800/80 scrollbar-thin">
+            {slides.map((s, idx) => {
+              const isCurrent = idx === currentSlideIndex;
+              return (
+                <div
+                  key={`thumb-${s.id}`}
+                  onClick={() => {
+                    setIsOverviewActive(false);
+                    setCurrentSlideIndex(idx);
+                  }}
+                  className={`group relative shrink-0 px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-2 ${
+                    isCurrent
+                      ? 'bg-blue-600/30 border-blue-500 text-white font-bold shadow-md'
+                      : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  <span className="w-4 h-4 rounded-full bg-slate-700 group-hover:bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">
+                    {s.order}
+                  </span>
+                  <span className="text-xs max-w-[130px] truncate">{s.title}</span>
+
+                  {mode === 'editor' && slides.length > 1 && (
+                    <button
+                      onClick={(e) => handleDeleteSlide(idx, e)}
+                      title="Eliminar este marco"
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 text-red-400 rounded transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Action Controls Bar */}
+        <div className="h-12 px-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <span className="font-bold text-white font-mono">
+              {currentSlideIndex + 1} / {slides.length}
+            </span>
+            <span className="opacity-50">|</span>
+            <span className="truncate max-w-[200px] sm:max-w-xs">{activeSlide?.title}</span>
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handlePrevSlide}
+              title="Diapositiva Anterior (← o Espacio)"
+              className="p-2 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={handleToggleOverview}
+              title={isOverviewActive ? 'Volver al foco' : 'Vista General del Mapa (O / Home)'}
+              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                isOverviewActive
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-slate-800 text-slate-300 hover:text-white'
+              }`}
+            >
+              <Compass className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={handleNextSlide}
+              title="Siguiente Diapositiva (→ o Espacio)"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs transition-colors flex items-center gap-1 shadow-md cursor-pointer active:scale-95"
+            >
+              <span>Siguiente</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Extra Tools */}
+          <div className="flex items-center gap-1 text-xs text-slate-400">
+            {activeNode?.note && (
+              <button
+                onClick={() => setShowNotesDrawer((prev) => !prev)}
+                title="Mostrar/Ocultar Notas del Orador (N)"
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  showNotesDrawer ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-slate-800 text-slate-400'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+              </button>
+            )}
+
+            <button
+              onClick={() => setIsFilmstripOpen((prev) => !prev)}
+              title="Alternar Tira de Diapositivas"
+              className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <Layers className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
