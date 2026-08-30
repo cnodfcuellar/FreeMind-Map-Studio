@@ -85,17 +85,21 @@ export const AVAILABLE_ICONS: IconDefinition[] = [
 /**
  * Universal vector icon renderer supporting all 500+ vector SVG icons with optional custom color and size
  */
-export function renderNodeIcon(iconId: string, className = 'w-3.5 h-3.5', customColor?: string, customSize?: number): React.ReactNode {
+export function renderNodeIcon(iconId: string, className: string | number = 'w-3.5 h-3.5', customColor?: string, customSize?: number): React.ReactNode {
+  const safeClassName = typeof className === 'string' ? className : 'w-3.5 h-3.5';
+  const finalSize = typeof className === 'number' ? className : customSize;
+  const finalColor = typeof className === 'number' && typeof customColor === 'string' ? customColor : customColor;
+
   const style: React.CSSProperties = {
-    ...(customColor ? { color: customColor } : {}),
-    ...(customSize ? { width: `${customSize}px`, height: `${customSize}px` } : {}),
+    ...(finalColor ? { color: finalColor } : {}),
+    ...(finalSize ? { width: `${finalSize}px`, height: `${finalSize}px` } : {}),
   };
 
   // 1. Check in 500+ vector icon repository
   const vectorItem = getVectorIconItem(iconId);
   if (vectorItem) {
     const IconComponent = vectorItem.icon;
-    return <IconComponent className={className} style={style} />;
+    return <IconComponent className={safeClassName} style={style} />;
   }
 
   // 2. Fallback check in available icons list

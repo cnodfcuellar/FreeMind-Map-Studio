@@ -158,7 +158,7 @@ export const SpatialSlideCardComponent: React.FC<SpatialSlideCardComponentProps>
             <div className="flex items-center gap-1 shrink-0">
               {content.icons.map((ic, i) => (
                 <span key={i} className="text-xl">
-                  {renderNodeIcon(ic, 22, textColor)}
+                  {renderNodeIcon(ic, 'w-5 h-5', textColor, 22)}
                 </span>
               ))}
             </div>
