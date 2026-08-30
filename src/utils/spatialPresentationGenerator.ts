@@ -50,6 +50,29 @@ export function generateDefaultSpatialSlides(
     };
   };
 
+  // Helper to extract exact visual styles from a node matching the map
+  const extractNodeStyle = (nodeId: string, isRoot: boolean) => {
+    const node = mindMap.nodes[nodeId];
+    if (!node) return { themeId: mindMap.themeId };
+
+    return {
+      themeId: mindMap.themeId,
+      backgroundColor: node.color,
+      textColor: node.textColor,
+      borderColor: node.borderColor,
+      borderWidth: node.borderWidth,
+      contentAlign: isRoot ? ('center' as const) : ('left' as const),
+      bgType: node.bgType,
+      gradientColor1: node.gradientColor1,
+      gradientColor2: node.gradientColor2,
+      gradientDirection: node.gradientDirection,
+      pattern: node.nodePattern,
+      patternColor: node.nodePatternColor,
+      patternSize: node.nodePatternSize,
+      patternOpacity: node.nodePatternOpacity,
+    };
+  };
+
   // Collect ordered nodes (Root first, then recursive traversal of main branches & children)
   const orderedNodeIds: string[] = [rootNode.id];
   const traverse = (nodeId: string) => {
@@ -99,10 +122,7 @@ export function generateDefaultSpatialSlides(
           rotation: rot,
         },
         content,
-        style: {
-          themeId: mindMap.themeId,
-          contentAlign: isRoot ? 'center' : 'left',
-        },
+        style: extractNodeStyle(nodeId, isRoot),
       });
 
       // Dedicated Note Slide if node has notes
@@ -133,8 +153,7 @@ export function generateDefaultSpatialSlides(
             icons: ['file-text'],
           },
           style: {
-            themeId: mindMap.themeId,
-            contentAlign: 'left',
+            ...extractNodeStyle(nodeId, false),
             borderColor: '#f59e0b',
             borderWidth: 2,
           },
@@ -162,7 +181,7 @@ export function generateDefaultSpatialSlides(
           rotation: 0,
         },
         content: rootContent,
-        style: { themeId: mindMap.themeId, contentAlign: 'center' },
+        style: extractNodeStyle(rootNode.id, true),
       });
 
       if (rootContent.notesMarkdown && rootContent.notesMarkdown.trim().length > 0) {
@@ -185,7 +204,7 @@ export function generateDefaultSpatialSlides(
             notesMarkdown: rootContent.notesMarkdown,
             icons: ['file-text'],
           },
-          style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+          style: { ...extractNodeStyle(rootNode.id, false), borderColor: '#f59e0b' },
         });
       }
     }
@@ -215,7 +234,7 @@ export function generateDefaultSpatialSlides(
             rotation: branchRot,
           },
           content: mainContent,
-          style: { themeId: mindMap.themeId, contentAlign: 'left' },
+          style: extractNodeStyle(mainId, false),
         });
 
         if (mainContent.notesMarkdown && mainContent.notesMarkdown.trim().length > 0) {
@@ -238,7 +257,7 @@ export function generateDefaultSpatialSlides(
               notesMarkdown: mainContent.notesMarkdown,
               icons: ['file-text'],
             },
-            style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+            style: { ...extractNodeStyle(mainId, false), borderColor: '#f59e0b' },
           });
         }
       }
@@ -267,7 +286,7 @@ export function generateDefaultSpatialSlides(
               rotation: Math.round((subAngle * 180) / Math.PI) - 90,
             },
             content: subContent,
-            style: { themeId: mindMap.themeId, contentAlign: 'left' },
+            style: extractNodeStyle(subId, false),
           });
 
           if (subContent.notesMarkdown && subContent.notesMarkdown.trim().length > 0) {
@@ -290,7 +309,7 @@ export function generateDefaultSpatialSlides(
                 notesMarkdown: subContent.notesMarkdown,
                 icons: ['file-text'],
               },
-              style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+              style: { ...extractNodeStyle(subId, false), borderColor: '#f59e0b' },
             });
           }
         }
@@ -310,13 +329,12 @@ export function generateDefaultSpatialSlides(
       if (!content) return;
 
       const isRoot = idx === 0;
-      // Distribute in scattered organic clouds
       const angle = (idx / Math.max(1, orderedNodeIds.length)) * Math.PI * 2 + (pseudoRandom() - 0.5) * 0.8;
       const distance = isRoot ? 0 : 350 + pseudoRandom() * spreadRadius;
 
       const x = isRoot ? 0 : Math.round(Math.cos(angle) * distance);
       const y = isRoot ? 0 : Math.round(Math.sin(angle) * distance);
-      const rot = isRoot ? 0 : Math.round((pseudoRandom() - 0.5) * 60); // Random tilt between -30° and +30°
+      const rot = isRoot ? 0 : Math.round((pseudoRandom() - 0.5) * 60);
       const scale = isRoot ? 1.3 : 0.85 + pseudoRandom() * 0.35;
 
       slides.push({
@@ -333,7 +351,7 @@ export function generateDefaultSpatialSlides(
           rotation: rot,
         },
         content,
-        style: { themeId: mindMap.themeId, contentAlign: isRoot ? 'center' : 'left' },
+        style: extractNodeStyle(nodeId, isRoot),
       });
 
       if (content.notesMarkdown && content.notesMarkdown.trim().length > 0) {
@@ -356,12 +374,12 @@ export function generateDefaultSpatialSlides(
             notesMarkdown: content.notesMarkdown,
             icons: ['file-text'],
           },
-          style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+          style: { ...extractNodeStyle(nodeId, false), borderColor: '#f59e0b' },
         });
       }
     });
   } else if (arrangement === 'stacked') {
-    // Stacked Cards / Deck of Cards Style (One over another with subtle offset & tilt)
+    // Stacked Cards / Deck of Cards Style
     const baseOffsetX = 0;
     const baseOffsetY = 0;
 
@@ -370,10 +388,9 @@ export function generateDefaultSpatialSlides(
       if (!content) return;
 
       const isRoot = idx === 0;
-      // Slight shift and rotation for organic card pile look
       const offsetX = isRoot ? 0 : ((idx % 7) - 3) * 16;
       const offsetY = isRoot ? 0 : ((idx % 5) - 2) * 14;
-      const rot = isRoot ? 0 : ((idx % 9) - 4) * 3.5; // -14° to +14° subtle rotation
+      const rot = isRoot ? 0 : ((idx % 9) - 4) * 3.5;
       const scale = isRoot ? 1.2 : 1.0;
 
       slides.push({
@@ -390,7 +407,7 @@ export function generateDefaultSpatialSlides(
           rotation: rot,
         },
         content,
-        style: { themeId: mindMap.themeId, contentAlign: isRoot ? 'center' : 'left' },
+        style: extractNodeStyle(nodeId, isRoot),
       });
 
       if (content.notesMarkdown && content.notesMarkdown.trim().length > 0) {
@@ -413,7 +430,7 @@ export function generateDefaultSpatialSlides(
             notesMarkdown: content.notesMarkdown,
             icons: ['file-text'],
           },
-          style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+          style: { ...extractNodeStyle(nodeId, false), borderColor: '#f59e0b' },
         });
       }
     });
@@ -427,6 +444,7 @@ export function generateDefaultSpatialSlides(
       const content = extractNodeContent(nodeId);
       if (!content) return;
 
+      const isRoot = idx === 0;
       const col = idx % cols;
       const row = Math.floor(idx / cols);
 
@@ -444,7 +462,7 @@ export function generateDefaultSpatialSlides(
           rotation: (idx % 2 === 1 ? 4 : -4) * (idx % 3),
         },
         content,
-        style: { themeId: mindMap.themeId, contentAlign: 'left' },
+        style: extractNodeStyle(nodeId, isRoot),
       });
 
       if (content.notesMarkdown && content.notesMarkdown.trim().length > 0) {
@@ -467,7 +485,7 @@ export function generateDefaultSpatialSlides(
             notesMarkdown: content.notesMarkdown,
             icons: ['file-text'],
           },
-          style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+          style: { ...extractNodeStyle(nodeId, false), borderColor: '#f59e0b' },
         });
       }
     });

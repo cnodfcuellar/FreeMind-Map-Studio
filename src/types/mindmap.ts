@@ -288,6 +288,14 @@ export interface SpatialSlideCard {
     borderWidth?: number;
     borderRadius?: number;
     contentAlign?: 'center' | 'left';
+    bgType?: NodeBackgroundType;
+    gradientColor1?: string;
+    gradientColor2?: string;
+    gradientDirection?: NodeGradientDirection;
+    pattern?: NodePatternStyle;
+    patternColor?: string;
+    patternSize?: number;
+    patternOpacity?: number;
   };
 }
 

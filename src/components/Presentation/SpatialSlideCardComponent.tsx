@@ -52,11 +52,96 @@ export const SpatialSlideCardComponent: React.FC<SpatialSlideCardComponentProps>
   const content = card.content;
 
   // Background and Text color
-  const bgColor = card.style?.backgroundColor || (isRoot ? theme.rootBg : theme.nodeBg);
+  const baseBgColor = card.style?.backgroundColor || (isRoot ? theme.rootBg : theme.nodeBg);
   const textColor = card.style?.textColor || (isRoot ? theme.rootText : theme.nodeText);
   const borderColor = card.style?.borderColor || (isRoot ? '#2563eb' : theme.nodeBorder);
   const borderWidth = card.style?.borderWidth ?? (isRoot ? 3 : 2);
   const isCenter = card.style?.contentAlign === 'center';
+
+  // Build Rich Background (Gradients & SVG Patterns)
+  const getCardBackgroundStyle = (): React.CSSProperties => {
+    const s = card.style;
+    if (!s) return { backgroundColor: baseBgColor };
+
+    // 1. Gradients
+    if (s.bgType === 'gradient') {
+      const g1 = s.gradientColor1 || baseBgColor;
+      const g2 = s.gradientColor2 || '#1e293b';
+      const dir = s.gradientDirection || 'to-br';
+      if (dir === 'radial') {
+        return { backgroundImage: `radial-gradient(circle, ${g1}, ${g2})` };
+      }
+      const cssDir = dir === 'to-r' ? 'to right' : dir === 'to-b' ? 'to bottom' : 'to bottom right';
+      return { backgroundImage: `linear-gradient(${cssDir}, ${g1}, ${g2})` };
+    }
+
+    // 2. SVG Patterns
+    if (s.bgType === 'pattern' && s.pattern) {
+      const pat = s.pattern;
+      const patColor = s.patternColor || '#94a3b8';
+      const size = s.patternSize || 24;
+      const opacity = s.patternOpacity ?? 0.45;
+
+      const hexToRgba = (hex: string, op: number) => {
+        let cleanHex = hex.replace('#', '');
+        let r = 148, g = 163, b = 184;
+        if (cleanHex.length === 3) {
+          r = parseInt(cleanHex[0] + cleanHex[0], 16);
+          g = parseInt(cleanHex[1] + cleanHex[1], 16);
+          b = parseInt(cleanHex[2] + cleanHex[2], 16);
+        } else if (cleanHex.length === 6) {
+          r = parseInt(cleanHex.substring(0, 2), 16);
+          g = parseInt(cleanHex.substring(2, 4), 16);
+          b = parseInt(cleanHex.substring(4, 6), 16);
+        }
+        return `rgba(${r}, ${g}, ${b}, ${op})`;
+      };
+
+      const patRgba = hexToRgba(patColor, opacity);
+
+      if (pat === 'dots') {
+        return {
+          backgroundColor: baseBgColor,
+          backgroundImage: `radial-gradient(${patRgba} 1.5px, transparent 1.5px)`,
+          backgroundSize: `${size}px ${size}px`,
+        };
+      }
+      if (pat === 'squares') {
+        return {
+          backgroundColor: baseBgColor,
+          backgroundImage: `linear-gradient(to right, ${patRgba} 1px, transparent 1px), linear-gradient(to bottom, ${patRgba} 1px, transparent 1px)`,
+          backgroundSize: `${size}px ${size}px`,
+        };
+      }
+      if (pat === 'stripes') {
+        return {
+          backgroundColor: baseBgColor,
+          backgroundImage: `repeating-linear-gradient(45deg, ${patRgba}, ${patRgba} 1.5px, transparent 1.5px, transparent ${size}px)`,
+        };
+      }
+      if (pat === 'hexagons') {
+        const R = size;
+        const W = Number((R * 1.7320508).toFixed(2));
+        const H = Number((R * 3).toFixed(2));
+        const W2 = Number((W / 2).toFixed(2));
+        const r05 = Number((R * 0.5).toFixed(2));
+        const r10 = Number((R * 1.0).toFixed(2));
+        const d = `M 0,0 v ${r05} l ${W2},${r05} v ${r10} l -${W2},${r05} v ${r05} M ${W},0 v ${r05} l -${W2},${r05} v ${r10} l ${W2},${r05} v ${r05} M 0,${R * 1.5} h 0`;
+        const hexSvg = encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><path d="${d}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+        );
+        return {
+          backgroundColor: baseBgColor,
+          backgroundImage: `url("data:image/svg+xml,${hexSvg}")`,
+          backgroundSize: `${W}px ${H}px`,
+        };
+      }
+    }
+
+    return { backgroundColor: baseBgColor };
+  };
+
+  const richBgStyle = getCardBackgroundStyle();
 
   // In presenter mode: active slide is on top (z-50) and 100% opaque. Non-active slides are dimmed (opacity 0.22, z-10).
   const isSpotlighted = !isPresenterMode || isOverviewActive || isCurrentActive;
@@ -83,13 +168,13 @@ export const SpatialSlideCardComponent: React.FC<SpatialSlideCardComponentProps>
         transformOrigin: 'center center',
         width: `${width}px`,
         minHeight: `${height}px`,
-        backgroundColor: bgColor,
         color: textColor,
         borderColor: isSelected && !isPresenterMode ? '#3b82f6' : isPresenterMode && isCurrentActive ? '#60a5fa' : borderColor,
         borderWidth: `${borderWidth}px`,
         opacity: isSpotlighted ? 1 : 0.2,
         zIndex: zIndexVal,
         transition: 'opacity 400ms ease, box-shadow 300ms ease, border-color 300ms ease',
+        ...richBgStyle,
       }}
       className={`absolute top-0 left-0 rounded-3xl p-6 flex flex-col justify-between select-none group ${
         isPresenterMode && isCurrentActive
