@@ -806,9 +806,27 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       var paddingX = isRoot ? 24 : 14;
       var paddingY = isRoot ? 12 : 8;
 
+      // Icon and progress positioning — matching main layout engine
+      var iconPos = node.iconPosition || 'top';
+      var progPos = node.progressPosition || 'top';
       var extraWidth = 0;
-      if (node.icons && node.icons.length > 0) extraWidth += node.icons.length * 20 + 6;
-      if (node.progress !== undefined) extraWidth += 24;
+      var iconExtraHeight = 0;
+
+      if (node.icons && node.icons.length > 0) {
+        if (iconPos === 'left') {
+          extraWidth += node.icons.length * 20 + 6;
+        } else {
+          iconExtraHeight = Math.max(iconExtraHeight, 22);
+        }
+      }
+      if (node.progress !== undefined) {
+        if (progPos === 'left') {
+          extraWidth += 24;
+        } else {
+          iconExtraHeight = Math.max(iconExtraHeight, 22);
+        }
+      }
+      if (node.link) extraWidth += 18;
       if (node.note) extraWidth += 18;
 
       var linkExtraHeight = 0;
@@ -822,14 +840,18 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       var imageExtraHeight = 0;
       var imageMinWidth = 0;
       if (node.imageUrl) {
-        if (node.imagePosition === 'left' || node.imagePosition === 'right') {
-          var imgW1 = node.imageWidth || 80;
+        if (node.imagePosition === 'background') {
+          imageMinWidth = 70;
+          imageExtraHeight = 20;
+        } else if (node.imagePosition === 'left' || node.imagePosition === 'right') {
+          var imgW1 = node.imageWidth || 100;
+          var imgH1 = node.imageHeight || Math.round(imgW1 * 0.75);
           extraWidth += imgW1 + 10;
-          imageExtraHeight = Math.max(0, (node.imageHeight || imgW1 * 0.75) - 28);
+          imageExtraHeight = Math.max(0, imgH1 - 28);
         } else {
-          var imgW2 = node.imageWidth || 120;
+          var imgW2 = node.imageWidth || 140;
           var imgH2 = node.imageHeight || Math.round(imgW2 * 0.65);
-          imageExtraHeight = imgH2 + 10;
+          imageExtraHeight = imgH2 + 12;
           imageMinWidth = imgW2 + 16;
         }
       }
@@ -843,9 +865,29 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
       var charWidth = fontSize * 0.58;
       var lines = (node.text || ' ').split('\\n');
-      var maxLineLength = Math.max.apply(null, lines.map(function(l) { return l.length; }).concat([1]));
-      var titleWidth = Math.min(Math.max(maxLineLength * charWidth, 40), 400);
-      var titleHeight = lines.length * (fontSize * 1.35);
+
+      var titleWidth = 0;
+      var titleHeight = 0;
+
+      var customW = node.customWidth;
+      if (node.shape === 'square' || node.shape === 'circle') {
+        customW = Math.max(node.customWidth || 0, node.customHeight || 0);
+      }
+
+      if (customW && customW > 0) {
+        var availTextWidth = Math.max(customW - (paddingX * 2 + extraWidth), 30);
+        var charsPerLine = Math.max(Math.floor(availTextWidth / charWidth), 1);
+        var wrappedTitleLines = 0;
+        for (var li = 0; li < lines.length; li++) {
+          wrappedTitleLines += Math.max(Math.ceil((lines[li].length || 1) / charsPerLine), 1);
+        }
+        titleWidth = availTextWidth;
+        titleHeight = wrappedTitleLines * (fontSize * 1.38);
+      } else {
+        var maxLineLength = Math.max.apply(null, lines.map(function(l) { return l.length; }).concat([1]));
+        titleWidth = Math.min(Math.max(maxLineLength * charWidth, 40), 400);
+        titleHeight = lines.length * (fontSize * 1.35);
+      }
 
       var bodyWidth = 0;
       var bodyHeight = 0;
@@ -853,27 +895,54 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         var bodyFontSize = node.bodyFontSize || (isRoot ? 13 : 12);
         var bodyLines = node.body.split('\\n');
         var bodyCharWidth = bodyFontSize * 0.56;
-        var maxBodyLineLength = Math.max.apply(null, bodyLines.map(function(l) { return l.length; }).concat([1]));
-        bodyWidth = Math.min(Math.max(maxBodyLineLength * bodyCharWidth, 40), 420);
-        bodyHeight = bodyLines.length * (bodyFontSize * 1.4) + 6;
+
+        if (customW && customW > 0) {
+          var availBodyWidth = Math.max(customW - (paddingX * 2), 30);
+          var bodyCharsPerLine = Math.max(Math.floor(availBodyWidth / bodyCharWidth), 1);
+          var wrappedBodyLines = 0;
+          for (var bi = 0; bi < bodyLines.length; bi++) {
+            wrappedBodyLines += Math.max(Math.ceil((bodyLines[bi].length || 1) / bodyCharsPerLine), 1);
+          }
+          bodyWidth = availBodyWidth;
+          bodyHeight = wrappedBodyLines * (bodyFontSize * 1.4) + 6;
+        } else {
+          var maxBodyLineLength = Math.max.apply(null, bodyLines.map(function(l) { return l.length; }).concat([1]));
+          bodyWidth = Math.min(Math.max(maxBodyLineLength * bodyCharWidth, 40), 420);
+          bodyHeight = bodyLines.length * (bodyFontSize * 1.4) + 6;
+        }
       }
 
       var contentWidth = Math.max(titleWidth, bodyWidth);
       var contentHeight = titleHeight + bodyHeight;
 
       var width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, linkMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
-      var height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + linkExtraHeight + imageExtraHeight));
+      var height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + iconExtraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + iconExtraHeight + linkExtraHeight + imageExtraHeight));
 
       if (node.customWidth && node.customWidth > 0) width = Math.max(width, node.customWidth);
       if (node.customHeight && node.customHeight > 0) height = Math.max(height, node.customHeight);
 
-      if (node.shape === 'hexagon' || node.shape === 'diamond') {
-        width = Math.round(width * 1.25 + 24);
-        height = Math.round(height * 1.1 + 12);
-      } else if (node.shape === 'circle' || node.shape === 'square') {
-        var dim = Math.max(width, height, 54);
+      // Shape-specific dimension adjustments — matching main layout engine
+      if ((node.bgType === 'image' && node.bgImageMode === 'fit') || (node.imageUrl && node.imagePosition === 'fit')) {
+        var fitScale = node.customWidth || node.imageWidth || 160;
+        width = fitScale;
+        height = node.customHeight || Math.round(fitScale * 0.75);
+      } else if (node.shape === 'square' || node.shape === 'circle') {
+        var dim = Math.max(width, height, node.customWidth || 0, node.customHeight || 0, 48);
         width = dim;
         height = dim;
+      } else if (node.shape === 'star') {
+        var baseW = Math.max(width + 48, 100);
+        width = node.customWidth || baseW;
+        height = node.customHeight || Math.round(Math.max(height * 2.2, width * 0.95, 96));
+      } else if (node.shape === 'bubble') {
+        width = node.customWidth || (width + 36);
+        height = node.customHeight || (height + 20);
+      } else if (node.shape === 'hexagon') {
+        width = node.customWidth || (width + 48);
+        height = node.customHeight || Math.max(height, 42);
+      } else if (node.shape === 'arrow') {
+        width = node.customWidth || (width + 52);
+        height = node.customHeight || Math.max(height, 42);
       }
 
       return { width: width, height: height };
@@ -934,6 +1003,33 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
   // Layout Engine
   parts.push(`
+    // 360° Ray & Box Intersection for Radial / Circular Edges
+    function getBoxRayIntersection(box, targetCenter) {
+      var centerX = box.x + box.width / 2;
+      var centerY = box.y + box.height / 2;
+      var dx = targetCenter.x - centerX;
+      var dy = targetCenter.y - centerY;
+
+      if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
+        return { x: centerX, y: centerY };
+      }
+
+      var halfW = box.width / 2;
+      var halfH = box.height / 2;
+
+      if (Math.abs(dx) * halfH > Math.abs(dy) * halfW) {
+        var signX = dx > 0 ? 1 : -1;
+        var x = centerX + signX * halfW;
+        var y = centerY + signX * halfW * (dy / dx);
+        return { x: x, y: y };
+      } else {
+        var signY = dy > 0 ? 1 : -1;
+        var y = centerY + signY * halfH;
+        var x = centerX + signY * halfH * (dx / dy);
+        return { x: x, y: y };
+      }
+    }
+
     function computeMindMapLayout() {
       var layoutMap = new Map();
       var root = mapData.nodes[mapData.rootId];
@@ -969,31 +1065,11 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
       // 1. RADIAL
       if (layoutType === 'radial') {
-        var radius = Math.max(180, validChildren.length * 40 + hGap * 1.5);
-        var angleStep = (2 * Math.PI) / validChildren.length;
-        validChildren.forEach(function(childId, i) {
-          var angle = i * angleStep - Math.PI / 2;
-          var childSize = estimateNodeSize(mapData.nodes[childId]);
-          var cx = Math.cos(angle) * radius - childSize.width / 2;
-          var cy = Math.sin(angle) * radius - childSize.height / 2;
-          var side = Math.cos(angle) >= 0 ? 'right' : 'left';
-          layoutMap.set(childId, { id: childId, x: cx, y: cy, width: childSize.width, height: childSize.height, side: side, depth: 1, branchIndex: i });
-          layoutBranchRadial(childId, cx, cy, childSize.width, childSize.height, angle, layoutMap, hGap, vGap);
-        });
+        layoutRadialTree(rootLayout, validChildren, mapData.nodes, layoutMap, { x: 0, y: 0 }, hGap, vGap);
       }
       // 2. CIRCULAR
       else if (layoutType === 'circular') {
-        var count = validChildren.length;
-        var baseRadius = Math.max(200, count * 45);
-        validChildren.forEach(function(childId, i) {
-          var angle = (i / count) * 2 * Math.PI - Math.PI / 2;
-          var childSize = estimateNodeSize(mapData.nodes[childId]);
-          var cx = Math.cos(angle) * baseRadius - childSize.width / 2;
-          var cy = Math.sin(angle) * baseRadius - childSize.height / 2;
-          var side = Math.cos(angle) >= 0 ? 'right' : 'left';
-          layoutMap.set(childId, { id: childId, x: cx, y: cy, width: childSize.width, height: childSize.height, side: side, depth: 1, branchIndex: i });
-          layoutBranchCircular(childId, baseRadius + 140, layoutMap, hGap);
-        });
+        layoutCircularTree(rootLayout, validChildren, mapData.nodes, layoutMap, { x: 0, y: 0 }, hGap, vGap);
       }
       // 3 & 4. TOP / BOTTOM (Tree Vertical)
       else if (layoutType === 'bottom' || layoutType === 'tree-down' || layoutType === 'top') {
@@ -1034,6 +1110,9 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         layoutBranchSide(rightChildren, 'right', rootLayout, mapData.nodes, layoutMap, rootHGap, hGap, vGap);
         layoutBranchSide(leftChildren, 'left', rootLayout, mapData.nodes, layoutMap, rootHGap, hGap, vGap);
       }
+
+      // Universal collision resolution pass across all layout types
+      resolveLayoutCollisions(layoutMap, mapData, { x: 0, y: 0 }, layoutType, hGap, vGap);
 
       return layoutMap;
     }
@@ -1157,98 +1236,411 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       });
     }
 
-    function layoutBranchRadial(nodeId, px, py, pw, ph, parentAngle, layoutMap, hGap, vGap) {
-      var node = mapData.nodes[nodeId];
-      if (!node || node.folded || !node.children || node.children.length === 0) return;
-      var count = node.children.length;
-      var spread = Math.PI / 2.5;
-      var subDist = Math.max(140, hGap * 2.2);
+    function layoutRadialTree(rootLayout, rootChildren, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap) {
+      if (rootChildren.length === 0) return;
+      var count = rootChildren.length;
 
-      node.children.forEach(function(cid, idx) {
-        var angle = (count === 1)
-          ? parentAngle
-          : parentAngle - spread / 2 + (idx / (count - 1)) * spread;
-        var size = estimateNodeSize(mapData.nodes[cid]);
-        var cx = px + pw / 2 + Math.cos(angle) * subDist - size.width / 2;
-        var cy = py + ph / 2 + Math.sin(angle) * subDist - size.height / 2;
-        var side = Math.cos(angle) >= 0 ? 'right' : 'left';
-        layoutMap.set(cid, { id: cid, x: cx, y: cy, width: size.width, height: size.height, side: side, depth: 2, branchIndex: idx });
-        layoutBranchRadial(cid, cx, cy, size.width, size.height, angle, layoutMap, hGap, vGap);
+      var maxChildW = 90;
+      var maxChildH = 34;
+      rootChildren.forEach(function(cid) {
+        var node = nodes[cid];
+        if (node) {
+          var size = estimateNodeSize(node);
+          maxChildW = Math.max(maxChildW, size.width);
+          maxChildH = Math.max(maxChildH, size.height);
+        }
+      });
+
+      var sectorSpan = (2 * Math.PI) / count;
+      var chordRequired = Math.max(maxChildW, maxChildH) + verticalGap + 28;
+      var chordRadius = chordRequired / (2 * Math.sin(Math.max(0.04, sectorSpan / 2)));
+      var rootClearance = (rootLayout.width + maxChildW) / 2 + horizontalGap + 50;
+      var baseRadius = Math.max(220, chordRadius, rootClearance);
+
+      rootChildren.forEach(function(childId, idx) {
+        var childNode = nodes[childId];
+        if (!childNode) return;
+
+        var startAngle = -Math.PI / 2 + idx * sectorSpan;
+        var endAngle = startAngle + sectorSpan;
+        var midAngle = startAngle + sectorSpan / 2;
+
+        var childSize = estimateNodeSize(childNode);
+        var centerX = canvasCenter.x + baseRadius * Math.cos(midAngle);
+        var centerY = canvasCenter.y + baseRadius * Math.sin(midAngle);
+
+        var childX = centerX - childSize.width / 2;
+        var childY = centerY - childSize.height / 2;
+
+        var childLayout = {
+          id: childId,
+          x: childX,
+          y: childY,
+          width: childSize.width,
+          height: childSize.height,
+          side: 'radial',
+          depth: 1,
+          branchIndex: idx
+        };
+        layoutMap.set(childId, childLayout);
+
+        if (!childNode.folded && childNode.children && childNode.children.length > 0) {
+          layoutRadialSubtree(childId, childLayout, startAngle, endAngle, baseRadius, 2, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap);
+        }
       });
     }
 
-    function layoutBranchCircular(nodeId, radius, layoutMap, hGap) {
-      var node = mapData.nodes[nodeId];
-      if (!node || node.folded || !node.children || node.children.length === 0) return;
-      node.children.forEach(function(cid, i) {
-        var count = node.children.length;
-        var pLayout = layoutMap.get(nodeId);
-        var pAngle = Math.atan2(pLayout.y + pLayout.height / 2, pLayout.x + pLayout.width / 2);
-        var spread = Math.PI / 3;
-        var angle = (count === 1) ? pAngle : pAngle - spread / 2 + (i / (count - 1)) * spread;
-        var size = estimateNodeSize(mapData.nodes[cid]);
-        var cx = Math.cos(angle) * radius - size.width / 2;
-        var cy = Math.sin(angle) * radius - size.height / 2;
-        var side = Math.cos(angle) >= 0 ? 'right' : 'left';
-        layoutMap.set(cid, { id: cid, x: cx, y: cy, width: size.width, height: size.height, side: side, depth: 2, branchIndex: i });
-        layoutBranchCircular(cid, radius + 130, layoutMap, hGap);
+    function layoutRadialSubtree(parentId, parentLayout, startAngle, endAngle, parentRadius, depth, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap) {
+      var parentNode = nodes[parentId];
+      if (!parentNode || parentNode.folded || !parentNode.children || parentNode.children.length === 0) return;
+      var validChildren = parentNode.children.filter(function(id) { return Boolean(nodes[id]); });
+      if (validChildren.length === 0) return;
+
+      var count = validChildren.length;
+      var maxChildW = 90;
+      var maxChildH = 34;
+      validChildren.forEach(function(cid) {
+        var node = nodes[cid];
+        if (node) {
+          var size = estimateNodeSize(node);
+          maxChildW = Math.max(maxChildW, size.width);
+          maxChildH = Math.max(maxChildH, size.height);
+        }
       });
+
+      var sectorSpan = endAngle - startAngle;
+      var availableSpan = Math.min(sectorSpan * 0.92, Math.PI * 0.85);
+      var stepDist = (parentLayout.width + maxChildW) / 2 + horizontalGap + 40;
+      var childSlice = availableSpan / count;
+      var reqChord = maxChildH + verticalGap + 18;
+      var minChordRadius = reqChord / (2 * Math.sin(Math.max(0.04, childSlice / 2)));
+      var currentRadius = Math.max(parentRadius + stepDist, minChordRadius);
+      var parentMidAngle = (startAngle + endAngle) / 2;
+
+      validChildren.forEach(function(childId, idx) {
+        var childNode = nodes[childId];
+        if (!childNode) return;
+
+        var midAngle = parentMidAngle;
+        var childStartAngle = startAngle;
+        var childEndAngle = endAngle;
+
+        if (count === 1) {
+          midAngle = parentMidAngle;
+          childStartAngle = parentMidAngle - sectorSpan / 2;
+          childEndAngle = parentMidAngle + sectorSpan / 2;
+        } else {
+          midAngle = parentMidAngle - availableSpan / 2 + (idx + 0.5) * childSlice;
+          childStartAngle = midAngle - childSlice / 2;
+          childEndAngle = midAngle + childSlice / 2;
+        }
+
+        var childSize = estimateNodeSize(childNode);
+        var centerX = canvasCenter.x + currentRadius * Math.cos(midAngle);
+        var centerY = canvasCenter.y + currentRadius * Math.sin(midAngle);
+
+        var childX = centerX - childSize.width / 2;
+        var childY = centerY - childSize.height / 2;
+
+        var childLayout = {
+          id: childId,
+          x: childX,
+          y: childY,
+          width: childSize.width,
+          height: childSize.height,
+          side: 'radial',
+          depth: depth,
+          branchIndex: idx
+        };
+        layoutMap.set(childId, childLayout);
+
+        if (!childNode.folded && childNode.children && childNode.children.length > 0) {
+          layoutRadialSubtree(childId, childLayout, childStartAngle, childEndAngle, currentRadius, depth + 1, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap);
+        }
+      });
+    }
+
+    function layoutCircularTree(rootLayout, rootChildren, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap) {
+      if (rootChildren.length === 0) return;
+      var count = rootChildren.length;
+
+      var maxChildW = 100;
+      var maxChildH = 36;
+      rootChildren.forEach(function(cid) {
+        var node = nodes[cid];
+        if (node) {
+          var size = estimateNodeSize(node);
+          maxChildW = Math.max(maxChildW, size.width);
+          maxChildH = Math.max(maxChildH, size.height);
+        }
+      });
+
+      var sectorSpan = (2 * Math.PI) / count;
+      var reqChord = Math.max(maxChildW, maxChildH) + verticalGap + 36;
+      var chordRadius = reqChord / (2 * Math.sin(Math.max(0.04, sectorSpan / 2)));
+      var rootClearanceRadius = (rootLayout.width + maxChildW) / 2 + horizontalGap + 80;
+      var baseRadius = Math.max(280, chordRadius, rootClearanceRadius);
+
+      rootChildren.forEach(function(childId, idx) {
+        var childNode = nodes[childId];
+        if (!childNode) return;
+
+        var startA = -Math.PI / 2 + (2 * Math.PI * idx) / count;
+        var endA = startA + sectorSpan;
+        var midA = (startA + endA) / 2;
+
+        var childSize = estimateNodeSize(childNode);
+        var centerX = canvasCenter.x + baseRadius * Math.cos(midA);
+        var centerY = canvasCenter.y + baseRadius * Math.sin(midA);
+
+        var childX = centerX - childSize.width / 2;
+        var childY = centerY - childSize.height / 2;
+
+        var childLayout = {
+          id: childId,
+          x: childX,
+          y: childY,
+          width: childSize.width,
+          height: childSize.height,
+          side: 'circular',
+          depth: 1,
+          branchIndex: idx
+        };
+        layoutMap.set(childId, childLayout);
+
+        if (!childNode.folded && childNode.children && childNode.children.length > 0) {
+          layoutCircularSubtree(childId, childLayout, startA, endA, baseRadius + 150, 2, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap);
+        }
+      });
+    }
+
+    function layoutCircularSubtree(parentId, parentLayout, startAngle, endAngle, radius, depth, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap) {
+      var parentNode = nodes[parentId];
+      if (!parentNode || parentNode.folded || !parentNode.children || parentNode.children.length === 0) return;
+      var validChildren = parentNode.children.filter(function(id) { return Boolean(nodes[id]); });
+      if (validChildren.length === 0) return;
+
+      var count = validChildren.length;
+      var totalSpan = endAngle - startAngle;
+      var stepAngle = totalSpan / count;
+
+      validChildren.forEach(function(childId, i) {
+        var childNode = nodes[childId];
+        if (!childNode) return;
+
+        var cStart = startAngle + i * stepAngle;
+        var cEnd = cStart + stepAngle;
+        var mid = (cStart + cEnd) / 2;
+
+        var childSize = estimateNodeSize(childNode);
+        var cx = canvasCenter.x + radius * Math.cos(mid);
+        var cy = canvasCenter.y + radius * Math.sin(mid);
+
+        var childLayout = {
+          id: childId,
+          x: cx - childSize.width / 2,
+          y: cy - childSize.height / 2,
+          width: childSize.width,
+          height: childSize.height,
+          side: 'circular',
+          depth: depth,
+          branchIndex: i
+        };
+        layoutMap.set(childId, childLayout);
+
+        if (!childNode.folded && childNode.children && childNode.children.length > 0) {
+          layoutCircularSubtree(childId, childLayout, cStart, cEnd, radius + 150, depth + 1, nodes, layoutMap, canvasCenter, horizontalGap, verticalGap);
+        }
+      });
+    }
+
+    // Universal Collision Resolution Pass
+    function shiftSubtree(nodeId, dx, dy, layoutMap, getDescendantIds) {
+      var allIds = [nodeId].concat(getDescendantIds(nodeId));
+      for (var k = 0; k < allIds.length; k++) {
+        var layout = layoutMap.get(allIds[k]);
+        if (layout) {
+          layout.x += dx;
+          layout.y += dy;
+        }
+      }
+    }
+
+    function resolveLayoutCollisions(layoutMap, mapData, canvasCenter, layoutType, horizontalGap, verticalGap) {
+      var rootId = mapData.rootId;
+      var nodeIds = [];
+      layoutMap.forEach(function(val, key) {
+        if (key !== rootId) nodeIds.push(key);
+      });
+      if (nodeIds.length < 2) return;
+
+      var minGapX = Math.max(20, Math.round(horizontalGap * 0.4));
+      var minGapY = Math.max(16, Math.round(verticalGap * 0.7));
+
+      var descendantsMap = new Map();
+      function getDescendantIds(id) {
+        if (descendantsMap.has(id)) return descendantsMap.get(id);
+        var node = mapData.nodes[id];
+        var list = [];
+        if (node && node.children) {
+          for (var c = 0; c < node.children.length; c++) {
+            var cid = node.children[c];
+            if (layoutMap.has(cid)) {
+              list.push(cid);
+              list = list.concat(getDescendantIds(cid));
+            }
+          }
+        }
+        descendantsMap.set(id, list);
+        return list;
+      }
+
+      var MAX_PASSES = 32;
+      for (var pass = 0; pass < MAX_PASSES; pass++) {
+        var hasCollision = false;
+
+        for (var i = 0; i < nodeIds.length; i++) {
+          var aId = nodeIds[i];
+          var a = layoutMap.get(aId);
+          if (!a) continue;
+          var aCenterX = a.x + a.width / 2;
+          var aCenterY = a.y + a.height / 2;
+
+          for (var j = i + 1; j < nodeIds.length; j++) {
+            var bId = nodeIds[j];
+            var b = layoutMap.get(bId);
+            if (!b) continue;
+            var bCenterX = b.x + b.width / 2;
+            var bCenterY = b.y + b.height / 2;
+
+            var overlapX = (a.width / 2 + b.width / 2 + minGapX) - Math.abs(aCenterX - bCenterX);
+            var overlapY = (a.height / 2 + b.height / 2 + minGapY) - Math.abs(aCenterY - bCenterY);
+
+            if (overlapX > 0 && overlapY > 0) {
+              hasCollision = true;
+
+              if (layoutType === 'standard' || layoutType === 'left' || layoutType === 'right') {
+                var pushY = (overlapY / 2) + 3;
+                var signY = aCenterY <= bCenterY ? -1 : 1;
+                shiftSubtree(a.id, 0, signY * pushY, layoutMap, getDescendantIds);
+                shiftSubtree(b.id, 0, -signY * pushY, layoutMap, getDescendantIds);
+              } else if (layoutType === 'top' || layoutType === 'bottom' || layoutType === 'balanced-horizontal' || layoutType === 'tree-down') {
+                var pushX = (overlapX / 2) + 3;
+                var signX = aCenterX <= bCenterX ? -1 : 1;
+                shiftSubtree(a.id, signX * pushX, 0, layoutMap, getDescendantIds);
+                shiftSubtree(b.id, -signX * pushX, 0, layoutMap, getDescendantIds);
+              } else {
+                var dx = bCenterX - aCenterX;
+                var dy = bCenterY - aCenterY;
+                if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) {
+                  dx = bCenterX - canvasCenter.x || 1;
+                  dy = bCenterY - canvasCenter.y || 1;
+                }
+                var dist = Math.hypot(dx, dy) || 1;
+                var pushDist = Math.max(overlapX, overlapY) / 2 + 5;
+                var nx = dx / dist;
+                var ny = dy / dist;
+
+                if (a.depth > b.depth) {
+                  shiftSubtree(a.id, -nx * pushDist * 1.5, -ny * pushDist * 1.5, layoutMap, getDescendantIds);
+                } else if (b.depth > a.depth) {
+                  shiftSubtree(b.id, nx * pushDist * 1.5, ny * pushDist * 1.5, layoutMap, getDescendantIds);
+                } else {
+                  shiftSubtree(a.id, -nx * pushDist, -ny * pushDist, layoutMap, getDescendantIds);
+                  shiftSubtree(b.id, nx * pushDist, ny * pushDist, layoutMap, getDescendantIds);
+                }
+              }
+            }
+          }
+        }
+
+        if (!hasCollision) break;
+      }
     }
 `);
 
   // Edge Path Generator
   parts.push(`
     function generateEdgePath(parent, child, edgeStyle) {
-      var startX, startY, endX, endY;
+      if (edgeStyle === 'hidden') return '';
+
+      var parentCenterX = parent.x + parent.width / 2;
+      var parentCenterY = parent.y + parent.height / 2;
+      var childCenterX = child.x + child.width / 2;
+      var childCenterY = child.y + child.height / 2;
+
+      // Radial / Circular
+      if (child.side === 'radial' || child.side === 'circular') {
+        var start = getBoxRayIntersection(parent, { x: childCenterX, y: childCenterY });
+        var end = getBoxRayIntersection(child, { x: parentCenterX, y: parentCenterY });
+
+        if (edgeStyle === 'linear') {
+          return 'M ' + start.x + ' ' + start.y + ' L ' + end.x + ' ' + end.y;
+        }
+        if (edgeStyle === 'sharp' || edgeStyle === 'horizontal') {
+          var midX = (start.x + end.x) / 2;
+          var midY = (start.y + end.y) / 2;
+          return 'M ' + start.x + ' ' + start.y + ' L ' + midX + ' ' + start.y + ' L ' + midX + ' ' + end.y + ' L ' + end.x + ' ' + end.y;
+        }
+        var edx = end.x - start.x;
+        var edy = end.y - start.y;
+        var cx1 = start.x + edx * 0.4;
+        var cy1 = start.y + edy * 0.4;
+        var cx2 = start.x + edx * 0.6;
+        var cy2 = start.y + edy * 0.6;
+        return 'M ' + start.x + ' ' + start.y + ' C ' + cx1 + ' ' + cy1 + ', ' + cx2 + ' ' + cy2 + ', ' + end.x + ' ' + end.y;
+      }
+
       var isVertical = child.side === 'top' || child.side === 'bottom';
+      var startX, startY, endX, endY;
 
       if (isVertical) {
         if (child.side === 'bottom') {
-          startX = parent.x + parent.width / 2;
+          startX = parentCenterX;
           startY = parent.y + parent.height;
-          endX = child.x + child.width / 2;
+          endX = childCenterX;
           endY = child.y;
         } else {
-          startX = parent.x + parent.width / 2;
+          startX = parentCenterX;
           startY = parent.y;
-          endX = child.x + child.width / 2;
+          endX = childCenterX;
           endY = child.y + child.height;
         }
       } else {
         if (child.side === 'right') {
           startX = parent.x + parent.width;
-          startY = parent.y + parent.height / 2;
+          startY = parentCenterY;
           endX = child.x;
-          endY = child.y + child.height / 2;
+          endY = childCenterY;
         } else {
           startX = parent.x;
-          startY = parent.y + parent.height / 2;
+          startY = parentCenterY;
           endX = child.x + child.width;
-          endY = child.y + child.height / 2;
+          endY = childCenterY;
         }
       }
 
       if (edgeStyle === 'sharp') {
         if (isVertical) {
-          var midY = (startY + endY) / 2;
-          return 'M ' + startX + ' ' + startY + ' L ' + startX + ' ' + midY + ' L ' + endX + ' ' + midY + ' L ' + endX + ' ' + endY;
+          var midY2 = (startY + endY) / 2;
+          return 'M ' + startX + ' ' + startY + ' L ' + startX + ' ' + midY2 + ' L ' + endX + ' ' + midY2 + ' L ' + endX + ' ' + endY;
         } else {
-          var midX = (startX + endX) / 2;
-          return 'M ' + startX + ' ' + startY + ' L ' + midX + ' ' + startY + ' L ' + midX + ' ' + endY + ' L ' + endX + ' ' + endY;
+          var midX2 = (startX + endX) / 2;
+          return 'M ' + startX + ' ' + startY + ' L ' + midX2 + ' ' + startY + ' L ' + midX2 + ' ' + endY + ' L ' + endX + ' ' + endY;
         }
       } else if (edgeStyle === 'linear') {
         return 'M ' + startX + ' ' + startY + ' L ' + endX + ' ' + endY;
       } else {
         if (isVertical) {
-          var dy = Math.abs(endY - startY);
-          var cy1 = child.side === 'bottom' ? startY + dy * 0.45 : startY - dy * 0.45;
-          var cy2 = child.side === 'bottom' ? endY - dy * 0.45 : endY + dy * 0.45;
-          return 'M ' + startX + ' ' + startY + ' C ' + startX + ' ' + cy1 + ', ' + endX + ' ' + cy2 + ', ' + endX + ' ' + endY;
+          var dy2 = Math.abs(endY - startY);
+          var cy1_v = child.side === 'bottom' ? startY + dy2 * 0.45 : startY - dy2 * 0.45;
+          var cy2_v = child.side === 'bottom' ? endY - dy2 * 0.45 : endY + dy2 * 0.45;
+          return 'M ' + startX + ' ' + startY + ' C ' + startX + ' ' + cy1_v + ', ' + endX + ' ' + cy2_v + ', ' + endX + ' ' + endY;
         } else {
-          var dx = Math.abs(endX - startX);
-          var cx1 = child.side === 'right' ? startX + dx * 0.45 : startX - dx * 0.45;
-          var cx2 = child.side === 'right' ? endX - dx * 0.45 : endX + dx * 0.45;
-          return 'M ' + startX + ' ' + startY + ' C ' + cx1 + ' ' + startY + ', ' + cx2 + ' ' + endY + ', ' + endX + ' ' + endY;
+          var dx2 = Math.abs(endX - startX);
+          var cx1_h = child.side === 'right' ? startX + dx2 * 0.45 : startX - dx2 * 0.45;
+          var cx2_h = child.side === 'right' ? endX - dx2 * 0.45 : endX + dx2 * 0.45;
+          return 'M ' + startX + ' ' + startY + ' C ' + cx1_h + ' ' + startY + ', ' + cx2_h + ' ' + endY + ', ' + endX + ' ' + endY;
         }
       }
     }
