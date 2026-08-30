@@ -259,6 +259,7 @@ export interface SpatialSlideCard {
   id: string;
   order: number;
   title: string;
+  isNoteSlide?: boolean;
   spatial: {
     x: number;
     y: number;

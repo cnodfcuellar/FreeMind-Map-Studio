@@ -159,66 +159,78 @@ export const SpatialSlideCardComponent: React.FC<SpatialSlideCardComponentProps>
       </div>
 
       {/* 2. Main Content Body */}
-      <div className={`flex-1 flex flex-col ${isCenter ? 'items-center text-center' : 'items-start text-left'}`}>
-        {/* Optional Image */}
-        {content.imageUrl && (
-          <div className="mb-4 w-full flex justify-center">
-            <img
-              src={content.imageUrl}
-              alt={content.titleText}
-              className="max-h-40 object-contain rounded-xl shadow-md border border-black/5"
-            />
+      {card.isNoteSlide ? (
+        <div className="flex-1 flex flex-col items-start text-left w-full overflow-hidden">
+          <div className="flex items-center gap-2 mb-3 text-amber-500 font-bold text-sm border-b border-amber-500/20 pb-2 w-full">
+            <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400 font-extrabold text-[10px] uppercase tracking-wider flex items-center gap-1">
+              <FileText className="w-3.5 h-3.5" />
+              <span>Nota Detallada</span>
+            </span>
+            <span className="text-base font-extrabold text-slate-100">{content.titleText}</span>
           </div>
-        )}
+          <div className="overflow-y-auto pr-1 text-sm leading-relaxed text-slate-100 max-h-[320px] w-full">
+            <MarkdownView content={content.notesMarkdown} isDark={true} />
+          </div>
+        </div>
+      ) : (
+        <div className={`flex-1 flex flex-col ${isCenter ? 'items-center text-center' : 'items-start text-left'}`}>
+          {/* Optional Image */}
+          {content.imageUrl && (
+            <div className="mb-4 w-full flex justify-center">
+              <img
+                src={content.imageUrl}
+                alt={content.titleText}
+                className="max-h-40 object-contain rounded-xl shadow-md border border-black/5"
+              />
+            </div>
+          )}
 
-        {/* Title & Icons */}
-        <div className={`flex items-center gap-2 mb-2 ${isCenter ? 'justify-center' : 'justify-start'}`}>
-          {content.icons && content.icons.length > 0 && (
-            <div className="flex items-center gap-1 shrink-0">
-              {content.icons.map((ic, i) => (
-                <span key={i} className="text-xl">
-                  {renderNodeIcon(ic, 'w-5 h-5', textColor, 22)}
-                </span>
+          {/* Title & Icons */}
+          <div className={`flex items-center gap-2 mb-2 ${isCenter ? 'justify-center' : 'justify-start'}`}>
+            {content.icons && content.icons.length > 0 && (
+              <div className="flex items-center gap-1 shrink-0">
+                {content.icons.map((ic, i) => (
+                  <span key={i} className="text-xl">
+                    {renderNodeIcon(ic, 'w-5 h-5', textColor, 22)}
+                  </span>
+                ))}
+              </div>
+            )}
+            <h2 className="text-2xl font-black tracking-tight leading-tight">
+              {content.titleText}
+            </h2>
+          </div>
+
+          {/* Body Text */}
+          {content.bodyText && (
+            <p className="text-sm opacity-85 leading-relaxed mb-4 max-w-xl font-medium">
+              {content.bodyText}
+            </p>
+          )}
+
+          {/* Sub-items list if any */}
+          {content.subItems && content.subItems.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 w-full my-2">
+              {content.subItems.slice(0, 6).map((sub) => (
+                <div
+                  key={sub.id}
+                  className="px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-xs font-semibold flex items-center gap-2 truncate"
+                >
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sub.color || '#3b82f6' }} />
+                  <span className="truncate">{sub.text}</span>
+                </div>
               ))}
             </div>
           )}
-          <h2 className="text-2xl font-black tracking-tight leading-tight">
-            {content.titleText}
-          </h2>
         </div>
+      )}
 
-        {/* Body Text */}
-        {content.bodyText && (
-          <p className="text-sm opacity-85 leading-relaxed mb-4 max-w-xl font-medium">
-            {content.bodyText}
-          </p>
-        )}
-
-        {/* Sub-items list if any */}
-        {content.subItems && content.subItems.length > 0 && (
-          <div className="grid grid-cols-2 gap-2 w-full my-2">
-            {content.subItems.slice(0, 6).map((sub) => (
-              <div
-                key={sub.id}
-                className="px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-xs font-semibold flex items-center gap-2 truncate"
-              >
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sub.color || '#3b82f6' }} />
-                <span className="truncate">{sub.text}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* 3. Footer with Markdown Notes Preview or Badge */}
-      {content.notesMarkdown && content.notesMarkdown.trim().length > 0 && (
+      {/* 3. Footer with Markdown Notes Preview on standard cards (if not a dedicated note slide) */}
+      {!card.isNoteSlide && content.notesMarkdown && content.notesMarkdown.trim().length > 0 && (
         <div className="mt-4 pt-3 border-t border-black/10 dark:border-white/10 w-full">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500 mb-1">
             <FileText className="w-3.5 h-3.5" />
-            <span>Nota del Orador</span>
-          </div>
-          <div className="text-xs opacity-80 max-h-24 overflow-hidden line-clamp-3 leading-relaxed">
-            <MarkdownView content={content.notesMarkdown} />
+            <span>Nota del Orador (Ver diapositiva siguiente)</span>
           </div>
         </div>
       )}
