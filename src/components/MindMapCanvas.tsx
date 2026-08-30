@@ -1711,28 +1711,49 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             )}
 
             {/* Notes Slide Floating Modal / Drawer */}
-            {showNotesDrawer && activeNode?.note && (
-              <div className="pointer-events-auto absolute top-20 right-6 sm:right-10 w-84 sm:w-96 max-h-[70vh] bg-slate-900/98 backdrop-blur-xl rounded-2xl border-2 border-amber-500/60 shadow-[0_0_40px_rgba(245,158,11,0.25)] p-4 flex flex-col text-slate-200 animate-in fade-in zoom-in-95 duration-200 z-50">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-500/20">
-                  <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1">
-                      <FileText className="w-3 h-3" />
-                      <span>Nota Detallada</span>
-                    </span>
-                    <span className="truncate max-w-[160px] text-slate-300">({activeNode.text})</span>
+            {(() => {
+              // Resolve active note from activeNode, activeSlide.nodeId, or activeSlide.nodeIds
+              let noteContent = activeNode?.note;
+              let noteTitle = activeNode?.text;
+              if (!noteContent && activeSlide?.nodeId && mindMap.nodes[activeSlide.nodeId]?.note) {
+                noteContent = mindMap.nodes[activeSlide.nodeId].note;
+                noteTitle = mindMap.nodes[activeSlide.nodeId].text;
+              }
+              if (!noteContent && activeSlide?.nodeIds && activeSlide.nodeIds.length > 0) {
+                for (const nid of activeSlide.nodeIds) {
+                  if (mindMap.nodes[nid]?.note) {
+                    noteContent = mindMap.nodes[nid].note;
+                    noteTitle = mindMap.nodes[nid].text;
+                    break;
+                  }
+                }
+              }
+
+              if (!showNotesDrawer || !noteContent) return null;
+
+              return (
+                <div className="pointer-events-auto absolute top-20 right-6 sm:right-10 w-84 sm:w-96 max-h-[70vh] bg-slate-900/98 backdrop-blur-xl rounded-2xl border-2 border-amber-500/60 shadow-[0_0_40px_rgba(245,158,11,0.25)] p-4 flex flex-col text-slate-200 animate-in fade-in zoom-in-95 duration-200 z-50">
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-500/20">
+                    <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
+                      <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1">
+                        <FileText className="w-3 h-3" />
+                        <span>Nota Detallada</span>
+                      </span>
+                      {noteTitle && <span className="truncate max-w-[160px] text-slate-300">({noteTitle})</span>}
+                    </div>
+                    <button
+                      onClick={() => setShowNotesDrawer(false)}
+                      className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setShowNotesDrawer(false)}
-                    className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="overflow-y-auto pr-1 text-xs space-y-2 leading-relaxed text-slate-200">
+                    <MarkdownView markdown={noteContent} isDark={true} />
+                  </div>
                 </div>
-                <div className="overflow-y-auto pr-1 text-xs space-y-2 leading-relaxed text-slate-200">
-                  <MarkdownView markdown={activeNode.note} isDark={true} />
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Bottom Filmstrip & Controls HUD */}
             <div className="pointer-events-auto bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex flex-col z-30 shadow-2xl">
