@@ -18,6 +18,8 @@ interface SpatialSlideCardComponentProps {
   card: SpatialSlideCard;
   isSelected: boolean;
   isPresenterMode: boolean;
+  isCurrentActive?: boolean;
+  isOverviewActive?: boolean;
   onSelect: () => void;
   onDoubleClick: () => void;
   onEditDetail: () => void;
@@ -32,6 +34,8 @@ export const SpatialSlideCardComponent: React.FC<SpatialSlideCardComponentProps>
   card,
   isSelected,
   isPresenterMode,
+  isCurrentActive = false,
+  isOverviewActive = false,
   onSelect,
   onDoubleClick,
   onEditDetail,
@@ -54,6 +58,16 @@ export const SpatialSlideCardComponent: React.FC<SpatialSlideCardComponentProps>
   const borderWidth = card.style?.borderWidth ?? (isRoot ? 3 : 2);
   const isCenter = card.style?.contentAlign === 'center';
 
+  // In presenter mode: active slide is on top (z-50) and 100% opaque. Non-active slides are dimmed (opacity 0.22, z-10).
+  const isSpotlighted = !isPresenterMode || isOverviewActive || isCurrentActive;
+  const zIndexVal = isPresenterMode
+    ? isCurrentActive
+      ? 60
+      : 10
+    : isSelected
+    ? 50
+    : 20;
+
   return (
     <div
       onClick={(e) => {
@@ -71,13 +85,18 @@ export const SpatialSlideCardComponent: React.FC<SpatialSlideCardComponentProps>
         minHeight: `${height}px`,
         backgroundColor: bgColor,
         color: textColor,
-        borderColor: isSelected && !isPresenterMode ? '#3b82f6' : borderColor,
+        borderColor: isSelected && !isPresenterMode ? '#3b82f6' : isPresenterMode && isCurrentActive ? '#60a5fa' : borderColor,
         borderWidth: `${borderWidth}px`,
+        opacity: isSpotlighted ? 1 : 0.2,
+        zIndex: zIndexVal,
+        transition: 'opacity 400ms ease, box-shadow 300ms ease, border-color 300ms ease',
       }}
-      className={`absolute top-0 left-0 rounded-3xl p-6 shadow-2xl flex flex-col justify-between transition-shadow select-none group ${
-        isSelected && !isPresenterMode
-          ? 'ring-4 ring-blue-500/40 shadow-[0_0_50px_rgba(59,130,246,0.35)] z-40'
-          : 'hover:shadow-[0_0_30px_rgba(0,0,0,0.15)] z-20'
+      className={`absolute top-0 left-0 rounded-3xl p-6 flex flex-col justify-between select-none group ${
+        isPresenterMode && isCurrentActive
+          ? 'shadow-[0_0_80px_rgba(59,130,246,0.5)] ring-2 ring-blue-400/80'
+          : isSelected && !isPresenterMode
+          ? 'ring-4 ring-blue-500/40 shadow-[0_0_50px_rgba(59,130,246,0.35)]'
+          : 'shadow-2xl hover:shadow-[0_0_30px_rgba(0,0,0,0.15)]'
       }`}
     >
       {/* 1. Header Badges & Actions */}

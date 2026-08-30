@@ -479,9 +479,14 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
                 card={card}
                 isSelected={selectedSlideId === card.id}
                 isPresenterMode={isPresenterMode}
+                isCurrentActive={idx === currentSlideIndex}
+                isOverviewActive={isOverviewActive}
                 onSelect={() => {
                   setSelectedSlideId(card.id);
                   setCurrentSlideIndex(idx);
+                  if (isPresenterMode) {
+                    flyCameraToSlide(card);
+                  }
                 }}
                 onDoubleClick={() => {
                   setEditingCardId(card.id);
