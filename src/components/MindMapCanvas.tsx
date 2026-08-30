@@ -1750,7 +1750,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                     </button>
                   </div>
                   <div className="overflow-y-auto pr-1 text-xs space-y-2 leading-relaxed text-slate-200">
-                    <MarkdownView markdown={noteContent} isDark={true} />
+                    <MarkdownView content={noteContent} markdown={noteContent} isDark={true} />
                   </div>
                 </div>
               );

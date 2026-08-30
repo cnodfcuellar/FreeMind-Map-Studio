@@ -92,19 +92,18 @@ export function renderInlineMarkdown(text: string, isDark = false): React.ReactN
   return nodes;
 }
 
-/**
- * Full Markdown Document Renderer to React JSX
- */
 export const MarkdownView: React.FC<{
-  content: string;
+  content?: string;
+  markdown?: string;
   isDark?: boolean;
   className?: string;
-}> = ({ content, isDark = false, className = '' }) => {
-  if (!content || content.trim().length === 0) {
+}> = ({ content, markdown, isDark = false, className = '' }) => {
+  const text = content ?? markdown ?? '';
+  if (!text || text.trim().length === 0) {
     return <div className="text-xs italic opacity-50">Sin contenido en la nota.</div>;
   }
 
-  const lines = content.split('\n');
+  const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let inCodeBlock = false;
   let codeBlockBuffer: string[] = [];
