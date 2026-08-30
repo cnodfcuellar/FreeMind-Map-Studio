@@ -64,9 +64,30 @@ export function generateDefaultPresentationSlides(
       width: rootLayout.width + rootPadding * 2,
       height: rootLayout.height + rootPadding * 2,
     },
-    showNotes: Boolean(rootNode.note),
+    showNotes: false,
     color: rootNode.color || '#2563eb',
   });
+
+  let currentOrder = 3;
+
+  // If Root has notes, insert a dedicated Note Slide immediately after Root
+  if (rootNode.note && rootNode.note.trim().length > 0) {
+    slides.push({
+      id: `slide-note-${rootNode.id}`,
+      order: currentOrder++,
+      title: `📝 Nota: ${rootNode.text || 'Tema Central'}`,
+      type: 'note',
+      nodeId: rootNode.id,
+      bounds: {
+        x: rootLayout.x - rootPadding * 1.5,
+        y: rootLayout.y - rootPadding * 1.5,
+        width: rootLayout.width + rootPadding * 3,
+        height: rootLayout.height + rootPadding * 3,
+      },
+      showNotes: true,
+      color: '#f59e0b',
+    });
+  }
 
   // 3. Helper to recursively collect branch bounds
   const getSubtreeBounds = (nodeId: string): { minX: number; minY: number; maxX: number; maxY: number } => {
@@ -93,11 +114,11 @@ export function generateDefaultPresentationSlides(
   };
 
   // 4. Iterate main branches & major sub-branches
-  let currentOrder = 3;
   if (rootNode.children && rootNode.children.length > 0) {
     rootNode.children.forEach((mainChildId) => {
       const mainNode = mindMap.nodes[mainChildId];
-      if (!mainNode || !layoutMap.has(mainChildId)) return;
+      const mainLayout = layoutMap.get(mainChildId);
+      if (!mainNode || !mainLayout) return;
 
       const branchBounds = getSubtreeBounds(mainChildId);
       const bPadding = 32;
@@ -115,11 +136,30 @@ export function generateDefaultPresentationSlides(
           width: Math.max(200, branchBounds.maxX - branchBounds.minX + bPadding * 2),
           height: Math.max(140, branchBounds.maxY - branchBounds.minY + bPadding * 2),
         },
-        showNotes: Boolean(mainNode.note),
+        showNotes: false,
         color: mainNode.color || '#3b82f6',
       });
 
-      // Add individual focused slide for sub-children if they have rich content (notes, children, etc.)
+      // If Main branch node has notes, insert a dedicated Note Slide immediately
+      if (mainNode.note && mainNode.note.trim().length > 0) {
+        slides.push({
+          id: `slide-note-${mainChildId}`,
+          order: currentOrder++,
+          title: `📝 Nota: ${mainNode.text || 'Rama Principal'}`,
+          type: 'note',
+          nodeId: mainChildId,
+          bounds: {
+            x: mainLayout.x - 30,
+            y: mainLayout.y - 30,
+            width: mainLayout.width + 60,
+            height: mainLayout.height + 60,
+          },
+          showNotes: true,
+          color: '#f59e0b',
+        });
+      }
+
+      // Add individual focused slide for sub-children
       if (mainNode.children && mainNode.children.length > 0) {
         mainNode.children.forEach((subChildId) => {
           const subNode = mindMap.nodes[subChildId];
@@ -141,9 +181,28 @@ export function generateDefaultPresentationSlides(
               width: Math.max(160, subTreeBounds.maxX - subTreeBounds.minX + subPadding * 2),
               height: Math.max(100, subTreeBounds.maxY - subTreeBounds.minY + subPadding * 2),
             },
-            showNotes: Boolean(subNode.note),
+            showNotes: false,
             color: subNode.color || mainNode.color || '#6366f1',
           });
+
+          // If Sub-child node has notes, insert a dedicated Note Slide immediately
+          if (subNode.note && subNode.note.trim().length > 0) {
+            slides.push({
+              id: `slide-note-${subChildId}`,
+              order: currentOrder++,
+              title: `📝 Nota: ${subNode.text || 'Detalle'}`,
+              type: 'note',
+              nodeId: subChildId,
+              bounds: {
+                x: subLayout.x - 24,
+                y: subLayout.y - 24,
+                width: subLayout.width + 48,
+                height: subLayout.height + 48,
+              },
+              showNotes: true,
+              color: '#f59e0b',
+            });
+          }
         });
       }
     });

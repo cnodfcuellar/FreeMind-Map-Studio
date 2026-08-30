@@ -277,13 +277,20 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
     []
   );
 
-  // Focus slide when in presentation mode
+  // Focus slide when in presentation mode and sync note drawer
   useEffect(() => {
     if (!isPresentationMode) return;
     if (isOverviewActive) {
       flyCameraToBounds(overviewBounds);
+      setShowNotesDrawer(false);
     } else if (activeSlide) {
       flyCameraToBounds(activeSlide.bounds);
+      // If the slide is specifically a Note slide or explicitly has showNotes enabled
+      if (activeSlide.type === 'note' || activeSlide.showNotes) {
+        setShowNotesDrawer(true);
+      } else {
+        setShowNotesDrawer(false);
+      }
     }
   }, [isPresentationMode, currentSlideIndex, activeSlide, isOverviewActive, overviewBounds, flyCameraToBounds]);
 
@@ -1703,22 +1710,25 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               </div>
             )}
 
-            {/* Notes Drawer */}
+            {/* Notes Slide Floating Modal / Drawer */}
             {showNotesDrawer && activeNode?.note && (
-              <div className="pointer-events-auto absolute top-28 right-4 w-80 sm:w-96 max-h-[65vh] bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700/80 shadow-2xl p-4 flex flex-col text-slate-200 animate-in fade-in">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                  <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
-                    <FileText className="w-4 h-4" />
-                    <span>Notas del Orador ({activeNode.text})</span>
+              <div className="pointer-events-auto absolute top-20 right-6 sm:right-10 w-84 sm:w-96 max-h-[70vh] bg-slate-900/98 backdrop-blur-xl rounded-2xl border-2 border-amber-500/60 shadow-[0_0_40px_rgba(245,158,11,0.25)] p-4 flex flex-col text-slate-200 animate-in fade-in zoom-in-95 duration-200 z-50">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-500/20">
+                  <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
+                    <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1">
+                      <FileText className="w-3 h-3" />
+                      <span>Nota Detallada</span>
+                    </span>
+                    <span className="truncate max-w-[160px] text-slate-300">({activeNode.text})</span>
                   </div>
                   <button
                     onClick={() => setShowNotesDrawer(false)}
-                    className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
+                    className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <div className="overflow-y-auto pr-1 text-xs space-y-2 leading-relaxed">
+                <div className="overflow-y-auto pr-1 text-xs space-y-2 leading-relaxed text-slate-200">
                   <MarkdownView markdown={activeNode.note} isDark={true} />
                 </div>
               </div>
