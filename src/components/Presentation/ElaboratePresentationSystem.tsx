@@ -387,6 +387,20 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
                 >
                   Matriz
                 </button>
+                <button
+                  onClick={() => handleReArrange('random')}
+                  className="px-2 py-1 rounded hover:bg-slate-700 text-slate-200 cursor-pointer font-medium"
+                  title="Acomodar de forma artística/aleatoria"
+                >
+                  Randómico
+                </button>
+                <button
+                  onClick={() => handleReArrange('stacked')}
+                  className="px-2 py-1 rounded hover:bg-slate-700 text-slate-200 cursor-pointer font-medium"
+                  title="Acomodar en pila (uno sobre otro con ligera inclinación)"
+                >
+                  En Pila (Mazo)
+                </button>
               </div>
 
               {/* Add Custom Card */}

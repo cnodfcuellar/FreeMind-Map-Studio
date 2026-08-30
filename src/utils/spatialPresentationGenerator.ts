@@ -1,14 +1,15 @@
 import { MindMap, SpatialSlideCard } from '../types/mindmap';
 
-export type SpatialArrangementType = 'spiral' | 'constellation' | 'timeline' | 'grid';
+export type SpatialArrangementType = 'spiral' | 'constellation' | 'grid' | 'random' | 'stacked';
 
 /**
  * Generates an intelligent array of SpatialSlideCard items from the current MindMap.
  * Supports multiple cinematic spatial layouts:
- * - 'spiral': Progressive spiral with elegant rotation increments (0°, 15°, 30°, ...).
+ * - 'spiral': Progressive spiral with elegant rotation increments.
  * - 'constellation': Giant central root and orbit branches with radial rotations.
- * - 'timeline': Linear horizontal journey.
  * - 'grid': Clean structured matrix.
+ * - 'random': Artistic scattered arrangement with random positions, rotations and tilts.
+ * - 'stacked': Cards stacked on top of each other (deck of cards / flashcards style) with slight offset and rotation.
  */
 export function generateDefaultSpatialSlides(
   mindMap: MindMap,
@@ -294,6 +295,127 @@ export function generateDefaultSpatialSlides(
           }
         }
       });
+    });
+  } else if (arrangement === 'random') {
+    // Artistic Scattered / Organic Random arrangement
+    const spreadRadius = 1400;
+    let seed = 42;
+    const pseudoRandom = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+
+    orderedNodeIds.forEach((nodeId, idx) => {
+      const content = extractNodeContent(nodeId);
+      if (!content) return;
+
+      const isRoot = idx === 0;
+      // Distribute in scattered organic clouds
+      const angle = (idx / Math.max(1, orderedNodeIds.length)) * Math.PI * 2 + (pseudoRandom() - 0.5) * 0.8;
+      const distance = isRoot ? 0 : 350 + pseudoRandom() * spreadRadius;
+
+      const x = isRoot ? 0 : Math.round(Math.cos(angle) * distance);
+      const y = isRoot ? 0 : Math.round(Math.sin(angle) * distance);
+      const rot = isRoot ? 0 : Math.round((pseudoRandom() - 0.5) * 60); // Random tilt between -30° and +30°
+      const scale = isRoot ? 1.3 : 0.85 + pseudoRandom() * 0.35;
+
+      slides.push({
+        id: `spatial-${nodeId}-${idx}`,
+        order: orderCounter++,
+        title: content.titleText,
+        isNoteSlide: false,
+        spatial: {
+          x: x - (cardWidth * scale) / 2,
+          y: y - (cardHeight * scale) / 2,
+          width: cardWidth,
+          height: cardHeight,
+          scale,
+          rotation: rot,
+        },
+        content,
+        style: { themeId: mindMap.themeId, contentAlign: isRoot ? 'center' : 'left' },
+      });
+
+      if (content.notesMarkdown && content.notesMarkdown.trim().length > 0) {
+        slides.push({
+          id: `spatial-note-${nodeId}-${idx}`,
+          order: orderCounter++,
+          title: `📝 Nota: ${content.titleText}`,
+          isNoteSlide: true,
+          spatial: {
+            x: x - (cardWidth * 0.9 * scale) / 2 + 80,
+            y: y - (cardHeight * 0.9 * scale) / 2 + 60,
+            width: cardWidth,
+            height: cardHeight,
+            scale: scale * 0.9,
+            rotation: (rot + 12) % 360,
+          },
+          content: {
+            nodeId: content.nodeId,
+            titleText: `Nota: ${content.titleText}`,
+            notesMarkdown: content.notesMarkdown,
+            icons: ['file-text'],
+          },
+          style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+        });
+      }
+    });
+  } else if (arrangement === 'stacked') {
+    // Stacked Cards / Deck of Cards Style (One over another with subtle offset & tilt)
+    const baseOffsetX = 0;
+    const baseOffsetY = 0;
+
+    orderedNodeIds.forEach((nodeId, idx) => {
+      const content = extractNodeContent(nodeId);
+      if (!content) return;
+
+      const isRoot = idx === 0;
+      // Slight shift and rotation for organic card pile look
+      const offsetX = isRoot ? 0 : ((idx % 7) - 3) * 16;
+      const offsetY = isRoot ? 0 : ((idx % 5) - 2) * 14;
+      const rot = isRoot ? 0 : ((idx % 9) - 4) * 3.5; // -14° to +14° subtle rotation
+      const scale = isRoot ? 1.2 : 1.0;
+
+      slides.push({
+        id: `spatial-${nodeId}-${idx}`,
+        order: orderCounter++,
+        title: content.titleText,
+        isNoteSlide: false,
+        spatial: {
+          x: baseOffsetX + offsetX - (cardWidth * scale) / 2,
+          y: baseOffsetY + offsetY - (cardHeight * scale) / 2,
+          width: cardWidth,
+          height: cardHeight,
+          scale,
+          rotation: rot,
+        },
+        content,
+        style: { themeId: mindMap.themeId, contentAlign: isRoot ? 'center' : 'left' },
+      });
+
+      if (content.notesMarkdown && content.notesMarkdown.trim().length > 0) {
+        slides.push({
+          id: `spatial-note-${nodeId}-${idx}`,
+          order: orderCounter++,
+          title: `📝 Nota: ${content.titleText}`,
+          isNoteSlide: true,
+          spatial: {
+            x: baseOffsetX + offsetX + 25 - (cardWidth * 0.95 * scale) / 2,
+            y: baseOffsetY + offsetY + 25 - (cardHeight * 0.95 * scale) / 2,
+            width: cardWidth,
+            height: cardHeight,
+            scale: scale * 0.95,
+            rotation: (rot + 5) % 360,
+          },
+          content: {
+            nodeId: content.nodeId,
+            titleText: `Nota: ${content.titleText}`,
+            notesMarkdown: content.notesMarkdown,
+            icons: ['file-text'],
+          },
+          style: { themeId: mindMap.themeId, contentAlign: 'left', borderColor: '#f59e0b' },
+        });
+      }
     });
   } else {
     // Standard Grid / Matrix
