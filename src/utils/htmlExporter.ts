@@ -22,7 +22,11 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
   const theme = THEMES[mindMap.themeId] || THEMES.default;
   const layout = mindMap.layout || 'standard';
 
-  return `<!DOCTYPE html>
+  // Build the complete HTML as an array of strings to avoid template literal escaping issues
+  const parts: string[] = [];
+
+  // ── HEAD ──
+  parts.push(`<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -315,7 +319,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      shrink: 0;
+      flex-shrink: 0;
     }
     .node-icon-item {
       display: inline-flex;
@@ -385,7 +389,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       transform: translateY(-1px);
     }
     .node-link-badge svg {
-      shrink: 0;
+      flex-shrink: 0;
     }
     .inline-link {
       color: #2563eb;
@@ -463,7 +467,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       background: rgba(0,0,0,0.18);
     }
     
-    /* Floating Note Hover Tooltip (Full content without scrollbars) */
+    /* Floating Note Hover Tooltip */
     .node-note-tooltip {
       position: absolute;
       bottom: calc(100% + 10px);
@@ -681,32 +685,40 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
   <div id="note-drawer" class="note-drawer">
     <div class="drawer-header">
       <h3 class="drawer-title" id="note-title">Nota del Nodo</h3>
-      <button class="drawer-close" onclick="closeNoteDrawer()">×</button>
+      <button class="drawer-close" onclick="closeNoteDrawer()">&times;</button>
     </div>
     <div class="drawer-body" id="note-body"></div>
   </div>
 
-  <script>
-    const mapData = ${jsonMap};
-    let zoom = 1;
-    let panX = window.innerWidth / 2;
-    let panY = window.innerHeight / 2;
-    let isDragging = false;
-    let startX, startY;
-    let searchQuery = '';
-    let isAllFolded = false;
+  <script>`);
 
-    const viewport = document.getElementById('viewport');
-    const container = document.getElementById('canvas-container');
-    const cloudsSvg = document.getElementById('clouds-layer');
-    const edgesSvg = document.getElementById('edges-layer');
-    const connectorsSvg = document.getElementById('connectors-layer');
-    const nodesLayer = document.getElementById('nodes-layer');
-    const zoomText = document.getElementById('zoom-text');
+  // ── JAVASCRIPT SECTION ──
+  // Using string concatenation instead of template literals inside <script> to avoid
+  // double-escaping issues with backticks inside a TS template literal.
+  parts.push(`
+    var mapData = ${jsonMap};
+    var zoom = 1;
+    var panX = window.innerWidth / 2;
+    var panY = window.innerHeight / 2;
+    var isDragging = false;
+    var startX = 0;
+    var startY = 0;
+    var searchQuery = '';
+    var isAllFolded = false;
 
-    // Vector Icon Generator
+    var viewport = document.getElementById('viewport');
+    var container = document.getElementById('canvas-container');
+    var cloudsSvg = document.getElementById('clouds-layer');
+    var edgesSvg = document.getElementById('edges-layer');
+    var connectorsSvg = document.getElementById('connectors-layer');
+    var nodesLayer = document.getElementById('nodes-layer');
+    var zoomText = document.getElementById('zoom-text');
+`);
+
+  // Icon Generator
+  parts.push(`
     function getSvgIcon(iconName) {
-      const icons = {
+      var icons = {
         'check': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>',
         'star': '<svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
         'flag': '<svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
@@ -721,33 +733,37 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         'zap': '<svg width="14" height="14" viewBox="0 0 24 24" fill="#eab308" stroke="#eab308" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
         'shield': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
         'database': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
-        'user': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        'user': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
       };
-      return icons[iconName] || '<span style="font-size:12px;">🏷️</span>';
+      return icons[iconName] || '<span style="font-size:12px;">\\ud83c\\udff7\\ufe0f</span>';
     }
+`);
 
-    // Auto-Hyperlink formatter for text/body
+  // Text formatters
+  parts.push(`
     function formatTextWithLinks(rawText) {
       if (!rawText) return '';
-      let escaped = String(rawText)
+      var escaped = String(rawText)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
       // Markdown links: [Label](url)
-      escaped = escaped.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s\\)]+)\\)/g, (match, label, url) => {
-        return \`<a href="\${url}" target="_blank" rel="noopener noreferrer" class="inline-link" onclick="event.stopPropagation()">\${label} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>\`;
+      escaped = escaped.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s\\)]+)\\)/g, function(match, label, url) {
+        return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="inline-link" onclick="event.stopPropagation()">' + label + ' <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>';
       });
 
-      // Raw URLs: https://... or http://...
-      escaped = escaped.replace(/(^|[\\s(])(https?:\\/\\/[^\\s\\)<]+)/g, (match, prefix, url) => {
-        return \`\${prefix}<a href="\${url}" target="_blank" rel="noopener noreferrer" class="inline-link" onclick="event.stopPropagation()">\${url} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>\`;
+      // Raw URLs
+      escaped = escaped.replace(/(^|[\\s(])(https?:\\/\\/[^\\s\\)<]+)/g, function(match, prefix, url) {
+        return prefix + '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="inline-link" onclick="event.stopPropagation()">' + url + ' <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>';
       });
 
       return escaped;
     }
+`);
 
-    // Markdown Parser & Formatter for Notes
+  // Markdown renderer
+  parts.push(`
     function renderMarkdown(markdown) {
       if (!markdown) return '';
       var html = String(markdown)
@@ -755,104 +771,98 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      // Code blocks
       html = html.replace(/\`\`\`([\\s\\S]*?)\`\`\`/g, function(m, code) {
         return '<pre style="background:#020617; color:#38bdf8; padding:8px 10px; border-radius:8px; font-family:monospace; font-size:11px; overflow-x:auto; margin:6px 0; border:1px solid #1e293b;"><code>' + code.trim() + '</code></pre>';
       });
 
-      // Headings
       html = html.replace(/^# (.+)$/gm, '<h1 style="font-size:13.5px; font-weight:bold; color:#60a5fa; margin:6px 0 3px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:2px;">$1</h1>');
       html = html.replace(/^## (.+)$/gm, '<h2 style="font-size:12.5px; font-weight:bold; color:#fcd34d; margin:5px 0 2px;">$1</h2>');
       html = html.replace(/^### (.+)$/gm, '<h3 style="font-size:11.5px; font-weight:bold; color:#34d399; margin:4px 0 2px;">$1</h3>');
 
-      // Blockquotes
       html = html.replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #f59e0b; padding-left:8px; margin:4px 0; color:#cbd5e1; font-style:italic; background:rgba(245,158,11,0.08); border-radius:0 4px 4px 0;">$1</blockquote>');
 
-      // Checkboxes
       html = html.replace(/^- \\[x\\] (.+)$/gim, '<div style="display:flex; align-items:center; gap:6px; margin:2px 0;"><input type="checkbox" checked disabled><span style="text-decoration:line-through; opacity:0.6;">$1</span></div>');
       html = html.replace(/^- \\[ \\] (.+)$/gm, '<div style="display:flex; align-items:center; gap:6px; margin:2px 0;"><input type="checkbox" disabled><span>$1</span></div>');
 
-      // Lists
       html = html.replace(/^[\\*\\-] (.+)$/gm, '<li style="margin-left:14px; list-style-type:disc; margin-bottom:2px;">$1</li>');
 
-      // Bold & Italic & Inline Code
       html = html.replace(/\\*\\*([^*]+)\\*\\*/g, '<strong style="color:#ffffff; font-weight:bold;">$1</strong>');
       html = html.replace(/\\*([^*]+)\\*/g, '<em style="font-style:italic;">$1</em>');
       html = html.replace(/\`([^\`]+)\`/g, '<code style="background:rgba(255,255,255,0.14); color:#fef08a; padding:1px 4px; border-radius:4px; font-family:monospace; font-size:10.5px;">$1</code>');
 
-      // Links
-      html = html.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s\\)]+)\\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:underline; font-weight:600;" onclick="event.stopPropagation()">$1 ↗</a>');
+      html = html.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s\\)]+)\\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#38bdf8; text-decoration:underline; font-weight:600;" onclick="event.stopPropagation()">$1 \\u2197</a>');
 
-      // Line breaks
       html = html.replace(/\\n/g, '<br/>');
 
       return html;
     }
+`);
 
-    // Node Estimation Engine matching FreeMind Studio
+  // Node Size Estimation
+  parts.push(`
     function estimateNodeSize(node) {
-      const isRoot = !node.parentId;
-      const fontSize = node.fontSize || (isRoot ? 16 : 14);
-      const paddingX = isRoot ? 24 : 14;
-      const paddingY = isRoot ? 12 : 8;
+      var isRoot = !node.parentId;
+      var fontSize = node.fontSize || (isRoot ? 16 : 14);
+      var paddingX = isRoot ? 24 : 14;
+      var paddingY = isRoot ? 12 : 8;
 
-      let extraWidth = 0;
+      var extraWidth = 0;
       if (node.icons && node.icons.length > 0) extraWidth += node.icons.length * 20 + 6;
       if (node.progress !== undefined) extraWidth += 24;
       if (node.note) extraWidth += 18;
 
-      let linkExtraHeight = 0;
-      let linkMinWidth = 0;
+      var linkExtraHeight = 0;
+      var linkMinWidth = 0;
       if (node.link && node.link.trim().length > 0) {
         linkExtraHeight += 24;
-        const cleanUrl = node.link.replace(/^https?:\\/\\//, '').replace(/^www\\./, '');
+        var cleanUrl = node.link.replace(/^https?:\\/\\//, '').replace(/^www\\./, '');
         linkMinWidth = Math.min(cleanUrl.length * 6.5 + 28, 220);
       }
 
-      let imageExtraHeight = 0;
-      let imageMinWidth = 0;
+      var imageExtraHeight = 0;
+      var imageMinWidth = 0;
       if (node.imageUrl) {
         if (node.imagePosition === 'left' || node.imagePosition === 'right') {
-          const imgW = node.imageWidth || 80;
-          extraWidth += imgW + 10;
-          imageExtraHeight = Math.max(0, (node.imageHeight || imgW * 0.75) - 28);
+          var imgW1 = node.imageWidth || 80;
+          extraWidth += imgW1 + 10;
+          imageExtraHeight = Math.max(0, (node.imageHeight || imgW1 * 0.75) - 28);
         } else {
-          const imgW = node.imageWidth || 120;
-          const imgH = node.imageHeight || Math.round(imgW * 0.65);
-          imageExtraHeight = imgH + 10;
-          imageMinWidth = imgW + 16;
+          var imgW2 = node.imageWidth || 120;
+          var imgH2 = node.imageHeight || Math.round(imgW2 * 0.65);
+          imageExtraHeight = imgH2 + 10;
+          imageMinWidth = imgW2 + 16;
         }
       }
 
-      let extraHeight = 0;
-      let tagMinWidth = 0;
+      var extraHeight = 0;
+      var tagMinWidth = 0;
       if (node.tags && node.tags.length > 0) {
         extraHeight += 22;
-        tagMinWidth = Math.min(node.tags.reduce((acc, t) => acc + t.length * 7 + 16, 0), 280);
+        tagMinWidth = Math.min(node.tags.reduce(function(acc, t) { return acc + t.length * 7 + 16; }, 0), 280);
       }
 
-      const charWidth = fontSize * 0.58;
-      const lines = (node.text || ' ').split('\\n');
-      const maxLineLength = Math.max(...lines.map(l => l.length), 1);
-      let titleWidth = Math.min(Math.max(maxLineLength * charWidth, 40), 400);
-      let titleHeight = lines.length * (fontSize * 1.35);
+      var charWidth = fontSize * 0.58;
+      var lines = (node.text || ' ').split('\\n');
+      var maxLineLength = Math.max.apply(null, lines.map(function(l) { return l.length; }).concat([1]));
+      var titleWidth = Math.min(Math.max(maxLineLength * charWidth, 40), 400);
+      var titleHeight = lines.length * (fontSize * 1.35);
 
-      let bodyWidth = 0;
-      let bodyHeight = 0;
+      var bodyWidth = 0;
+      var bodyHeight = 0;
       if (node.body && node.body.trim().length > 0) {
-        const bodyFontSize = node.bodyFontSize || (isRoot ? 13 : 12);
-        const bodyLines = node.body.split('\\n');
-        const bodyCharWidth = bodyFontSize * 0.56;
-        const maxBodyLineLength = Math.max(...bodyLines.map(l => l.length), 1);
+        var bodyFontSize = node.bodyFontSize || (isRoot ? 13 : 12);
+        var bodyLines = node.body.split('\\n');
+        var bodyCharWidth = bodyFontSize * 0.56;
+        var maxBodyLineLength = Math.max.apply(null, bodyLines.map(function(l) { return l.length; }).concat([1]));
         bodyWidth = Math.min(Math.max(maxBodyLineLength * bodyCharWidth, 40), 420);
         bodyHeight = bodyLines.length * (bodyFontSize * 1.4) + 6;
       }
 
-      const contentWidth = Math.max(titleWidth, bodyWidth);
-      const contentHeight = titleHeight + bodyHeight;
+      var contentWidth = Math.max(titleWidth, bodyWidth);
+      var contentHeight = titleHeight + bodyHeight;
 
-      let width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, linkMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
-      let height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + linkExtraHeight + imageExtraHeight));
+      var width = Math.round(Math.max(contentWidth + paddingX * 2 + extraWidth, tagMinWidth + paddingX * 2, linkMinWidth + paddingX * 2, imageMinWidth + paddingX * 2));
+      var height = Math.round(Math.max(contentHeight + paddingY * 2 + extraHeight + linkExtraHeight + imageExtraHeight, (isRoot ? 48 : 34) + extraHeight + linkExtraHeight + imageExtraHeight));
 
       if (node.customWidth && node.customWidth > 0) width = Math.max(width, node.customWidth);
       if (node.customHeight && node.customHeight > 0) height = Math.max(height, node.customHeight);
@@ -861,76 +871,84 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         width = Math.round(width * 1.25 + 24);
         height = Math.round(height * 1.1 + 12);
       } else if (node.shape === 'circle' || node.shape === 'square') {
-        const dim = Math.max(width, height, 54);
+        var dim = Math.max(width, height, 54);
         width = dim;
         height = dim;
       }
 
-      return { width, height };
+      return { width: width, height: height };
     }
+`);
 
+  // Subtree metrics (horizontal)
+  parts.push(`
     function calculateSubTreeMetrics(nodeId, nodes, verticalGap) {
-      const node = nodes[nodeId];
+      var node = nodes[nodeId];
       if (!node) return { id: nodeId, width: 60, height: 30, subtreeHeight: 30, childrenLayouts: [] };
 
-      const { width, height } = estimateNodeSize(node);
-      const hasCloud = Boolean(node.cloud && node.cloud.enabled);
-      const cloudPad = hasCloud ? 36 : 0;
+      var sz = estimateNodeSize(node);
+      var hasCloud = Boolean(node.cloud && node.cloud.enabled);
+      var cloudPad = hasCloud ? 36 : 0;
 
       if (node.folded || !node.children || node.children.length === 0) {
-        return { id: nodeId, width: width + cloudPad, height: height + cloudPad, subtreeHeight: height + cloudPad, childrenLayouts: [] };
+        return { id: nodeId, width: sz.width + cloudPad, height: sz.height + cloudPad, subtreeHeight: sz.height + cloudPad, childrenLayouts: [] };
       }
 
-      const childrenLayouts = node.children.filter(cid => Boolean(nodes[cid])).map(cid => calculateSubTreeMetrics(cid, nodes, verticalGap));
-      let totalChildrenHeight = 0;
-      for (let i = 0; i < childrenLayouts.length; i++) {
+      var childrenLayouts = node.children.filter(function(cid) { return Boolean(nodes[cid]); }).map(function(cid) { return calculateSubTreeMetrics(cid, nodes, verticalGap); });
+      var totalChildrenHeight = 0;
+      for (var i = 0; i < childrenLayouts.length; i++) {
         totalChildrenHeight += childrenLayouts[i].subtreeHeight;
         if (i < childrenLayouts.length - 1) totalChildrenHeight += verticalGap;
       }
 
-      const subtreeHeight = Math.max(height + cloudPad, totalChildrenHeight + cloudPad);
-      return { id: nodeId, width: width + cloudPad, height: height + cloudPad, subtreeHeight, childrenLayouts };
+      var subtreeHeight = Math.max(sz.height + cloudPad, totalChildrenHeight + cloudPad);
+      return { id: nodeId, width: sz.width + cloudPad, height: sz.height + cloudPad, subtreeHeight: subtreeHeight, childrenLayouts: childrenLayouts };
     }
+`);
 
+  // Subtree metrics (vertical)
+  parts.push(`
     function calculateSubTreeVerticalMetrics(nodeId, nodes, horizontalGap) {
-      const node = nodes[nodeId];
+      var node = nodes[nodeId];
       if (!node) return { id: nodeId, width: 60, height: 30, subtreeWidth: 60, childrenLayouts: [] };
 
-      const { width, height } = estimateNodeSize(node);
-      const hasCloud = Boolean(node.cloud && node.cloud.enabled);
-      const cloudPad = hasCloud ? 36 : 0;
+      var sz = estimateNodeSize(node);
+      var hasCloud = Boolean(node.cloud && node.cloud.enabled);
+      var cloudPad = hasCloud ? 36 : 0;
 
       if (node.folded || !node.children || node.children.length === 0) {
-        return { id: nodeId, width: width + cloudPad, height: height + cloudPad, subtreeWidth: width + cloudPad, childrenLayouts: [] };
+        return { id: nodeId, width: sz.width + cloudPad, height: sz.height + cloudPad, subtreeWidth: sz.width + cloudPad, childrenLayouts: [] };
       }
 
-      const childrenLayouts = node.children.filter(cid => Boolean(nodes[cid])).map(cid => calculateSubTreeVerticalMetrics(cid, nodes, horizontalGap));
-      let totalChildrenWidth = 0;
-      for (let i = 0; i < childrenLayouts.length; i++) {
+      var childrenLayouts = node.children.filter(function(cid) { return Boolean(nodes[cid]); }).map(function(cid) { return calculateSubTreeVerticalMetrics(cid, nodes, horizontalGap); });
+      var totalChildrenWidth = 0;
+      for (var i = 0; i < childrenLayouts.length; i++) {
         totalChildrenWidth += childrenLayouts[i].subtreeWidth;
         if (i < childrenLayouts.length - 1) totalChildrenWidth += horizontalGap;
       }
 
-      const subtreeWidth = Math.max(width + cloudPad, totalChildrenWidth + cloudPad);
-      return { id: nodeId, width: width + cloudPad, height: height + cloudPad, subtreeWidth, childrenLayouts };
+      var subtreeWidth = Math.max(sz.width + cloudPad, totalChildrenWidth + cloudPad);
+      return { id: nodeId, width: sz.width + cloudPad, height: sz.height + cloudPad, subtreeWidth: subtreeWidth, childrenLayouts: childrenLayouts };
     }
+`);
 
-    // Complete Layout Engine for all 8 distributions
+  // Layout Engine
+  parts.push(`
     function computeMindMapLayout() {
-      const layoutMap = new Map();
-      const root = mapData.nodes[mapData.rootId];
+      var layoutMap = new Map();
+      var root = mapData.nodes[mapData.rootId];
       if (!root) return layoutMap;
 
-      const hGap = mapData.horizontalGap !== undefined ? mapData.horizontalGap : 54;
-      const vGap = mapData.verticalGap !== undefined ? mapData.verticalGap : 14;
-      const rootHGap = Math.max(48, Math.round(hGap * 1.3));
+      var hGap = mapData.horizontalGap !== undefined ? mapData.horizontalGap : 54;
+      var vGap = mapData.verticalGap !== undefined ? mapData.verticalGap : 14;
+      var rootHGap = Math.max(48, Math.round(hGap * 1.3));
 
-      const vertSiblingHGap = Math.max(20, Math.round(hGap * 0.9 + 10));
-      const vertLevelVGap = Math.max(50, Math.round(vGap * 2.8 + 45));
-      const vertRootVGap = Math.max(70, Math.round(vGap * 3.4 + 60));
+      var vertSiblingHGap = Math.max(20, Math.round(hGap * 0.9 + 10));
+      var vertLevelVGap = Math.max(50, Math.round(vGap * 2.8 + 45));
+      var vertRootVGap = Math.max(70, Math.round(vGap * 3.4 + 60));
 
-      const rootSize = estimateNodeSize(root);
-      const rootLayout = {
+      var rootSize = estimateNodeSize(root);
+      var rootLayout = {
         id: root.id,
         x: -rootSize.width / 2,
         y: -rootSize.height / 2,
@@ -938,7 +956,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         height: rootSize.height,
         side: 'root',
         depth: 0,
-        branchIndex: 0,
+        branchIndex: 0
       };
       layoutMap.set(root.id, rootLayout);
 
@@ -946,66 +964,48 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         return layoutMap;
       }
 
-      const validChildren = root.children.filter(id => Boolean(mapData.nodes[id]));
-      const layoutType = mapData.layout || 'standard';
+      var validChildren = root.children.filter(function(id) { return Boolean(mapData.nodes[id]); });
+      var layoutType = mapData.layout || 'standard';
 
       // 1. RADIAL
       if (layoutType === 'radial') {
-        const radius = Math.max(180, validChildren.length * 40 + hGap * 1.5);
-        const angleStep = (2 * Math.PI) / validChildren.length;
-        validChildren.forEach((childId, i) => {
-          const angle = i * angleStep - Math.PI / 2;
-          const childSize = estimateNodeSize(mapData.nodes[childId]);
-          const cx = Math.cos(angle) * radius - childSize.width / 2;
-          const cy = Math.sin(angle) * radius - childSize.height / 2;
-          const side = Math.cos(angle) >= 0 ? 'right' : 'left';
-          layoutMap.set(childId, {
-            id: childId,
-            x: cx,
-            y: cy,
-            width: childSize.width,
-            height: childSize.height,
-            side,
-            depth: 1,
-            branchIndex: i,
-          });
+        var radius = Math.max(180, validChildren.length * 40 + hGap * 1.5);
+        var angleStep = (2 * Math.PI) / validChildren.length;
+        validChildren.forEach(function(childId, i) {
+          var angle = i * angleStep - Math.PI / 2;
+          var childSize = estimateNodeSize(mapData.nodes[childId]);
+          var cx = Math.cos(angle) * radius - childSize.width / 2;
+          var cy = Math.sin(angle) * radius - childSize.height / 2;
+          var side = Math.cos(angle) >= 0 ? 'right' : 'left';
+          layoutMap.set(childId, { id: childId, x: cx, y: cy, width: childSize.width, height: childSize.height, side: side, depth: 1, branchIndex: i });
           layoutBranchRadial(childId, cx, cy, childSize.width, childSize.height, angle, layoutMap, hGap, vGap);
         });
       }
       // 2. CIRCULAR
       else if (layoutType === 'circular') {
-        const count = validChildren.length;
-        const baseRadius = Math.max(200, count * 45);
-        validChildren.forEach((childId, i) => {
-          const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
-          const childSize = estimateNodeSize(mapData.nodes[childId]);
-          const cx = Math.cos(angle) * baseRadius - childSize.width / 2;
-          const cy = Math.sin(angle) * baseRadius - childSize.height / 2;
-          const side = Math.cos(angle) >= 0 ? 'right' : 'left';
-          layoutMap.set(childId, {
-            id: childId,
-            x: cx,
-            y: cy,
-            width: childSize.width,
-            height: childSize.height,
-            side,
-            depth: 1,
-            branchIndex: i,
-          });
+        var count = validChildren.length;
+        var baseRadius = Math.max(200, count * 45);
+        validChildren.forEach(function(childId, i) {
+          var angle = (i / count) * 2 * Math.PI - Math.PI / 2;
+          var childSize = estimateNodeSize(mapData.nodes[childId]);
+          var cx = Math.cos(angle) * baseRadius - childSize.width / 2;
+          var cy = Math.sin(angle) * baseRadius - childSize.height / 2;
+          var side = Math.cos(angle) >= 0 ? 'right' : 'left';
+          layoutMap.set(childId, { id: childId, x: cx, y: cy, width: childSize.width, height: childSize.height, side: side, depth: 1, branchIndex: i });
           layoutBranchCircular(childId, baseRadius + 140, layoutMap, hGap);
         });
       }
       // 3 & 4. TOP / BOTTOM (Tree Vertical)
       else if (layoutType === 'bottom' || layoutType === 'tree-down' || layoutType === 'top') {
-        const dir = (layoutType === 'top') ? 'top' : 'bottom';
+        var dir = (layoutType === 'top') ? 'top' : 'bottom';
         layoutVerticalBranch(validChildren, dir, rootLayout, mapData.nodes, layoutMap, vertRootVGap, vertSiblingHGap, vertLevelVGap);
       }
       // 5. BALANCED HORIZONTAL
       else if (layoutType === 'balanced-horizontal') {
-        const topChildren = [];
-        const bottomChildren = [];
-        validChildren.forEach((cid, i) => {
-          const node = mapData.nodes[cid];
+        var topChildren = [];
+        var bottomChildren = [];
+        validChildren.forEach(function(cid, i) {
+          var node = mapData.nodes[cid];
           if (node.side === 'top') topChildren.push(cid);
           else if (node.side === 'bottom') bottomChildren.push(cid);
           else if (i % 2 === 0) bottomChildren.push(cid);
@@ -1016,15 +1016,15 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       }
       // 6, 7 & 8. RIGHT, LEFT, STANDARD
       else {
-        let rightChildren = [];
-        let leftChildren = [];
+        var rightChildren = [];
+        var leftChildren = [];
         if (layoutType === 'right') {
           rightChildren = validChildren;
         } else if (layoutType === 'left') {
           leftChildren = validChildren;
         } else {
-          validChildren.forEach((cid, i) => {
-            const node = mapData.nodes[cid];
+          validChildren.forEach(function(cid, i) {
+            var node = mapData.nodes[cid];
             if (node.side === 'left') leftChildren.push(cid);
             else if (node.side === 'right') rightChildren.push(cid);
             else if (i % 2 === 0) rightChildren.push(cid);
@@ -1037,33 +1037,30 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
       return layoutMap;
     }
+`);
 
+  // Layout helpers
+  parts.push(`
     function layoutBranchSide(childIds, side, parentLayout, nodes, layoutMap, rootHGap, hGap, vGap) {
       if (childIds.length === 0) return;
-      const metricsList = childIds.map(id => calculateSubTreeMetrics(id, nodes, vGap));
-      let totalHeight = 0;
-      for (let i = 0; i < metricsList.length; i++) {
+      var metricsList = childIds.map(function(id) { return calculateSubTreeMetrics(id, nodes, vGap); });
+      var totalHeight = 0;
+      for (var i = 0; i < metricsList.length; i++) {
         totalHeight += metricsList[i].subtreeHeight;
         if (i < metricsList.length - 1) totalHeight += vGap;
       }
-      let startY = parentLayout.y + parentLayout.height / 2 - totalHeight / 2;
+      var startY = parentLayout.y + parentLayout.height / 2 - totalHeight / 2;
 
-      metricsList.forEach((metric, branchIdx) => {
-        const node = nodes[metric.id];
-        const nodeY = startY + metric.subtreeHeight / 2 - metric.height / 2;
-        const nodeX = (side === 'right')
+      metricsList.forEach(function(metric, branchIdx) {
+        var node = nodes[metric.id];
+        var nodeY = startY + metric.subtreeHeight / 2 - metric.height / 2;
+        var nodeX = (side === 'right')
           ? parentLayout.x + parentLayout.width + rootHGap
           : parentLayout.x - metric.width - rootHGap;
 
-        const calculated = {
-          id: metric.id,
-          x: nodeX,
-          y: nodeY,
-          width: metric.width,
-          height: metric.height,
-          side,
-          depth: parentLayout.depth + 1,
-          branchIndex: branchIdx,
+        var calculated = {
+          id: metric.id, x: nodeX, y: nodeY, width: metric.width, height: metric.height,
+          side: side, depth: parentLayout.depth + 1, branchIndex: branchIdx
         };
         layoutMap.set(metric.id, calculated);
 
@@ -1075,29 +1072,23 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     }
 
     function layoutChildrenSide(childrenMetrics, side, parentLayout, nodes, layoutMap, hGap, vGap) {
-      let totalHeight = 0;
-      for (let i = 0; i < childrenMetrics.length; i++) {
+      var totalHeight = 0;
+      for (var i = 0; i < childrenMetrics.length; i++) {
         totalHeight += childrenMetrics[i].subtreeHeight;
         if (i < childrenMetrics.length - 1) totalHeight += vGap;
       }
-      let startY = parentLayout.y + parentLayout.height / 2 - totalHeight / 2;
+      var startY = parentLayout.y + parentLayout.height / 2 - totalHeight / 2;
 
-      childrenMetrics.forEach(metric => {
-        const node = nodes[metric.id];
-        const nodeY = startY + metric.subtreeHeight / 2 - metric.height / 2;
-        const nodeX = (side === 'right')
+      childrenMetrics.forEach(function(metric) {
+        var node = nodes[metric.id];
+        var nodeY = startY + metric.subtreeHeight / 2 - metric.height / 2;
+        var nodeX = (side === 'right')
           ? parentLayout.x + parentLayout.width + hGap
           : parentLayout.x - metric.width - hGap;
 
-        const calculated = {
-          id: metric.id,
-          x: nodeX,
-          y: nodeY,
-          width: metric.width,
-          height: metric.height,
-          side,
-          depth: parentLayout.depth + 1,
-          branchIndex: parentLayout.branchIndex,
+        var calculated = {
+          id: metric.id, x: nodeX, y: nodeY, width: metric.width, height: metric.height,
+          side: side, depth: parentLayout.depth + 1, branchIndex: parentLayout.branchIndex
         };
         layoutMap.set(metric.id, calculated);
 
@@ -1110,30 +1101,24 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
     function layoutVerticalBranch(childIds, dir, parentLayout, nodes, layoutMap, rootVGap, hGap, vGap) {
       if (childIds.length === 0) return;
-      const metricsList = childIds.map(id => calculateSubTreeVerticalMetrics(id, nodes, hGap));
-      let totalWidth = 0;
-      for (let i = 0; i < metricsList.length; i++) {
+      var metricsList = childIds.map(function(id) { return calculateSubTreeVerticalMetrics(id, nodes, hGap); });
+      var totalWidth = 0;
+      for (var i = 0; i < metricsList.length; i++) {
         totalWidth += metricsList[i].subtreeWidth;
         if (i < metricsList.length - 1) totalWidth += hGap;
       }
-      let startX = parentLayout.x + parentLayout.width / 2 - totalWidth / 2;
+      var startX = parentLayout.x + parentLayout.width / 2 - totalWidth / 2;
 
-      metricsList.forEach((metric, branchIdx) => {
-        const node = nodes[metric.id];
-        const nodeX = startX + metric.subtreeWidth / 2 - metric.width / 2;
-        const nodeY = (dir === 'bottom')
+      metricsList.forEach(function(metric, branchIdx) {
+        var node = nodes[metric.id];
+        var nodeX = startX + metric.subtreeWidth / 2 - metric.width / 2;
+        var nodeY = (dir === 'bottom')
           ? parentLayout.y + parentLayout.height + rootVGap
           : parentLayout.y - metric.height - rootVGap;
 
-        const calculated = {
-          id: metric.id,
-          x: nodeX,
-          y: nodeY,
-          width: metric.width,
-          height: metric.height,
-          side: dir,
-          depth: parentLayout.depth + 1,
-          branchIndex: branchIdx,
+        var calculated = {
+          id: metric.id, x: nodeX, y: nodeY, width: metric.width, height: metric.height,
+          side: dir, depth: parentLayout.depth + 1, branchIndex: branchIdx
         };
         layoutMap.set(metric.id, calculated);
 
@@ -1145,29 +1130,23 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     }
 
     function layoutChildrenVertical(childrenMetrics, dir, parentLayout, nodes, layoutMap, hGap, vGap) {
-      let totalWidth = 0;
-      for (let i = 0; i < childrenMetrics.length; i++) {
+      var totalWidth = 0;
+      for (var i = 0; i < childrenMetrics.length; i++) {
         totalWidth += childrenMetrics[i].subtreeWidth;
         if (i < childrenMetrics.length - 1) totalWidth += hGap;
       }
-      let startX = parentLayout.x + parentLayout.width / 2 - totalWidth / 2;
+      var startX = parentLayout.x + parentLayout.width / 2 - totalWidth / 2;
 
-      childrenMetrics.forEach(metric => {
-        const node = nodes[metric.id];
-        const nodeX = startX + metric.subtreeWidth / 2 - metric.width / 2;
-        const nodeY = (dir === 'bottom')
+      childrenMetrics.forEach(function(metric) {
+        var node = nodes[metric.id];
+        var nodeX = startX + metric.subtreeWidth / 2 - metric.width / 2;
+        var nodeY = (dir === 'bottom')
           ? parentLayout.y + parentLayout.height + vGap
           : parentLayout.y - metric.height - vGap;
 
-        const calculated = {
-          id: metric.id,
-          x: nodeX,
-          y: nodeY,
-          width: metric.width,
-          height: metric.height,
-          side: dir,
-          depth: parentLayout.depth + 1,
-          branchIndex: parentLayout.branchIndex,
+        var calculated = {
+          id: metric.id, x: nodeX, y: nodeY, width: metric.width, height: metric.height,
+          side: dir, depth: parentLayout.depth + 1, branchIndex: parentLayout.branchIndex
         };
         layoutMap.set(metric.id, calculated);
 
@@ -1179,65 +1158,49 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     }
 
     function layoutBranchRadial(nodeId, px, py, pw, ph, parentAngle, layoutMap, hGap, vGap) {
-      const node = mapData.nodes[nodeId];
+      var node = mapData.nodes[nodeId];
       if (!node || node.folded || !node.children || node.children.length === 0) return;
-      const count = node.children.length;
-      const spread = Math.PI / 2.5;
-      const subDist = Math.max(140, hGap * 2.2);
+      var count = node.children.length;
+      var spread = Math.PI / 2.5;
+      var subDist = Math.max(140, hGap * 2.2);
 
-      node.children.forEach((cid, idx) => {
-        const angle = (count === 1)
+      node.children.forEach(function(cid, idx) {
+        var angle = (count === 1)
           ? parentAngle
           : parentAngle - spread / 2 + (idx / (count - 1)) * spread;
-        const size = estimateNodeSize(mapData.nodes[cid]);
-        const cx = px + pw / 2 + Math.cos(angle) * subDist - size.width / 2;
-        const cy = py + ph / 2 + Math.sin(angle) * subDist - size.height / 2;
-        const side = Math.cos(angle) >= 0 ? 'right' : 'left';
-        layoutMap.set(cid, {
-          id: cid,
-          x: cx,
-          y: cy,
-          width: size.width,
-          height: size.height,
-          side,
-          depth: 2,
-          branchIndex: idx,
-        });
+        var size = estimateNodeSize(mapData.nodes[cid]);
+        var cx = px + pw / 2 + Math.cos(angle) * subDist - size.width / 2;
+        var cy = py + ph / 2 + Math.sin(angle) * subDist - size.height / 2;
+        var side = Math.cos(angle) >= 0 ? 'right' : 'left';
+        layoutMap.set(cid, { id: cid, x: cx, y: cy, width: size.width, height: size.height, side: side, depth: 2, branchIndex: idx });
         layoutBranchRadial(cid, cx, cy, size.width, size.height, angle, layoutMap, hGap, vGap);
       });
     }
 
     function layoutBranchCircular(nodeId, radius, layoutMap, hGap) {
-      const node = mapData.nodes[nodeId];
+      var node = mapData.nodes[nodeId];
       if (!node || node.folded || !node.children || node.children.length === 0) return;
-      node.children.forEach((cid, i) => {
-        const count = node.children.length;
-        const pLayout = layoutMap.get(nodeId);
-        const pAngle = Math.atan2(pLayout.y + pLayout.height / 2, pLayout.x + pLayout.width / 2);
-        const spread = Math.PI / 3;
-        const angle = (count === 1) ? pAngle : pAngle - spread / 2 + (i / (count - 1)) * spread;
-        const size = estimateNodeSize(mapData.nodes[cid]);
-        const cx = Math.cos(angle) * radius - size.width / 2;
-        const cy = Math.sin(angle) * radius - size.height / 2;
-        const side = Math.cos(angle) >= 0 ? 'right' : 'left';
-        layoutMap.set(cid, {
-          id: cid,
-          x: cx,
-          y: cy,
-          width: size.width,
-          height: size.height,
-          side,
-          depth: 2,
-          branchIndex: i,
-        });
+      node.children.forEach(function(cid, i) {
+        var count = node.children.length;
+        var pLayout = layoutMap.get(nodeId);
+        var pAngle = Math.atan2(pLayout.y + pLayout.height / 2, pLayout.x + pLayout.width / 2);
+        var spread = Math.PI / 3;
+        var angle = (count === 1) ? pAngle : pAngle - spread / 2 + (i / (count - 1)) * spread;
+        var size = estimateNodeSize(mapData.nodes[cid]);
+        var cx = Math.cos(angle) * radius - size.width / 2;
+        var cy = Math.sin(angle) * radius - size.height / 2;
+        var side = Math.cos(angle) >= 0 ? 'right' : 'left';
+        layoutMap.set(cid, { id: cid, x: cx, y: cy, width: size.width, height: size.height, side: side, depth: 2, branchIndex: i });
         layoutBranchCircular(cid, radius + 130, layoutMap, hGap);
       });
     }
+`);
 
-    // Edge Path Generators
+  // Edge Path Generator
+  parts.push(`
     function generateEdgePath(parent, child, edgeStyle) {
-      let startX, startY, endX, endY;
-      const isVertical = child.side === 'top' || child.side === 'bottom';
+      var startX, startY, endX, endY;
+      var isVertical = child.side === 'top' || child.side === 'bottom';
 
       if (isVertical) {
         if (child.side === 'bottom') {
@@ -1267,59 +1230,60 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
       if (edgeStyle === 'sharp') {
         if (isVertical) {
-          const midY = (startY + endY) / 2;
-          return \`M \${startX} \${startY} L \${startX} \${midY} L \${endX} \${midY} L \${endX} \${endY}\`;
+          var midY = (startY + endY) / 2;
+          return 'M ' + startX + ' ' + startY + ' L ' + startX + ' ' + midY + ' L ' + endX + ' ' + midY + ' L ' + endX + ' ' + endY;
         } else {
-          const midX = (startX + endX) / 2;
-          return \`M \${startX} \${startY} L \${midX} \${startY} L \${midX} \${endY} L \${endX} \${endY}\`;
+          var midX = (startX + endX) / 2;
+          return 'M ' + startX + ' ' + startY + ' L ' + midX + ' ' + startY + ' L ' + midX + ' ' + endY + ' L ' + endX + ' ' + endY;
         }
       } else if (edgeStyle === 'linear') {
-        return \`M \${startX} \${startY} L \${endX} \${endY}\`;
+        return 'M ' + startX + ' ' + startY + ' L ' + endX + ' ' + endY;
       } else {
-        // Bezier curve
         if (isVertical) {
-          const dy = Math.abs(endY - startY);
-          const cy1 = child.side === 'bottom' ? startY + dy * 0.45 : startY - dy * 0.45;
-          const cy2 = child.side === 'bottom' ? endY - dy * 0.45 : endY + dy * 0.45;
-          return \`M \${startX} \${startY} C \${startX} \${cy1}, \${endX} \${cy2}, \${endX} \${endY}\`;
+          var dy = Math.abs(endY - startY);
+          var cy1 = child.side === 'bottom' ? startY + dy * 0.45 : startY - dy * 0.45;
+          var cy2 = child.side === 'bottom' ? endY - dy * 0.45 : endY + dy * 0.45;
+          return 'M ' + startX + ' ' + startY + ' C ' + startX + ' ' + cy1 + ', ' + endX + ' ' + cy2 + ', ' + endX + ' ' + endY;
         } else {
-          const dx = Math.abs(endX - startX);
-          const cx1 = child.side === 'right' ? startX + dx * 0.45 : startX - dx * 0.45;
-          const cx2 = child.side === 'right' ? endX - dx * 0.45 : endX + dx * 0.45;
-          return \`M \${startX} \${startY} C \${cx1} \${startY}, \${cx2} \${endY}, \${endX} \${endY}\`;
+          var dx = Math.abs(endX - startX);
+          var cx1 = child.side === 'right' ? startX + dx * 0.45 : startX - dx * 0.45;
+          var cx2 = child.side === 'right' ? endX - dx * 0.45 : endX + dx * 0.45;
+          return 'M ' + startX + ' ' + startY + ' C ' + cx1 + ' ' + startY + ', ' + cx2 + ' ' + endY + ', ' + endX + ' ' + endY;
         }
       }
     }
+`);
 
-    // Main Renderer
+  // Main Renderer
+  parts.push(`
     function renderMap() {
       nodesLayer.innerHTML = '';
       edgesSvg.innerHTML = '';
       cloudsSvg.innerHTML = '';
       connectorsSvg.innerHTML = '';
 
-      const layoutMap = computeMindMapLayout();
-      const themeBranchColors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#14b8a6'];
-      const edgeStyle = mapData.edgeStyle || 'bezier';
-      const edgeDash = mapData.edgeDash || 'solid';
-      const edgeWidth = mapData.edgeWidth || 2.2;
+      var layoutMap = computeMindMapLayout();
+      var themeBranchColors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#14b8a6'];
+      var edgeStyle = mapData.edgeStyle || 'bezier';
+      var edgeDash = mapData.edgeDash || 'solid';
+      var edgeWidth = mapData.edgeWidth || 2.2;
 
       // 1. Render Clouds
-      Object.values(mapData.nodes).forEach(node => {
+      Object.values(mapData.nodes).forEach(function(node) {
         if (node.cloud && node.cloud.enabled) {
-          const pLayout = layoutMap.get(node.id);
+          var pLayout = layoutMap.get(node.id);
           if (!pLayout) return;
 
-          let minX = pLayout.x;
-          let maxX = pLayout.x + pLayout.width;
-          let minY = pLayout.y;
-          let maxY = pLayout.y + pLayout.height;
+          var minX = pLayout.x;
+          var maxX = pLayout.x + pLayout.width;
+          var minY = pLayout.y;
+          var maxY = pLayout.y + pLayout.height;
 
           function expandDescendants(nId) {
-            const n = mapData.nodes[nId];
+            var n = mapData.nodes[nId];
             if (!n || n.folded || !n.children) return;
-            n.children.forEach(cid => {
-              const cLayout = layoutMap.get(cid);
+            n.children.forEach(function(cid) {
+              var cLayout = layoutMap.get(cid);
               if (cLayout) {
                 minX = Math.min(minX, cLayout.x);
                 maxX = Math.max(maxX, cLayout.x + cLayout.width);
@@ -1331,8 +1295,8 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           }
           expandDescendants(node.id);
 
-          const pad = 18;
-          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          var pad = 18;
+          var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           rect.setAttribute('x', minX - pad);
           rect.setAttribute('y', minY - pad);
           rect.setAttribute('width', (maxX - minX) + pad * 2);
@@ -1347,16 +1311,16 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       });
 
       // 2. Render Edges
-      layoutMap.forEach((childLayout, childId) => {
-        const childNode = mapData.nodes[childId];
+      layoutMap.forEach(function(childLayout, childId) {
+        var childNode = mapData.nodes[childId];
         if (!childNode || !childNode.parentId) return;
-        const parentLayout = layoutMap.get(childNode.parentId);
+        var parentLayout = layoutMap.get(childNode.parentId);
         if (!parentLayout) return;
 
-        const pathData = generateEdgePath(parentLayout, childLayout, edgeStyle);
-        const branchColor = childNode.borderColor || themeBranchColors[childLayout.branchIndex % themeBranchColors.length] || '#94a3b8';
+        var pathData = generateEdgePath(parentLayout, childLayout, edgeStyle);
+        var branchColor = childNode.borderColor || themeBranchColors[childLayout.branchIndex % themeBranchColors.length] || '#94a3b8';
 
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', pathData);
         path.setAttribute('stroke', branchColor);
         path.setAttribute('stroke-width', String(edgeWidth));
@@ -1368,23 +1332,23 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
       // 3. Render Cross-Connectors
       if (mapData.connectors && mapData.connectors.length > 0) {
-        mapData.connectors.forEach(conn => {
-          const fromL = layoutMap.get(conn.fromId);
-          const toL = layoutMap.get(conn.toId);
+        mapData.connectors.forEach(function(conn) {
+          var fromL = layoutMap.get(conn.fromId);
+          var toL = layoutMap.get(conn.toId);
           if (!fromL || !toL) return;
 
-          const sx = fromL.x + fromL.width / 2;
-          const sy = fromL.y + fromL.height / 2;
-          const ex = toL.x + toL.width / 2;
-          const ey = toL.y + toL.height / 2;
-          const dx = ex - sx;
-          const dy = ey - sy;
-          const curve = conn.curvature !== undefined ? conn.curvature : -50;
-          const mx = (sx + ex) / 2 - (dy / 2) * (curve / 100);
-          const my = (sy + ey) / 2 + (dx / 2) * (curve / 100);
+          var sx = fromL.x + fromL.width / 2;
+          var sy = fromL.y + fromL.height / 2;
+          var ex = toL.x + toL.width / 2;
+          var ey = toL.y + toL.height / 2;
+          var ddx = ex - sx;
+          var ddy = ey - sy;
+          var curve = conn.curvature !== undefined ? conn.curvature : -50;
+          var mx = (sx + ex) / 2 - (ddy / 2) * (curve / 100);
+          var my = (sy + ey) / 2 + (ddx / 2) * (curve / 100);
 
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          path.setAttribute('d', \`M \${sx} \${sy} Q \${mx} \${my}, \${ex} \${ey}\`);
+          var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', 'M ' + sx + ' ' + sy + ' Q ' + mx + ' ' + my + ', ' + ex + ' ' + ey);
           path.setAttribute('stroke', conn.color || '#3b82f6');
           path.setAttribute('stroke-width', String(conn.width || 2));
           path.setAttribute('fill', 'none');
@@ -1394,9 +1358,9 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           connectorsSvg.appendChild(path);
 
           if (conn.label) {
-            const textGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            const textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            var textGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            var textBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            var textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             textEl.textContent = conn.label;
             textEl.setAttribute('x', String(mx));
             textEl.setAttribute('y', String(my + 4));
@@ -1405,10 +1369,10 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
             textEl.setAttribute('fill', '#1e293b');
             textEl.setAttribute('text-anchor', 'middle');
             
-            const w = conn.label.length * 6.5 + 16;
-            textBg.setAttribute('x', String(mx - w / 2));
+            var tw = conn.label.length * 6.5 + 16;
+            textBg.setAttribute('x', String(mx - tw / 2));
             textBg.setAttribute('y', String(my - 10));
-            textBg.setAttribute('width', String(w));
+            textBg.setAttribute('width', String(tw));
             textBg.setAttribute('height', '20');
             textBg.setAttribute('rx', '6');
             textBg.setAttribute('fill', '#ffffff');
@@ -1423,72 +1387,72 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       }
 
       // 4. Render HTML Nodes
-      layoutMap.forEach((layout, id) => {
-        const node = mapData.nodes[id];
+      layoutMap.forEach(function(layout, id) {
+        var node = mapData.nodes[id];
         if (!node) return;
 
-        const isRoot = !node.parentId;
-        const div = document.createElement('div');
-        const shape = node.shape || 'bubble';
-        div.className = \`node-element shape-\${shape} \${isRoot ? 'node-root' : ''}\`;
-        div.id = \`node-\${id}\`;
-        div.style.left = \`\${layout.x}px\`;
-        div.style.top = \`\${layout.y}px\`;
-        div.style.width = \`\${layout.width}px\`;
-        div.style.height = \`\${layout.height}px\`;
+        var isRoot = !node.parentId;
+        var div = document.createElement('div');
+        var shape = node.shape || 'bubble';
+        div.className = 'node-element shape-' + shape + (isRoot ? ' node-root' : '');
+        div.id = 'node-' + id;
+        div.style.left = layout.x + 'px';
+        div.style.top = layout.y + 'px';
+        div.style.width = layout.width + 'px';
+        div.style.height = layout.height + 'px';
 
         // Background
         if (node.bgType === 'transparent') {
           div.style.background = 'transparent';
         } else if (node.bgType === 'gradient') {
-          const c1 = node.gradientColor1 || node.color || '#3b82f6';
-          const c2 = node.gradientColor2 || '#8b5cf6';
-          div.style.background = \`linear-gradient(135deg, \${c1}, \${c2})\`;
+          var c1 = node.gradientColor1 || node.color || '#3b82f6';
+          var c2 = node.gradientColor2 || '#8b5cf6';
+          div.style.background = 'linear-gradient(135deg, ' + c1 + ', ' + c2 + ')';
         } else {
           div.style.backgroundColor = node.color || (isRoot ? '#2563eb' : '#ffffff');
         }
 
         // Borders
         div.style.borderColor = node.borderColor || (isRoot ? '#1d4ed8' : '#cbd5e1');
-        div.style.borderWidth = \`\${node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 2 : 1.5)}px\`;
+        div.style.borderWidth = (node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 2 : 1.5)) + 'px';
         div.style.borderStyle = node.borderDash || node.borderStyle || 'solid';
 
         // Content Wrapper
-        const wrap = document.createElement('div');
+        var wrap = document.createElement('div');
         wrap.className = 'node-content-wrap';
 
         // Top Image
         if (node.imageUrl && (node.imagePosition === 'top' || !node.imagePosition)) {
-          const imgWrap = document.createElement('div');
+          var imgWrap = document.createElement('div');
           imgWrap.className = 'node-image-wrap';
-          const img = document.createElement('img');
+          var img = document.createElement('img');
           img.src = node.imageUrl;
           img.className = 'node-image';
-          if (node.imageWidth) img.style.width = \`\${node.imageWidth}px\`;
+          if (node.imageWidth) img.style.width = node.imageWidth + 'px';
           imgWrap.appendChild(img);
           wrap.appendChild(imgWrap);
         }
 
         // Header Row (Icons + Title + Action Badges)
-        const headerRow = document.createElement('div');
+        var headerRow = document.createElement('div');
         headerRow.className = 'node-header-row';
 
         // Left Image
         if (node.imageUrl && node.imagePosition === 'left') {
-          const img = document.createElement('img');
-          img.src = node.imageUrl;
-          img.className = 'node-image';
-          img.style.width = \`\${node.imageWidth || 40}px\`;
-          img.style.marginRight = '6px';
-          headerRow.appendChild(img);
+          var imgL = document.createElement('img');
+          imgL.src = node.imageUrl;
+          imgL.className = 'node-image';
+          imgL.style.width = (node.imageWidth || 40) + 'px';
+          imgL.style.marginRight = '6px';
+          headerRow.appendChild(imgL);
         }
 
         // Icons
         if (node.icons && node.icons.length > 0) {
-          const iconsContainer = document.createElement('div');
+          var iconsContainer = document.createElement('div');
           iconsContainer.className = 'node-icons';
-          node.icons.forEach(ic => {
-            const span = document.createElement('span');
+          node.icons.forEach(function(ic) {
+            var span = document.createElement('span');
             span.className = 'node-icon-item';
             span.innerHTML = getSvgIcon(ic);
             iconsContainer.appendChild(span);
@@ -1497,10 +1461,10 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         }
 
         // Title Text
-        const titleEl = document.createElement('div');
+        var titleEl = document.createElement('div');
         titleEl.className = 'node-title-text';
         titleEl.innerHTML = formatTextWithLinks(node.text || '');
-        titleEl.style.fontSize = \`\${node.fontSize || (isRoot ? 16 : 14)}px\`;
+        titleEl.style.fontSize = (node.fontSize || (isRoot ? 16 : 14)) + 'px';
         titleEl.style.color = node.textColor || (isRoot ? '#ffffff' : '#1e293b');
         if (node.bold) titleEl.style.fontWeight = '700';
         if (node.italic) titleEl.style.fontStyle = 'italic';
@@ -1509,21 +1473,21 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
         // Right Image
         if (node.imageUrl && node.imagePosition === 'right') {
-          const img = document.createElement('img');
-          img.src = node.imageUrl;
-          img.className = 'node-image';
-          img.style.width = \`\${node.imageWidth || 40}px\`;
-          img.style.marginLeft = '6px';
-          headerRow.appendChild(img);
+          var imgR = document.createElement('img');
+          imgR.src = node.imageUrl;
+          imgR.className = 'node-image';
+          imgR.style.width = (node.imageWidth || 40) + 'px';
+          imgR.style.marginLeft = '6px';
+          headerRow.appendChild(imgR);
         }
 
         // Note Indicator Button in Header
         if (node.note) {
-          const noteBtn = document.createElement('span');
+          var noteBtn = document.createElement('span');
           noteBtn.className = 'node-note-btn';
-          noteBtn.innerHTML = '📝';
+          noteBtn.innerHTML = '\\ud83d\\udcdd';
           noteBtn.title = 'Nota: ' + (node.note || '');
-          noteBtn.onclick = (e) => {
+          noteBtn.onclick = function(e) {
             e.stopPropagation();
             openNoteDrawer(node.text, node.note);
           };
@@ -1534,22 +1498,22 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
         // Between Image
         if (node.imageUrl && node.imagePosition === 'between') {
-          const imgWrap = document.createElement('div');
-          imgWrap.className = 'node-image-wrap';
-          const img = document.createElement('img');
-          img.src = node.imageUrl;
-          img.className = 'node-image';
-          if (node.imageWidth) img.style.width = \`\${node.imageWidth}px\`;
-          imgWrap.appendChild(img);
-          wrap.appendChild(imgWrap);
+          var imgWrapB = document.createElement('div');
+          imgWrapB.className = 'node-image-wrap';
+          var imgB = document.createElement('img');
+          imgB.src = node.imageUrl;
+          imgB.className = 'node-image';
+          if (node.imageWidth) imgB.style.width = node.imageWidth + 'px';
+          imgWrapB.appendChild(imgB);
+          wrap.appendChild(imgWrapB);
         }
 
         // Body Text
         if (node.body && node.body.trim().length > 0) {
-          const bodyEl = document.createElement('div');
+          var bodyEl = document.createElement('div');
           bodyEl.className = 'node-body-text';
           bodyEl.innerHTML = formatTextWithLinks(node.body);
-          bodyEl.style.fontSize = \`\${node.bodyFontSize || (isRoot ? 13 : 11.5)}px\`;
+          bodyEl.style.fontSize = (node.bodyFontSize || (isRoot ? 13 : 11.5)) + 'px';
           bodyEl.style.color = node.bodyColor || (isRoot ? '#e2e8f0' : '#475569');
           if (node.bodyBold) bodyEl.style.fontWeight = '700';
           if (node.bodyItalic) bodyEl.style.fontStyle = 'italic';
@@ -1559,60 +1523,55 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
         // Bottom Image
         if (node.imageUrl && node.imagePosition === 'bottom') {
-          const imgWrap = document.createElement('div');
-          imgWrap.className = 'node-image-wrap';
-          const img = document.createElement('img');
-          img.src = node.imageUrl;
-          img.className = 'node-image';
-          if (node.imageWidth) img.style.width = \`\${node.imageWidth}px\`;
-          imgWrap.appendChild(img);
-          wrap.appendChild(imgWrap);
+          var imgWrapBtm = document.createElement('div');
+          imgWrapBtm.className = 'node-image-wrap';
+          var imgBtm = document.createElement('img');
+          imgBtm.src = node.imageUrl;
+          imgBtm.className = 'node-image';
+          if (node.imageWidth) imgBtm.style.width = node.imageWidth + 'px';
+          imgWrapBtm.appendChild(imgBtm);
+          wrap.appendChild(imgWrapBtm);
         }
 
         // Dedicated Prominent Link Badge
         if (node.link && node.link.trim().length > 0) {
-          const linkBadge = document.createElement('a');
+          var linkBadge = document.createElement('a');
           linkBadge.className = 'node-link-badge';
           linkBadge.href = node.link;
           linkBadge.target = '_blank';
           linkBadge.rel = 'noopener noreferrer';
-          linkBadge.title = \`Abrir enlace: \${node.link}\`;
-          linkBadge.onclick = (e) => e.stopPropagation();
+          linkBadge.title = 'Abrir enlace: ' + node.link;
+          linkBadge.onclick = function(e) { e.stopPropagation(); };
 
-          const cleanDisplayUrl = node.link.replace(/^https?:\\/\\//, '').replace(/^www\\./, '').replace(/\\/$/, '');
-          linkBadge.innerHTML = \`
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-              <polyline points="15 3 21 3 21 9"></polyline>
-              <line x1="10" y1="14" x2="21" y2="3"></line>
-            </svg>
-            <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px;">\${cleanDisplayUrl}</span>
-          \`;
+          var cleanDisplayUrl = node.link.replace(/^https?:\\/\\//, '').replace(/^www\\./, '').replace(/\\/$/, '');
+          linkBadge.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <span style="overflow:hidden; text-overflow:ellipsis; max-width:180px;">' + cleanDisplayUrl + '</span>';
           wrap.appendChild(linkBadge);
         }
 
         // Progress Bar
         if (node.progress !== undefined) {
-          const progWrap = document.createElement('div');
+          var progWrap = document.createElement('div');
           progWrap.className = 'node-progress-wrap';
-          const bg = document.createElement('div');
+          var bg = document.createElement('div');
           bg.className = 'progress-bar-bg';
-          const fill = document.createElement('div');
+          var fill = document.createElement('div');
           fill.className = 'progress-bar-fill';
-          fill.style.width = \`\${node.progress}%\`;
+          fill.style.width = node.progress + '%';
           bg.appendChild(fill);
-          const txt = document.createElement('span');
+          var txt = document.createElement('span');
           txt.className = 'progress-bar-text';
-          txt.textContent = \`\${node.progress}%\`;
+          txt.textContent = node.progress + '%';
           progWrap.appendChild(bg);
           progWrap.appendChild(txt);
           wrap.appendChild(progWrap);
-          // Tags
+        }
+
+        // Tags
         if (node.tags && node.tags.length > 0) {
-          const tagsWrap = document.createElement('div');
+          var tagsWrap = document.createElement('div');
           tagsWrap.className = 'node-tags-wrap';
-          node.tags.forEach(t => {
-            const tSpan = document.createElement('span');
+          node.tags.forEach(function(t) {
+            var tSpan = document.createElement('span');
             tSpan.className = 'tag-badge';
             tSpan.textContent = '#' + t;
             tagsWrap.appendChild(tSpan);
@@ -1622,15 +1581,15 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
         // Floating Note Hover Tooltip
         if (node.note && node.note.trim().length > 0) {
-          const tooltip = document.createElement('div');
-          const isTopLayout = layout.side === 'top';
+          var tooltip = document.createElement('div');
+          var isTopLayout = layout.side === 'top';
           tooltip.className = 'node-note-tooltip' + (isTopLayout ? ' pos-bottom' : '');
           
-          const tipHeader = document.createElement('div');
+          var tipHeader = document.createElement('div');
           tipHeader.className = 'tooltip-note-header';
-          tipHeader.innerHTML = '<span>📝 Nota del Nodo</span>';
+          tipHeader.innerHTML = '<span>\\ud83d\\udcdd Nota del Nodo</span>';
           
-          const tipBody = document.createElement('div');
+          var tipBody = document.createElement('div');
           tipBody.className = 'tooltip-note-body';
           tipBody.innerHTML = renderMarkdown(node.note);
           
@@ -1643,47 +1602,51 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
 
         // Search Match Highlight
         if (searchQuery.trim() !== '') {
-          const q = searchQuery.toLowerCase();
-          if ((node.text && node.text.toLowerCase().includes(q)) ||
-              (node.body && node.body.toLowerCase().includes(q)) ||
-              (node.link && node.link.toLowerCase().includes(q)) ||
-              (node.tags && node.tags.some(t => t.toLowerCase().includes(q)))) {
+          var q = searchQuery.toLowerCase();
+          if ((node.text && node.text.toLowerCase().indexOf(q) !== -1) ||
+              (node.body && node.body.toLowerCase().indexOf(q) !== -1) ||
+              (node.link && node.link.toLowerCase().indexOf(q) !== -1) ||
+              (node.tags && node.tags.some(function(t) { return t.toLowerCase().indexOf(q) !== -1; }))) {
             div.classList.add('search-match');
           }
         }
 
         nodesLayer.appendChild(div);
 
-        // Fold/Unfold Button (Support all nodes with children including Root)
+        // Fold/Unfold Button
         if (node.children && node.children.length > 0) {
-          const foldBtn = document.createElement('div');
+          var foldBtn = document.createElement('div');
           foldBtn.className = 'fold-btn';
-          foldBtn.textContent = node.folded ? '+' : '−';
+          foldBtn.textContent = node.folded ? '+' : '\\u2212';
           foldBtn.title = node.folded ? 'Desplegar ramas' : 'Plegar ramas';
-          const isVert = layout.side === 'top' || layout.side === 'bottom';
+          var isVert = layout.side === 'top' || layout.side === 'bottom';
           if (isVert) {
-            foldBtn.style.left = \`\${layout.x + layout.width / 2 - 11}px\`;
+            foldBtn.style.left = (layout.x + layout.width / 2 - 11) + 'px';
             foldBtn.style.top = (layout.side === 'bottom')
-              ? \`\${layout.y + layout.height - 11}px\`
-              : \`\${layout.y - 11}px\`;
+              ? (layout.y + layout.height - 11) + 'px'
+              : (layout.y - 11) + 'px';
           } else {
-            foldBtn.style.top = \`\${layout.y + layout.height / 2 - 11}px\`;
+            foldBtn.style.top = (layout.y + layout.height / 2 - 11) + 'px';
             foldBtn.style.left = (layout.side === 'left')
-              ? \`\${layout.x - 11}px\`
-              : \`\${layout.x + layout.width - 11}px\`;
+              ? (layout.x - 11) + 'px'
+              : (layout.x + layout.width - 11) + 'px';
           }
-          foldBtn.onclick = (e) => {
-            e.stopPropagation();
-            toggleFold(id);
-          };
+          foldBtn.onclick = (function(nodeId) {
+            return function(e) {
+              e.stopPropagation();
+              toggleFold(nodeId);
+            };
+          })(id);
           nodesLayer.appendChild(foldBtn);
         }
       });
     }
+`);
 
-    // Viewport & Pan/Zoom
+  // Viewport & Pan/Zoom & Interaction
+  parts.push(`
     function updateTransform() {
-      viewport.style.transform = \`translate(\${panX}px, \${panY}px) scale(\${zoom})\`;
+      viewport.style.transform = 'translate(' + panX + 'px, ' + panY + 'px) scale(' + zoom + ')';
       zoomText.textContent = Math.round(zoom * 100) + '%';
     }
 
@@ -1700,25 +1663,25 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     }
 
     function fitToScreen() {
-      const layoutMap = computeMindMapLayout();
+      var layoutMap = computeMindMapLayout();
       if (layoutMap.size === 0) return;
 
-      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-      layoutMap.forEach(l => {
+      var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      layoutMap.forEach(function(l) {
         minX = Math.min(minX, l.x);
         maxX = Math.max(maxX, l.x + l.width);
         minY = Math.min(minY, l.y);
         maxY = Math.max(maxY, l.y + l.height);
       });
 
-      const mapW = maxX - minX + 120;
-      const mapH = maxY - minY + 120;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      var mapW = maxX - minX + 120;
+      var mapH = maxY - minY + 120;
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
 
-      const fitZoom = Math.min(Math.max(Math.min((vw * 0.9) / mapW, (vh * 0.85) / mapH), 0.25), 1.8);
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
+      var fitZoom = Math.min(Math.max(Math.min((vw * 0.9) / mapW, (vh * 0.85) / mapH), 0.25), 1.8);
+      var centerX = (minX + maxX) / 2;
+      var centerY = (minY + maxY) / 2;
 
       zoom = fitZoom;
       panX = vw / 2 - centerX * zoom;
@@ -1727,29 +1690,29 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     }
 
     // Pan interaction
-    container.addEventListener('mousedown', (e) => {
+    container.addEventListener('mousedown', function(e) {
       if (e.target.closest('.node-element') || e.target.closest('.fold-btn') || e.target.closest('.floating-toolbar') || e.target.closest('header')) return;
       isDragging = true;
       startX = e.clientX - panX;
       startY = e.clientY - panY;
     });
 
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener('mousemove', function(e) {
       if (!isDragging) return;
       panX = e.clientX - startX;
       panY = e.clientY - startY;
       updateTransform();
     });
 
-    window.addEventListener('mouseup', () => { isDragging = false; });
+    window.addEventListener('mouseup', function() { isDragging = false; });
 
-    container.addEventListener('wheel', (e) => {
+    container.addEventListener('wheel', function(e) {
       e.preventDefault();
-      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
+      var zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      var mouseX = e.clientX;
+      var mouseY = e.clientY;
 
-      const newZoom = Math.max(0.15, Math.min(3.0, zoom * zoomFactor));
+      var newZoom = Math.max(0.15, Math.min(3.0, zoom * zoomFactor));
       panX = mouseX - (mouseX - panX) * (newZoom / zoom);
       panY = mouseY - (mouseY - panY) * (newZoom / zoom);
       zoom = newZoom;
@@ -1757,39 +1720,39 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     }, { passive: false });
 
     // Touch Support (Pinch to Zoom & Pan)
-    let initialTouchDistance = null;
-    let initialTouchZoom = zoom;
+    var initialTouchDistance = null;
+    var initialTouchZoom = zoom;
 
-    container.addEventListener('touchstart', (e) => {
+    container.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
         isDragging = true;
         startX = e.touches[0].clientX - panX;
         startY = e.touches[0].clientY - panY;
       } else if (e.touches.length === 2) {
         isDragging = false;
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        var dx = e.touches[0].clientX - e.touches[1].clientX;
+        var dy = e.touches[0].clientY - e.touches[1].clientY;
         initialTouchDistance = Math.hypot(dx, dy);
         initialTouchZoom = zoom;
       }
     });
 
-    container.addEventListener('touchmove', (e) => {
+    container.addEventListener('touchmove', function(e) {
       e.preventDefault();
       if (e.touches.length === 1 && isDragging) {
         panX = e.touches[0].clientX - startX;
         panY = e.touches[0].clientY - startY;
         updateTransform();
       } else if (e.touches.length === 2 && initialTouchDistance) {
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        const distance = Math.hypot(dx, dy);
+        var dx = e.touches[0].clientX - e.touches[1].clientX;
+        var dy = e.touches[0].clientY - e.touches[1].clientY;
+        var distance = Math.hypot(dx, dy);
         zoom = Math.max(0.15, Math.min(3.0, initialTouchZoom * (distance / initialTouchDistance)));
         updateTransform();
       }
     }, { passive: false });
 
-    container.addEventListener('touchend', () => {
+    container.addEventListener('touchend', function() {
       isDragging = false;
       initialTouchDistance = null;
     });
@@ -1805,12 +1768,12 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     // Fold / Unfold All Nodes
     function toggleFoldAll() {
       isAllFolded = !isAllFolded;
-      Object.keys(mapData.nodes).forEach(id => {
+      Object.keys(mapData.nodes).forEach(function(id) {
         if (id !== mapData.rootId && mapData.nodes[id].children && mapData.nodes[id].children.length > 0) {
           mapData.nodes[id].folded = isAllFolded;
         }
       });
-      const btn = document.getElementById('btn-fold-toggle');
+      var btn = document.getElementById('btn-fold-toggle');
       if (btn) btn.textContent = isAllFolded ? 'Desplegar Todo' : 'Plegar Todo';
       renderMap();
       fitToScreen();
@@ -1841,7 +1804,11 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     // Init
     renderMap();
     fitToScreen();
-  </script>
+`);
+
+  parts.push(`  </script>
 </body>
-</html>`;
+</html>`);
+
+  return parts.join('\n');
 }
