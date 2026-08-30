@@ -1734,10 +1734,6 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     }
 
     // Pan interaction
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-
     container.addEventListener('mousedown', (e) => {
       if (e.target.closest('.node-element') || e.target.closest('.fold-btn') || e.target.closest('.floating-toolbar') || e.target.closest('header')) return;
       isDragging = true;
