@@ -227,10 +227,10 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
     /* Layers */
     svg#clouds-layer, svg#edges-layer, svg#connectors-layer {
       position: absolute;
-      top: -25000px;
-      left: -25000px;
-      width: 50000px;
-      height: 50000px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
       overflow: visible;
     }
@@ -1607,9 +1607,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           progWrap.appendChild(bg);
           progWrap.appendChild(txt);
           wrap.appendChild(progWrap);
-        }
-
-        // Tags
+          // Tags
         if (node.tags && node.tags.length > 0) {
           const tagsWrap = document.createElement('div');
           tagsWrap.className = 'node-tags-wrap';
@@ -1642,57 +1640,52 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         }
 
         div.appendChild(wrap);
-        maxY = Math.max(maxY, l.y + l.height);
+
+        // Search Match Highlight
+        if (searchQuery.trim() !== '') {
+          const q = searchQuery.toLowerCase();
+          if ((node.text && node.text.toLowerCase().includes(q)) ||
+              (node.body && node.body.toLowerCase().includes(q)) ||
+              (node.link && node.link.toLowerCase().includes(q)) ||
+              (node.tags && node.tags.some(t => t.toLowerCase().includes(q)))) {
+            div.classList.add('search-match');
+          }
+        }
+
+        nodesLayer.appendChild(div);
+
+        // Fold/Unfold Button (Support all nodes with children including Root)
+        if (node.children && node.children.length > 0) {
+          const foldBtn = document.createElement('div');
+          foldBtn.className = 'fold-btn';
+          foldBtn.textContent = node.folded ? '+' : '−';
+          foldBtn.title = node.folded ? 'Desplegar ramas' : 'Plegar ramas';
+          const isVert = layout.side === 'top' || layout.side === 'bottom';
+          if (isVert) {
+            foldBtn.style.left = \`\${layout.x + layout.width / 2 - 11}px\`;
+            foldBtn.style.top = (layout.side === 'bottom')
+              ? \`\${layout.y + layout.height - 11}px\`
+              : \`\${layout.y - 11}px\`;
+          } else {
+            foldBtn.style.top = \`\${layout.y + layout.height / 2 - 11}px\`;
+            foldBtn.style.left = (layout.side === 'left')
+              ? \`\${layout.x - 11}px\`
+              : \`\${layout.x + layout.width - 11}px\`;
+          }
+          foldBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleFold(id);
+          };
+          nodesLayer.appendChild(foldBtn);
+        }
       });
-
-      const mapW = maxX - minX + 120;
-      const mapH = maxY - minY + 120;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      const fitZoom = Math.min(Math.max(Math.min((vw * 0.9) / mapW, (vh * 0.85) / mapH), 0.25), 1.8);
-      const centerX = (minX + maxX) / 2;
-      const centerY = (minY + maxY) / 2;
-
-      zoom = fitZoom;
-      panX = vw / 2 - centerX * zoom;
-      panY = vh / 2 - centerY * zoom;
-      updateTransform();
     }
 
-    // Pan interaction
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-
-    container.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.node-element') || e.target.closest('.fold-btn') || e.target.closest('.floating-toolbar') || e.target.closest('header')) return;
-      isDragging = true;
-      startX = e.clientX - panX;
-      startY = e.clientY - panY;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      panX = e.clientX - startX;
-      panY = e.clientY - startY;
-      updateTransform();
-    });
-
-    window.addEventListener('mouseup', () => { isDragging = false; });
-
-    container.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-
-      const newZoom = Math.max(0.15, Math.min(3.0, zoom * zoomFactor));
-      panX = mouseX - (mouseX - panX) * (newZoom / zoom);
-      panY = mouseY - (mouseY - panY) * (newZoom / zoom);
-      zoom = newZoom;
-      updateTransform();
-    }, { passive: false });
+    // Viewport & Pan/Zoom
+    function updateTransform() {
+      viewport.style.transform = \`translate(\${panX}px, \${panY}px) scale(\${zoom})\`;
+      zoomText.textContent = Math.round(zoom * 100) + '%';
+    }
 
     function zoomBy(factor) {
       zoom = Math.max(0.15, Math.min(3.0, zoom * factor));
