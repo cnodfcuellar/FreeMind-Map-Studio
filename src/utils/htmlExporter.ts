@@ -1642,51 +1642,57 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         }
 
         div.appendChild(wrap);
-
-        // Search Match Highlight
-        if (searchQuery.trim() !== '') {
-          const q = searchQuery.toLowerCase();
-          if ((node.text && node.text.toLowerCase().includes(q)) ||
-              (node.body && node.body.toLowerCase().includes(q)) ||
-              (node.link && node.link.toLowerCase().includes(q)) ||
-              (node.tags && node.tags.some(t => t.toLowerCase().includes(q)))) {
-            div.classList.add('search-match');
-          }
-        }
-
-        nodesLayer.appendChild(div);
-
-        // Fold/Unfold Button
-        if (node.children && node.children.length > 0 && !isRoot) {
-          const foldBtn = document.createElement('div');
-          foldBtn.className = 'fold-btn';
-          foldBtn.textContent = node.folded ? '+' : '−';
-          const isVert = layout.side === 'top' || layout.side === 'bottom';
-          if (isVert) {
-            foldBtn.style.left = \`\${layout.x + layout.width / 2 - 10}px\`;
-            foldBtn.style.top = (layout.side === 'bottom')
-              ? \`\${layout.y + layout.height - 10}px\`
-              : \`\${layout.y - 10}px\`;
-          } else {
-            foldBtn.style.top = \`\${layout.y + layout.height / 2 - 10}px\`;
-            foldBtn.style.left = (layout.side === 'left')
-              ? \`\${layout.x - 10}px\`
-              : \`\${layout.x + layout.width - 10}px\`;
-          }
-          foldBtn.onclick = (e) => {
-            e.stopPropagation();
-            toggleFold(id);
-          };
-          nodesLayer.appendChild(foldBtn);
-        }
+        maxY = Math.max(maxY, l.y + l.height);
       });
+
+      const mapW = maxX - minX + 120;
+      const mapH = maxY - minY + 120;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      const fitZoom = Math.min(Math.max(Math.min((vw * 0.9) / mapW, (vh * 0.85) / mapH), 0.25), 1.8);
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+
+      zoom = fitZoom;
+      panX = vw / 2 - centerX * zoom;
+      panY = vh / 2 - centerY * zoom;
+      updateTransform();
     }
 
-    // Viewport & Pan/Zoom
-    function updateTransform() {
-      viewport.style.transform = \`translate(\${panX}px, \${panY}px) scale(\${zoom})\`;
-      zoomText.textContent = Math.round(zoom * 100) + '%';
-    }
+    // Pan interaction
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    container.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.node-element') || e.target.closest('.fold-btn') || e.target.closest('.floating-toolbar') || e.target.closest('header')) return;
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      const newZoom = Math.max(0.15, Math.min(3.0, zoom * zoomFactor));
+      panX = mouseX - (mouseX - panX) * (newZoom / zoom);
+      panY = mouseY - (mouseY - panY) * (newZoom / zoom);
+      zoom = newZoom;
+      updateTransform();
+    }, { passive: false });
 
     function zoomBy(factor) {
       zoom = Math.max(0.15, Math.min(3.0, zoom * factor));
@@ -1712,20 +1718,28 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         maxY = Math.max(maxY, l.y + l.height);
       });
 
-      const mapWidth = maxX - minX + 120;
-      const mapHeight = maxY - minY + 120;
-      const scaleX = (window.innerWidth - 60) / mapWidth;
-      const scaleY = (window.innerHeight - 100) / mapHeight;
-      zoom = Math.max(0.2, Math.min(1.2, Math.min(scaleX, scaleY)));
+      const mapW = maxX - minX + 120;
+      const mapH = maxY - minY + 120;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
 
-      panX = window.innerWidth / 2 - ((minX + maxX) / 2) * zoom;
-      panY = window.innerHeight / 2 - ((minY + maxY) / 2) * zoom;
+      const fitZoom = Math.min(Math.max(Math.min((vw * 0.9) / mapW, (vh * 0.85) / mapH), 0.25), 1.8);
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+
+      zoom = fitZoom;
+      panX = vw / 2 - centerX * zoom;
+      panY = vh / 2 - centerY * zoom;
       updateTransform();
     }
 
-    // Interaction Listeners
+    // Pan interaction
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
     container.addEventListener('mousedown', (e) => {
-      if (e.target.closest('.node-element') || e.target.closest('.fold-btn') || e.target.closest('a')) return;
+      if (e.target.closest('.node-element') || e.target.closest('.fold-btn') || e.target.closest('.floating-toolbar') || e.target.closest('header')) return;
       isDragging = true;
       startX = e.clientX - panX;
       startY = e.clientY - panY;
@@ -1791,7 +1805,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       initialTouchDistance = null;
     });
 
-    // Fold / Unfold
+    // Fold / Unfold Single Node
     function toggleFold(nodeId) {
       if (mapData.nodes[nodeId]) {
         mapData.nodes[nodeId].folded = !mapData.nodes[nodeId].folded;
@@ -1799,14 +1813,16 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       }
     }
 
+    // Fold / Unfold All Nodes
     function toggleFoldAll() {
       isAllFolded = !isAllFolded;
       Object.keys(mapData.nodes).forEach(id => {
-        if (id !== mapData.rootId) {
+        if (id !== mapData.rootId && mapData.nodes[id].children && mapData.nodes[id].children.length > 0) {
           mapData.nodes[id].folded = isAllFolded;
         }
       });
-      document.getElementById('btn-fold-toggle').textContent = isAllFolded ? 'Desplegar Todo' : 'Plegar Todo';
+      const btn = document.getElementById('btn-fold-toggle');
+      if (btn) btn.textContent = isAllFolded ? 'Desplegar Todo' : 'Plegar Todo';
       renderMap();
       fitToScreen();
     }
@@ -1828,7 +1844,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       document.getElementById('note-drawer').classList.remove('open');
     }
 
-    // Export PNG
+    // Export PNG / Print
     function exportCanvasPng() {
       window.print();
     }
