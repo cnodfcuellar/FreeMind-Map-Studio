@@ -233,8 +233,8 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       pointer-events: none;
       overflow: visible;
     }
@@ -661,7 +661,16 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       <!-- Edges and Branches Layer -->
       <svg id="edges-layer"></svg>
       <!-- Cross Connectors Layer -->
-      <svg id="connectors-layer"></svg>
+      <svg id="connectors-layer">
+        <defs>
+          <marker id="connector-arrow-end" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#3b82f6"></path>
+          </marker>
+          <marker id="connector-arrow-start" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 8 1.5 L 0 5 L 8 8.5 z" fill="#3b82f6"></path>
+          </marker>
+        </defs>
+      </svg>
       <!-- Node HTML DOM Layer -->
       <div id="nodes-layer"></div>
     </div>
@@ -1655,7 +1664,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       connectorsSvg.innerHTML = '';
 
       var layoutMap = computeMindMapLayout();
-      var themeBranchColors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#14b8a6'];
+      var themeBranchColors = ${JSON.stringify(theme.branchColors || ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#14b8a6'])};
       var edgeStyle = mapData.edgeStyle || 'bezier';
       var edgeDash = mapData.edgeDash || 'solid';
       var edgeWidth = mapData.edgeWidth || 2.2;
@@ -1710,15 +1719,22 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         if (!parentLayout) return;
 
         var pathData = generateEdgePath(parentLayout, childLayout, edgeStyle);
-        var branchColor = childNode.borderColor || themeBranchColors[childLayout.branchIndex % themeBranchColors.length] || '#94a3b8';
+        if (!pathData) return;
+
+        var defaultWidth = childLayout.depth === 1 ? 2.5 : 1.8;
+        var width = childNode.edgeWidth || mapData.edgeWidth || defaultWidth;
+        var branchColor = childNode.edgeColor || mapData.edgeColor || themeBranchColors[childLayout.branchIndex % themeBranchColors.length] || '#3b82f6';
+        var effectiveDash = childNode.edgeDash || mapData.edgeDash || 'solid';
 
         var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', pathData);
         path.setAttribute('stroke', branchColor);
-        path.setAttribute('stroke-width', String(edgeWidth));
+        path.setAttribute('stroke-width', String(width));
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('stroke-linejoin', 'round');
         path.setAttribute('fill', 'none');
-        if (edgeDash === 'dashed') path.setAttribute('stroke-dasharray', '6 4');
-        else if (edgeDash === 'dotted') path.setAttribute('stroke-dasharray', '2 3');
+        if (effectiveDash === 'dashed') path.setAttribute('stroke-dasharray', String(Math.max(10, width * 3.5)) + ' ' + String(Math.max(7, width * 2.5)));
+        else if (effectiveDash === 'dotted') path.setAttribute('stroke-dasharray', '0.1 ' + String(Math.max(8, width * 3.0)));
         edgesSvg.appendChild(path);
       });
 
@@ -1743,8 +1759,12 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           path.setAttribute('d', 'M ' + sx + ' ' + sy + ' Q ' + mx + ' ' + my + ', ' + ex + ' ' + ey);
           path.setAttribute('stroke', conn.color || '#3b82f6');
           path.setAttribute('stroke-width', String(conn.width || 2));
+          path.setAttribute('stroke-linecap', 'round');
           path.setAttribute('fill', 'none');
           path.setAttribute('opacity', String(conn.opacity || 0.9));
+          if (conn.arrow !== 'none') {
+            path.setAttribute('marker-end', 'url(#connector-arrow-end)');
+          }
           if (conn.style === 'dashed') path.setAttribute('stroke-dasharray', '6 4');
           else if (conn.style === 'dotted') path.setAttribute('stroke-dasharray', '2 3');
           connectorsSvg.appendChild(path);
