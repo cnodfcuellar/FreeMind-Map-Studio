@@ -248,8 +248,46 @@ export interface MindMap {
   // Presentation Mode (Mindomo-style Custom Frames & Storyboard)
   presentationSlides?: SlideFrame[];
 
+  // Elaborate Spatial Presentation Mode (Prezi-style Free Board & Rotation)
+  elaborateSlides?: SpatialSlideCard[];
+
   createdAt: number;
   updatedAt: number;
+}
+
+export interface SpatialSlideCard {
+  id: string;
+  order: number;
+  title: string;
+  spatial: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    scale: number;
+    rotation: number; // in degrees
+  };
+  content: {
+    nodeId?: string;
+    titleText: string;
+    bodyText?: string;
+    notesMarkdown?: string;
+    imageUrl?: string;
+    imageSize?: 'small' | 'medium' | 'large';
+    icons?: string[];
+    tags?: string[];
+    progress?: number;
+    subItems?: { id: string; text: string; color?: string }[];
+  };
+  style?: {
+    themeId?: string;
+    backgroundColor?: string;
+    textColor?: string;
+    borderColor?: string;
+    borderWidth?: number;
+    borderRadius?: number;
+    contentAlign?: 'center' | 'left';
+  };
 }
 
 export interface SlideFrame {

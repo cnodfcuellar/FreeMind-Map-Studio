@@ -49,7 +49,7 @@ interface MenuBarProps {
   onAddSibling: () => void;
   onDeleteNode: () => void;
   onToggleOutline: () => void;
-  onStartPresentation: (mode?: 'classic' | 'dynamic') => void;
+  onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
   onShowComingSoon?: (data: { title: string; subtitle: string; mode: 'elaborate' | 'dynamic' }) => void;
   onOpenShortcuts: () => void;
   onToggleFullscreen: () => void;
@@ -446,18 +446,11 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                 <kbd className="text-[10px] text-slate-400 font-mono">F5</kbd>
               </button>
               <button
-                onClick={() => {
-                  setOpenMenu(null);
-                  onShowComingSoon?.({
-                    title: 'Modo Elaborado',
-                    subtitle: 'Recorrido Interactivo Guiado por el Mapa',
-                    mode: 'elaborate',
-                  });
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                onClick={() => { onStartPresentation('elaborate'); setOpenMenu(null); }}
+                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-indigo-50 hover:text-indigo-700 cursor-pointer"
               >
-                <span className="flex items-center gap-2"><Map className="w-3.5 h-3.5 text-blue-600" /> Presentación Elaborada</span>
-                <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">Pronto</span>
+                <span className="flex items-center gap-2"><Map className="w-3.5 h-3.5 text-indigo-600" /> Presentación Elaborada (Espacial)</span>
+                <span className="text-[9px] font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-full">Activo</span>
               </button>
               <div className="my-1 border-t border-slate-100" />
               <button

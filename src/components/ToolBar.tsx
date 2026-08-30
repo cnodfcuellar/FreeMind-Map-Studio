@@ -48,7 +48,7 @@ interface ToolBarProps {
   onUndo: () => void;
   onRedo: () => void;
   onToggleOutline: () => void;
-  onStartPresentation: (mode?: 'classic' | 'dynamic') => void;
+  onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
   onShowComingSoon?: (data: { title: string; subtitle: string; mode: 'elaborate' | 'dynamic' }) => void;
   onToggleFilterBar: () => void;
   onToggleToolPanel: () => void;
@@ -557,32 +557,28 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 </div>
               </button>
 
-              {/* 2. Elaborado */}
+              {/* 2. Elaborado (Prezi Espacial + Tarjetas Libres) */}
               <button
                 onClick={() => {
                   setIsPresentationMenuOpen(false);
-                  onShowComingSoon?.({
-                    title: 'Modo Elaborado',
-                    subtitle: 'Recorrido Interactivo Guiado por el Mapa',
-                    mode: 'elaborate',
-                  });
+                  onStartPresentation('elaborate');
                 }}
-                className="w-full p-2 rounded-xl text-left hover:bg-blue-50 group flex items-start gap-2.5 transition-colors cursor-pointer"
+                className="w-full p-2 rounded-xl text-left hover:bg-indigo-50 group flex items-start gap-2.5 transition-colors cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                   <Map className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-bold text-xs text-slate-800 group-hover:text-blue-900">
-                      Elaborado
+                    <span className="font-bold text-xs text-slate-800 group-hover:text-indigo-900">
+                      Elaborado (Espacial Prezi)
                     </span>
-                    <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold">
-                      Próximamente
+                    <span className="px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px] font-bold">
+                      Activo
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                    Cámara guiada con zoom y foco en ramas
+                    Lienzo libre, rotación de tarjetas y vuelo cinemático con zoom
                   </p>
                 </div>
               </button>

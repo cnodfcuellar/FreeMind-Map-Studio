@@ -36,6 +36,7 @@ import { SavedMapsModal } from './components/Modals/SavedMapsModal';
 import { ConnectorModal } from './components/Modals/ConnectorModal';
 import { IconPackModal } from './components/Modals/IconPackModal';
 import { ComingSoonModal, ComingSoonModalData } from './components/Modals/ComingSoonModal';
+import { ElaboratePresentationSystem } from './components/Presentation/ElaboratePresentationSystem';
 
 export default function App() {
   const store = useMindMapStore();
@@ -90,7 +91,7 @@ export default function App() {
   const [isSavedMapsModalOpen, setIsSavedMapsModalOpen] = useState(false);
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
-  const [presentationType, setPresentationType] = useState<'classic' | 'dynamic'>('dynamic');
+  const [presentationType, setPresentationType] = useState<'classic' | 'dynamic' | 'elaborate'>('dynamic');
   const [comingSoonModalData, setComingSoonModalData] = useState<ComingSoonModalData | null>(null);
 
   const isAnyModalOpen = Boolean(
@@ -159,7 +160,13 @@ export default function App() {
           onDeleteNode={() => handleDeleteNode()}
           onToggleOutline={() => setIsOutlineOpen((o) => !o)}
           onStartPresentation={(mode) => {
-            setPresentationType(mode === 'dynamic' ? 'dynamic' : 'classic');
+            if (mode === 'elaborate') {
+              setPresentationType('elaborate');
+            } else if (mode === 'classic') {
+              setPresentationType('classic');
+            } else {
+              setPresentationType('dynamic');
+            }
             setIsPresentationMode(true);
           }}
           onShowComingSoon={(data) => setComingSoonModalData(data)}
@@ -251,7 +258,13 @@ export default function App() {
           onRedo={handleRedo}
           onToggleOutline={() => setIsOutlineOpen((o) => !o)}
           onStartPresentation={(mode) => {
-            setPresentationType(mode === 'classic' ? 'classic' : 'dynamic');
+            if (mode === 'elaborate') {
+              setPresentationType('elaborate');
+            } else if (mode === 'classic') {
+              setPresentationType('classic');
+            } else {
+              setPresentationType('dynamic');
+            }
             setIsPresentationMode(true);
           }}
           onShowComingSoon={(data) => setComingSoonModalData(data)}
@@ -575,7 +588,16 @@ export default function App() {
         />
       )}
 
-      {/* 5b. Presentation Coming Soon Modal */}
+      {/* 5b. Elaborate Spatial Prezi-style Presentation System */}
+      {isPresentationMode && presentationType === 'elaborate' && (
+        <ElaboratePresentationSystem
+          mindMap={mindMap}
+          onClose={() => setIsPresentationMode(false)}
+          onUpdateMindMap={(updated) => setMindMap(updated)}
+        />
+      )}
+
+      {/* 5c. Presentation Coming Soon Modal */}
       <ComingSoonModal
         isOpen={Boolean(comingSoonModalData)}
         data={comingSoonModalData}
