@@ -97,17 +97,23 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
       const cardW = card.spatial.width * cardScale;
       const cardH = card.spatial.height * cardScale;
 
-      const targetZoom = Math.min(Math.max(Math.min((vw * 0.88) / cardW, (vh * 0.82) / cardH), 0.3), 2.5);
-      const targetRot = -card.spatial.rotation; // Inverse rotation to align horizontally
+      const targetZoom = Math.min(Math.max(Math.min((vw * 0.85) / cardW, (vh * 0.8) / cardH), 0.35), 2.2);
+      const targetRotDeg = -card.spatial.rotation; // Inverse rotation to make card horizontal
+      const targetRotRad = (targetRotDeg * Math.PI) / 180;
 
-      const centerX = card.spatial.x + cardW / 2;
-      const centerY = card.spatial.y + cardH / 2;
+      // Unrotated center of the card
+      const cx = card.spatial.x + cardW / 2;
+      const cy = card.spatial.y + cardH / 2;
+
+      // Rotated and scaled position of the card center
+      const rotCenterX = (cx * Math.cos(targetRotRad) - cy * Math.sin(targetRotRad)) * targetZoom;
+      const rotCenterY = (cx * Math.sin(targetRotRad) + cy * Math.cos(targetRotRad)) * targetZoom;
 
       setCamZoom(targetZoom);
-      setCamRotation(targetRot);
+      setCamRotation(targetRotDeg);
       setCamPan({
-        x: vw / 2 - centerX * targetZoom,
-        y: vh / 2 - centerY * targetZoom,
+        x: vw / 2 - rotCenterX,
+        y: vh / 2 - rotCenterY,
       });
     },
     []
@@ -439,7 +445,7 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
           style={{
             transform: `translate3d(${camPan.x}px, ${camPan.y}px, 0) scale(${camZoom}) rotate(${camRotation}deg)`,
             transformOrigin: '0 0',
-            transition: isPresenterMode && !isPanningBoard ? 'transform 850ms cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+            transition: !isPanningBoard && !transformingCardId ? 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
           }}
           className="absolute top-0 left-0 w-full h-full pointer-events-none will-change-transform"
         >
@@ -595,9 +601,7 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
                     setIsOverviewActive(false);
                     setCurrentSlideIndex(idx);
                     setSelectedSlideId(s.id);
-                    if (isPresenterMode) {
-                      flyCameraToSlide(s);
-                    }
+                    flyCameraToSlide(s);
                   }}
                   className={`group relative shrink-0 px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-2 ${
                     isCurrent
