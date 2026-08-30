@@ -63,7 +63,16 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
 
   const [transformingCardId, setTransformingCardId] = useState<string | null>(null);
   const [transformMode, setTransformMode] = useState<'drag' | 'rotate' | 'resize' | null>(null);
-  const [transformStartPos, setTransformStartPos] = useState<{ mouseX: number; mouseY: number; cardX: number; cardY: number; cardRot: number; cardW: number; cardH: number } | null>(null);
+  const [transformStartPos, setTransformStartPos] = useState<{
+    mouseX: number;
+    mouseY: number;
+    cardX: number;
+    cardY: number;
+    cardRot: number;
+    cardW: number;
+    cardH: number;
+    cardScale: number;
+  } | null>(null);
 
   // Theme styling
   const theme = THEMES[mindMap.themeId] || THEMES.default;
@@ -94,18 +103,22 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
       const vh = rect.height || window.innerHeight;
 
       const cardScale = card.spatial.scale || 1;
-      const cardW = card.spatial.width * cardScale;
-      const cardH = card.spatial.height * cardScale;
+      const cardW = card.spatial.width;
+      const cardH = card.spatial.height;
 
-      const targetZoom = Math.min(Math.max(Math.min((vw * 0.85) / cardW, (vh * 0.8) / cardH), 0.35), 2.2);
+      // Target zoom should fit the scaled card snugly inside viewport (with safe margin)
+      const targetZoom = Math.min(
+        Math.max(Math.min((vw * 0.82) / (cardW * cardScale), (vh * 0.78) / (cardH * cardScale)), 0.25),
+        2.5
+      );
       const targetRotDeg = -card.spatial.rotation; // Inverse rotation to make card horizontal
       const targetRotRad = (targetRotDeg * Math.PI) / 180;
 
-      // Unrotated center of the card
+      // Center of the unrotated card in world board space
       const cx = card.spatial.x + cardW / 2;
       const cy = card.spatial.y + cardH / 2;
 
-      // Rotated and scaled position of the card center
+      // Position of the card center after applying viewport rotation and zoom around (0,0)
       const rotCenterX = (cx * Math.cos(targetRotRad) - cy * Math.sin(targetRotRad)) * targetZoom;
       const rotCenterY = (cx * Math.sin(targetRotRad) + cy * Math.cos(targetRotRad)) * targetZoom;
 
@@ -262,6 +275,24 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
         const updated = slides.map((s) =>
           s.id === transformingCardId
             ? { ...s, spatial: { ...s.spatial, rotation: deg } }
+            : s
+        );
+        setSlides(updated);
+      } else if (transformMode === 'resize') {
+        const initialScale = transformStartPos.cardScale ?? 1.0;
+        const initialHypot = Math.hypot(transformStartPos.cardW, transformStartPos.cardH);
+        const currentHypot = Math.hypot(transformStartPos.cardW + dx, transformStartPos.cardH + dy);
+        const factor = Math.max(0.4, Math.min(3.0, (currentHypot / initialHypot) * initialScale));
+
+        const updated = slides.map((s) =>
+          s.id === transformingCardId
+            ? {
+                ...s,
+                spatial: {
+                  ...s.spatial,
+                  scale: Number(factor.toFixed(2)),
+                },
+              }
             : s
         );
         setSlides(updated);
@@ -540,6 +571,7 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
                     cardRot: card.spatial.rotation,
                     cardW: card.spatial.width,
                     cardH: card.spatial.height,
+                    cardScale: card.spatial.scale || 1.0,
                   });
                 }}
                 onStartRotate={(e) => {
@@ -555,6 +587,7 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
                     cardRot: card.spatial.rotation,
                     cardW: card.spatial.width,
                     cardH: card.spatial.height,
+                    cardScale: card.spatial.scale || 1.0,
                   });
                 }}
                 onStartResize={(e) => {
@@ -562,6 +595,16 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
                   setSelectedSlideId(card.id);
                   setTransformingCardId(card.id);
                   setTransformMode('resize');
+                  setTransformStartPos({
+                    mouseX: e.clientX,
+                    mouseY: e.clientY,
+                    cardX: card.spatial.x,
+                    cardY: card.spatial.y,
+                    cardRot: card.spatial.rotation,
+                    cardW: card.spatial.width,
+                    cardH: card.spatial.height,
+                    cardScale: card.spatial.scale || 1.0,
+                  });
                 }}
               />
             ))}
