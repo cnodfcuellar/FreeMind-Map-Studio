@@ -1392,6 +1392,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   theme={theme}
                   branchColor={branchColor}
                   isMatch={isMatch}
+                  isPresentationMode={isPresentationMode}
                   globalVisibility={{
                     hideAllBodies: mindMap.hideAllBodies,
                     hideAllImages: mindMap.hideAllImages,

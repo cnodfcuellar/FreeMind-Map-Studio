@@ -20,6 +20,7 @@ interface NodeComponentProps {
   theme: MindMapTheme;
   branchColor: string;
   isMatch?: boolean;
+  isPresentationMode?: boolean;
   globalVisibility?: {
     hideAllBodies?: boolean;
     hideAllImages?: boolean;
@@ -47,6 +48,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   theme,
   branchColor,
   isMatch,
+  isPresentationMode,
   globalVisibility,
   onSelect,
   onDoubleClick,
@@ -971,11 +973,12 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         </button>
       )}
 
-      {/* Floating Note Hover Tooltip Preview Card (Only when notes are NOT shown inline) */}
+      {/* Floating Note Hover Tooltip Preview Card (Only when notes are NOT shown inline and NOT in presentation mode) */}
       {node.note &&
         node.note.trim().length > 0 &&
         isHovered &&
         !isEditing &&
+        !isPresentationMode &&
         !(node.showNoteInline || globalVisibility?.showAllNotesInline) && (
         <div
           className={`absolute left-1/2 -translate-x-1/2 w-max min-w-[200px] max-w-[340px] sm:max-w-[420px] bg-slate-900/95 text-slate-100 dark:bg-slate-800/98 dark:text-slate-100 p-3.5 rounded-xl shadow-2xl border border-slate-700/80 backdrop-blur-md text-left z-50 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none ${
