@@ -42,6 +42,8 @@
    - 10.2. [Tutorial 2: Cómo Modificar la Interfaz de las Presentaciones](#-tutorial-2-cómo-modificar-la-interfaz-de-las-presentaciones)
    - 10.3. [Tutorial 3: Cómo Añadir una Nueva Forma de Nodo (Rombo/Diamante)](#-tutorial-3-cómo-añadir-una-nueva-forma-de-nodo-ejemplo-diamante--rombo)
    - 10.4. [Tutorial 4: Conversión de Coordenadas de Pantalla a Mundo en el Canvas](#-tutorial-4-conversión-de-coordenadas-de-pantalla-a-mundo-en-el-canvas)
+   - 10.5. [Tutorial 5: Cómo Cambiar el Color de Fondo del MiniMapa](#-tutorial-5-cómo-cambiar-el-color-de-fondo-del-minimapa)
+
 
 ---
 
@@ -951,10 +953,136 @@ Esta función se utiliza activamente en:
 
 ---
 
+### 📘 Tutorial 5: Cómo Cambiar el Color de Fondo del MiniMapa
+
+El MiniMapa ([`src/components/MiniMap.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/MiniMap.tsx)) se ubica flotando en la esquina inferior derecha del lienzo. Tiene **dos áreas de fondo distintas** que se pueden personalizar:
+
+1. **El Contenedor Exterior (Tarjeta Glassmorphism)**: El panel exterior translúcido con bordes redondeados, desenfoque y sombra.
+2. **El Lienzo Interior del Radar (Área SVG)**: El rectángulo SVG que representa el espacio del mapa donde se dibujan los nodos en miniatura y el recuadro del visor (*viewport*).
+
+```
+┌────────────────────────────────────────────────────────┐
+│ CONTENEDOR EXTERIOR (div en MiniMap.tsx ~L218)        │
+│ backgroundColor: 'rgba(255, 255, 255, 0.65)'           │
+│                                                        │
+│   ┌────────────────────────────────────────────────┐   │
+│   │ ÁREA INTERIOR SVG (<rect fill="..."> ~L295)    │   │
+│   │ fill="#0f172a" (Azul noche oscuro / Radar)     │   │
+│   │                                                │   │
+│   │      [ Nodo A ] ─── [ Nodo B ]                 │   │
+│   │          │                                     │   │
+│   │      ┌───┴───┐  [ ▢ Visor Cámara Actual ]      │   │
+│   │                                                │   │
+│   └────────────────────────────────────────────────┘   │
+└────────────────────────────────────────────────────────┘
+```
+
+A continuación se explican las 3 formas de personalizarlo según el nivel de dinamismo deseado:
+
+---
+
+#### Nivel A: Modificación Rápida y Directa en Estilos CSS/JSX
+Si solo deseas cambiar los colores fijos del MiniMapa (por ejemplo, para que sea completamente oscuro OLED o blanco puro):
+
+Abre [`src/components/MiniMap.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/MiniMap.tsx):
+
+1. **Para cambiar el color de la tarjeta exterior (alrededor de la línea 214):**
+```tsx
+// En src/components/MiniMap.tsx (Línea ~218)
+<div
+  style={{
+    borderColor: 'rgba(51, 65, 85, 0.6)',       // Borde sutil oscuro
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',   // 👉 Cambia de blanco traslúcido a Azul Oscuro/OLED
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)',
+  }}
+  className={`backdrop-blur-md p-2 rounded-2xl ${sizeConfig.cardWidth} ...`}
+>
+```
+
+2. **Para cambiar el fondo del radar interior SVG (alrededor de la línea 290):**
+```tsx
+// En src/components/MiniMap.tsx (Línea ~295)
+{/* Radar Background fill */}
+<rect
+  x={bounds.minX}
+  y={bounds.minY}
+  width={bounds.maxX - bounds.minX}
+  height={bounds.maxY - bounds.minY}
+  fill="#1e1e2e" // 👉 Cambia '#0f172a' por el color HEX deseado (ej. #000000 para OLED negro puro o #181825 para tema Catppuccin)
+/>
+```
+
+---
+
+#### Nivel B: Fondo Dinámico Reactivo al Tema Actual del Mapa
+Para que el MiniMapa adopte automáticamente el mismo color de fondo del lienzo del mapa mental que el usuario haya seleccionado en el inspector:
+
+En [`src/components/MiniMap.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/MiniMap.tsx) (alrededor de la línea 295):
+El componente ya recibe las props `mindMap` y `theme`. Puedes usar el operador de coalescencia nula (`||`) para leer el fondo configurado en el mapa:
+
+```tsx
+// En src/components/MiniMap.tsx (Línea ~295)
+<rect
+  x={bounds.minX}
+  y={bounds.minY}
+  width={bounds.maxX - bounds.minX}
+  height={bounds.maxY - bounds.minY}
+  // 👉 Si el mapa tiene color personalizado lo usa; si no, usa el del tema; si no, usa el valor por defecto
+  fill={mindMap.backgroundColor || theme.canvasBg || '#0f172a'}
+/>
+```
+
+---
+
+#### Nivel C: Añadir un Selector de Color del MiniMapa en el Inspector (`ToolPanel`)
+Si deseas que el usuario final pueda personalizar el color del MiniMapa directamente desde la pestaña de diseño:
+
+1. **Añadir el campo al modelo de tipos ([`src/types/mindmap.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/types/mindmap.ts)):**
+```typescript
+// En src/types/mindmap.ts -> interface MindMap
+export interface MindMap {
+  // ... campos existentes ...
+  miniMapBgColor?: string; // 👉 Color de fondo personalizado para el minimapa
+}
+```
+
+2. **Añadir el selector en el Inspector ([`src/components/organisms/toolpanel/ThemeTab.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/toolpanel/ThemeTab.tsx)):**
+```tsx
+// En src/components/organisms/toolpanel/ThemeTab.tsx:
+import { ColorPicker } from '../../atoms/ColorPicker';
+
+<div className="mt-4 pt-4 border-t border-slate-700/50">
+  <label className="text-xs font-semibold text-slate-300 mb-2 block">
+    Fondo del MiniMapa
+  </label>
+  <ColorPicker
+    value={mindMap.miniMapBgColor || '#0f172a'}
+    onChange={(color) => onUpdateMapSettings({ miniMapBgColor: color })}
+  />
+</div>
+```
+
+3. **Consumir la propiedad en el MiniMapa ([`src/components/MiniMap.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/MiniMap.tsx)):**
+```tsx
+// En src/components/MiniMap.tsx (Línea ~295)
+<rect
+  x={bounds.minX}
+  y={bounds.minY}
+  width={bounds.maxX - bounds.minX}
+  height={bounds.maxY - bounds.minY}
+  fill={mindMap.miniMapBgColor || '#0f172a'}
+/>
+```
+
+---
+
 <div align="center">
 
 **FreeMind Map Studio — Arquitectura de Software v3.0**  
 *Mantenibilidad · Rendimiento · Privacidad Absoluta · Cero Dependencias Externas*
 
 </div>
+
 
