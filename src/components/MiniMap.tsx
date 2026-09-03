@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { MindMap, CalculatedNodeLayout, MindMapTheme } from '../types/mindmap';
+import { ZoomControls } from './molecules/ZoomControls';
 import {
   ZoomIn,
   ZoomOut,
@@ -7,6 +8,7 @@ import {
   Compass,
   ChevronDown,
 } from 'lucide-react';
+
 
 export type MiniMapSize = 'compact' | 'medium' | 'large';
 
@@ -446,74 +448,17 @@ export const MiniMap: React.FC<MiniMapProps> = ({
         </div>
       )}
 
-      {/* Zoom Controls HUD (Placed UNDER the minimap - Clean Light Theme Guaranteed) */}
-      <div
-        style={{
-          borderColor: 'rgba(226, 232, 240, 0.95)',
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          backgroundColor: 'rgba(255, 255, 255, 0.96)',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
-        }}
-        className="flex items-center gap-1.5 backdrop-blur-md px-3 py-1.5 rounded-2xl text-slate-700 transition-all duration-200 z-50"
-      >
-        {/* Toggle MiniMap Button */}
-        <button
-          title={showMiniMap ? 'Ocultar MiniMapa' : 'Mostrar MiniMapa'}
-          onClick={onToggleMiniMap}
-          className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-            showMiniMap
-              ? 'bg-blue-50 text-blue-600 font-bold'
-              : 'hover:bg-slate-100 text-slate-600'
-          }`}
-        >
-          <Compass className="w-4 h-4" />
-        </button>
-
-        <div style={{ backgroundColor: '#e2e8f0' }} className="w-px h-4.5 mx-0.5" />
-
-        {/* Zoom Out (-) */}
-        <button
-          title="Alejar Zoom (-)"
-          onClick={onZoomOut}
-          className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-600 hover:text-blue-600 transition-colors cursor-pointer active:scale-95"
-        >
-          <ZoomOut className="w-4 h-4 stroke-[2]" />
-        </button>
-
-        {/* Zoom Percentage (Click to Reset 100%) */}
-        <button
-          title="Restablecer al 100%"
-          onClick={onResetZoom}
-          style={{
-            borderColor: '#e2e8f0',
-            backgroundColor: '#f8fafc',
-          }}
-          className="text-xs font-bold px-2 py-1 hover:bg-blue-50 hover:text-blue-600 rounded-lg min-w-13 text-center font-mono text-slate-700 transition-colors cursor-pointer border"
-        >
-          {Math.round(zoom * 100)}%
-        </button>
-
-        {/* Zoom In (+) */}
-        <button
-          title="Acercar Zoom (+)"
-          onClick={onZoomIn}
-          className="p-1.5 hover:bg-slate-100 rounded-xl text-slate-600 hover:text-blue-600 transition-colors cursor-pointer active:scale-95"
-        >
-          <ZoomIn className="w-4 h-4 stroke-[2]" />
-        </button>
-
-        <div style={{ backgroundColor: '#e2e8f0' }} className="w-px h-4.5 mx-0.5" />
-
-        {/* Center / Fit all */}
-        <button
-          title="Ajustar y Centrar todo el mapa"
-          onClick={onFitView}
-          className="p-1.5 hover:bg-blue-50 rounded-xl text-slate-600 hover:text-blue-600 transition-colors cursor-pointer active:scale-95"
-        >
-          <Maximize2 className="w-4 h-4 stroke-[2]" />
-        </button>
-      </div>
+      {/* Zoom Controls HUD (Placed UNDER the minimap) */}
+      <ZoomControls
+        zoom={zoom}
+        onZoomIn={onZoomIn}
+        onZoomOut={onZoomOut}
+        onResetZoom={onResetZoom}
+        onFitToScreen={onFitView}
+        onToggleMiniMap={onToggleMiniMap}
+        showMiniMap={showMiniMap}
+      />
     </div>
   );
 };
+

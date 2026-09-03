@@ -17,6 +17,10 @@ import { generateDefaultPresentationSlides } from '../utils/presentationGenerato
 import { MarkdownView } from '../utils/markdownRenderer';
 import { NodeComponent } from './NodeComponent';
 import { MiniMap } from './MiniMap';
+import { CanvasBackgroundLayer } from './organisms/canvas/CanvasBackgroundLayer';
+import { CanvasDrawingOverlay } from './organisms/canvas/CanvasDrawingOverlay';
+import { CanvasPresentationHUD } from './organisms/canvas/CanvasPresentationHUD';
+import { CanvasContextMenu } from './organisms/canvas/CanvasContextMenu';
 import {
   ZoomIn,
   ZoomOut,
@@ -175,11 +179,12 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
 
   // Slides state (from mindMap or generated default)
   const slides = React.useMemo(() => {
-    if (mindMap.presentationSlides && mindMap.presentationSlides.length > 0) {
+    if (mindMap.presentationSlides !== undefined) {
       return mindMap.presentationSlides;
     }
     return generateDefaultPresentationSlides(mindMap, layoutMap);
-  }, [mindMap, layoutMap]);
+  }, [mindMap.presentationSlides, mindMap, layoutMap]);
+
 
   // Active Slide and Node
   const activeSlide = slides[currentSlideIndex] || slides[0];
@@ -462,7 +467,25 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
 
   // Handle Pan & Drag Events
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0 && (e.target === containerRef.current || (e.target as HTMLElement).id === 'svg-edges-layer' || (e.target as HTMLElement).id === 'canvas-background')) {
+    // 1. Drawing Frame in Presentation Editor Mode
+    if (isPresentationMode && presMode === 'editor' && editorTool === 'draw_frame' && containerRef.current) {
+      if (e.button !== 0) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const canvasX = (e.clientX - rect.left - pan.x) / zoom;
+      const canvasY = (e.clientY - rect.top - pan.y) / zoom;
+      setIsDrawingFrame(true);
+      setDrawStart({ x: canvasX, y: canvasY });
+      setDrawCurrent({ x: canvasX, y: canvasY });
+      return;
+    }
+
+    // 2. Normal Canvas Pan
+    if (
+      e.button === 0 &&
+      (e.target === containerRef.current ||
+        (e.target as HTMLElement).id === 'svg-edges-layer' ||
+        (e.target as HTMLElement).id === 'canvas-background')
+    ) {
       setIsPanning(true);
       setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
       onSelectNode(null);
@@ -472,6 +495,15 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    // 1. Drawing frame in progress
+    if (isDrawingFrame && drawStart && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const canvasX = (e.clientX - rect.left - pan.x) / zoom;
+      const canvasY = (e.clientY - rect.top - pan.y) / zoom;
+      setDrawCurrent({ x: canvasX, y: canvasY });
+      return;
+    }
+
     if (draggingConnectorId && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const canvasX = (e.clientX - rect.left - pan.x) / zoom;
@@ -507,6 +539,52 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   };
 
   const handleMouseUp = () => {
+    // 1. Complete Drawing Frame
+    if (isDrawingFrame && drawStart && drawCurrent) {
+      const boxX = Math.min(drawStart.x, drawCurrent.x);
+      const boxY = Math.min(drawStart.y, drawCurrent.y);
+      const boxW = Math.abs(drawCurrent.x - drawStart.x);
+      const boxH = Math.abs(drawCurrent.y - drawStart.y);
+      setIsDrawingFrame(false);
+      setDrawStart(null);
+      setDrawCurrent(null);
+
+      if (boxW >= 24 && boxH >= 24) {
+        const enclosedNodeIds: string[] = [];
+        layoutMap.forEach((l, nid) => {
+          if (
+            l.x + l.width >= boxX &&
+            l.x <= boxX + boxW &&
+            l.y + l.height >= boxY &&
+            l.y <= boxY + boxH
+          ) {
+            enclosedNodeIds.push(nid);
+          }
+        });
+
+        const firstNode = enclosedNodeIds.length > 0 ? mindMap.nodes[enclosedNodeIds[0]] : null;
+        const newSlide: SlideFrame = {
+          id: `slide-frame-${Date.now()}`,
+          order: slides.length + 1,
+          title: firstNode?.text ? `Marco: ${firstNode.text}` : `Marco ${slides.length + 1}`,
+          type: 'custom_area',
+          nodeIds: enclosedNodeIds,
+          nodeId: enclosedNodeIds[0],
+          bounds: {
+            x: Math.round(boxX),
+            y: Math.round(boxY),
+            width: Math.round(boxW),
+            height: Math.round(boxH),
+          },
+          showNotes: enclosedNodeIds.some((nid) => Boolean(mindMap.nodes[nid]?.note)),
+          color: '#3b82f6',
+        };
+        updateSlides([...slides, newSlide]);
+        setCurrentSlideIndex(slides.length);
+      }
+      return;
+    }
+
     setIsPanning(false);
 
     if (draggingConnectorId) {
@@ -520,25 +598,36 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
     setDragOverNodeId(null);
   };
 
-  // Wheel Zoom
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    if (!containerRef.current) return;
+  // Native non-passive Wheel Zoom to prevent "Unable to preventDefault inside passive event listener invocation"
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const onWheelNative = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-    const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
-    const newZoom = Math.min(Math.max(zoom * zoomFactor, 0.2), 2.5);
+      const zoomFactor = e.deltaY < 0 ? 1.12 : 0.89;
 
-    // Zoom towards mouse pointer
-    const newPanX = mouseX - (mouseX - pan.x) * (newZoom / zoom);
-    const newPanY = mouseY - (mouseY - pan.y) * (newZoom / zoom);
+      setZoom((currentZoom) => {
+        const newZoom = Math.min(Math.max(currentZoom * zoomFactor, 0.2), 2.5);
+        setPan((currentPan) => {
+          const newPanX = mouseX - (mouseX - currentPan.x) * (newZoom / currentZoom);
+          const newPanY = mouseY - (mouseY - currentPan.y) * (newZoom / currentZoom);
+          return { x: newPanX, y: newPanY };
+        });
+        return newZoom;
+      });
+    };
 
-    setZoom(newZoom);
-    setPan({ x: newPanX, y: newPanY });
-  };
+    container.addEventListener('wheel', onWheelNative, { passive: false });
+    return () => {
+      container.removeEventListener('wheel', onWheelNative);
+    };
+  }, []);
+
 
   // Right Click Context Menu
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -767,12 +856,18 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
         ref={containerRef}
         id="canvas-background"
         style={{ backgroundColor: effectiveBgColor }}
-        className="relative flex-1 w-full h-full overflow-hidden cursor-grab active:cursor-grabbing select-none"
+        className={`relative flex-1 w-full h-full overflow-hidden select-none ${
+          isPresentationMode && presMode === 'editor' && editorTool === 'draw_frame'
+            ? 'cursor-crosshair'
+            : isPresentationMode && presMode === 'editor' && editorTool === 'pick_nodes'
+            ? 'cursor-pointer'
+            : 'cursor-grab active:cursor-grabbing'
+        }`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onWheel={handleWheel}
         onContextMenu={handleContextMenu}
+
       >
       {/* Viewport Transform Container */}
       <div
@@ -830,121 +925,15 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#3b82f6" />
             </marker>
 
-            {/* Pattern 1: Dots (Puntos) */}
-            {effectivePattern === 'dots' && (
-              <pattern
-                id="canvas-bg-pattern"
-                width={effectivePatternSize}
-                height={effectivePatternSize}
-                patternUnits="userSpaceOnUse"
-              >
-                <circle
-                  cx={effectivePatternSize / 2}
-                  cy={effectivePatternSize / 2}
-                  r={1.5}
-                  fill={effectivePatternColor}
-                  fillOpacity={effectivePatternOpacity}
-                />
-              </pattern>
-            )}
-
-            {/* Pattern 2: Lines (Líneas horizontales) */}
-            {effectivePattern === 'lines' && (
-              <pattern
-                id="canvas-bg-pattern"
-                width={effectivePatternSize}
-                height={effectivePatternSize}
-                patternUnits="userSpaceOnUse"
-              >
-                <line
-                  x1="0"
-                  y1={effectivePatternSize}
-                  x2={effectivePatternSize}
-                  y2={effectivePatternSize}
-                  stroke={effectivePatternColor}
-                  strokeWidth="1"
-                  strokeOpacity={effectivePatternOpacity}
-                />
-              </pattern>
-            )}
-
-            {/* Pattern 3: Squares (Cuadrados / Cuadrícula) */}
-            {effectivePattern === 'squares' && (
-              <pattern
-                id="canvas-bg-pattern"
-                width={effectivePatternSize}
-                height={effectivePatternSize}
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  d={`M ${effectivePatternSize} 0 L 0 0 0 ${effectivePatternSize}`}
-                  fill="none"
-                  stroke={effectivePatternColor}
-                  strokeWidth="1"
-                  strokeOpacity={effectivePatternOpacity}
-                />
-              </pattern>
-            )}
-
-            {/* Pattern 4: Triangles (Malla isométrica regular de triángulos equiláteros) */}
-            {effectivePattern === 'triangles' && (
-              <pattern
-                id="canvas-bg-pattern"
-                width={triangleW}
-                height={triangleH}
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  d={`M 0 0 L ${triangleW} 0 M 0 ${triangleH2} L ${triangleW} ${triangleH2} M 0 0 L ${triangleW} ${triangleH} M ${triangleW2} 0 L ${triangleW} ${triangleH2} M 0 ${triangleH2} L ${triangleW2} ${triangleH} M ${triangleW} 0 L 0 ${triangleH} M ${triangleW2} 0 L 0 ${triangleH2} M ${triangleW} ${triangleH2} L ${triangleW2} ${triangleH}`}
-                  fill="none"
-                  stroke={effectivePatternColor}
-                  strokeWidth="1"
-                  strokeOpacity={effectivePatternOpacity}
-                />
-              </pattern>
-            )}
-
-            {/* Pattern 5: Hexagons (Malla hexagonal regular en panal de abejas completo) */}
-            {effectivePattern === 'hexagons' && (() => {
-              const R = effectivePatternSize;
-              const W = Number((R * 1.7320508).toFixed(2));
-              const H = Number((R * 3).toFixed(2));
-              const W2 = Number((W / 2).toFixed(2));
-              const r05 = Number((R * 0.5).toFixed(2));
-              const r10 = Number((R * 1.0).toFixed(2));
-              const d = `M 0,0 v ${r05} l ${W2},${r05} v ${r10} l -${W2},${r05} v ${r05} M ${W},0 v ${r05} l -${W2},${r05} v ${r10} l ${W2},${r05} v ${r05}`;
-              return (
-                <pattern
-                  id="canvas-bg-pattern"
-                  width={W}
-                  height={H}
-                  patternUnits="userSpaceOnUse"
-                >
-                  <path
-                    d={d}
-                    fill="none"
-                    stroke={effectivePatternColor}
-                    strokeWidth="1.2"
-                    strokeOpacity={effectivePatternOpacity}
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                </pattern>
-              );
-            })()}
           </defs>
 
           {/* Group 0: Dynamic Background Pattern Plane */}
-          {effectivePattern !== 'none' && (
-            <rect
-              id="canvas-pattern-plane"
-              x="-200000"
-              y="-200000"
-              width="400000"
-              height="400000"
-              fill="url(#canvas-bg-pattern)"
-            />
-          )}
+          <CanvasBackgroundLayer
+            pattern={effectivePattern}
+            patternColor={effectivePatternColor}
+            patternSize={effectivePatternSize}
+            patternOpacity={effectivePatternOpacity}
+          />
 
           {/* Group 1: Clouds (rendered behind edges and nodes, outer clouds first) */}
           <g id="clouds-group">
@@ -1375,6 +1364,8 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             const branchColor = getBranchColor(layout);
 
             const isHighlighted = !isPresentationMode || isOverviewActive || activeHighlightedNodeIds.has(node.id);
+            const hasSlideFrame = isPresentationMode && presMode === 'editor' && slides.some((s) => s.nodeId === node.id);
+            const isStaged = hasSlideFrame || stagedNodeIds.has(node.id);
 
             return (
               <div
@@ -1393,6 +1384,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   branchColor={branchColor}
                   isMatch={isMatch}
                   isPresentationMode={isPresentationMode}
+                  isStaged={isStaged}
                   globalVisibility={{
                     hideAllBodies: mindMap.hideAllBodies,
                     hideAllImages: mindMap.hideAllImages,
@@ -1401,7 +1393,45 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                     hideAllLinks: mindMap.hideAllLinks,
                     showAllNotesInline: mindMap.showAllNotesInline,
                   }}
-                  onSelect={(id) => onSelectNode(id)}
+                  onSelect={(id) => {
+                    if (isPresentationMode && presMode === 'editor' && editorTool === 'pick_nodes') {
+                      const targetNode = mindMap.nodes[id];
+                      const targetLayout = layoutMap.get(id);
+                      if (!targetNode || !targetLayout) return;
+
+                      // Check if a slide frame already exists for this node
+                      const existingIndex = slides.findIndex((s) => s.nodeId === id && s.type === 'node');
+                      if (existingIndex !== -1) {
+                        setCurrentSlideIndex(existingIndex);
+                        return;
+                      }
+
+                      // Automatically create presentation frame over this node!
+                      const pad = 28;
+                      const newSlide: SlideFrame = {
+                        id: `slide-node-${id}-${Date.now()}`,
+                        order: slides.length + 1,
+                        title: targetNode.text || `Marco ${slides.length + 1}`,
+                        type: 'node',
+                        nodeId: id,
+                        nodeIds: [id],
+                        bounds: {
+                          x: Math.round(targetLayout.x - pad),
+                          y: Math.round(targetLayout.y - pad),
+                          width: Math.round(targetLayout.width + pad * 2),
+                          height: Math.round(targetLayout.height + pad * 2),
+                        },
+                        showNotes: Boolean(targetNode.note),
+                        color: targetNode.color || '#3b82f6',
+                      };
+
+                      updateSlides([...slides, newSlide]);
+                      setCurrentSlideIndex(slides.length);
+                      return;
+                    }
+                    onSelectNode(id);
+                  }}
+
                   onDoubleClick={(id) => onStartEditing(id)}
                   onTextChange={onUpdateNodeText}
                   onFinishEditing={onFinishEditing}
@@ -1413,6 +1443,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                 />
               </div>
             );
+
           })}
         </div>
 
@@ -1453,423 +1484,52 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
 
           {/* Presentation Slide Frames Layer (Editor Mode) */}
           {isPresentationMode && presMode === 'editor' && (
-            <div className="pointer-events-auto">
-              {slides.map((slide, idx) => {
-                const isSelected = idx === currentSlideIndex;
-                return (
-                  <div
-                    key={`editor-frame-${slide.id}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentSlideIndex(idx);
-                    }}
-                    style={{
-                      transform: `translate3d(${slide.bounds.x}px, ${slide.bounds.y}px, 0)`,
-                      width: slide.bounds.width,
-                      height: slide.bounds.height,
-                    }}
-                    className={`absolute top-0 left-0 rounded-3xl border-2 transition-all cursor-pointer ${
-                      isSelected
-                        ? 'border-blue-400 bg-blue-500/10 shadow-[0_0_30px_rgba(59,130,246,0.3)] ring-2 ring-blue-400/50'
-                        : 'border-dashed border-slate-600/60 bg-slate-800/5 hover:border-slate-400 hover:bg-slate-800/20'
-                    }`}
-                  >
-                    <div className="absolute -top-3 left-4 px-2.5 py-0.5 rounded-full bg-blue-600 text-white font-bold text-[10px] shadow-md flex items-center gap-1">
-                      <span>Slide {slide.order}</span>
-                      <span className="opacity-75">• {slide.title}</span>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Drawn Box in Progress */}
-              {editorTool === 'draw_frame' && isDrawingFrame && drawStart && drawCurrent && (
-                <div
-                  style={{
-                    transform: `translate3d(${Math.min(drawStart.x, drawCurrent.x)}px, ${Math.min(drawStart.y, drawCurrent.y)}px, 0)`,
-                    width: Math.abs(drawCurrent.x - drawStart.x),
-                    height: Math.abs(drawCurrent.y - drawStart.y),
-                  }}
-                  className="absolute top-0 left-0 rounded-2xl border-2 border-indigo-400 bg-indigo-500/20 pointer-events-none z-40 border-dashed"
-                />
-              )}
-            </div>
+            <CanvasDrawingOverlay
+              slides={slides}
+              currentSlideIndex={currentSlideIndex}
+              onSelectSlide={setCurrentSlideIndex}
+              editorTool={editorTool}
+              isDrawingFrame={isDrawingFrame}
+              drawStart={drawStart}
+              drawCurrent={drawCurrent}
+            />
           )}
         </div>
 
         {/* PRESENTATION HUD OVERLAYS (Rendered on top of the real canvas) */}
         {isPresentationMode && (
-          <div className="absolute inset-0 pointer-events-none flex flex-col justify-between z-50">
-
-            {/* Top Presentation Bar */}
-            <div className="pointer-events-auto h-14 px-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 flex items-center justify-between shadow-xl">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-blue-600/20 text-blue-400 px-3 py-1 rounded-xl border border-blue-500/30 text-xs font-bold">
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>Presentación Dinámica</span>
-                </div>
-                <span className="text-sm font-semibold text-slate-300 truncate max-w-[260px] sm:max-w-md">
-                  {mindMap.title}
-                </span>
-              </div>
-
-              {/* Mode Switcher */}
-              <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 text-xs font-bold">
-                <button
-                  onClick={() => setPresMode('editor')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    presMode === 'editor' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Sliders className="w-3.5 h-3.5" />
-                  <span>Editor de Marcos</span>
-                </button>
-                <button
-                  onClick={() => setPresMode('play')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    presMode === 'play' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Presentar (F5)</span>
-                </button>
-              </div>
-
-              {/* Right Exit & Actions */}
-              <div className="flex items-center gap-2">
-                {presMode === 'editor' && (
-                  <>
-                    <div className="flex items-center bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60 mr-1">
-                      <button
-                        onClick={handleUndo}
-                        disabled={undoStack.length === 0}
-                        title="Deshacer (Ctrl+Z)"
-                        className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                      >
-                        <Undo2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={handleRedo}
-                        disabled={redoStack.length === 0}
-                        title="Rehacer (Ctrl+Y / Ctrl+Shift+Z)"
-                        className="p-1.5 rounded text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                      >
-                        <Redo2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        const rootNode = mindMap.nodes[mindMap.rootId];
-                        const rootLayout = layoutMap.get(mindMap.rootId);
-                        const pad = 100;
-                        const initialSlide: SlideFrame = rootLayout
-                          ? {
-                              id: 'slide-root-initial',
-                              order: 1,
-                              title: `🎯 ${rootNode?.text || 'Inicio'}`,
-                              type: 'node',
-                              nodeId: mindMap.rootId,
-                              bounds: {
-                                x: rootLayout.x - pad,
-                                y: rootLayout.y - pad,
-                                width: rootLayout.width + pad * 2,
-                                height: rootLayout.height + pad * 2,
-                              },
-                              showNotes: Boolean(rootNode?.note),
-                              color: rootNode?.color || '#2563eb',
-                            }
-                          : {
-                              id: 'slide-overview-initial',
-                              order: 1,
-                              title: `🗺️ ${mindMap.title || 'Inicio'}`,
-                              type: 'overview',
-                              bounds: overviewBounds,
-                              showNotes: false,
-                              color: '#3b82f6',
-                            };
-                        updateSlides([initialSlide]);
-                        setCurrentSlideIndex(0);
-                      }}
-                      title="Empezar desde cero manualmente"
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-300 text-xs font-semibold transition-colors cursor-pointer border border-red-800/60"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                      <span>Empezar de Cero</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        const autoSlides = generateDefaultPresentationSlides(mindMap, layoutMap);
-                        updateSlides(autoSlides);
-                        setCurrentSlideIndex(0);
-                      }}
-                      title="Generar marcos según la jerarquía"
-                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer border border-slate-700"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="hidden sm:inline">Auto-generar</span>
-                    </button>
-                  </>
-                )}
-
-                <button
-                  onClick={onClosePresentation}
-                  title="Salir de la presentación (ESC)"
-                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Editor Floating Tools Pill (Floating cleanly at top center) */}
-            {presMode === 'editor' && (
-              <div className="pointer-events-auto absolute top-16 left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-700/80 shadow-2xl flex items-center gap-2 text-xs z-40">
-                <span className="text-slate-400 font-semibold mr-1">Crear marco:</span>
-                <button
-                  onClick={() => setEditorTool('pick_nodes')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold transition-all cursor-pointer ${
-                    editorTool === 'pick_nodes' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                >
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  <span>1. Seleccionar Nodos</span>
-                </button>
-
-                <button
-                  onClick={() => setEditorTool('draw_frame')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold transition-all cursor-pointer ${
-                    editorTool === 'draw_frame' ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                >
-                  <Crop className="w-3.5 h-3.5" />
-                  <span>2. Dibujar Recuadro</span>
-                </button>
-
-                <button
-                  onClick={() => setEditorTool('navigate')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold transition-all cursor-pointer ${
-                    editorTool === 'navigate' ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
-                >
-                  <MousePointer className="w-3.5 h-3.5" />
-                  <span>Navegar / Mover</span>
-                </button>
-
-                {stagedNodeIds.size > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
-                      {stagedNodeIds.size} seleccionados
-                    </span>
-                    <button
-                      onClick={() => {
-                        let minX = Infinity;
-                        let minY = Infinity;
-                        let maxX = -Infinity;
-                        let maxY = -Infinity;
-                        const selectedIds = Array.from(stagedNodeIds);
-                        selectedIds.forEach((nid) => {
-                          const l = layoutMap.get(nid);
-                          if (l) {
-                            minX = Math.min(minX, l.x);
-                            maxX = Math.max(maxX, l.x + l.width);
-                            minY = Math.min(minY, l.y);
-                            maxY = Math.max(maxY, l.y + l.height);
-                          }
-                        });
-                        if (minX === Infinity) return;
-                        const pad = 24;
-                        const firstNode = mindMap.nodes[selectedIds[0]];
-                        const newSlide: SlideFrame = {
-                          id: `slide-custom-${Date.now()}`,
-                          order: slides.length + 1,
-                          title: firstNode?.text || 'Marco Personalizado',
-                          type: 'custom_area',
-                          nodeIds: selectedIds,
-                          nodeId: selectedIds[0],
-                          bounds: {
-                            x: minX - pad,
-                            y: minY - pad,
-                            width: Math.max(160, maxX - minX + pad * 2),
-                            height: Math.max(100, maxY - minY + pad * 2),
-                          },
-                          showNotes: selectedIds.some((id) => Boolean(mindMap.nodes[id]?.note)),
-                          color: '#3b82f6',
-                        };
-                        updateSlides([...slides, newSlide]);
-                        setCurrentSlideIndex(slides.length);
-                        setStagedNodeIds(new Set());
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1 bg-blue-600 text-white font-bold rounded-lg shadow cursor-pointer hover:bg-blue-500"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Crear Marco</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Notes Slide Floating Modal / Drawer */}
-            {(() => {
-              // Resolve active note from activeNode, activeSlide.nodeId, or activeSlide.nodeIds
-              let noteContent = activeNode?.note;
-              let noteTitle = activeNode?.text;
-              if (!noteContent && activeSlide?.nodeId && mindMap.nodes[activeSlide.nodeId]?.note) {
-                noteContent = mindMap.nodes[activeSlide.nodeId].note;
-                noteTitle = mindMap.nodes[activeSlide.nodeId].text;
-              }
-              if (!noteContent && activeSlide?.nodeIds && activeSlide.nodeIds.length > 0) {
-                for (const nid of activeSlide.nodeIds) {
-                  if (mindMap.nodes[nid]?.note) {
-                    noteContent = mindMap.nodes[nid].note;
-                    noteTitle = mindMap.nodes[nid].text;
-                    break;
-                  }
-                }
-              }
-
-              if (!showNotesDrawer || !noteContent) return null;
-
-              return (
-                <div className="pointer-events-auto absolute top-20 right-6 sm:right-10 w-84 sm:w-96 max-h-[70vh] bg-slate-900/98 backdrop-blur-xl rounded-2xl border-2 border-amber-500/60 shadow-[0_0_40px_rgba(245,158,11,0.25)] p-4 flex flex-col text-slate-200 animate-in fade-in zoom-in-95 duration-200 z-50">
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-500/20">
-                    <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                      <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1">
-                        <FileText className="w-3 h-3" />
-                        <span>Nota Detallada</span>
-                      </span>
-                      {noteTitle && <span className="truncate max-w-[160px] text-slate-300">({noteTitle})</span>}
-                    </div>
-                    <button
-                      onClick={() => setShowNotesDrawer(false)}
-                      className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer transition-colors"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <div className="overflow-y-auto pr-1 text-xs space-y-2 leading-relaxed text-slate-200">
-                    <MarkdownView content={noteContent} markdown={noteContent} isDark={true} />
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Bottom Filmstrip & Controls HUD */}
-            <div className="pointer-events-auto bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex flex-col z-30 shadow-2xl">
-              {/* Progress Line */}
-              <div className="w-full bg-slate-800 h-1">
-                <div
-                  style={{
-                    width: `${((currentSlideIndex + 1) / Math.max(1, slides.length)) * 100}%`,
-                  }}
-                  className="h-full bg-blue-500 transition-all duration-300 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
-                />
-              </div>
-
-              {/* Filmstrip Bar */}
-              {isFilmstripOpen && (
-                <div className="px-4 py-2 overflow-x-auto flex items-center gap-2 border-b border-slate-800/80 scrollbar-thin">
-                  {slides.map((s, idx) => {
-                    const isCurrent = idx === currentSlideIndex;
-                    return (
-                      <div
-                        key={`thumb-${s.id}`}
-                        onClick={() => {
-                          setIsOverviewActive(false);
-                          setCurrentSlideIndex(idx);
-                        }}
-                        className={`group relative shrink-0 px-3 py-1.5 rounded-xl border transition-all cursor-pointer flex items-center gap-2 ${
-                          isCurrent
-                            ? 'bg-blue-600/30 border-blue-500 text-white font-bold shadow-md'
-                            : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                        }`}
-                      >
-                        <span className="w-4 h-4 rounded-full bg-slate-700 group-hover:bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">
-                          {s.order}
-                        </span>
-                        <span className="text-xs max-w-[130px] truncate">{s.title}</span>
-                        {presMode === 'editor' && slides.length > 1 && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const updated = slides.filter((_, i) => i !== idx).map((item, i) => ({ ...item, order: i + 1 }));
-                              updateSlides(updated);
-                            }}
-                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 text-red-400 rounded transition-opacity"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Action Controls Bar */}
-              <div className="h-12 px-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs text-slate-400">
-                  <span className="font-bold text-white font-mono">
-                    {currentSlideIndex + 1} / {slides.length}
-                  </span>
-                  <span className="opacity-50">|</span>
-                  <span className="truncate max-w-[200px] sm:max-w-xs">{activeSlide?.title}</span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={handlePrevSlide}
-                    title="Anterior (← o Retroceso)"
-                    className="p-2 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl transition-colors cursor-pointer"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-
-                  <button
-                    onClick={handleToggleOverview}
-                    title={isOverviewActive ? 'Volver al foco' : 'Vista General (O / Home)'}
-                    className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                      isOverviewActive ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    <Compass className="w-5 h-5" />
-                  </button>
-
-                  <button
-                    onClick={handleNextSlide}
-                    title="Siguiente (→ o Espacio)"
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs transition-colors flex items-center gap-1 shadow-md cursor-pointer active:scale-95"
-                  >
-                    <span>Siguiente</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-1 text-xs text-slate-400">
-                  {activeNode?.note && (
-                    <button
-                      onClick={() => setShowNotesDrawer((prev) => !prev)}
-                      title="Notas del Orador (N)"
-                      className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                        showNotesDrawer ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-slate-800 text-slate-400'
-                      }`}
-                    >
-                      <FileText className="w-4 h-4" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setIsFilmstripOpen((prev) => !prev)}
-                    title="Tira de Diapositivas"
-                    className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <Layers className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <CanvasPresentationHUD
+            mindMap={mindMap}
+            layoutMap={layoutMap}
+            slides={slides}
+            currentSlideIndex={currentSlideIndex}
+            activeSlide={activeSlide}
+            activeNode={activeNode}
+            presMode={presMode}
+            setPresMode={setPresMode}
+            editorTool={editorTool}
+            setEditorTool={setEditorTool}
+            stagedNodeIds={stagedNodeIds}
+            setStagedNodeIds={setStagedNodeIds}
+            showNotesDrawer={showNotesDrawer}
+            setShowNotesDrawer={setShowNotesDrawer}
+            isOverviewActive={isOverviewActive}
+            setIsOverviewActive={setIsOverviewActive}
+            isFilmstripOpen={isFilmstripOpen}
+            setIsFilmstripOpen={setIsFilmstripOpen}
+            undoStack={undoStack}
+            redoStack={redoStack}
+            handleUndo={handleUndo}
+            handleRedo={handleRedo}
+            updateSlides={updateSlides}
+            setCurrentSlideIndex={setCurrentSlideIndex}
+            handleNextSlide={handleNextSlide}
+            handlePrevSlide={handlePrevSlide}
+            handleToggleOverview={handleToggleOverview}
+            onClosePresentation={onClosePresentation}
+            overviewBounds={overviewBounds}
+            generateDefaultPresentationSlides={generateDefaultPresentationSlides}
+          />
         )}
 
         {/* Interactive Mini-Map & Zoom Controls (Hidden during Presentation Mode) */}
@@ -1896,186 +1556,22 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
       </div>
 
       {/* Right Click Context Menu (Freeplane inspired) */}
-      {contextMenu.visible && (
-        <div
-          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
-          className="fixed z-50 bg-white/98 backdrop-blur-md rounded-xl border border-slate-200/90 shadow-2xl py-1.5 min-w-56 max-h-[calc(100vh-24px)] overflow-y-auto text-xs text-slate-700 font-medium animate-in fade-in zoom-in-95 duration-100"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {contextMenu.nodeId ? (
-            <>
-              <button
-                onClick={() => {
-                  onAddChildNode(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Plus className="w-3.5 h-3.5 text-blue-600" /> Agregar Nodo Hijo
-                </span>
-                <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
-                  Tab
-                </kbd>
-              </button>
-
-              <button
-                onClick={() => {
-                  onAddSiblingNode(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <FolderPlus className="w-3.5 h-3.5 text-emerald-600" /> Agregar Nodo Hermano
-                </span>
-                <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
-                  Enter
-                </kbd>
-              </button>
-
-              <button
-                onClick={() => {
-                  onStartEditing(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Edit2 className="w-3.5 h-3.5 text-indigo-600" /> Editar Texto
-                </span>
-                <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
-                  F2
-                </kbd>
-              </button>
-
-              <div className="my-1 border-t border-slate-100" />
-
-              <button
-                onClick={() => {
-                  onCopyNode(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Copy className="w-3.5 h-3.5 text-slate-500" /> Copiar Rama
-                </span>
-                <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
-                  Ctrl+C
-                </kbd>
-              </button>
-
-              <button
-                onClick={() => {
-                  onCutNode(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Scissors className="w-3.5 h-3.5 text-slate-500" /> Cortar Rama
-                </span>
-                <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
-                  Ctrl+X
-                </kbd>
-              </button>
-
-              <button
-                onClick={() => {
-                  onPasteNode(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <Clipboard className="w-3.5 h-3.5 text-slate-500" /> Pegar como Hijo
-                </span>
-                <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
-                  Ctrl+V
-                </kbd>
-              </button>
-
-              <div className="my-1 border-t border-slate-100" />
-
-              <button
-                onClick={() => {
-                  onOpenConnectorModal(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <Link className="w-3.5 h-3.5 text-cyan-600" /> Crear Conector a otro nodo
-              </button>
-
-              <button
-                onClick={() => {
-                  onToggleCloud(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <Cloud className="w-3.5 h-3.5 text-amber-500" /> Alternar Nube de Rama
-              </button>
-
-              <div className="my-1 border-t border-slate-100" />
-
-              {/* Style propagation actions */}
-              <button
-                onClick={() => {
-                  onApplyStyleToChildren?.(contextMenu.nodeId!);
-                  setContextMenu((prev) => ({ ...prev, visible: false }));
-                }}
-                className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              >
-                <GitFork className="w-3.5 h-3.5 text-blue-600" /> Aplicar Estilo a Hijos
-              </button>
-
-              {contextMenu.nodeId !== mindMap.rootId && (
-                <button
-                  onClick={() => {
-                    onApplyStyleToSiblings?.(contextMenu.nodeId!);
-                    setContextMenu((prev) => ({ ...prev, visible: false }));
-                  }}
-                  className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                >
-                  <MoveHorizontal className="w-3.5 h-3.5 text-indigo-600" /> Aplicar Estilo a Hermanos
-                </button>
-              )}
-
-              {contextMenu.nodeId !== mindMap.rootId && (
-                <>
-                  <div className="my-1 border-t border-slate-100" />
-                  <button
-                    onClick={() => {
-                      onDeleteNode(contextMenu.nodeId!);
-                      setContextMenu((prev) => ({ ...prev, visible: false }));
-                    }}
-                    className="w-full px-3 py-1.5 text-left flex items-center justify-between text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Trash2 className="w-3.5 h-3.5" /> Eliminar Nodo
-                    </span>
-                    <kbd className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-mono">
-                      Supr
-                    </kbd>
-                  </button>
-                </>
-              )}
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                onAddChildNode(mindMap.rootId);
-                setContextMenu((prev) => ({ ...prev, visible: false }));
-              }}
-              className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5 text-blue-600" /> Agregar Rama Principal
-            </button>
-          )}
-        </div>
-      )}
+      <CanvasContextMenu
+        contextMenu={contextMenu}
+        mindMap={mindMap}
+        onClose={() => setContextMenu((prev) => ({ ...prev, visible: false }))}
+        onAddChildNode={onAddChildNode}
+        onAddSiblingNode={onAddSiblingNode}
+        onStartEditing={onStartEditing}
+        onDeleteNode={onDeleteNode}
+        onCopyNode={onCopyNode}
+        onCutNode={onCutNode}
+        onPasteNode={onPasteNode}
+        onOpenConnectorModal={onOpenConnectorModal}
+        onToggleCloud={onToggleCloud}
+        onApplyStyleToChildren={onApplyStyleToChildren}
+        onApplyStyleToSiblings={onApplyStyleToSiblings}
+      />
     </>
   );
 };

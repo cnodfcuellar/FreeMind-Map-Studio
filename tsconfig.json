@@ -21,6 +21,13 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": [
+      "react",
+      "react-dom",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ]
   }
 }
+

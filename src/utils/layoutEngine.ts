@@ -13,6 +13,7 @@ export function estimateNodeSize(
     hideAllTags?: boolean;
     hideAllIcons?: boolean;
     hideAllLinks?: boolean;
+    showAllNotesInline?: boolean;
   }
 ): { width: number; height: number } {
   const isRoot = !node.parentId;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NodeShape, NodeBackgroundType, NodeGradientDirection, NodePatternStyle, NodeBgImageMode, EdgeStyle, EdgeProfile, MindNode } from '../../types/mindmap';
+import { NodeShape, NodeBackgroundType, NodeGradientDirection, NodePatternStyle, NodeBgImageMode, EdgeStyle, EdgeProfile, MindNode } from '../../../types/mindmap';
 import { CollapsibleSection } from '../../atoms/CollapsibleSection';
 import { ColorPicker } from '../../atoms/ColorPicker';
 import { SliderInput } from '../../atoms/SliderInput';

@@ -1,221 +1,249 @@
 import React from 'react';
 import {
   Plus,
-  Trash2,
-  Edit2,
   FolderPlus,
-  Link as LinkIcon,
-  Cloud,
+  Edit2,
   Copy,
   Scissors,
   Clipboard,
-  Sparkles,
+  Link,
+  Cloud,
   GitFork,
   MoveHorizontal,
+  Trash2,
 } from 'lucide-react';
+import { MindMap } from '../../../types/mindmap';
 
-interface CanvasContextMenuProps {
+export interface ContextMenuState {
   visible: boolean;
   x: number;
   y: number;
   nodeId: string | null;
-  hasClipboard: boolean;
-  isRoot: boolean;
+}
+
+export interface CanvasContextMenuProps {
+  contextMenu: ContextMenuState;
+  mindMap: MindMap;
   onClose: () => void;
-  onAddChild: () => void;
-  onAddSibling: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onToggleCloud: () => void;
-  onOpenConnectorModal: () => void;
-  onCopy: () => void;
-  onCut: () => void;
-  onPaste: () => void;
-  onApplyStyleToChildren?: () => void;
-  onApplyStyleToSiblings?: () => void;
+  onAddChildNode: (nodeId: string) => void;
+  onAddSiblingNode: (nodeId: string) => void;
+  onStartEditing: (nodeId: string) => void;
+  onDeleteNode: (nodeId: string) => void;
+  onCopyNode: (nodeId: string) => void;
+  onCutNode: (nodeId: string) => void;
+  onPasteNode: (nodeId: string) => void;
+  onOpenConnectorModal: (nodeId: string) => void;
+  onToggleCloud: (nodeId: string) => void;
+  onApplyStyleToChildren?: (nodeId: string) => void;
+  onApplyStyleToSiblings?: (nodeId: string) => void;
 }
 
 export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
-  visible,
-  x,
-  y,
-  nodeId,
-  hasClipboard,
-  isRoot,
+  contextMenu,
+  mindMap,
   onClose,
-  onAddChild,
-  onAddSibling,
-  onEdit,
-  onDelete,
-  onToggleCloud,
+  onAddChildNode,
+  onAddSiblingNode,
+  onStartEditing,
+  onDeleteNode,
+  onCopyNode,
+  onCutNode,
+  onPasteNode,
   onOpenConnectorModal,
-  onCopy,
-  onCut,
-  onPaste,
+  onToggleCloud,
   onApplyStyleToChildren,
   onApplyStyleToSiblings,
 }) => {
-  if (!visible || !nodeId) return null;
+  if (!contextMenu.visible) return null;
 
   return (
     <div
-      style={{ left: x, top: y }}
+      style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+      className="fixed z-50 bg-white/98 backdrop-blur-md rounded-xl border border-slate-200/90 shadow-2xl py-1.5 min-w-56 max-h-[calc(100vh-24px)] overflow-y-auto text-xs text-slate-700 font-medium animate-in fade-in zoom-in-95 duration-100 select-none"
       onClick={(e) => e.stopPropagation()}
-      className="fixed z-50 bg-white border border-slate-200/90 rounded-2xl shadow-xl py-1.5 min-w-[210px] text-xs text-slate-700 animate-in fade-in zoom-in-95 duration-100 select-none"
     >
-      <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-        Operaciones de Nodo
-      </div>
-
-      <button
-        type="button"
-        onClick={() => {
-          onAddChild();
-          onClose();
-        }}
-        className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left cursor-pointer"
-      >
-        <Plus className="w-3.5 h-3.5 text-blue-600" />
-        <span>Añadir Hijo (Tab)</span>
-      </button>
-
-      {!isRoot && (
-        <button
-          type="button"
-          onClick={() => {
-            onAddSibling();
-            onClose();
-          }}
-          className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors text-left cursor-pointer"
-        >
-          <FolderPlus className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Añadir Hermano (Enter)</span>
-        </button>
-      )}
-
-      <button
-        type="button"
-        onClick={() => {
-          onEdit();
-          onClose();
-        }}
-        className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-slate-50 transition-colors text-left cursor-pointer"
-      >
-        <Edit2 className="w-3.5 h-3.5 text-slate-500" />
-        <span>Editar Texto (F2)</span>
-      </button>
-
-      <div className="h-[1px] bg-slate-100 my-1" />
-
-      <button
-        type="button"
-        onClick={() => {
-          onCopy();
-          onClose();
-        }}
-        className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-slate-50 transition-colors text-left cursor-pointer"
-      >
-        <Copy className="w-3.5 h-3.5 text-slate-500" />
-        <span>Copiar Rama (Ctrl+C)</span>
-      </button>
-
-      {!isRoot && (
-        <button
-          type="button"
-          onClick={() => {
-            onCut();
-            onClose();
-          }}
-          className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-slate-50 transition-colors text-left cursor-pointer"
-        >
-          <Scissors className="w-3.5 h-3.5 text-slate-500" />
-          <span>Cortar Rama (Ctrl+X)</span>
-        </button>
-      )}
-
-      {hasClipboard && (
-        <button
-          type="button"
-          onClick={() => {
-            onPaste();
-            onClose();
-          }}
-          className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-slate-50 transition-colors text-left cursor-pointer"
-        >
-          <Clipboard className="w-3.5 h-3.5 text-blue-600" />
-          <span>Pegar aquí (Ctrl+V)</span>
-        </button>
-      )}
-
-      <div className="h-[1px] bg-slate-100 my-1" />
-
-      <button
-        type="button"
-        onClick={() => {
-          onOpenConnectorModal();
-          onClose();
-        }}
-        className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-purple-50 hover:text-purple-700 transition-colors text-left cursor-pointer"
-      >
-        <LinkIcon className="w-3.5 h-3.5 text-purple-600" />
-        <span>Conectar con otro nodo...</span>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => {
-          onToggleCloud();
-          onClose();
-        }}
-        className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-blue-50 hover:text-blue-700 transition-colors text-left cursor-pointer"
-      >
-        <Cloud className="w-3.5 h-3.5 text-blue-500" />
-        <span>Alternar Nube</span>
-      </button>
-
-      {onApplyStyleToChildren && (
-        <button
-          type="button"
-          onClick={() => {
-            onApplyStyleToChildren();
-            onClose();
-          }}
-          className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-indigo-50 hover:text-indigo-700 transition-colors text-left cursor-pointer"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-          <span>Propagar estilo a hijos</span>
-        </button>
-      )}
-
-      {onApplyStyleToSiblings && !isRoot && (
-        <button
-          type="button"
-          onClick={() => {
-            onApplyStyleToSiblings();
-            onClose();
-          }}
-          className="w-full px-3 py-1.5 flex items-center gap-2 hover:bg-indigo-50 hover:text-indigo-700 transition-colors text-left cursor-pointer"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-          <span>Propagar estilo a hermanos</span>
-        </button>
-      )}
-
-      {!isRoot && (
+      {contextMenu.nodeId ? (
         <>
-          <div className="h-[1px] bg-slate-100 my-1" />
           <button
             type="button"
             onClick={() => {
-              onDelete();
+              onAddChildNode(contextMenu.nodeId!);
               onClose();
             }}
-            className="w-full px-3 py-1.5 flex items-center gap-2 text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
+            className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
           >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Eliminar Nodo (Supr)</span>
+            <span className="flex items-center gap-2">
+              <Plus className="w-3.5 h-3.5 text-blue-600" /> Agregar Nodo Hijo
+            </span>
+            <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+              Tab
+            </kbd>
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onAddSiblingNode(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <FolderPlus className="w-3.5 h-3.5 text-emerald-600" /> Agregar Nodo Hermano
+            </span>
+            <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+              Enter
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onStartEditing(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <Edit2 className="w-3.5 h-3.5 text-indigo-600" /> Editar Texto
+            </span>
+            <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+              F2
+            </kbd>
+          </button>
+
+          <div className="my-1 border-t border-slate-100" />
+
+          <button
+            type="button"
+            onClick={() => {
+              onCopyNode(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <Copy className="w-3.5 h-3.5 text-slate-500" /> Copiar Rama
+            </span>
+            <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+              Ctrl+C
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onCutNode(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <Scissors className="w-3.5 h-3.5 text-slate-500" /> Cortar Rama
+            </span>
+            <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+              Ctrl+X
+            </kbd>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onPasteNode(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <Clipboard className="w-3.5 h-3.5 text-slate-500" /> Pegar como Hijo
+            </span>
+            <kbd className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">
+              Ctrl+V
+            </kbd>
+          </button>
+
+          <div className="my-1 border-t border-slate-100" />
+
+          <button
+            type="button"
+            onClick={() => {
+              onOpenConnectorModal(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <Link className="w-3.5 h-3.5 text-cyan-600" /> Crear Conector a otro nodo
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              onToggleCloud(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <Cloud className="w-3.5 h-3.5 text-amber-500" /> Alternar Nube de Rama
+          </button>
+
+          <div className="my-1 border-t border-slate-100" />
+
+          <button
+            type="button"
+            onClick={() => {
+              onApplyStyleToChildren?.(contextMenu.nodeId!);
+              onClose();
+            }}
+            className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <GitFork className="w-3.5 h-3.5 text-blue-600" /> Aplicar Estilo a Hijos
+          </button>
+
+          {contextMenu.nodeId !== mindMap.rootId && (
+            <button
+              type="button"
+              onClick={() => {
+                onApplyStyleToSiblings?.(contextMenu.nodeId!);
+                onClose();
+              }}
+              className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-indigo-50 hover:text-indigo-600 transition-colors cursor-pointer"
+            >
+              <MoveHorizontal className="w-3.5 h-3.5 text-indigo-600" /> Aplicar Estilo a Hermanos
+            </button>
+          )}
+
+          {contextMenu.nodeId !== mindMap.rootId && (
+            <>
+              <div className="my-1 border-t border-slate-100" />
+              <button
+                type="button"
+                onClick={() => {
+                  onDeleteNode(contextMenu.nodeId!);
+                  onClose();
+                }}
+                className="w-full px-3 py-1.5 text-left flex items-center justify-between text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <Trash2 className="w-3.5 h-3.5" /> Eliminar Nodo
+                </span>
+                <kbd className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-mono">
+                  Supr
+                </kbd>
+              </button>
+            </>
+          )}
         </>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            onAddChildNode(mindMap.rootId);
+            onClose();
+          }}
+          className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-colors cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5 text-blue-600" /> Agregar Rama Principal
+        </button>
       )}
     </div>
   );

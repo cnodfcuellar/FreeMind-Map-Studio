@@ -60,6 +60,58 @@ Este documento confirma y evalúa cada una de las fases de la refactorización p
 
 | # | Criterio de Evaluación | Método de Verificación | Resultado | Evidencia |
 |---|------------------------|-------------------------|-----------|-----------|
-| 4.1 | Subcomponentes modulares de Canvas | Creación de archivos | ✅ PASS | Creados `CanvasZoomControls` y `CanvasContextMenu`. |
-| 5.1 | Subcomponentes modulares de Presentación | Creación de archivos | ✅ PASS | Creados `presentationThemes` y `PresentationControls`. |
+| 4.1 | Subcomponentes modulares de Canvas | Creación de archivos | ✅ PASS | Creados `CanvasBackgroundLayer`, `CanvasDrawingOverlay`, `CanvasPresentationHUD` y `CanvasContextMenu`. |
+| 5.1 | Subcomponentes modulares de Presentación | Creación de archivos | ✅ PASS | Creados `SpatialSlideCardComponent`, `SlideDetailModal` y `ElaboratePresentationSystem`. |
 | 5.2 | Verificación integral de build | `pnpm build` | ✅ PASS | Build exitoso con 0 errores TypeScript/Vite. |
+
+---
+
+## 📋 Fase 6 — Estandarización de Modales y Átomos Globales
+- **Estado:** ✅ **COMPLETADA**
+- **Fecha:** 2026-09-02
+
+| # | Criterio de Evaluación | Método de Verificación | Resultado | Evidencia |
+|---|------------------------|-------------------------|-----------|-----------|
+| 6.1 | Estandarización de los 7 modales con Atomic Design | Inspección de código | ✅ PASS | Modales migrados a `ModalBackdrop` (átomo) y `ModalHeader` (molécula): Shortcuts, SavedMaps, ExportImport, Connector, IconPack, Templates, ComingSoon. |
+| 6.2 | Integración de ZoomControls en MiniMap | Reemplazo de controles | ✅ PASS | Eliminados botones manuales duplicados conectando la molécula `ZoomControls.tsx`. |
+| 6.3 | Blindaje con ErrorBoundary | Átomo global | ✅ PASS | Creado `ErrorBoundary.tsx` envolviendo a `MainEditorLayout` en `App.tsx`. |
+
+---
+
+## 📋 Fase 7 — Modularización de NodeComponent
+- **Estado:** ✅ **COMPLETADA**
+- **Fecha:** 2026-09-02
+
+| # | Criterio de Evaluación | Método de Verificación | Resultado | Evidencia |
+|---|------------------------|-------------------------|-----------|-----------|
+| 7.1 | Descomposición de NodeComponent monolítico | Conteo de líneas | ✅ PASS | Reducido de **1,010 líneas (39.9 KB)** a **182 líneas (5.8 KB)** como orquestador declarativo. |
+| 7.2 | Sub-moléculas de renderizado de nodos | Creación de moléculas | ✅ PASS | Creados `NodeBackgroundRenderer`, `NodeHeaderRow`, `NodeBadgesBar`, `NodeActionButtons`. |
+| 7.3 | Cero pérdida de formas, fondos y notas | Prueba visual interactiva | ✅ PASS | Preservadas las 10 formas, 8 patrones SVG, degradados, cola SVG de burbuja, drag handle, notas Markdown, tags y badges. |
+
+---
+
+## 📋 Fase 8 — Verificación Automatizada y Auditoría
+- **Estado:** ✅ **COMPLETADA**
+- **Fecha:** 2026-09-02
+
+| # | Criterio de Evaluación | Método de Verificación | Resultado | Evidencia |
+|---|------------------------|-------------------------|-----------|-----------|
+| 8.1 | Comprobación estricta de TypeScript | `pnpm lint` (`tsc --noEmit`) | ✅ PASS | 0 errores en todo el proyecto con React 19 y tipos estrictos. |
+| 8.2 | Suite de pruebas unitarias | `pnpm vitest run` | ✅ PASS | 14/14 tests pasando (100%) en 5 suites de pruebas. |
+| 8.3 | Compilación de producción Vite | `pnpm build` | ✅ PASS | Empaquetado exitoso en 7.25s transformando 1,740 módulos. |
+| 8.4 | Auditoría en navegador real | `browser_subagent` (Chromium) | ✅ PASS | Cero errores en consola de JavaScript (`console.error = 0`). |
+
+---
+
+## 📋 Fase 9 — Optimización y Corrección de la Presentación Dinámica
+- **Estado:** ✅ **COMPLETADA**
+- **Fecha:** 2026-09-03
+
+| # | Criterio de Evaluación | Método de Verificación | Resultado | Evidencia |
+|---|------------------------|-------------------------|-----------|-----------|
+| 9.1 | Corrección de oyente pasivo en zoom | Refactorización de eventos | ✅ PASS | Eliminado `onWheel` de JSX y vinculado oyente nativo `{ passive: false }`. Eliminado error `Unable to preventDefault inside passive event listener`. |
+| 9.2 | Empezar de cero sin marcos | Ajuste en `useMemo` | ✅ PASS | Condición `mindMap.presentationSlides !== undefined` permite limpiar el mapa a 0 diapositivas sin autogenerar las 51 por defecto. |
+| 9.3 | Creación automática de marco con 1 clic | Interacción en `pick_nodes` | ✅ PASS | Al pulsar cualquier nodo en modo 'Seleccionar Nodo (Crear Marco)', se genera automáticamente su diapositiva perimetral con encuadre de cámara. |
+| 9.4 | Eliminación de bloqueo de puntero | Ajuste en `CanvasDrawingOverlay` | ✅ PASS | `pointer-events-none` en el cuerpo del marco garantiza que el 100% de los nodos reciban clics sin bloqueos. |
+| 9.5 | Dibujo interactivo de recuadros | Implementación en canvas | ✅ PASS | Herramienta 'Dibujar Recuadro' permite arrastrar un marco libremente para agrupar nodos. |
+

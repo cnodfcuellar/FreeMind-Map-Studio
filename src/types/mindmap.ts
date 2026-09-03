@@ -169,7 +169,10 @@ export interface Connector {
   id: string;
   fromId: string;
   toId: string;
+  fromNodeId?: string;
+  toNodeId?: string;
   label?: string;
+
   color?: string;
   style?: 'solid' | 'dashed' | 'dotted';
   arrow?: 'start' | 'end' | 'both' | 'none';

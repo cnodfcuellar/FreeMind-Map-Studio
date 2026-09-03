@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MindNode, NodeShape, MindMap } from '../types/mindmap';
+import { MindNode, NodeShape, MindMap, LayoutType, EdgeStyle, EdgeProfile } from '../types/mindmap';
+
 import {
   Plus,
   FolderPlus,
@@ -33,19 +34,23 @@ interface ToolBarProps {
   selectedNode: MindNode | null;
   canUndo: boolean;
   canRedo: boolean;
-  isOutlineMode: boolean;
+  isOutlineMode?: boolean;
+  isOutlineOpen?: boolean;
   isFilterBarOpen: boolean;
   isToolPanelOpen: boolean;
   mindMap?: MindMap;
+  onSave?: () => void;
+
   onToggleGlobalVisibility?: (key: 'hideAllBodies' | 'hideAllImages' | 'hideAllTags' | 'hideAllIcons' | 'hideAllLinks') => void;
   onAddChild: () => void;
   onAddSibling: () => void;
   onDeleteNode: () => void;
-  onToggleFold: () => void;
-  onToggleBold: () => void;
-  onToggleItalic: () => void;
-  onChangeShape: (shape: NodeShape) => void;
+  onToggleFold?: () => void;
+  onToggleBold?: () => void;
+  onToggleItalic?: () => void;
+  onChangeShape?: (shape: NodeShape) => void;
   onUndo: () => void;
+
   onRedo: () => void;
   onToggleOutline: () => void;
   onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
@@ -56,7 +61,20 @@ interface ToolBarProps {
   onToggleCloud: () => void;
   onOpenExportModal: () => void;
   onOpenIconPackModal?: () => void;
+  onOpenTemplates?: () => void;
+  onOpenSavedMaps?: () => void;
+  onChangeLayout?: (layout: LayoutType) => void;
+  onChangeTheme?: (themeId: string) => void;
+  onChangeColor?: (color: string) => void;
+  onChangeEdgeStyle?: (edgeStyle: EdgeStyle) => void;
+  onChangeEdgeProfile?: (edgeProfile: EdgeProfile) => void;
+  onChangeEdgeWidth?: (edgeWidth: number) => void;
+  onChangeEdgeColor?: (edgeColor: string) => void;
+  onChangeEdgeDash?: (edgeDash: 'solid' | 'dashed' | 'dotted') => void;
+  onResetEdges?: () => void;
+  onOpenIconPack?: () => void;
 }
+
 
 export const ToolBar: React.FC<ToolBarProps> = ({
   selectedNode,

@@ -42,7 +42,11 @@ interface PresentationThemeConfig {
   badgeBg: string;
   isLight: boolean;
   branchColors: string[];
+  accentClass?: string;
+  cardBgClass?: string;
+  cardBorderClass?: string;
 }
+
 
 /**
  * Presentation Themes synchronized with all MindMap Themes from the app.
@@ -551,10 +555,13 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
   // Find related connectors (cross-links)
   const relatedConnectors = useMemo(() => {
     if (!mindMap.connectors || !currentNode) return [];
-    return mindMap.connectors.filter(
-      (c) => c.fromNodeId === currentNode.id || c.toNodeId === currentNode.id
-    );
+    return mindMap.connectors.filter((c) => {
+      const f = c.fromId || c.fromNodeId;
+      const t = c.toId || c.toNodeId;
+      return f === currentNode.id || t === currentNode.id;
+    });
   }, [mindMap.connectors, currentNode]);
+
 
   // Current batch of child nodes for this slide (in phase 'children')
   const currentChildNodes = useMemo(() => {
@@ -1293,10 +1300,13 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                   {relatedConnectors.slice(0, 3).map((conn) => {
-                    const isSource = conn.fromNodeId === currentNode.id;
-                    const targetId = isSource ? conn.toNodeId : conn.fromNodeId;
+                    const fromId = conn.fromId || conn.fromNodeId || '';
+                    const toId = conn.toId || conn.toNodeId || '';
+                    const isSource = fromId === currentNode.id;
+                    const targetId = isSource ? toId : fromId;
                     const targetNode = mindMap.nodes[targetId];
                     if (!targetNode) return null;
+
 
                     return (
                       <div

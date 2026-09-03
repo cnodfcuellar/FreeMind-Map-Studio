@@ -19,6 +19,9 @@ import {
   Info,
   LayoutGrid,
 } from 'lucide-react';
+import { ModalBackdrop } from '../atoms/ModalBackdrop';
+import { ModalHeader } from '../molecules/ModalHeader';
+import { Button } from '../atoms/Button';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   all: '🌟',
@@ -85,38 +88,18 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div
-        className="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden text-slate-800 animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/90 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm sm:text-base font-bold text-slate-900">
-                  Explorador de Iconos SVG Vectoriales
-                </h2>
-                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-semibold">
-                  {TOTAL_VECTOR_ICONS_COUNT} Iconos
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 hidden sm:block">
-                100% vectoriales, libre uso (MIT), ultraligeros y escalables para nodos y mapas mentales.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <ModalBackdrop isOpen={isOpen} onClose={onClose} maxWidth="5xl" className="h-[90vh]">
+      <ModalHeader
+        title="Explorador de Iconos SVG Vectoriales"
+        subtitle="100% vectoriales, libre uso (MIT), ultraligeros y escalables para nodos y mapas mentales"
+        icon={<Sparkles className="w-5 h-5 text-blue-600" />}
+        badge={
+          <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[11px] font-semibold">
+            {TOTAL_VECTOR_ICONS_COUNT} Iconos
+          </span>
+        }
+        onClose={onClose}
+      />
 
         {/* Selected Node Status Bar */}
         {selectedNodeId && (
@@ -399,15 +382,14 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
               </button>
             )}
 
-            <button
-              onClick={onClose}
-              className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors"
-            >
+            <Button variant="primary" size="sm" onClick={onClose}>
               Listo
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalBackdrop>
   );
 };
+
+
+

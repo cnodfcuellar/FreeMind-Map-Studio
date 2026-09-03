@@ -60,7 +60,24 @@ export interface ToolPanelProps {
     backgroundPatternSize?: number;
     backgroundPatternOpacity?: number;
   }) => void;
+  onUpdateMapBackgroundColor?: (backgroundColor?: string) => void;
+  onUpdateMapBackgroundPattern?: (patternConfig: {
+    pattern?: BackgroundPatternStyle;
+    patternColor?: string;
+    patternSize?: number;
+    patternOpacity?: number;
+  }) => void;
+  onUpdateMapSpacing?: (horizontalGap: number, verticalGap: number) => void;
+  onUpdateMapVisibility?: (visibility: {
+    hideAllBodies?: boolean;
+    hideAllImages?: boolean;
+    hideAllTags?: boolean;
+    hideAllIcons?: boolean;
+    hideAllLinks?: boolean;
+    showAllNotesInline?: boolean;
+  }) => void;
   onResetMapBackground?: () => void;
+
 }
 
 export type TabType = 'content' | 'format' | 'notes' | 'icons' | 'clouds' | 'theme';

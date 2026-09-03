@@ -16,6 +16,10 @@ import {
   Tag,
   Eye,
 } from 'lucide-react';
+import { ModalBackdrop } from '../atoms/ModalBackdrop';
+import { ModalHeader } from '../molecules/ModalHeader';
+import { Button } from '../atoms/Button';
+
 
 interface TemplatesModalProps {
   isOpen: boolean;
@@ -356,33 +360,18 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
   });
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                Galería de Plantillas y Ejemplos
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                  20 Modelos
-                </span>
-              </h2>
-              <p className="text-xs text-slate-500">
-                Mapas preconfigurados con etiquetas de nodo, estilos de enlace, perfiles de grosor y paletas
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <ModalBackdrop isOpen={isOpen} onClose={onClose} maxWidth="4xl">
+      <ModalHeader
+        title="Galería de Plantillas y Ejemplos"
+        subtitle="Mapas preconfigurados con etiquetas de nodo, estilos de enlace, perfiles de grosor y paletas"
+        icon={<Sparkles className="w-5 h-5 text-blue-600" />}
+        badge={
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
+            20 Modelos
+          </span>
+        }
+        onClose={onClose}
+      />
 
         {/* Filter and Search Bar */}
         <div className="px-6 py-3 border-b border-slate-100 bg-white flex flex-col gap-2.5 shrink-0">
@@ -604,17 +593,14 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500 shrink-0">
+        <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
           <span>Selecciona cualquier plantilla para cargar su contenido y configuración visual completa.</span>
-          <button
-            onClick={onClose}
-            className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition-colors cursor-pointer"
-          >
+          <Button variant="secondary" size="sm" onClick={onClose}>
             Cerrar
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+    </ModalBackdrop>
   );
 };
+
 

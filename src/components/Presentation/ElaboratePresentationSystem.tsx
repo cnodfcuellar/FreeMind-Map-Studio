@@ -38,11 +38,12 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
 
   // Slides State (loaded from mindMap or generated initially)
   const initialSlides = useMemo(() => {
-    if (mindMap.elaborateSlides && mindMap.elaborateSlides.length > 0) {
+    if (mindMap.elaborateSlides !== undefined) {
       return mindMap.elaborateSlides;
     }
     return generateDefaultSpatialSlides(mindMap, 'spiral');
-  }, [mindMap]);
+  }, [mindMap.elaborateSlides, mindMap]);
+
 
   const [slides, setSlides] = useState<SpatialSlideCard[]>(initialSlides);
   const [selectedSlideId, setSelectedSlideId] = useState<string | null>(slides[0]?.id || null);
@@ -224,7 +225,7 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isPresenterMode, slides.length, editingCardId, activeSlide, isOverviewActive, flyCameraToSlide, flyToOverview, onClose]);
 
-  // Board Mouse Drag (Pan the whole infinite board)
+  // Board Mouse Drag & Card Transformations via Window Listeners
   const handleBoardMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0 && e.button !== 1) return;
     setIsPanningBoard(true);
@@ -232,84 +233,110 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
     setSelectedSlideId(null);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isPanningBoard && boardPanStart) {
-      setCamPan({
-        x: e.clientX - boardPanStart.x,
-        y: e.clientY - boardPanStart.y,
-      });
-      return;
-    }
+  useEffect(() => {
+    if (!isPanningBoard && !transformingCardId) return;
 
-    if (transformingCardId && transformStartPos && transformMode) {
-      const card = slides.find((s) => s.id === transformingCardId);
-      if (!card) return;
-
-      const dx = (e.clientX - transformStartPos.mouseX) / camZoom;
-      const dy = (e.clientY - transformStartPos.mouseY) / camZoom;
-
-      if (transformMode === 'drag') {
-        const updated = slides.map((s) =>
-          s.id === transformingCardId
-            ? {
-                ...s,
-                spatial: {
-                  ...s.spatial,
-                  x: Math.round(transformStartPos.cardX + dx),
-                  y: Math.round(transformStartPos.cardY + dy),
-                },
-              }
-            : s
-        );
-        setSlides(updated);
-      } else if (transformMode === 'rotate') {
-        const cardCenterX = card.spatial.x + card.spatial.width / 2;
-        const cardCenterY = card.spatial.y + card.spatial.height / 2;
-        const screenCardX = cardCenterX * camZoom + camPan.x;
-        const screenCardY = cardCenterY * camZoom + camPan.y;
-
-        const rad = Math.atan2(e.clientY - screenCardY, e.clientX - screenCardX);
-        let deg = Math.round((rad * 180) / Math.PI) + 90;
-        deg = (deg + 360) % 360;
-
-        const updated = slides.map((s) =>
-          s.id === transformingCardId
-            ? { ...s, spatial: { ...s.spatial, rotation: deg } }
-            : s
-        );
-        setSlides(updated);
-      } else if (transformMode === 'resize') {
-        const initialScale = transformStartPos.cardScale ?? 1.0;
-        const initialHypot = Math.hypot(transformStartPos.cardW, transformStartPos.cardH);
-        const currentHypot = Math.hypot(transformStartPos.cardW + dx, transformStartPos.cardH + dy);
-        const factor = Math.max(0.4, Math.min(3.0, (currentHypot / initialHypot) * initialScale));
-
-        const updated = slides.map((s) =>
-          s.id === transformingCardId
-            ? {
-                ...s,
-                spatial: {
-                  ...s.spatial,
-                  scale: Number(factor.toFixed(2)),
-                },
-              }
-            : s
-        );
-        setSlides(updated);
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      if (isPanningBoard && boardPanStart) {
+        setCamPan({
+          x: e.clientX - boardPanStart.x,
+          y: e.clientY - boardPanStart.y,
+        });
+        return;
       }
-    }
-  };
 
-  const handleMouseUp = () => {
-    setIsPanningBoard(false);
-    setBoardPanStart(null);
-    if (transformingCardId) {
-      saveSlides(slides);
-      setTransformingCardId(null);
-      setTransformMode(null);
-      setTransformStartPos(null);
-    }
-  };
+      if (transformingCardId && transformStartPos && transformMode) {
+        const card = slides.find((s) => s.id === transformingCardId);
+        if (!card) return;
+
+        const rawDx = (e.clientX - transformStartPos.mouseX) / camZoom;
+        const rawDy = (e.clientY - transformStartPos.mouseY) / camZoom;
+        const camRotRad = (camRotation * Math.PI) / 180;
+        const dx = rawDx * Math.cos(-camRotRad) - rawDy * Math.sin(-camRotRad);
+        const dy = rawDx * Math.sin(-camRotRad) + rawDy * Math.cos(-camRotRad);
+
+        if (transformMode === 'drag') {
+          const updated = slides.map((s) =>
+            s.id === transformingCardId
+              ? {
+                  ...s,
+                  spatial: {
+                    ...s.spatial,
+                    x: Math.round(transformStartPos.cardX + dx),
+                    y: Math.round(transformStartPos.cardY + dy),
+                  },
+                }
+              : s
+          );
+          setSlides(updated);
+        } else if (transformMode === 'rotate') {
+          const cardCenterX = card.spatial.x + card.spatial.width / 2;
+          const cardCenterY = card.spatial.y + card.spatial.height / 2;
+          const screenCardX =
+            (cardCenterX * Math.cos(camRotRad) - cardCenterY * Math.sin(camRotRad)) * camZoom + camPan.x;
+          const screenCardY =
+            (cardCenterX * Math.sin(camRotRad) + cardCenterY * Math.cos(camRotRad)) * camZoom + camPan.y;
+
+          const rad = Math.atan2(e.clientY - screenCardY, e.clientX - screenCardX);
+          let deg = Math.round((rad * 180) / Math.PI) - Math.round(camRotation) + 90;
+          deg = ((deg % 360) + 360) % 360;
+
+          const updated = slides.map((s) =>
+            s.id === transformingCardId ? { ...s, spatial: { ...s.spatial, rotation: deg } } : s
+          );
+          setSlides(updated);
+        } else if (transformMode === 'resize') {
+          const initialScale = transformStartPos.cardScale ?? 1.0;
+          const initialHypot = Math.hypot(transformStartPos.cardW, transformStartPos.cardH);
+          const currentHypot = Math.hypot(transformStartPos.cardW + dx, transformStartPos.cardH + dy);
+          const factor = Math.max(0.4, Math.min(3.0, (currentHypot / initialHypot) * initialScale));
+
+          const updated = slides.map((s) =>
+            s.id === transformingCardId
+              ? {
+                  ...s,
+                  spatial: {
+                    ...s.spatial,
+                    scale: Number(factor.toFixed(2)),
+                  },
+                }
+              : s
+          );
+          setSlides(updated);
+        }
+      }
+    };
+
+    const handleWindowMouseUp = () => {
+      setIsPanningBoard(false);
+      setBoardPanStart(null);
+      if (transformingCardId) {
+        saveSlides(slides);
+        setTransformingCardId(null);
+        setTransformMode(null);
+        setTransformStartPos(null);
+      }
+    };
+
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', handleWindowMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowMouseUp);
+    };
+  }, [
+    isPanningBoard,
+    boardPanStart,
+    transformingCardId,
+    transformStartPos,
+    transformMode,
+    slides,
+    camZoom,
+    camRotation,
+    camPan,
+    saveSlides,
+  ]);
+
 
   // Zoom on wheel
   const handleWheel = (e: React.WheelEvent) => {
@@ -480,8 +507,6 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
       <div
         ref={containerRef}
         onMouseDown={handleBoardMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
         onWheel={handleWheel}
         className="flex-1 w-full h-full relative overflow-hidden cursor-grab active:cursor-grabbing bg-radial from-slate-900 via-slate-950 to-black"
       >
