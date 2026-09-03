@@ -1,1337 +1,638 @@
-# FreeMind Map Studio — Arquitectura Completa del Proyecto
+# 🧠 FreeMind Map Studio — Documento Maestro de Arquitectura de Software
 
-**Version:** 2.2  **Fecha:** 2026-08-29  
-**Stack:** React 19 + TypeScript 5.8 + Vite 6 + Tailwind CSS v4 + Zustand 5  
-**Gestor de paquetes:** pnpm  
-**Persistencia:** localStorage (sin backend, 100% offline)  
-**Patron de arquitectura:** Atomic Design + Store centralizado (Zustand)
-
----
-
-## 1. Vision General
-
-FreeMind Map Studio es una aplicacion de mapas mentales completamente offline que corre en el navegador sin ningun servidor. El estado completo se gestiona mediante un store reactivo global (Zustand) y se persiste en `localStorage` automaticamente en cada cambio.
-
-```
-USUARIO
-  │
-  ▼
-App.tsx  (orquestador, delegador de composicion)
-  │           │               │              │
-  ▼           ▼               ▼              ▼
-MenuBar   MindMapCanvas   ToolPanel   PresentationMode
-ToolBar   (lienzo SVG)    (inspector) (slides 100vh)
-FilterBar    │                │
-StatusBar    ▼                ▼
-         NodeComponent   6 Tabs (Organismos)
-         MiniMap              │
-                              ▼
-                      Moleculas + Atomos
-```
-
-### 1.1. Diagrama de Capas (Atomic Design)
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  PAGINA (App.tsx)                                               │
-│  Orquestador: compone organismos, gestiona modales y foco       │
-├─────────────────────────────────────────────────────────────────┤
-│  ORGANISMOS (componentes de pagina completa)                    │
-│  MenuBar · ToolBar · FilterBar · MindMapCanvas · OutlineView    │
-│  ToolPanel · PresentationMode · StatusBar · MiniMap · Modals/   │
-│  ├── organisms/toolpanel/  (6 tabs especializados)              │
-│  │   ├── ContentTab · FormatTab · NotesTab                      │
-│  │   └── IconsTab · CloudsTab · ThemeTab                        │
-│  ├── organisms/canvas/     (CanvasContextMenu, ZoomControls)    │
-│  └── organisms/presentation/ (controles + 7 temas visuales)     │
-├─────────────────────────────────────────────────────────────────┤
-│  MOLECULAS (combinaciones reutilizables)                        │
-│  FontFormatToolbar · ShapeSelector · TagManager                 │
-├─────────────────────────────────────────────────────────────────┤
-│  ATOMOS (elementos UI primitivos)                               │
-│  CollapsibleSection · ColorPicker · SliderInput                 │
-│  ToggleButton · ToggleButtonGroup                              │
-├─────────────────────────────────────────────────────────────────┤
-│  HOOKS (logica reutilizable y store)                            │
-│  useMindMapStore · useSearchFilter · useKeyboardShortcuts       │
-├─────────────────────────────────────────────────────────────────┤
-│  UTILS (funciones puras, sin estado)                            │
-│  layoutEngine · themes · storage · freeplaneConverter           │
-│  htmlExporter · connectorUtils · markdownRenderer               │
-│  iconMap · vectorIconPack · sampleMaps · additionalTemplates    │
-└─────────────────────────────────────────────────────────────────┘
-```
+**Versión:** 3.0  
+**Fecha:** Septiembre 2026  
+**Tecnologías Principales:** React 19 · TypeScript 5.8 · Vite 6 · Tailwind CSS v4 · Zustand 5 · Vitest 4 · Motion 12  
+**Gestor de Paquetes:** pnpm  
+**Persistencia:** `localStorage` (100% Offline, sin servidores, privacidad absoluta)  
+**Patrones de Diseño:** Atomic Design + Store Unidireccional Reactivo (Zustand) + Inmutabilidad Funcional + Error Boundaries  
 
 ---
 
-## 2. Flujo de Datos (Zustand — Reactivo Unidireccional)
+## 📑 Tabla de Contenidos
 
-```
-Store Global (useMindMapStore — Zustand)
-  [mindMap: MindMap]          -- unica fuente de verdad del mapa
-  [historyPast: MindMap[]]    -- pila undo (max 40)
-  [historyFuture: MindMap[]]  -- pila redo
-  [selectedNodeId: string]    -- nodo actualmente seleccionado
-  [editingNodeId: string]     -- nodo en modo edicion de texto
-  [focusTarget: {...} | null] -- senal de auto-zoom y centrado de nodo
-  [isPresentationMode: bool]  -- activa overlay de presentacion
-  [isOutlineOpen: bool]       -- panel esquema izquierdo
-  [isOutlineFullscreen: bool] -- esquema en pantalla completa
-  [isToolPanelOpen: bool]     -- panel propiedades derecho
-  [isFilterBarOpen: bool]     -- barra de busqueda
-  [clipboard: {...}]          -- portapapeles de nodo/subtree
-  [filterOptions: {...}]      -- criterios de filtrado activos
-
-Flujo de mutacion:
-  Componente --> store.pushHistory(current) + store.setMindMap(nuevo)
-                 --> subscripcion Zustand --> React re-render
-                 --> useEffect --> saveCurrentMap() --> localStorage
-```
-
-### 2.1. Propagacion de Estilos y de Iconos
-
-El store desacopla deliberadamente la propagacion de estilo general de la de iconos:
-
-1. **`handleApplyStyleToChildren / handleApplyStyleToSiblings`**:
-   - Propaga exclusivamente el `extractNodeStyleBundle` (forma, colores de fondo, degradados, tramas, imagen de fondo, bordes, aristas, tipografia de titulo y cuerpo).
-2. **`handleApplyIconsToChildren / handleApplyIconsToSiblings`**:
-   - Propaga exclusivamente el `iconBundle` (`icons`, `iconColor`, `iconSize`, `iconPosition`), sin alterar fondos, bordes ni geometrias de los nodos.
+1. [Visión General del Sistema y Ficha Técnica](#1-visión-general-del-sistema-y-ficha-técnica)
+2. [Arquitectura Atomic Design (4 Niveles)](#2-arquitectura-atomic-design-4-niveles)
+   - 2.1. [Nivel 4 — Templates (`MainEditorLayout.tsx`)](#21-nivel-4--templates-maineditorlayouttsx)
+   - 2.2. [Nivel 3 — Organismos (Canvas, ToolPanel, Shell, Modales)](#22-nivel-3--organismos)
+   - 2.3. [Nivel 2 — Moléculas (Controles y Sub-moléculas de Nodo)](#23-nivel-2--moléculas)
+   - 2.4. [Nivel 1 — Átomos (Primitivos UI y ErrorBoundary)](#24-nivel-1--átomos)
+3. [Flujo de Datos y Estado Global con Zustand](#3-flujo-de-datos-y-estado-global-con-zustand)
+   - 3.1. [Estructura del Store (`useMindMapStore.ts`)](#31-estructura-del-store-usemindmapstorets)
+   - 3.2. [Historial Inmutable Undo/Redo](#32-historial-inmutable-undoredo)
+   - 3.3. [Propagación de Estilos vs Propagación de Iconos](#33-propagación-de-estilos-vs-propagación-de-iconos)
+   - 3.4. [Hooks Desacoplados (Atajos y Filtros)](#34-hooks-desacoplados-atajos-y-filtros)
+4. [Motor Matemático de Layout y Geometría (`layoutEngine.ts`)](#4-motor-matemático-de-layout-y-geometría-layoutenginets)
+   - 4.1. [Algoritmo de 2 Pasadas (Bottom-Up & Top-Down)](#41-algoritmo-de-2-pasadas-bottom-up--top-down)
+   - 4.2. [Los 9 Algoritmos de Distribución Geométrica](#42-los-9-algoritmos-de-distribución-geométrica)
+   - 4.3. [Cálculo de Conectores Flotantes y Nubes](#43-cálculo-de-conectores-flotantes-y-nubes)
+5. [Los 3 Sistemas de Presentación](#5-los-3-sistemas-de-presentación)
+   - 5.1. [Sistema 1: Presentación Clásica en Diapositivas](#51-sistema-1-presentación-clásica-en-diapositivas)
+   - 5.2. [Sistema 2: Presentación Dinámica en Lienzo (Prezi-Style)](#52-sistema-2-presentación-dinámica-en-lienzo-prezi-style)
+   - 5.3. [Sistema 3: Presentación Espacial 3D](#53-sistema-3-presentación-espacial-3d)
+6. [Interoperabilidad, Exportación y Almacenamiento](#6-interoperabilidad-exportación-y-almacenamiento)
+   - 6.1. [Conversor Freeplane XML (`.mm`)](#61-conversor-freeplane-xml-mm)
+   - 6.2. [Exportador HTML Autónomo y Formatos Vectoriales](#62-exportador-html-autónomo-y-formatos-vectoriales)
+   - 6.3. [Estrategia de Persistencia Local](#63-estrategia-de-persistencia-local)
+7. [Infraestructura de Pruebas y Calidad de Código](#7-infraestructura-de-pruebas-y-calidad-de-código)
+8. [Matriz Código a Código del Repositorio](#8-matriz-código-a-código-del-repositorio)
 
 ---
 
-## 3. Modelo de Datos (`types/mindmap.ts`)
+## 1. Visión General del Sistema y Ficha Técnica
 
-### 3.1. `MindNode` (Nodo del Mapa Mental)
+FreeMind Map Studio es una suite de mapas mentales y presentaciones interactivas de grado profesional diseñada para ejecutarse íntegramente en el navegador web cliente. No requiere servidores centrales, bases de datos remotas ni autenticación de usuarios. 
+
+### Principios Rectores de Diseño:
+1. **100% Offline y Privacidad Absoluta**: Toda la información reside en la máquina del usuario (`localStorage` y descargas de archivos locales).
+2. **Cero Dependencias Externas en Exportables**: El exportador HTML genera un visor interactivo autónomo con SVG embebido, operable sin conexión a internet.
+3. **Inmutabilidad y Robustez Funcional**: Cada operación sobre el árbol genera nuevas referencias inmutables, permitiendo un historial de Deshacer/Rehacer de 40 estados sin efectos secundarios.
+4. **Desacoplamiento Estricto (Atomic Design)**: La interfaz está descompuesta en Átomos, Moléculas, Organismos y Templates, eliminando componentes monolíticos.
+5. **Tipado Estricto de Extremo a Extremo**: Cero errores en `tsc --noEmit` con React 19 y TypeScript 5.8.
+
+```mermaid
+flowchart TD
+    subgraph Cliente["Navegador Web (Cliente 100% Offline)"]
+        User(["👤 Usuario"])
+        
+        subgraph UI["Capa de Interfaz (Atomic Design)"]
+            ErrorBoundary["🛡️ ErrorBoundary"]
+            Template["📐 MainEditorLayout (Template)"]
+            
+            subgraph Shell["Organismos de Shell"]
+                MenuBar["🖥️ MenuBar"]
+                ToolBar["🔧 ToolBar"]
+                FilterBar["🔍 FilterBar"]
+                StatusBar["📊 StatusBar"]
+            end
+            
+            subgraph CanvasOrg["Organismo del Lienzo"]
+                Canvas["🗺️ MindMapCanvas"]
+                BgLayer["🎨 CanvasBackgroundLayer"]
+                DrawingOverlay["📐 CanvasDrawingOverlay"]
+                PresHUD["🎬 CanvasPresentationHUD"]
+                ContextMenu["🖱️ CanvasContextMenu"]
+                NodesLayer["🔵 Nodos (NodeComponent)"]
+                MiniMap["🗺️ MiniMap + ZoomControls"]
+            end
+            
+            subgraph InspectorOrg["Organismo Inspector"]
+                ToolPanel["🛠️ ToolPanel"]
+                Tabs["6 Pestañas Modulares\n(Content, Format, Notes, Icons, Clouds, Theme)"]
+            end
+            
+            subgraph PresSystems["3 Modos de Presentación"]
+                ClassicPres["🎞️ PresentationMode (Clásica)"]
+                DynamicPres["✨ CanvasPresentation (Dinámica)"]
+                SpatialPres["🪐 ElaboratePresentationSystem (3D)"]
+            end
+        end
+        
+        subgraph Logic["Lógica de Negocio y Estado"]
+            Store[("🧠 useMindMapStore (Zustand 5)")]
+            Shortcuts["⌨️ useKeyboardShortcuts"]
+            SearchFilter["🔍 useSearchFilter"]
+        end
+        
+        subgraph Algorithms["Motores Matemáticos Puros"]
+            LayoutEngine["⚙️ layoutEngine.ts (9 Algoritmos)"]
+            ConnectorUtils["🔗 connectorUtils.ts (Bézier & Nubes)"]
+            FreeplaneConv["📂 freeplaneConverter.ts (XML .mm)"]
+            HtmlExport["🌐 htmlExporter.ts (Visor Autónomo)"]
+        end
+        
+        subgraph Storage["Persistencia Local"]
+            LocalStorage[("💾 localStorage (Navegador)")]
+        end
+    end
+
+    User -->|Interacción / Atajos| UI
+    UI -->|Invoca Acciones| Store
+    Store -->|Notifica Estado| UI
+    Store -->|Auto-guardado| LocalStorage
+    Canvas -->|Solicita Posicionamiento| LayoutEngine
+    Canvas -->|Calcula Curvas| ConnectorUtils
+    MenuBar -->|Importar / Exportar| FreeplaneConv
+    MenuBar -->|Generar Standalone| HtmlExport
+```
+
+---
+
+## 2. Arquitectura Atomic Design (4 Niveles)
+
+El proyecto organiza sus componentes visuales siguiendo estrictamente la metodología **Atomic Design**, garantizando que cada pieza tenga una responsabilidad delimitada y una alta reutilización.
+
+```mermaid
+graph TD
+    subgraph Nivel4["NIVEL 4 — TEMPLATES"]
+        T1["MainEditorLayout.tsx"]
+    end
+
+    subgraph Nivel3["NIVEL 3 — ORGANISMOS"]
+        O1["MindMapCanvas.tsx"]
+        O2["ToolPanel.tsx (6 Tabs)"]
+        O3["MenuBar.tsx & ToolBar.tsx"]
+        O4["PresentationMode.tsx"]
+        O5["ElaboratePresentationSystem.tsx"]
+        O6["7 Modales Estandarizados"]
+        O7["CanvasBackgroundLayer.tsx"]
+        O8["CanvasDrawingOverlay.tsx"]
+        O9["CanvasPresentationHUD.tsx"]
+    end
+
+    subgraph Nivel2["NIVEL 2 — MOLÉCULAS"]
+        M1["ModalHeader.tsx"]
+        M2["SearchInput.tsx"]
+        M3["HistoryControls.tsx"]
+        M4["ZoomControls.tsx"]
+        M5["FontFormatToolbar.tsx"]
+        M6["ShapeSelector.tsx"]
+        M7["TagManager.tsx"]
+        subgraph NodeMolecules["Moléculas de NodeComponent"]
+            M8["NodeBackgroundRenderer.tsx"]
+            M9["NodeHeaderRow.tsx"]
+            M10["NodeBadgesBar.tsx"]
+            M11["NodeActionButtons.tsx"]
+        end
+    end
+
+    subgraph Nivel1["NIVEL 1 — ÁTOMOS"]
+        A1["Button.tsx"]
+        A2["IconButton.tsx"]
+        A3["Input.tsx"]
+        A4["Badge.tsx"]
+        A5["ModalBackdrop.tsx"]
+        A6["ErrorBoundary.tsx"]
+        A7["CollapsibleSection.tsx"]
+        A8["ColorPicker.tsx"]
+        A9["SliderInput.tsx"]
+        A10["ToggleButton.tsx"]
+        A11["ToggleButtonGroup.tsx"]
+    end
+
+    T1 --> O1 & O2 & O3 & O4 & O5 & O6
+    O1 --> O7 & O8 & O9 & M8 & M9 & M10 & M11 & M4
+    O2 --> M5 & M6 & M7 & A7 & A8 & A9 & A10 & A11
+    O6 --> M1 & A5 & A1 & A3
+    M1 --> A2
+    M2 --> A3 & A2
+    M3 --> A2
+    M4 --> A2
+    M7 --> A4 & A3 & A2
+```
+
+---
+
+### 2.1. Nivel 4 — Templates (`MainEditorLayout.tsx`)
+
+`MainEditorLayout` orquesta la disposición espacial de la aplicación dividiéndola en slots (`slots`) declarativos:
+- **Barra Superior**: `menuBar` y `toolBar`.
+- **Barra de Búsqueda Desplegable**: `filterBar` (condicional a `isFilterBarOpen`).
+- **Área Central de Trabajo**:
+  - Panel izquierdo colapsable: `outlineView` (`isOutlineOpen`).
+  - Lienzo central: `canvas` (ocupa el 100% del espacio restante).
+  - Panel lateral derecho: `toolPanel` (inspector de 6 pestañas, `isToolPanelOpen`).
+- **Barra de Estado Inferior**: `statusBar`.
+- **Capa Flotante de Modales**: `modals`.
+- **Overlay de Presentación Pantalla Completa**: `presentationOverlay`.
+
+Gracias a este template, [`src/App.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/App.tsx) se mantiene como un orquestador conciso envuelto en [`src/components/atoms/ErrorBoundary.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/ErrorBoundary.tsx), garantizando que cualquier fallo inesperado en un subcomponente muestre una pantalla de recuperación con opción de recarga sin pérdida de datos en `localStorage`.
+
+---
+
+### 2.2. Nivel 3 — Organismos
+
+Los organismos son estructuras complejas que combinan moléculas y átomos para resolver flujos de usuario completos.
+
+#### A. Descomposición del Lienzo (`MindMapCanvas.tsx`)
+El lienzo infinito delega sus responsabilidades en 4 sub-organismos desacoplados:
+1. [`CanvasBackgroundLayer.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasBackgroundLayer.tsx): Renderiza de manera ultrarrápida los 12 fondos del lienzo (cuadernos de puntos, mallas milimetradas, planos blueprint, paneles hexagonales y tramas cibernéticas) mediante patrones SVG nativos con `transform: translate3d`.
+2. [`CanvasDrawingOverlay.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasDrawingOverlay.tsx): 
+   - Dibuja en vivo el recuadro interactivo punteado azul durante el arrastre con la herramienta **Dibujar Recuadro**, mostrando dimensiones en píxeles (`Ancho × Alto`).
+   - Renderiza las etiquetas escalonadas de las diapositivas existentes.
+   - Aplica `pointer-events-none` sobre el cuerpo transparente de los marcos para que **nunca bloqueen los clics dirigidos a los nodos** situados debajo.
+3. [`CanvasPresentationHUD.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasPresentationHUD.tsx): Barra flotante superior e inferior de la Presentación Dinámica:
+   - Alternancia entre modo **Editor de Marcos** y **Presentar (F5)**.
+   - Herramientas: `1. Seleccionar Nodo (Crear Marco)`, `2. Dibujar Recuadro` y `Navegar / Mover`.
+   - Botón **Empezar de Cero** para limpiar el mapa a 0 diapositivas.
+   - Tira inferior (*Filmstrip*) interactiva con miniaturas, botones de salto y eliminación.
+4. [`CanvasContextMenu.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasContextMenu.tsx): Menú contextual al hacer clic derecho sobre cualquier nodo o fondo del lienzo, con accesos directos a crear hijo, hermano, clonar, cortar, copiar, pegar, crear nubes y cambiar formas.
+
+#### B. Descomposición del Inspector (`ToolPanel.tsx`)
+El panel lateral derecho se compone de 6 pestañas independientes alojadas en `src/components/organisms/toolpanel/`:
+- `ContentTab.tsx`: Título, cuerpo multilínea, alineación tipográfica e imágenes adjuntas con 7 posiciones (`top`, `bottom`, `left`, `right`, `between`, `background`, `fit`).
+- `FormatTab.tsx`: Geometría de forma (10 opciones), fondo (color, degradados en 4 direcciones, 8 tramas SVG e imagen de fondo), bordes (grosor, color, estilos sólido/discontinuo/punteado) y estilos de arista hacia hijos.
+- `NotesTab.tsx`: Editor de notas Markdown enriquecido, hipervínculos web y barra de progreso (0% a 100%).
+- `IconsTab.tsx`: Catálogo temático de iconos vectoriales interactivos con tinte SVG y escala personalizada.
+- `CloudsTab.tsx`: Activación de nubes de agrupación sobre el sub-árbol, selección de 4 geometrías y selector de color RGBA con transparencia.
+- `ThemeTab.tsx`: Selector visual de los 9 temas integrados, los 9 algoritmos de layout geométrico y los 12 fondos de lienzo.
+
+#### C. Modales Estandarizados
+Los 7 diálogos modales (`ExportImportModal`, `ShortcutsModal`, `TemplatesModal`, `SavedMapsModal`, `ConnectorModal`, `IconPackModal`, `ComingSoonModal`) implementan la misma base:
+- `ModalBackdrop` (átomo): Bloqueo visual con desenfoque de fondo (`backdrop-blur-sm`).
+- `ModalHeader` (molécula): Icono temático, título descriptivo, subtítulo y botón de cierre unificado con tecla `Escape`.
+
+---
+
+### 2.3. Nivel 2 — Moléculas
+
+Las moléculas agrupan átomos con una finalidad funcional específica:
+- [`ZoomControls.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/ZoomControls.tsx): Control unificado de acercar (`+`), alejar (`-`), reset a 100% y auto-centrado (`Ctrl+0`). Se utiliza tanto en la barra flotante del lienzo como dentro del `MiniMap`.
+- [`HistoryControls.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/HistoryControls.tsx): Botones de Deshacer y Rehacer con indicación de atajos de teclado y conteo de pila.
+- [`SearchInput.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/SearchInput.tsx): Input estilizado con icono de lupa, foco automático y botón de limpieza inmediata (`✕`).
+- [`ModalHeader.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/ModalHeader.tsx): Encabezado de modales con tipografía de alto contraste.
+
+#### Modularización de `NodeComponent.tsx`
+El renderizador de nodos (`NodeComponent.tsx`) fue refactorizado pasando de un monolito de más de 1,000 líneas a un orquestador declarativo de 180 líneas respaldado por 4 moléculas especializadas:
+1. [`NodeBackgroundRenderer.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/node/NodeBackgroundRenderer.tsx):
+   - Generación matemática de polígonos SVG para formas complejas: **Hexágono** (6 vértices con corte simétrico), **Flecha de Dirección** (cuerpo rectangular con punta triangular) y **Estrella de 5 puntas**.
+   - Renderizado de la **Cola de Burbuja de Diálogo (`bubble`)**: Dibuja una punta exterior SVG que conecta limpiamente el nodo con su rama padre.
+   - Detección de luminancia de fondo (`isDarkNodeBackground`) para conmutar automáticamente el contraste del texto entre blanco y negro.
+2. [`NodeHeaderRow.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/node/NodeHeaderRow.tsx):
+   - Fila superior e interior del nodo: imagen adjunta en posición superior/izquierda, indicadores de progreso circulares y píldoras, iconos vectoriales y visualizador de título.
+   - Textarea inline interactivo con auto-enfoque al pulsar `F2` o hacer doble clic.
+3. [`NodeBadgesBar.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/node/NodeBadgesBar.tsx):
+   - Insignias de metadatos: chips de tags interactivos, indicador de hipervínculo con apertura externa segura (`target="_blank" rel="noopener noreferrer"`), y badge de Nota Markdown con previsualización en tooltip o drawer.
+4. [`NodeActionButtons.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/node/NodeActionButtons.tsx):
+   - Píldora de plegado/desplegado de rama (`folded`) con conteo de hijos ocultos.
+   - Botón flotante `+` para agregar hijos instantáneos mediante clic.
+   - Asa de arrastre (*Drag Handle*) para re-parentar nodos con protección anti-ciclos.
+
+---
+
+### 2.4. Nivel 1 — Átomos
+
+Componentes base sin lógica de negocio, estilizados con Tailwind CSS y altamente testeados:
+- [`Button.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/Button.tsx): Variantes `primary`, `secondary`, `danger`, `ghost`, con soporte para estados de carga (`isLoading`) e iconos.
+- [`IconButton.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/IconButton.tsx): Botón cuadrado o circular compacto para barras de herramientas con tooltips nativos.
+- [`Input.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/Input.tsx): Campo de texto con estilos de foco accesibles (`ring-2 ring-blue-500`).
+- [`Badge.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/Badge.tsx): Píldora de estado con variantes cromáticas (`default`, `primary`, `success`, `warning`, `danger`).
+- [`ModalBackdrop.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/ModalBackdrop.tsx): Capa oscura translúcida con cierre por clic exterior.
+- [`ErrorBoundary.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/ErrorBoundary.tsx): Componente de clase React que captura fallos en tiempo de ejecución en cualquier nivel del árbol.
+- [`ColorPicker.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/ColorPicker.tsx): Paleta de colores preestablecidos con selector nativo y validación hexadecimal.
+- [`SliderInput.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/SliderInput.tsx): Control deslizante sincronizado bidireccionalmente con un input numérico.
+- [`ToggleButton.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/ToggleButton.tsx) y [`ToggleButtonGroup.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/ToggleButtonGroup.tsx): Interruptores visuales para opciones exclusivas.
+- [`CollapsibleSection.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/atoms/CollapsibleSection.tsx): Contenedor de acordeón con cabecera interactiva y animación de despliegue.
+
+---
+
+## 3. Flujo de Datos y Estado Global con Zustand
+
+El estado de la aplicación sigue una arquitectura **unidireccional y reactiva** impulsada por Zustand 5, garantizando que el mapa mental tenga una única fuente de verdad inmutable.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant UI as Componente React (Node / Toolbar)
+    participant Store as useMindMapStore (Zustand 5)
+    participant Engine as layoutEngine.ts
+    participant LocalStorage as localStorage
+
+    Usuario->>UI: Modifica Nodo / Agrega Hijo / Cambia Color
+    UI->>Store: invoca acción (e.g. addChildNode, updateNode)
+    Store->>Store: pushHistory(currentMap) [Pila Undo, max 40]
+    Store->>Store: Genera nuevo objeto MindMap inmutable
+    Store-->>UI: Notifica a suscriptores reactivos
+    UI->>Engine: useMemo re-calcula posiciones geométricas
+    Engine-->>UI: Retorna Map<string, CalculatedNodeLayout>
+    UI->>UI: Re-renderizado eficiente de nodos y aristas
+    Store->>LocalStorage: saveCurrentMap(newMap) automático
+```
+
+### 3.1. Estructura del Store (`useMindMapStore.ts`)
+
+El store centraliza las siguientes piezas clave de estado:
 
 ```typescript
-export interface MindNode {
-  id: string;
-  text: string;
-  parentId: string | null;
-  children: string[];
-  folded?: boolean;
-  side?: NodeSide; // 'left' | 'right' | 'root' | 'bottom' | 'top' | 'radial' | 'circular'
+interface MindMapStoreState {
+  // 1. Estado del Mapa Mental
+  mindMap: MindMap;
+  setMindMap: (map: MindMap) => void;
   
-  // Geometria y Formas (10 opciones)
-  shape?: NodeShape; // 'bubble' | 'fork' | 'rectangle' | 'square' | 'oval' | 'circle' | 'hexagon' | 'pill' | 'arrow' | 'star'
-  customWidth?: number;
-  customHeight?: number;
+  // 2. Historial Inmutable
+  historyPast: MindMap[];
+  historyFuture: MindMap[];
+  pushHistory: (map: MindMap) => void;
+  handleUndo: () => void;
+  handleRedo: () => void;
   
-  // Fondo y Relleno
-  color?: string; // Color solido o base
-  bgType?: NodeBackgroundType; // 'color' | 'transparent' | 'gradient' | 'pattern' | 'image'
-  gradientColor1?: string;
-  gradientColor2?: string;
-  gradientDirection?: NodeGradientDirection; // 'to-r' | 'to-b' | 'to-br' | 'radial'
-  nodePattern?: NodePatternStyle; // 'dots' | 'lines' | 'squares' | 'stripes' | 'triangles' | 'hexagons' | 'cross'
-  nodePatternColor?: string;
-  nodePatternSize?: number;
-  nodePatternOpacity?: number;
-
-  // Imagen de Fondo del Nodo
-  bgImageUrl?: string;
-  bgImageMode?: NodeBgImageMode; // 'fit' | 'cover' | 'contain' | 'tile'
-  bgImageOpacity?: number;
-
-  // Bordes
-  borderColor?: string;
-  borderWidth?: number;
-  borderDash?: 'solid' | 'dashed' | 'dotted';
-  borderStyle?: 'solid' | 'dashed' | 'dotted';
-
-  // Imagen Adjunta de Contenido
-  imageUrl?: string;
-  imageWidth?: number;
-  imageHeight?: number;
-  imagePosition?: 'top' | 'bottom' | 'left' | 'right' | 'between' | 'background' | 'fit';
-
-  // Tipografia de Titulo
-  textColor?: string;
-  fontSize?: number;
-  bold?: boolean;
-  italic?: boolean;
-  fontFamily?: string;
-  textAlign?: 'left' | 'center' | 'right';
-
-  // Tipografia de Cuerpo (Body)
-  body?: string;
-  bodyFontSize?: number;
-  bodyBold?: boolean;
-  bodyItalic?: boolean;
-  bodyColor?: string;
-  bodyFontFamily?: string;
-  bodyAlign?: 'left' | 'center' | 'right';
+  // 3. Foco y Selección
+  selectedNodeId: string | null;
+  setSelectedNodeId: (id: string | null) => void;
+  editingNodeId: string | null;
+  setEditingNodeId: (id: string | null) => void;
+  focusTarget: { id: string; timestamp: number } | null;
+  triggerFocusNode: (id: string) => void;
   
-  // Aristas hacia hijos
-  edgeColor?: string;
-  edgeStyle?: EdgeStyle; // 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden'
-  edgeWidth?: number;
-  edgeDash?: 'solid' | 'dashed' | 'dotted';
-  edgeProfile?: EdgeProfile; // 'uniform' | 'tapered' | 'spindle' | 'hourglass'
+  // 4. Portapapeles Inteligente
+  clipboard: { node: MindNode; subtree: Record<string, MindNode> } | null;
+  copyNode: (id: string) => void;
+  cutNode: (id: string) => void;
+  pasteNode: (targetParentId: string) => void;
   
-  // Iconos y Enriquecimiento
-  icons?: string[];
-  iconPosition?: 'left' | 'top';
-  iconColor?: string; // Tinte de color SVG para iconos vectoriales
-  iconSize?: number;  // Escala en px (10px a 36px)
-  tags?: string[];
-  progress?: number;  // 0 a 100
-  progressPosition?: 'left' | 'top';
-  link?: string;
-  note?: string;      // Markdown extenso
-  details?: string;
-
-  // Visibilidad de elementos (Ojos)
-  hideBody?: boolean;
-  hideImage?: boolean;
-  hideTags?: boolean;
-  hideIcons?: boolean;
-  hideLink?: boolean;
-  hideProgress?: boolean;
-  
-  // Nube / Agrupador
-  cloud?: NodeCloud;
+  // 5. Visibilidad de Paneles
+  isOutlineOpen: boolean;
+  isOutlineFullscreen: boolean;
+  isToolPanelOpen: boolean;
+  isFilterBarOpen: boolean;
+  isPresentationMode: boolean;
+  presentationType: 'classic' | 'canvas' | 'elaborate';
 }
 ```
 
-### 3.2. `MindMap` (Estructura Global del Mapa)
+### 3.2. Historial Inmutable Undo/Redo
 
-```typescript
-export interface MindMap {
-  id: string;
-  title: string;
-  rootId: string;
-  nodes: Record<string, MindNode>;
-  layout: LayoutType;
-  themeId: string;
-  
-  // Fondo Global del Lienzo
-  backgroundColor?: string;
-  backgroundPattern?: BackgroundPatternStyle; // 'none' | 'dots' | 'lines' | 'squares' | 'triangles' | 'hexagons'
-  backgroundPatternColor?: string;
-  backgroundPatternSize?: number;
-  backgroundPatternOpacity?: number;
+Cada mutación sobre el árbol invoca `pushHistory(currentMap)` antes de aplicar el cambio:
+- La pila de `historyPast` almacena hasta **40 instantáneas completas**.
+- Al invocar `handleUndo()`, el mapa actual se desplaza a `historyFuture` y el estado anterior se restaura instantáneamente.
+- La inmutabilidad garantiza que los nodos compartidos no sufran mutaciones por referencia, previniendo estados inconsistentes o bucles infinitos en React.
 
-  // Aristas Globales
-  edgeStyle?: EdgeStyle;
-  edgeProfile?: EdgeProfile;
-  edgeWidth?: number;
-  edgeDash?: 'solid' | 'dashed' | 'dotted';
-  edgeColor?: string;
+### 3.3. Propagación de Estilos vs Propagación de Iconos
 
-  // Espaciados
-  horizontalGap?: number;
-  verticalGap?: number;
+El store desacopla deliberadamente la propagación de diseño para no sobreescribir datos no deseados:
+1. **`applyStyleToChildren` / `applyStyleToSiblings`**:
+   - Extrae el paquete de diseño `extractNodeStyleBundle` (forma, colores, degradados, tramas, imagen de fondo, bordes, tipografía).
+   - Lo aplica en cascada respetando los textos, notas, tags y enlaces de cada nodo descendiente.
+2. **`applyIconsToChildren` / `applyIconsToSiblings`**:
+   - Propaga exclusivamente el conjunto de iconos vectoriales, tamaño y tinte, sin alterar los estilos geométricos ni los fondos de los nodos.
 
-  // Conectores cruzados
-  connectors?: Connector[];
+### 3.4. Hooks Desacoplados (Atajos y Filtros)
 
-  createdAt: number;
-  updatedAt: number;
-}
+- [`useKeyboardShortcuts.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/hooks/useKeyboardShortcuts.ts): Registra un único oyente global en `window` que intercepta atajos de teclado estándar de Freeplane (`Tab`, `Enter`, `F2`, `Supr`, `Espacio`, `Ctrl+Z`, `Ctrl+Y`, `Ctrl+C`, `Ctrl+V`, `Ctrl+F`, `F5`). Ignora pulsaciones si el usuario está escribiendo en un input, textarea o modal.
+- [`useSearchFilter.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/hooks/useSearchFilter.ts): Evalúa en tiempo real criterios acumulativos de filtrado (búsqueda textual, tags, rango de progreso, iconos, notas y links) y genera un `Set<string>` con los IDs de los nodos coincidentes, con opción de incluir ancestros o descendientes.
+
+---
+
+## 4. Motor Matemático de Layout y Geometría (`layoutEngine.ts`)
+
+El motor de layout es una biblioteca matemática pura sin dependencias de DOM que calcula las coordenadas `(x, y)` y dimensiones de cada nodo del mapa mental.
+
+```mermaid
+flowchart TD
+    Start(["Inicio: computeMindMapLayout(mindMap)"]) --> Pass1["PASO 1 (Bottom-Up): calculateSubtreeDimensions"]
+    
+    Pass1 --> DimNode["calculateNodeDimensions(node):\nTexto + Padding + Imágenes + Badges + Iconos"]
+    DimNode --> SubtreeHeight["Acumular alturas verticales de hijos + verticalGap"]
+    
+    SubtreeHeight --> Pass2["PASO 2 (Top-Down): assignNodeCoordinates"]
+    
+    Pass2 --> LayoutFork{"mindMap.layout"}
+    
+    LayoutFork -->|standard / horizontal| BiFork["Repartir hijos entre Lado Izquierdo y Derecho"]
+    LayoutFork -->|right_only / left_only| SingleDir["Distribuir en un solo semieje horizontal"]
+    LayoutFork -->|top_only / bottom_only| VerticalDir["Distribuir en semieje vertical"]
+    LayoutFork -->|tree_vertical| TreeDir["Disposición jerárquica vertical hacia abajo"]
+    LayoutFork -->|radial| RadialDir["Distribución por sectores angulares (r·cosθ, r·sinθ)"]
+    LayoutFork -->|circular| CircularDir["Distribución orbital perimétrica"]
+    
+    BiFork & SingleDir & VerticalDir & TreeDir & RadialDir & CircularDir --> LayoutMap[("Map<string, CalculatedNodeLayout>")]
+    LayoutMap --> Finish(["Retorno de Coordenadas y Conexiones"])
 ```
 
----
+### 4.1. Algoritmo de 2 Pasadas (Bottom-Up & Top-Down)
 
-## 4. Componentes y Arquitectura UI
+1. **Pasada 1 (Bottom-Up — Medición y Acumulación)**:
+   - Recorre recursivamente el árbol desde las hojas hacia la raíz.
+   - En cada nodo, calcula su ancho y alto mediante `calculateNodeDimensions`, considerando longitud de texto, tamaño de fuente, imágenes adjuntas, badges de tags y notas.
+   - Suma las alturas de sus sub-árboles hijos más el espaciado vertical (`verticalGap`).
+2. **Pasada 2 (Top-Down — Asignación de Coordenadas)**:
+   - Fija la raíz en el origen `(0, 0)`.
+   - Distribuye a los hijos ordenadamente en el plano cartesiano según el algoritmo de layout elegido, sumando el espaciado horizontal (`horizontalGap`).
 
-### 4.1. `NodeComponent.tsx` (Renderizado de Nodos)
+### 4.2. Los 9 Algoritmos de Distribución Geométrica
 
-- **Forma Burbuja (`bubble`)**:
-  - Incorpora una cola/punta triangular exterior SVG (`12x16px`) que apunta directamente hacia el lateral de su rama de conexion (`side === 'left'` o `'right'`).
-  - Mantiene el contenido interno (imagenes, titulo, cuerpo, tags, links) perfectamente centrado y contenido sin recortes ni desbordamientos.
-- **Forma Horquilla (`fork`)**:
-  - Mantiene su linea base de apoyo tradicional de Freeplane respetando plenamente los fondos personalizados del nodo (color, degradado, trama o imagen de fondo), sin forzar transparencias indeseadas.
-- **Formas Poligonales SVG**:
-  - Hexagonos, flechas de direccion y estrellas de 5 puntas renderizadas con SVG vectorial nítido.
-- **Iconos Vectoriales con Tinte y Escala**:
-  - `renderNodeIcon(iconId, className, node.iconColor, node.iconSize)` aplica estilos CSS en tiempo real (`color`, `width`, `height`).
-- **Fondos Desacoplados**:
-  - Capa inferior de imagen de fondo (`bgImageUrl`) independiente de la imagen adjunta de contenido (`imageUrl`).
+| # | Layout | Comportamiento Geométrico |
+|---|--------|---------------------------|
+| 1 | `standard` | **Bifurcado Clásico:** Alterna ramas principales entre la derecha y la izquierda de la raíz para un equilibrio visual idéntico al de Freeplane. |
+| 2 | `horizontal` | **Horizontal Balanceado:** Asigna ramas a derecha o izquierda de forma codiciosa (*greedy*) calculando la suma de alturas de sub-árboles para minimizar la disparidad vertical. |
+| 3 | `right_only` | Todas las ramas se proyectan exclusivamente hacia la derecha (`+X`). Ideal para diagramas cronológicos o flujos de causa-efecto. |
+| 4 | `left_only` | Todas las ramas se proyectan hacia la izquierda (`-X`). |
+| 5 | `bottom_only` | Proyección hacia abajo (`+Y`). |
+| 6 | `top_only` | Proyección hacia arriba (`-Y`). |
+| 7 | `tree_vertical` | **Árbol Organizacional:** Distribución jerárquica descendente donde los hijos se centran horizontalmente debajo de su padre directo. |
+| 8 | `radial` | **Radial Continuo:** Distribuye los nodos en anillos concéntricos calculando ángulos polares: $X = r \cdot \cos(\theta)$, $Y = r \cdot \sin(\theta)$. |
+| 9 | `circular` | **Orbital Perimétrico:** Posiciona los nodos hijos en el perímetro de una circunferencia perfecta alrededor del nodo raíz. |
 
-### 4.2. `MindMapCanvas.tsx` (Lienzo Infinito SVG/HTML)
+### 4.3. Cálculo de Conectores Flotantes y Nubes
 
-- Pan y Zoom continuos con aceleracion por hardware (`translate3d`, `scale`).
-- **Auto-Zoom al Enfocar**: Recibe `focusTarget: { nodeId, timestamp }` y traslada el centro de la camara sobre el nodo seleccionado con un nivel de zoom cercano (`~1.15x`).
-- Renderizado de aristas curvas, ahusadas (*tapered*), de huso (*spindle*) o reloj de arena (*hourglass*).
-- Renderizado de nubes poligonales y festoneadas con borde personalizable.
-- Gestion de arrastre (Drag & Drop) para reordenar y re-emparentar ramas.
-
-### 4.3. `OutlineView.tsx` (Panel de Esquema)
-
-- Vista estructurada en arbol de texto editable con atajos rapidos.
-- Al hacer clic en cualquier fila de nodo, emite una senal `setFocusTarget` que enfoca y hace zoom inmediatamente en el lienzo sobre dicho nodo.
-- Soporta busqueda, filtrado de texto, plegado/desplegado y modo pantalla completa.
-
-### 4.4. `ToolPanel.tsx` y los 6 Tabs Organismos
-
-1. **`ContentTab.tsx`**:
-   - Titulo, cuerpo de texto (`body`), tipografia independiente, alineacion, imagen adjunta de contenido y toggle de visibilidad (ojos).
-2. **`FormatTab.tsx`**:
-   - Selector de 10 formas, fondos solidos/degradados/tramas/imagen de fondo, bordes con tarjetas visuales de 3 estilos (`solid`, `dashed`, `dotted`), aristas individuales y propagacion de estilo a hijos/hermanos.
-3. **`NotesTab.tsx`**:
-   - Editor Markdown enriquecido, enlace externo/interno, barra de progreso interactiva (0% a 100%).
-4. **`IconsTab.tsx`**:
-   - Seccion plegable **"Color y Tamaño de Iconos"** (`CollapsibleSection`).
-   - Selector de color (`ColorPicker`) con paleta de colores sugeridos.
-   - Deslizador de tamaño (`SliderInput`) de `10px` a `36px`.
-   - Botones de **"Copiar a Hijos"** y **"Copiar a Hermanos"** aislados exclusivamente para la configuracion de iconos.
-   - Buscador rapido y galeria de categorias con mas de 500 iconos vectoriales Lucide.
-5. **`CloudsTab.tsx`**:
-   - Nubes de agrupacion con selector de 8 formas, fondos avanzados y tarjetas visuales de 3 columnas para estilo de borde.
-6. **`ThemeTab.tsx`**:
-   - Temas visuales globales, algoritmos de diseño (*Layout*), aristas globales y seccion **"Fondo del Lienzo"** con tarjetas visuales de 6 patrones de rejilla (*Liso, Puntos, Líneas, Cuadros, Triángulos, Panal*), selector de color del trazo del patron, tamaño y opacidad.
+- **Aristas de Rama (`generateEdgePath` / `generateRibbonEdgePath`)**:
+  - Curvas de Bézier cúbicas con puntos de control horizontales basados en la distancia entre nodos:
+    $$\mathbf{C}_1 = (X_{padre} + \Delta X \cdot 0.5, Y_{padre}), \quad \mathbf{C}_2 = (X_{padre} + \Delta X \cdot 0.5, Y_{hijo})$$
+  - Soporta 4 perfiles de trazado: **Uniforme** (grosor constante), **Cónico / Tapered** (grueso en la base y fino en el nodo destino), **Huso / Spindle** (grueso en el centro) y **Reloj de Arena**.
+- **Conectores Cruzados Flotantes ([`src/utils/connectorUtils.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/utils/connectorUtils.ts))**:
+  - Calcula las intersecciones perimetrales entre las cajas delimitadoras de cualquier par de nodos arbitrarios.
+  - Genera flechas en extremos (`start`, `end`, `both`), etiquetas intermedias y estilos de curva (Bézier, recta o en ángulo ortogonal `step`).
+- **Nubes de Agrupación ([`computeCloudBounds`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/utils/layoutEngine.ts))**:
+  - Calcula la envolvente convexa del sub-árbol completo con margen perimetral y genera trazados SVG ondulados o poligonales con fondo traslúcido.
 
 ---
 
-## 5. Utilidades del Sistema (`src/utils/`)
+## 5. Los 3 Sistemas de Presentación
 
-| Archivo | Responsabilidad |
-| :--- | :--- |
-| **`layoutEngine.ts`** | Calculo matematico de coordenadas de nodos, arboles bilaterales, radiales y verticales, curvas de conexion y nubes. |
-| **`iconMap.tsx`** | Mapeo de identificadores a iconos vectoriales con soporte dinamico de `customColor` y `customSize`. |
-| **`vectorIconPack.tsx`** | Repositorio de mas de 500 iconos clasificados en 20 categorias con indexacion y busqueda. |
-| **`freeplaneConverter.ts`** | Parser y serializador bidireccional XML compatible con Freeplane / FreeMind (`.mm`). |
-| **`htmlExporter.ts`** | Generador de archivo HTML autonomo 100% portable con visor interactivo embebido. |
-| **`connectorUtils.ts`** | Geometria de lineas de conexion cruzada con control interactivo de curvatura y flechas. |
-| **`storage.ts`** | Capa de persistencia local en `localStorage` con indexacion de mapas guardados. |
-| **`sampleMaps.ts` & `additionalTemplates.ts`** | Catalogo completo de plantillas tematicas actualizadas con todas las funciones visuales activas. |
-
----
-
-## 6. Atajos de Teclado Globales
-
-- **`Tab` / `Insert`**: Crear nuevo nodo hijo.
-- **`Enter`**: Crear nuevo nodo hermano.
-- **`F2` / `Doble Clic`**: Editar texto del nodo.
-- **`Espacio`**: Plegar / Desplegar rama.
-- **`Delete` / `Backspace`**: Eliminar nodo seleccionado.
-- **`Ctrl + Z` / `Ctrl + Y`**: Deshacer / Rehacer historial.
-- **`Ctrl + C` / `Ctrl + X` / `Ctrl + V`**: Copiar / Cortar / Pegar ramas completas.
-- **`Alt + O`**: Alternar panel de Esquema (*Outline*).
-- **`Alt + P`**: Alternar panel de Propiedades (*ToolPanel*).
-- **`Ctrl + F`**: Barra de busqueda y filtrado interactivo.
-- **`F5`**: Iniciar Modo Presentacion en pantalla completa.
-- **`Ctrl + +` / `Ctrl + -` / `Ctrl + 0`**: Zoom In / Zoom Out / Ajustar vista al 100%.
-
----
-
-## 3. Estructura de Datos Clave
-
-### 3.1. MindMap (mapa completo)
-```typescript
-interface MindMap {
-  id: string                    // identificador unico
-  title: string                 // titulo editable del mapa
-  rootId: string                // ID del nodo raiz
-  nodes: Record<string, MindNode> // TODOS los nodos indexados por ID
-  connectors: Connector[]       // conectores cruzados flotantes
-  layout: LayoutType            // algoritmo de layout activo
-  themeId: string               // tema visual activo
-
-  // Fondo del lienzo (sobreescribe el tema si se configura)
-  backgroundColor?: string
-  backgroundPattern?: BackgroundPatternStyle
-  backgroundPatternColor?: string
-  backgroundPatternSize?: number
-  backgroundPatternOpacity?: number
-
-  // Aristas globales del mapa (overrideable por nodo)
-  edgeStyle?: EdgeStyle         // bezier | linear | sharp | horizontal | hidden
-  edgeWidth?: number
-  edgeColor?: string
-  edgeDash?: solid | dashed | dotted
-  edgeProfile?: EdgeProfile     // uniform | tapered | spindle | hourglass
-  horizontalGap?: number        // espacio horizontal entre niveles
-  verticalGap?: number          // espacio vertical entre hermanos
-
-  createdAt: number             // timestamp
-  updatedAt: number             // timestamp (auto-actualizado en cada cambio)
-}
+```mermaid
+graph TD
+    PresRoot["3 MODOS DE PRESENTACIÓN"]
+    
+    PresRoot --> Mode1["1. Modo Presentación Clásica\n(PresentationMode.tsx)"]
+    PresRoot --> Mode2["2. Modo Presentación Dinámica\n(MindMapCanvas + CanvasPresentationHUD)"]
+    PresRoot --> Mode3["3. Modo Presentación Espacial 3D\n(ElaboratePresentationSystem.tsx)"]
+    
+    Mode1 --> M1Desc["• Diapositivas automáticas sin scroll\n• 3 Fases por nodo (Tema, Notas, Subtemas)\n• 7 Temas de presentación\n• Salto directo por tarjetas con Backspace"]
+    
+    Mode2 --> M2Desc["• Vuelo cinemático de cámara en lienzo Prezi-style\n• 1 Clic = Crear Marco instantáneo sobre nodo\n• Herramienta Dibujar Recuadro (X × Y en vivo)\n• Empezar de Cero (0 marcos)\n• Tira de miniaturas (Filmstrip) interactiva\n• Pointer-events desacoplados"]
+    
+    Mode3 --> M3Desc["• Entorno 3D isométrico con Motion 12\n• Tarjetas espaciales interactivas\n• Arrastre, rotación y escala en tiempo real\n• Compensación matemática del ángulo de cámara\n• Modal de inspección detallada"]
 ```
 
-### 3.2. MindNode (nodo individual)
-```typescript
-interface MindNode {
-  // Estructura del arbol
-  id: string
-  text: string                  // titulo/texto principal
-  parentId: string | null       // null solo en el nodo raiz
-  children: string[]            // IDs de los hijos en orden
-  folded?: boolean              // true = hijos ocultos en el lienzo
-  side?: NodeSide               // left | right | root | bottom | top | radial | circular
+### 5.1. Sistema 1: Presentación Clásica en Diapositivas
 
-  // Apariencia / Forma
-  shape?: NodeShape             // bubble | fork | rectangle | square | oval | circle | pill | hexagon | arrow | star
-  customWidth?: number          // ancho fijo (50-500px, 0 = auto)
-  customHeight?: number         // alto fijo (30-300px, 0 = auto)
-
-  // Fondo del nodo (4 modos)
-  color?: string                // color solido o acento
-  bgType?: NodeBackgroundType   // color | transparent | gradient | pattern | image
-  gradientColor1?: string
-  gradientColor2?: string
-  gradientDirection?: to-r | to-b | to-br | radial
-  nodePattern?: NodePatternStyle  // dots | lines | squares | stripes | triangles | hexagons | cross
-  nodePatternColor?: string
-  nodePatternSize?: number
-  nodePatternOpacity?: number
-
-  // Imagen de fondo interno del nodo
-  bgImageUrl?: string
-  bgImageMode?: fit | cover | contain | tile
-  bgImageOpacity?: number
-
-  // Bordes y contornos
-  borderColor?: string
-  borderWidth?: number          // 0-8px
-  borderDash?: solid | dashed | dotted
-  borderStyle?: solid | dashed | dotted
-
-  // Imagen de contenido adjunta al nodo
-  imageUrl?: string
-  imageWidth?: number           // 60-300px
-  imageHeight?: number
-  imagePosition?: top | bottom | left | right | between | background | fit
-
-  // Tipografia del titulo
-  textColor?: string
-  fontSize?: number
-  bold?: boolean
-  italic?: boolean
-  fontFamily?: string
-  textAlign?: left | center | right
-
-  // Tipografia del cuerpo (subtexto)
-  body?: string                 // texto adicional del nodo
-  bodyFontSize?: number
-  bodyBold?: boolean
-  bodyItalic?: boolean
-  bodyColor?: string
-  bodyFontFamily?: string
-  bodyAlign?: left | center | right
-
-  // Aristas de este nodo (override del mapa)
-  edgeColor?: string
-  edgeStyle?: EdgeStyle
-  edgeWidth?: number
-  edgeDash?: solid | dashed | dotted
-  edgeProfile?: EdgeProfile
-
-  // Metadatos
-  icons?: string[]              // IDs de iconos del iconMap
-  tags?: string[]               // etiquetas de texto libre
-  progress?: number             // 0-100 (barra de progreso)
-  link?: string                 // URL, mailto: o #nodeId
-  note?: string                 // nota en Markdown
-  details?: string              // detalles adicionales
-
-  // Nodo libre (Post-it)
-  isFreeFloating?: boolean      // true = posicion manual en el lienzo
-  freePosition?: {x: number, y: number}
-
-  // Nube de agrupacion
-  cloud?: NodeCloud             // {enabled, color, shape}
-}
-```
-
-### 3.3. Connector (conector cruzado flotante)
-```typescript
-interface Connector {
-  id: string
-  fromId: string                // nodo de origen
-  toId: string                  // nodo de destino
-  label?: string                // etiqueta de texto flotante
-  color?: string
-  style?: solid | dashed | dotted
-  arrow?: start | end | both | none
-  curvature?: number
-  shape?: curved | bezier | straight | step
-  width?: number
-  controlPoint?: {x: number, y: number}  // punto Bezier ajustable
-  layer?: above | below         // si se dibuja encima o debajo de los nodos
-  opacity?: number
-}
-```
-
----
-
-## 4. Arquitectura de Componentes (Atomic Design)
-
-### 4.1. Atomos (`src/components/atoms/`)
-
-Componentes UI primitivos, sin logica de negocio, 100% reutilizables:
-
-| Atomo | Archivo | Responsabilidad |
-|:------|:--------|:----------------|
-| `CollapsibleSection` | CollapsibleSection.tsx | Seccion con cabecera clickeable que expande/colapsa contenido hijo |
-| `ColorPicker` | ColorPicker.tsx | Input de color con campo hex y paleta rapida de presets |
-| `SliderInput` | SliderInput.tsx | Slider numerico con input editable y rango configurable |
-| `ToggleButton` | ToggleButton.tsx | Boton binario on/off con estado visual activo |
-| `ToggleButtonGroup` | ToggleButtonGroup.tsx | Grupo exclusivo de ToggleButtons (solo uno activo a la vez) |
-
-### 4.2. Moleculas (`src/components/molecules/`)
-
-Combinaciones de atomos que forman controles especificos del dominio:
-
-| Molecula | Archivo | Composicion |
-|:---------|:--------|:------------|
-| `FontFormatToolbar` | FontFormatToolbar.tsx | ToggleButtons de bold/italic + selector de fuente + slider de tamano + ColorPicker |
-| `ShapeSelector` | ShapeSelector.tsx | Grid de ToggleButtons con preview visual de las 10 formas geometricas |
-| `TagManager` | TagManager.tsx | Lista de chips con X para eliminar + input con Enter para agregar nuevos tags |
-
-### 4.3. Organismos (`src/components/organisms/`)
-
-Componentes complejos que componen secciones funcionales completas:
-
-#### 4.3.1. Organismos del ToolPanel (`organisms/toolpanel/`)
-
-El ToolPanel se dividio en 6 pestanas-organismo independientes:
-
-| Tab | Archivo | Contenido |
-|:----|:--------|:----------|
-| `ContentTab` | ContentTab.tsx | Titulo, cuerpo, tipografia titulo, tipografia cuerpo |
-| `FormatTab` | FormatTab.tsx | Forma, geometria, fondo (4 modos), contornos/bordes, imagenes, aristas |
-| `NotesTab` | NotesTab.tsx | Nota Markdown con preview, enlace URL, progreso |
-| `IconsTab` | IconsTab.tsx | Grid de iconos toggle + boton abrir IconPackModal |
-| `CloudsTab` | CloudsTab.tsx | Toggle nube on/off, forma, color RGBA |
-| `ThemeTab` | ThemeTab.tsx | Tema del mapa (9), layout (9), fondo lienzo (12), aristas globales, espaciado |
-
-#### 4.3.2. Organismos del Canvas (`organisms/canvas/`)
-
-| Componente | Archivo | Responsabilidad |
-|:-----------|:--------|:----------------|
-| `CanvasContextMenu` | CanvasContextMenu.tsx | Menu contextual (clic derecho) con opciones de nodo |
-| `CanvasZoomControls` | CanvasZoomControls.tsx | Controles de zoom (+, -, porcentaje, ajustar, fullscreen) |
-
-#### 4.3.3. Organismos de Presentacion (`organisms/presentation/`)
-
-| Componente | Archivo | Responsabilidad |
-|:-----------|:--------|:----------------|
-| `PresentationControls` | PresentationControls.tsx | Barra superior + modal de opciones de presentacion |
-| `presentationThemes` | presentationThemes.ts | Definicion de los 7 temas de presentacion (datos, no componente) |
-
-### 4.4. Paginas / Componentes de Alto Nivel (`src/components/`)
-
-| Componente | Archivo | Tamaño | Responsabilidad |
-|:-----------|:--------|:-------|:----------------|
-| `MenuBar` | MenuBar.tsx | ~26KB | Barra de menu superior con dropdowns (Archivo/Editar/Insertar/Formato/Ver/Ayuda) |
-| `ToolBar` | ToolBar.tsx | ~29KB | Herramientas rapidas: edicion de arbol, tipografia, forma, historia, zoom, paneles |
-| `FilterBar` | FilterBar.tsx | ~4KB | Barra de busqueda colapsable con filtros acumulativos (texto, tag, progreso) |
-| `MindMapCanvas` | MindMapCanvas.tsx | ~55KB | Lienzo infinito con pan/zoom, drag&drop, SVG aristas/nubes/conectores, MiniMap |
-| `NodeComponent` | NodeComponent.tsx | ~32KB | Renderizado visual de cada nodo (10 formas, fondo, imagen, tags, edicion inline) |
-| `ToolPanel` | ToolPanel.tsx | ~10KB | Contenedor de tabs: delega renderizado a los 6 organismos del toolpanel |
-| `PresentationMode` | PresentationMode.tsx | ~52KB | Overlay fullscreen: 3 fases por nodo, auto-paginacion, 7 temas, jump history |
-| `OutlineView` | OutlineView.tsx | ~17KB | Vista de esquema en arbol (panel izquierdo), edicion inline, plegar/desplegar |
-| `MiniMap` | MiniMap.tsx | ~18KB | Minimapa radar flotante en 3 tamanos (S/M/L) |
-| `StatusBar` | StatusBar.tsx | ~2KB | Barra de estado inferior (nodos, seleccion, zoom, posicion, modo) |
-
-### 4.5. Modales (`src/components/Modals/`)
-
-| Modal | Archivo | Funcion |
-|:------|:--------|:--------|
-| `ExportImportModal` | ExportImportModal.tsx | Exportar (6 formatos) / Importar (2 formatos) |
-| `TemplatesModal` | TemplatesModal.tsx | Galeria de plantillas predefinidas con ilustraciones SVG |
-| `SavedMapsModal` | SavedMapsModal.tsx | Listar, cargar, eliminar mapas guardados en localStorage |
-| `ConnectorModal` | ConnectorModal.tsx | Crear/editar conector cruzado entre nodos |
-| `IconPackModal` | IconPackModal.tsx | Galeria de iconos vectoriales por categorias |
-| `ShortcutsModal` | ShortcutsModal.tsx | Referencia de atajos de teclado (solo lectura) |
-| `ComingSoonModal` | ComingSoonModal.tsx | Aviso "Proximamente" para modos elaborado/dinamico |
-
----
-
-## 5. Hooks Personalizados (`src/hooks/`)
-
-### 5.1. useMindMapStore.ts (Store Zustand — 582 lineas)
-
-Store centralizado que contiene TODA la logica de negocio de la aplicacion.
-
-**Estado gestionado:**
-- `mindMap` — objeto MindMap completo (fuente de verdad)
-- `historyPast` / `historyFuture` — pilas de undo/redo (max 40)
-- `selectedNodeId` / `editingNodeId` — seleccion y edicion activa
-- `isOutlineOpen` / `isOutlineFullscreen` — panel de esquema
-- `isPresentationMode` — modo presentacion
-- `isToolPanelOpen` / `isFilterBarOpen` — paneles laterales
-- `filterOptions` — criterios de filtrado activos
-- `clipboard` — portapapeles de nodo/subtree (copy/cut)
-
-**Acciones implementadas:**
-```typescript
-// Setters de estado
-setMindMap(mapOrUpdater)
-setSelectedNodeId(id)
-setEditingNodeId(id)
-setIsOutlineOpen(open)
-setIsPresentationMode(mode)
-setIsToolPanelOpen(open)
-setIsFilterBarOpen(open)
-setFilterOptions(optionsOrUpdater)
-
-// Historial
-pushHistory(map)     // guarda estado actual antes de mutacion
-handleUndo()         // retrocede un estado
-handleRedo()         // avanza un estado
-
-// CRUD de nodos
-updateNode(nodeId, updates)         // Partial<MindNode>
-handleAddChild(parentId?)           // Tab / Insert
-handleAddSibling(siblingId?)        // Enter
-handleDeleteNode(nodeIdToDelete?)   // Supr / Backspace
-handleToggleFold(nodeId?)           // Espacio
-handleFoldAll()                     // Plegar todo el arbol
-handleUnfoldAll()                   // Desplegar todo el arbol
-handleReparentNode(draggedId, targetParentId)  // Drag & Drop
-
-// Portapapeles
-handleCopyNode(nodeId?)             // Ctrl+C
-handleCutNode(nodeId?)              // Ctrl+X
-handlePasteNode(targetParentId?)    // Ctrl+V (clona con nuevos IDs)
-
-// Propagacion de estilos
-handleApplyStyleToChildren(nodeId?) // Aplica estilo a hijos directos
-handleApplyStyleToSiblings(nodeId?) // Aplica estilo a hermanos
-```
-
-**Inicializacion:** Al crear el store, carga el mapa de localStorage via `loadCurrentMap()`.
-Si no existe, carga `TUTORIAL_MAP` como mapa de bienvenida.
-
-**Auto-guardado:** Cada vez que `setMindMap` es invocado, un subscriber persiste en localStorage.
-
-### 5.2. useSearchFilter.ts (52 lineas)
-
-Hook puro que calcula filtros de busqueda reactivamente:
-
-- **Input:** `mindMap`, `filterOptions`
-- **Output:** `{ searchMatches: Set<string>, availableTags: string[] }`
-- Usa `useMemo` para recalcular solo cuando cambian los datos
-- Filtra por: texto (titulo + nota), tag, progreso minimo
-
-### 5.3. useKeyboardShortcuts.ts (222 lineas)
-
-Hook que registra los atajos de teclado globales:
-
-- Se conecta directamente al store Zustand via `useMindMapStore()`
-- Registra un `addEventListener('keydown')` en `useEffect`
-- Se deshabilita cuando: hay un input activo, modal abierto, o modo presentacion
-- Recibe `isAnyModalOpen` y `onCloseModals` como props
-
----
-
-## 6. Componentes Principales (Detalle)
-
-### 6.1. App.tsx (Orquestador / Pagina)
-
-Componente raiz que actua como compositor:
-
-Responsabilidades (v2 — reducidas respecto a v1):
-- Consumir el store Zustand via `useMindMapStore()`
-- Gestionar estado local de modales (isExportModalOpen, etc.)
-- Instanciar `useKeyboardShortcuts()` y `useSearchFilter()`
-- Calcular `currentTheme` y `selectedNode` como derivados
-- Componer el arbol de componentes (layout, paneles, modales)
-
-Lo que ya NO hace (delegado al store Zustand):
-- Definir handlers de mutacion de nodos
-- Gestionar historial undo/redo manualmente
-- Contener la logica de portapapeles
-- Auto-guardar en localStorage
-
-### 6.2. MindMapCanvas.tsx (Lienzo SVG/HTML Infinito)
-
-El lienzo es una capa HTML con un contenedor SVG incrustado para las aristas.
-Implementa pan y zoom via transformaciones CSS (translate + scale).
-
-Mecanismos internos:
-- Estado de pan: {x, y} + isPanning (MouseDown/Move/Up)
-- Estado de zoom: numero (rueda del raton o botones)
-- Drag and Drop de nodos: draggedNodeId + dragOverNodeId
-- ContextMenu: visible | x | y | nodeId (clic derecho) → CanvasContextMenu organismo
-- Calcula el layout llamando a computeMindMapLayout() de layoutEngine.ts
-- Renderiza aristas en SVG (generateEdgePath / generateRibbonEdgePath)
-- Renderiza nubes en SVG (computeCloudBounds)
-- Renderiza conectores cruzados en SVG (calculateConnectorGeometry)
-- Renderiza cada nodo como NodeComponent
-- Integra el MiniMap como componente flotante
-- Utiliza CanvasZoomControls como organismo para controles de zoom
-
-Interacciones del lienzo:
-  Clic en nodo       --> seleccionar nodo (setSelectedNodeId)
-  Doble clic en nodo --> iniciar edicion de texto (setEditingNodeId)
-  Clic derecho nodo  --> mostrar menu contextual (CanvasContextMenu)
-  Clic en lienzo     --> deseleccionar (setSelectedNodeId(null))
-  Arrastrar lienzo   --> pan (sin nodo seleccionado)
-  Arrastrar nodo     --> Drag and Drop reparenting
-  Rueda del raton    --> zoom in/out
-
-### 6.3. NodeComponent.tsx (Renderizado de un Nodo)
-
-Renderiza visualmente cada nodo segun sus propiedades.
-El padre (MindMapCanvas) le pasa la posicion/tamano calculados por layoutEngine.
-
-Elementos que renderiza:
-  - Geometria de la forma (bubble/fork/rectangle/square/oval/circle/pill/hexagon/arrow/star)
-    * bubble/pill/rectangle/square/oval/circle: <div> con CSS (border-radius, clip-path)
-    * hexagon/arrow/star: <svg> con polygon points calculados dinamicamente
-  - Imagen de fondo (bgImageUrl): <img> con opacity como layer inferior
-  - Patron de fondo (nodePattern): SVG data URI renderizado via CSS background
-  - Degradado (gradient): gradiente CSS lineal o radial
-  - Iconos: fila de iconos renderizados por iconMap / vectorIconPack
-  - Texto del titulo (con bold, italic, fuente, color, alineacion)
-  - Imagen de contenido (imageUrl): <img> en posicion configurada
-  - Texto del cuerpo (body): subtexto secundario con su tipografia
-  - Barra de progreso: si progress >= 0
-  - Tags: chips de color al pie del nodo
-  - Badge de enlace: si hay link configurado
-  - Indicador de nota: si hay note (icono de nota)
-  - Boton plegar/desplegar: '+N' si el nodo tiene hijos y esta plegado
-  - Resaltado de busqueda: si el nodo esta en searchMatches
-  - Input de edicion inline: cuando editingNodeId === node.id
-
-### 6.4. ToolPanel.tsx (Panel Inspector Derecho — Contenedor de Tabs)
-
-Componente contenedor que orquesta 6 pestanas-organismo.
-Cada tab es un componente independiente que recibe las props necesarias.
-
-Pestanas (navegacion grid 6 columnas):
-1. **Contenido** (ContentTab) — Titulo, cuerpo, tipografia
-2. **Formato** (FormatTab) — Forma, fondo, bordes, imagenes, aristas
-3. **Notas** (NotesTab) — Nota Markdown, enlace, progreso
-4. **Iconos** (IconsTab) — Grid de iconos + boton pack completo
-5. **Nubes** (CloudsTab) — Toggle nube, forma, color
-6. **Tema** (ThemeTab) — Tema del mapa, layout, fondo lienzo, aristas globales
-
-### 6.5. PresentationMode.tsx (Modo Presentacion Clasica)
-
-Overlay de pantalla completa (fixed inset-0, z-50) que reemplaza visualmente
-toda la interfaz. NO modifica el mapa; es solo lectura.
-
-Utiliza organismos extraidos:
-- `PresentationControls` — barra superior y modal de opciones
-- `presentationThemes` — definiciones de los 7 temas
-
-Estado interno del componente:
-  themeId: string               -- tema de presentacion activo ('dark-studio')
-  showNotes: boolean            -- incluir diapositivas de notas (true)
-  imageSize: small|medium|large|hidden  -- tamano de imagenes adjuntas ('medium')
-  showChildrenCards: boolean    -- incluir diapositivas de subtemas (true)
-  showConnectorsCards: boolean  -- mostrar conectores en slides de subtemas (true)
-  contentAlign: center|left     -- alineacion del contenido ('center')
-  fontSizeScale: compact|normal|large  -- escala del titulo ('normal')
-  currentIndex: number          -- indice de la diapositiva activa
-  isConfigOpen: boolean         -- modal de configuracion abierto
-  jumpHistory: number[]         -- pila de indices de origen (Volver)
-
-Generacion de slides (useMemo re-calcula cuando cambia mindMap u opciones):
-  Algoritmo traverse() recorre el arbol en profundidad (DFS) y por cada nodo genera:
-
-  FASE 1: body
-    splitBodyTextIntoSlideChunks(node.body, hasImage)
-      Si NO hay imagen: maximo 6 lineas / 450 chars por chunk
-      Si HAY imagen:    maximo 4 lineas / 280 chars por chunk
-      Resultado: 1..N slides tipo body con bodySubset
-
-  FASE 2: notes (solo si showNotes=true y node.note existe)
-    splitMarkdownIntoSlideChunks(node.note)
-      Maximo 9 lineas / 550 chars por chunk
-      Resultado: 1..N slides tipo notes con noteSubset
-
-  FASE 3: children (solo si showChildrenCards=true y children.length > 0)
-    Lotes de 6 hijos por slide
-    Resultado: ceil(N/6) slides tipo children con childrenSubset: string[]
-
-  Luego traverse() desciende recursivamente a cada hijo.
-
-Navegacion:
-  handleNext()       -- avanza currentIndex++ (tope en slides.length-1)
-  handlePrev()       -- retrocede currentIndex-- (tope en 0)
-  handleJumpToNode() -- salta al primer slide 'body' del nodo clicado.
-                        Guarda currentIndex en jumpHistory (push)
-  handleReturnJump() -- regresa al ultimo jumpHistory (pop) via Backspace
-
-### 6.6. OutlineView.tsx (Vista de Esquema — Panel Izquierdo)
-
-Panel lateral izquierdo que muestra el mapa como arbol de texto.
-Puede estar en modo panel lateral o modo pantalla completa (fullscreen).
-
-Funciones:
-  Seleccionar nodo    --> hace scroll en el lienzo al nodo
-  Doble clic          --> editar texto del nodo inline
-  Boton + Hijo        --> handleAddChild(nodeId)
-  Boton + Hermano     --> handleAddSibling(nodeId)
-  Boton X Eliminar    --> handleDeleteNode(nodeId)
-  Toggle Plegar       --> handleToggleFold(nodeId)
-  Plegar todo / Desplegar todo
-
-### 6.7. MenuBar.tsx (Barra de Menu Superior — 48px)
-
-Menus desplegables implementados con estado local (openMenu).
-Cierra el menu al hacer clic fuera (useEffect con mousedown listener).
-
-Menu [Archivo]:
-  Nuevo Mapa         -- crea BLANK_MAP con nuevo timestamp
-  Abrir / Importar   -- abre ExportImportModal
-  Guardar ahora      -- saveCurrentMap() a localStorage
-  Mis Mapas Guardados-- abre SavedMapsModal
-  Plantillas         -- abre TemplatesModal
-  Exportar           -- abre ExportImportModal
-  Imprimir PDF       -- window.print()
-
-Menu [Editar]:
-  Deshacer / Rehacer
-  Cortar / Copiar / Pegar
-  Eliminar Nodo
-  Editar Texto (F2)
-  Buscar (Ctrl+F)
-
-Menu [Insertar]:
-  Nuevo Hijo / Hermano
-  Notas, Enlace, Progreso, Iconos, Tags, Imagen, Conector, Nube
-
-Menu [Formato]:
-  Temas: 9 temas visuales (cambia mindMap.themeId)
-  Formas: 10 formas (cambia selectedNode.shape)
-  Restablecer Formato: elimina sobreescrituras de estilo del nodo
-
-Menu [Ver]:
-  Centrar / Ajustar / Zoom
-  Panel Esquema (Alt+O)
-  Panel Propiedades (Alt+P)
-  MiniMapa (Alt+M)
-  Plegar todo / Desplegar todo
-  Pantalla Completa (requestFullscreen)
-  Presentacion (F5)
-
-Titulo del mapa: editable inline (doble clic sobre el titulo activa un input)
-
-### 6.8. ToolBar.tsx (Barra de Herramientas — 44px)
-
-Accesos directos graficos a las operaciones mas frecuentes.
-Los botones reflejan el estado del nodo seleccionado (negrita activa = boton resaltado).
-
-Grupos:
-  Edicion de arbol: +Hijo / +Hermano / Eliminar / Plegar
-  Tipografia: Negrita / Cursiva (aplica al titulo del nodo seleccionado)
-  Forma rapida: selector de forma via dropdown
-  Decoracion: Nube / Conector
-  Historia: Deshacer / Rehacer
-  Vista: Zoom -, porcentaje, Zoom +, Ajustar, Pantalla completa
-  Paneles: Toggle esquema / Toggle panel propiedades / Toggle filtro
-  Exportar: boton directo
-  Presentacion: boton F5
-
-### 6.9. FilterBar.tsx (Barra de Filtro — 40px, colapsable)
-
-Se activa con Ctrl+F o el boton de filtro en ToolBar.
-Todos los filtros son acumulativos (AND logico).
-
-Controles:
-  Campo de busqueda de texto (busca en titulo y nota del nodo)
-  Selector de Tag (dropdown con los tags presentes en el mapa)
-  Selector de Progreso minimo (0-100)
-  Selector de Icono (dropdown con iconos presentes)
-  Toggle 'Mostrar Ancestros': muestra los nodos padres del resultado
-  Toggle 'Mostrar Descendientes': muestra los hijos del resultado
-  Boton Limpiar Filtros
-  Contador de coincidencias: 'N coincidencias'
-
-El calculo de coincidencias se realiza en `useSearchFilter` hook.
-El lienzo recibe el Set resultante y lo pasa a NodeComponent para resaltar nodos.
-
-### 6.10. MiniMap.tsx (Minimapa Radar Flotante)
-
-Flotante en la esquina inferior izquierda del lienzo.
-Muestra una representacion a escala de todos los nodos del mapa.
-
-Tamanos:
-  S: 160px ancho
-  M: 220px ancho
-  L: 300px ancho
-
-Interaccion:
-  Clic en el minimapa --> mueve el pan del lienzo al punto clicado
-  Rectangulo de camara activa: representa la porcion del lienzo visible
-  Botones S/M/L: cambian el tamano del minimapa
-
-### 6.11. StatusBar.tsx (Barra de Estado — 24px)
-
-Barra informativa fija en la parte inferior.
-Muestra:
-  Nodos totales en el mapa
-  Nodo seleccionado (texto + ID)
-  Zoom actual
-  Posicion de pan (X, Y)
-  Modo actual: 'Listo' | 'Editando'
-
----
-
-## 7. Modales
-
-### 7.1. ExportImportModal.tsx
-
-Exportar (6 formatos):
-  .mm XML     -- serializa el MindMap al formato XML de Freeplane
-               -- funcion: freeplaneConverter.ts exportToFreeplaneXML()
-  .html       -- genera HTML autonomo con mapa interactivo embebido
-               -- funcion: htmlExporter.ts exportToHTML()
-  .svg        -- captura el SVG del lienzo y descarga
-  .png        -- usa html2canvas para capturar el lienzo
-  .md         -- serializa el arbol como encabezados Markdown jerarquicos
-  .json       -- JSON.stringify(mindMap) completo
-
-Importar (2 formatos):
-  .mm XML     -- parsea XML de Freeplane via DOMParser
-               -- funcion: freeplaneConverter.ts importFromFreeplaneXML()
-  .json       -- JSON.parse() del respaldo FreeMind Studio
-
-### 7.2. TemplatesModal.tsx
-
-Galeria de plantillas predefinidas con ilustraciones SVG.
-Carga los datos de utils/sampleMaps.ts y utils/additionalTemplates.ts.
-Al seleccionar, carga la plantilla como nuevo mapa (pushHistory + setMindMap).
-
-Plantillas disponibles (de sampleMaps.ts + additionalTemplates.ts):
-  - Tutorial Freemind Studio (mapa de bienvenida con todas las funciones)
-  - Mapa en Blanco
-  - Planificacion de Proyectos
-  - Lluvia de Ideas (Brainstorming)
-  - Analisis FODA (SWOT)
-  - Mapa de Conocimiento
-  - Organigrama
-  - Plan de Estudios
-  - Roadmap de Producto
-  - Y muchas mas en additionalTemplates.ts (72KB de datos)
-
-### 7.3. SavedMapsModal.tsx
-
-Lista de mapas guardados en localStorage.
-Muestra: titulo, fecha de actualizacion, numero de nodos.
-
-Operaciones:
-  Cargar mapa      -- pushHistory + setMindMap(loaded)
-  Eliminar mapa    -- deleteMapById() + actualiza indice
-  Nuevo mapa       -- BLANK_MAP con nuevo ID
-
-Persistencia:
-  Key principal: 'freemind_current_map_v1' -- mapa activo
-  Key de indice:  'freemind_saved_maps_index_v1' -- lista de metadatos
-  Keys por mapa:  'freemind_map_{id}' -- JSON completo de cada mapa
-
-### 7.4. ConnectorModal.tsx
-
-Crea un nuevo Connector entre dos nodos.
-Se abre desde: menu contextual | Menu Insertar | boton en ToolBar.
-
-Opciones configurables al crear:
-  Nodo de destino: selector de todos los nodos del mapa
-  Etiqueta de texto
-  Color
-  Estilo de linea: solid / dashed / dotted
-  Flecha: none / start / end / both
-  Forma: curved / bezier / straight / step
-  Grosor
-  Capa: above / below
-
-### 7.5. IconPackModal.tsx
-
-Galeria de iconos vectoriales con categorias.
-Permite togglear iconos en el nodo seleccionado.
-Los iconos se almacenan como string[] en node.icons.
-Renderizados por iconMap.tsx y vectorIconPack.tsx.
-
-### 7.6. ShortcutsModal.tsx
-
-Referencia rapida de todos los atajos de teclado.
-Solo lectura, sin interaccion.
-
-### 7.7. ComingSoonModal.tsx
-
-Se muestra cuando el usuario elige 'Modo Elaborado' o 'Modo Dinamico'.
-Muestra un mensaje de proximamente con animacion.
-Ofrece boton 'Iniciar Modo Clasico' como alternativa.
-
----
-
-## 8. Utilidades (utils/)
-
-### 8.1. layoutEngine.ts (Motor de Layout — ~1779 lineas)
-
-Nucleo del posicionamiento de nodos. Exporta:
-
-estimateNodeSize(node):          Calcula el tamano de un nodo basado en:
-  - Longitud del texto (charWidth * fontSize * 0.58)
-  - Icono, progreso, enlace, nota (extra width)
-  - Imagen adjunta (posicion determina extra height/width)
-  - Tags (extra height + minWidth)
-  - Cuerpo (body) del nodo
-  - customWidth / customHeight (sobreescribe calculo automatico)
-  - shape === square|circle: usa el max de ambas dimensiones
-
-computeMindMapLayout(mindMap):   Algoritmo principal. Devuelve Record<string, CalculatedNodeLayout>.
-  Selecciona el algoritmo segun mindMap.layout:
-    standard            -- distribucion bifurcada clasica Freeplane
-    balanced-horizontal -- arbol horizontal con raiz a la izquierda
-    left                -- todas las ramas a la izquierda
-    right               -- todas las ramas a la derecha
-    top                 -- arbol hacia arriba
-    bottom              -- arbol hacia abajo
-    tree-down           -- arbol vertical con raiz arriba
-    radial              -- ramas en circulo alrededor del raiz
-    circular            -- disposicion circular
-
-  Tiene en cuenta: nodos plegados (folded=true los excluye del layout),
-  customWidth/Height, gaps globales (horizontalGap, verticalGap).
-
-generateEdgePath(from, to, side, style):  Genera el path SVG de una arista del arbol.
-  Estilos: bezier | linear | sharp | horizontal | hidden
-
-generateRibbonEdgePath(from, to, side, profile, width):  Genera ribbon SVG (perfil especial).
-  Perfiles: tapered | spindle | hourglass
-
-computeCloudBounds(nodeIds, layouts):  Calcula el bounding box de una nube de agrupacion.
-
-### 8.2. markdownRenderer.tsx
-
-Renderiza texto Markdown como HTML usando un parser personalizado (sin librerias externas).
-Soporta: # encabezados, **negrita**, *cursiva*, `codigo`, > citas, - listas, --- separadores.
-El componente <MarkdownView> acepta prop isDark para adaptar los colores al tema.
-
-### 8.3. connectorUtils.ts
-
-calculateConnectorGeometry(from, to, connector):  Calcula los puntos de anclaje de un
-conector cruzado considerando los bordes del nodo (no atraviesa el interior del nodo).
-Devuelve: { startX, startY, endX, endY, controlX, controlY }
-
-### 8.4. freeplaneConverter.ts
-
-importFromFreeplaneXML(xmlString):  Parsea XML .mm de Freeplane y construye un MindMap.
-  Lee: <node TEXT>, <richcontent TYPE='NOTE'>, <attribute NAME VALUE>, <icon BUILTIN>
-  Mapea colores y formas de Freeplane a los tipos internos.
-
-exportToFreeplaneXML(mindMap):  Serializa MindMap a formato .mm XML compatible con Freeplane 1.x.
-
-### 8.5. htmlExporter.ts (~72KB)
-
-Genera un archivo .html completamente autonomo que contiene:
-  - El mapa mental como datos JSON embebidos
-  - Un mini-renderizador SVG/HTML en JavaScript vanilla incrustado
-  - Estilos CSS embebidos
-  - Sin dependencias externas (puede abrirse offline)
-
-### 8.6. themes.ts
-
-THEMES: Record<string, MindMapTheme>  -- 9 temas del mapa
-  Cada tema define: background, rootBg, rootText, nodeBg, nodeText,
-  nodeBorder, branchColors (7 colores de ramas), edgeStyle, fontFamily
-
-BACKGROUND_PRESET_THEMES: BackgroundPresetTheme[]  -- 12 fondos de lienzo
-  Cada preset define: backgroundColor, pattern, patternColor, patternSize, patternOpacity
-
-### 8.7. iconMap.tsx
-
-Mapeo de string de icono (por ejemplo 'star', 'flag', 'check') a
-componente React (emoji o SVG de lucide-react).
-Usado por NodeComponent y PresentationMode.
-
-### 8.8. vectorIconPack.tsx (~64KB)
-
-Pack premium de iconos vectoriales SVG organizados por categorias.
-Categorias: Negocios, Tecnologia, Educacion, Salud, Arte, etc.
-Usado por IconPackModal.tsx.
-
-### 8.9. sampleMaps.ts + additionalTemplates.ts
-
-Datos estaticos de mapas predefinidos listos para usar.
-  TUTORIAL_MAP:  mapa de bienvenida con todas las caracteristicas demostradas
-  BLANK_MAP:     mapa vacio con solo el nodo raiz
-  additionalTemplates.ts: coleccion de mas de 20 plantillas tematicas
-
-### 8.10. storage.ts
-
-loadCurrentMap():         Lee 'freemind_current_map_v1' de localStorage.
-                          Si el mapa guardado es el tutorial, devuelve TUTORIAL_MAP actualizado.
-saveCurrentMap(map):      Escribe el mapa activo + actualiza el indice.
-getSavedMapsIndex():      Lee la lista de metadatos de todos los mapas.
-updateSavedMapsIndex():   Actualiza el indice + guarda el mapa en su propia key.
-loadMapById(id):          Lee un mapa especifico por su ID.
-deleteMapById(id):        Elimina el mapa y lo quita del indice.
-
----
-
-## 9. Sistema de Temas (Temas del Mapa)
-
-Un tema define la paleta de colores de TODO el mapa.
-Se aplica en MindMapCanvas y NodeComponent.
-
-Propiedades de un tema (MindMapTheme):
-  background:    color de fondo del lienzo
-  backgroundPattern: patron de fondo (dots/lines/squares/etc.)
-  rootBg:        color de fondo del nodo raiz
-  rootText:      color de texto del nodo raiz
-  nodeBg:        color de fondo de los nodos normales
-  nodeText:      color de texto de los nodos normales
-  nodeBorder:    color de borde de los nodos normales
-  branchColors:  array de 7 colores, uno por rama principal
-  edgeStyle:     estilo de arista por defecto
-  fontFamily:    fuente del tema (todos usan 'Plus Jakarta Sans')
-
-Temas disponibles:
-  default      Clasico Azul     -- fondo slate-50, raiz azul
-  rainbow      Arcoiris         -- fondo blanco, 8 colores de rama
-  dark         Modo Oscuro      -- fondo slate-900, nodos dark
-  forest       Bosque Esmeralda -- fondo verde claro
-  sunset       Atardecer Calido -- fondo amarillo claro, naranja
-  minimal      Minimalista Mono -- fondo neutro, ramas grises
-  blueprint    Plano Tecnico    -- fondo azul oscuro, nodos navy
-  honeycomb    Panal Creativo   -- fondo crema, nodos blancos dorados
-
-Los colores de rama se asignan automaticamente a las ramas del nivel 1
-usando branchIndex % branchColors.length.
-Los nodos de niveles mas profundos heredan el color de su rama raiz.
-
----
-
-## 10. Sistema de Layout
-
-El layout se recalcula en cada render de MindMapCanvas via useMemo.
-Recibe el mapa completo y devuelve posiciones {x, y, width, height} por nodo.
-
-Algoritmos:
-  standard:            Layout bifurcado clasico.
-    - Asigna side=right o side=left a las ramas del nivel 1 (balanceo automatico).
-    - Las ramas derechas crecen hacia la derecha, las izquierdas hacia la izquierda.
-    - Cada rama se posiciona verticalmente segun la suma de alturas de sus hermanos.
-
-  balanced-horizontal: Similar a standard pero el raiz siempre queda a la izquierda.
-  left, right:         Todas las ramas en una sola direccion.
-  top, bottom:         Arbol vertical (raiz arriba o abajo).
-  tree-down:           Arbol jerarquico clasico descendente.
-  radial:              Las ramas del nivel 1 se distribuyen en angulos iguales
-                       alrededor del raiz. Los hijos crecen radialmente.
-  circular:            Disposicion en circulos concentricos.
-
-Nodos libres (isFreeFloating=true):
-  No participan en el calculo de layout.
-  Usan su freePosition {x, y} directamente.
-
----
-
-## 11. Persistencia y Almacenamiento
-
-La aplicacion NO tiene backend. TODO se guarda en localStorage del navegador.
-
-Claves localStorage:
-  freemind_current_map_v1        -- JSON del mapa activo (auto-guardado)
-  freemind_saved_maps_index_v1   -- JSON[] de metadatos de todos los mapas
-  freemind_map_{id}              -- JSON del mapa {id} (guardado explicitamente)
-
-Auto-guardado:
-  El store Zustand (useMindMapStore) persiste el mapa automaticamente
-  cada vez que setMindMap() es invocado via subscriber interno.
-
-Ciclo de vida de un mapa:
-  1. Primera visita: se carga TUTORIAL_MAP
-  2. Cambios del usuario: se guarda en 'freemind_current_map_v1' automaticamente
-  3. El usuario puede guardar explicitamente (Ctrl+S) --> updateSavedMapsIndex()
-  4. El usuario puede abrir un mapa guardado --> loadMapById(id)
-  5. El usuario puede importar un .mm o .json --> setMindMap(imported)
-
----
-
-## 12. Historial Undo/Redo
-
-Implementado dentro del store Zustand (useMindMapStore):
-  historyPast:   MindMap[]  -- estados previos (max 40)
-  historyFuture: MindMap[]  -- estados para rehacer
-
-pushHistory(current): llamado ANTES de cada mutacion
-  setHistoryPast(prev => [...prev.slice(-40), current])
-  setHistoryFuture([])  -- limpiar futuros al hacer una accion nueva
-
-handleUndo():
-  Extrae el ultimo estado de historyPast
-  Mueve mindMap actual a historyFuture
-  Aplica el estado previo
-
-handleRedo():
-  Extrae el primer estado de historyFuture
-  Mueve mindMap actual a historyPast
-  Aplica el estado futuro
-
-Operaciones que NO crean entrada en el historial:
-  - Cambios de seleccion (selectedNodeId)
-  - Cambios de vista (zoom, pan)
-  - Apertura/cierre de paneles y modales
-
----
-
-## 13. Atajos de Teclado Completos
-
-Manejados por `useKeyboardShortcuts` hook, que se conecta al store Zustand.
-El handler se deshabilita cuando: hay un input activo, hay un modal abierto,
-o el modo presentacion esta activo.
-
-Atajos del lienzo principal:
-  Tab / Insert          Crear nodo hijo del seleccionado
-  Enter                 Crear nodo hermano despues del seleccionado
-  F2                    Iniciar edicion de texto inline
-  Espacio               Plegar/desplegar rama del nodo seleccionado
-  Supr / Backspace      Eliminar nodo y su subtree
-  Esc                   Salir de edicion / seleccionar nodo raiz
-  Flechas               Navegar entre nodos del arbol:
-    ArrowUp/Down        Nodo anterior/siguiente en la misma rama
-    ArrowRight          En nodo raiz: primer hijo derecho
-                        En nodo right: primer hijo
-                        En nodo left: nodo padre
-    ArrowLeft           En nodo raiz: primer hijo izquierdo
-                        En nodo left: primer hijo
-                        En nodo right: nodo padre
-  Ctrl+Z                Deshacer
-  Ctrl+Y / Ctrl+Shift+Z Rehacer
-  Ctrl+C                Copiar subtree
-  Ctrl+X                Cortar subtree
-  Ctrl+V                Pegar subtree como hijo del seleccionado
-  Ctrl+F                Toggle barra de busqueda
-  Alt+O                 Toggle panel de esquema
-  Alt+P                 Toggle panel de propiedades
-  F5                    Toggle modo presentacion
-
-Atajos del modo presentacion (manejados en PresentationMode.tsx):
-  ArrowRight / Espacio  Siguiente diapositiva
-  ArrowLeft             Diapositiva anterior
-  Backspace             Volver al punto de salto (jumpHistory.pop)
-  E                     Toggle modal de configuracion
-  Esc                   Cerrar modal de config / Salir de presentacion
-
----
-
-## 14. Diagrama de Flujo de un Cambio Tipico
-
-Ejemplo: Usuario pulsa Tab para anadir un nodo hijo.
+Implementado en [`src/components/PresentationMode.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/PresentationMode.tsx), convierte automáticamente la jerarquía del mapa mental en una presentación de diapositivas limpias y elegantes:
 
 ```
-1. useKeyboardShortcuts hook detecta 'Tab' via addEventListener('keydown')
-2. Llama a store.handleAddChild():
-   a. pushHistory(mindMap)  -- guarda el estado actual en historyPast
-   b. Genera nuevo ID: 'node-{Date.now()}'
-   c. Determina side del nuevo nodo (hereda del padre)
-   d. Crea newNode: {id, text:'Nueva Idea', parentId, children:[], side, shape:'bubble'}
-   e. set(state => ({mindMap: {..., nodes: {..., [parentId]: padreConNuevoHijo, [newId]: newNode}}}))
-   f. setSelectedNodeId(newId)
-   g. setEditingNodeId(newId)  -- abre el input de texto inline
-3. Zustand notifica a los suscriptores:
-   a. Todos los componentes que consumen useMindMapStore() se re-renderizan
-   b. Subscriber de auto-guardado invoca saveCurrentMap() --> localStorage
-   c. MindMapCanvas: computeMindMapLayout() recalcula posiciones
-   d. NodeComponent del nuevo nodo se renderiza con input activo
-   e. MiniMap se actualiza
-   f. StatusBar muestra nuevo total de nodos
+Flujo de Fases para cada Nodo:
+┌─────────────────────────────────────┐
+│  FASE 1 — Tema Principal            │  ← Siempre presente
+│  🖼️ Imagen + Título + Cuerpo        │  ← Paginación automática si el texto es extenso
+└──────────────────┬──────────────────┘
+                   │
+┌──────────────────▼──────────────────┐
+│  FASE 2 — Notas del Presentador     │  ← Si el nodo contiene notas Markdown
+│  Markdown enriquecido renderizado   │  ← Paginación inteligente (~9 líneas por diapositiva)
+└──────────────────┬──────────────────┘
+                   │
+┌──────────────────▼──────────────────┐
+│  FASE 3 — Subtemas / Hijos          │  ← Grid de tarjetas interactivas (máximo 6 por slide)
+│  [Card A] [Card B] [Card C]         │  ← Clic en tarjeta = Salto inmediato al nodo
+│  [Card D] [Card E] [Card F]         │  ← Tecla Backspace = Vuelve al nodo de origen
+└─────────────────────────────────────┘
 ```
+
+- **7 Temas de Presentación:** Estudio Oscuro, Medianoche OLED, Cyberpunk Neón, Azul Ejecutivo, Bosque Esmeralda, Atardecer y Luz Minimalista.
 
 ---
 
-## 15. Tecnologias y Dependencias
+### 5.2. Sistema 2: Presentación Dinámica en Lienzo (Prezi-Style)
 
-Produccion:
-  react@19              Framework UI
-  react-dom@19          DOM renderer
-  zustand@5             Estado global reactivo
-  lucide-react          Iconos SVG vectoriales
-  motion                Animaciones (micro-interacciones)
-  canvas-confetti       Efectos de confeti
-  @google/genai         Funciones IA opcionales
+Opera directamente sobre el lienzo infinito mediante [`CanvasPresentationHUD.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasPresentationHUD.tsx) y [`CanvasDrawingOverlay.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasDrawingOverlay.tsx):
 
-Desarrollo:
-  typescript@5.8        Tipado estatico
-  vite@6                Bundler y servidor de desarrollo
-  tailwindcss@4         Utilidades CSS
-  @vitejs/plugin-react  Plugin Vite para React
-  @tailwindcss/vite     Plugin Tailwind para Vite
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant HUD as CanvasPresentationHUD
+    participant Canvas as MindMapCanvas
+    participant Overlay as CanvasDrawingOverlay
+    participant Camera as Pan & Zoom Engine
 
-Sin dependencias para:
-  Markdown parsing      (parser propio en markdownRenderer.tsx)
-  Layout engine         (implementacion propia en layoutEngine.ts)
-  Exportacion HTML      (generacion de strings en htmlExporter.ts)
-  Persistencia          (localStorage nativo)
-  Importacion Freeplane (DOMParser nativo del navegador)
+    Usuario->>HUD: Clic en "1. Seleccionar Nodo (Crear Marco)"
+    Usuario->>Canvas: Clic sobre un Nodo del mapa
+    Canvas->>Canvas: onSelect(nodeId) en modo pick_nodes
+    Canvas->>Canvas: Calcula límites bounds del nodo + pad 28px
+    Canvas->>HUD: Agrega nueva diapositiva a slides[]
+    Canvas->>Camera: flyTo(x, y, zoom) hacia el nuevo marco
+    HUD->>HUD: Actualiza contador (ej. 1 / 1) y añade miniatura al Filmstrip
+    Overlay-->>Usuario: Muestra recuadro perimetral con badge de diapositiva
+```
+
+#### Características Clave:
+1. **Creación Automática con 1 Clic (`1. Seleccionar Nodo`)**:
+   - Al hacer clic sobre cualquier nodo del mapa, el sistema calcula de inmediato el cuadro perimetral con un margen visual idóneo (`pad = 28px`), genera la diapositiva en `slides` y vuela la cámara al encuadre.
+   - Si el nodo ya cuenta con diapositiva, la cámara lo enfoca de inmediato sin generar duplicados.
+2. **Dibujo de Recuadros Interactivos (`2. Dibujar Recuadro`)**:
+   - Permite arrastrar el ratón para encerrar cualquier grupo de nodos o área libre del lienzo. Durante el arrastre, muestra un badge con las dimensiones en píxeles en tiempo real (`X × Y`).
+3. **Empezar de Cero**:
+   - El botón con icono de papelera vacía la presentación a `0` diapositivas sin autogenerar las diapositivas por defecto, permitiendo al presentador armar un guion visual 100% personalizado desde cero.
+4. **Desacoplamiento de Eventos de Puntero (`pointer-events`)**:
+   - El cuerpo de los marcos tiene asignado `pointer-events-none`. De este modo, los nodos situados dentro de los marcos **reciben clics directos sin ninguna interferencia**.
+5. **Corrección de Oyentes Pasivos de Zoom**:
+   - Se eliminó el atributo JSX `onWheel` y se conectó un oyente nativo con `{ passive: false }` mediante `useEffect`, permitiendo que `e.preventDefault()` cancele el scroll de página sin lanzar ningún error en consola.
 
 ---
 
-## 16. Estructura de Archivos Completa
+### 5.3. Sistema 3: Presentación Espacial 3D
+
+Implementado en [`src/components/Presentation/ElaboratePresentationSystem.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/Presentation/ElaboratePresentationSystem.tsx) con Motion 12:
+- Renderiza las diapositivas como tarjetas espaciales 3D distribuidas en una cuadrícula o espiral en el espacio tridimensional (`transform: translate3d(...) rotateX(...) rotateY(...)`).
+- **Manipulación de Tarjetas con Compensación Angular**: Permite arrastrar, rotar y escalar tarjetas en tiempo real. Los oyentes de ratón se registran en `window` para no perder el foco y compensan matemáticamente la rotación de cámara `camRotation`:
+  $$\Delta X_{local} = \Delta X \cdot \cos(-\theta) - \Delta Y \cdot \sin(-\theta)$$
+  $$\Delta Y_{local} = \Delta X \cdot \sin(-\theta) + \Delta Y \cdot \cos(-\theta)$$
+- **Modal de Detalle (`SlideDetailModal.tsx`)**: Permite inspeccionar en profundidad el contenido Markdown y notas de la tarjeta seleccionada.
+
+---
+
+## 6. Interoperabilidad, Exportación y Almacenamiento
+
+### 6.1. Conversor Freeplane XML (`.mm`)
+
+Implementado en [`src/utils/freeplaneConverter.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/utils/freeplaneConverter.ts):
+- **Importador**: Utiliza la API nativa del navegador `DOMParser` para convertir archivos XML `.mm` de Freeplane en árboles `MindMap`. Lee atributos estándar (`TEXT`, `FOLDED`, `COLOR`, `STYLE`, `BACKGROUND_COLOR`, `LINK`), nodos hijos de notas enriquecidas (`richcontent TYPE="NOTE"`) y conectores cruzados (`<arrowlink>`).
+- **Exportador**: Emplea `XMLSerializer` para transformar el estado interno a un documento XML compatible al 100% con Freeplane 1.x, garantizando que los mapas creados en la web puedan abrirse en la aplicación de escritorio nativa sin advertencias.
+
+### 6.2. Exportador HTML Autónomo y Formatos Vectoriales
+
+- **Exportador HTML Autónomo ([`src/utils/htmlExporter.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/utils/htmlExporter.ts))**:
+  - Genera un archivo `.html` único e independiente que incluye el motor de renderizado SVG completo, controles de zoom/pan y visualizador de notas en un script inline.
+  - **No depende de internet, CDN ni scripts externos**, garantizando que el archivo exportado funcione para siempre en cualquier dispositivo.
+- **Exportación SVG y PNG**:
+  - Calcula la caja delimitadora exacta de todos los nodos (`minX`, `minY`, `maxX`, `maxY`) para exportar imágenes con fondo transparente o temático sin márgenes vacíos indeseados.
+- **Exportación Markdown (`.md`)**:
+  - Serializa la jerarquía como encabezados Markdown anidados (`#`, `##`, `###`), listas de viñetas y bloques de notas.
+
+### 6.3. Estrategia de Persistencia Local
+
+La persistencia se gestiona en [`src/utils/storage.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/utils/storage.ts):
+```
+localStorage (Navegador)
+├── freemind_current_map_v1         ← Mapa activo en edición (actualizado tras cada acción)
+├── freemind_saved_maps_index_v1    ← Índice de mapas guardados en la galería local
+└── freemind_map_{id}               ← Documento JSON completo de cada mapa guardado
+```
+El store de Zustand incluye un suscriptor interno que detecta mutaciones y guarda automáticamente el mapa en `localStorage` con tolerancia a cuotas y manejo de errores.
+
+---
+
+## 7. Infraestructura de Pruebas y Calidad de Código
+
+El proyecto cuenta con una infraestructura de testing automatizado configurada en `vite.config.ts` y `src/test/setup.ts` con **Vitest + React Testing Library + JSDOM**:
 
 ```
-src/
-├── App.tsx                              Pagina / Orquestador (Zustand consumer)
-├── main.tsx                             ReactDOM.createRoot
-├── index.css                            Estilos globales + Tailwind v4
-│
-├── types/
-│   └── mindmap.ts                       Tipos TypeScript: MindMap, MindNode, Connector, etc.
-│
-├── hooks/
-│   ├── useMindMapStore.ts               Store Zustand centralizado (582 lineas)
-│   ├── useSearchFilter.ts               Hook de filtro/busqueda reactivo
-│   └── useKeyboardShortcuts.ts          Hook de atajos de teclado globales
-│
-├── components/
-│   ├── MenuBar.tsx                      Barra de menu superior (Archivo/Editar/...)
-│   ├── ToolBar.tsx                      Barra de herramientas rapidas
-│   ├── FilterBar.tsx                    Barra de busqueda colapsable
-│   ├── MindMapCanvas.tsx                Lienzo SVG/HTML infinito con pan/zoom
-│   ├── NodeComponent.tsx                Renderizado de cada nodo (10 formas)
-│   ├── ToolPanel.tsx                    Contenedor de 6 tabs-organismo
-│   ├── PresentationMode.tsx             Modo presentacion (3 fases, 7 temas)
-│   ├── OutlineView.tsx                  Vista de esquema en arbol
-│   ├── MiniMap.tsx                      Minimapa radar flotante
-│   ├── StatusBar.tsx                    Barra de estado inferior
-│   │
-│   ├── atoms/                           ATOMOS (primitivos UI)
-│   │   ├── CollapsibleSection.tsx
-│   │   ├── ColorPicker.tsx
-│   │   ├── SliderInput.tsx
-│   │   ├── ToggleButton.tsx
-│   │   └── ToggleButtonGroup.tsx
-│   │
-│   ├── molecules/                       MOLECULAS (combinaciones reutilizables)
-│   │   ├── FontFormatToolbar.tsx
-│   │   ├── ShapeSelector.tsx
-│   │   └── TagManager.tsx
-│   │
-│   ├── organisms/                       ORGANISMOS (secciones funcionales)
-│   │   ├── toolpanel/                   Tabs del ToolPanel
-│   │   │   ├── ContentTab.tsx           Titulo, cuerpo, tipografia
-│   │   │   ├── FormatTab.tsx            Forma, fondo, bordes, imagenes, aristas
-│   │   │   ├── NotesTab.tsx             Notas Markdown, enlace, progreso
-│   │   │   ├── IconsTab.tsx             Grid de iconos toggle
-│   │   │   ├── CloudsTab.tsx            Nube on/off, forma, color
-│   │   │   └── ThemeTab.tsx             Tema, layout, fondo lienzo, aristas globales
-│   │   ├── canvas/                      Sub-componentes del lienzo
-│   │   │   ├── CanvasContextMenu.tsx    Menu contextual (clic derecho)
-│   │   │   └── CanvasZoomControls.tsx   Controles de zoom
-│   │   └── presentation/               Sub-componentes de presentacion
-│   │       ├── PresentationControls.tsx Barra superior + modal opciones
-│   │       └── presentationThemes.ts    Definicion de 7 temas
-│   │
-│   └── Modals/                          MODALES
-│       ├── ExportImportModal.tsx         Exportar / Importar mapas
-│       ├── ShortcutsModal.tsx            Referencia de atajos de teclado
-│       ├── TemplatesModal.tsx            Plantillas predefinidas
-│       ├── SavedMapsModal.tsx            Mis mapas guardados
-│       ├── ConnectorModal.tsx            Crear/editar conector
-│       ├── IconPackModal.tsx             Pack de iconos vectoriales
-│       └── ComingSoonModal.tsx           Modal "Proximamente"
-│
-└── utils/                               UTILIDADES (funciones puras)
-    ├── layoutEngine.ts                  Motor de layout (9 algoritmos, ~65KB)
-    ├── themes.ts                        9 temas de mapa + 12 fondos de lienzo
-    ├── markdownRenderer.tsx             Parser Markdown propio (sin librerias)
-    ├── connectorUtils.ts                Geometria de conectores cruzados
-    ├── freeplaneConverter.ts            Import/Export Freeplane .mm XML
-    ├── htmlExporter.ts                  Generador HTML autonomo (~72KB)
-    ├── storage.ts                       CRUD localStorage (mapa activo + indice)
-    ├── sampleMaps.ts                    Tutorial + Mapa en blanco (~99KB)
-    ├── additionalTemplates.ts           +20 plantillas tematicas (~75KB)
-    ├── templateIllustrations.ts         SVGs de preview de plantillas
-    ├── iconMap.tsx                       String icono -> componente React
-    └── vectorIconPack.tsx               Pack de iconos premium (~64KB)
+Suites de Pruebas Automatizadas (14 Tests / 100% Passing):
+✓ src/components/atoms/__tests__/Atoms.test.tsx (5 tests)
+  • Renderizado de Badge con variantes cromáticas
+  • Renderizado de Button con variantes y estado de carga (loading)
+  • Renderizado de IconButton con tooltip accesible
+  • Input de texto con manejo de eventos onChange
+  • ModalBackdrop con invocación de cierre por clic exterior
+
+✓ src/components/templates/__tests__/MainEditorLayout.test.tsx (2 tests)
+  • Montaje estructurado de slots (MenuBar, ToolBar, Canvas, Paneles, Modales)
+  • Visibilidad condicional de paneles laterales (OutlineView y ToolPanel)
+
+✓ src/utils/__tests__/layoutEngine.test.ts (2 tests)
+  • Medición dimensional exacta de nodos en computeMindMapLayout
+  • Posicionamiento geométrico bifurcado en layout estándar
+
+✓ src/utils/__tests__/connectorUtils.test.ts (3 tests)
+  • Cálculo de curvas de Bézier entre nodos distantes
+  • Conectores ortogonales de tipo escalonado (step)
+  • Puntos de anclaje perimetrales en bounding boxes
+
+✓ src/utils/__tests__/freeplaneConverter.test.ts (2 tests)
+  • Parseo de XML Freeplane .mm a estructura MindMap
+  • Exportación bidireccional serializada sin pérdida de jerarquía
 ```
+
+### Comandos de Calidad:
+- `pnpm lint`: Validación estricta de tipos con `tsc --noEmit` (0 errores).
+- `pnpm test`: Ejecución de los 14 tests unitarios con Vitest.
+- `pnpm build`: Empaquetado optimizado para producción con Vite (transforma 1,740 módulos en ~7 segundos).
+
+---
+
+## 8. Matriz Código a Código del Repositorio
+
+| Directorio / Archivo | Nivel Arquitectónico | Rol y Responsabilidad Principal |
+|:---|:---:|:---|
+| `src/App.tsx` | Orquestador | Conecta el store Zustand con `MainEditorLayout`, gestiona modales y envuelve la aplicación en `ErrorBoundary`. |
+| `src/components/templates/MainEditorLayout.tsx` | **Template** | Define la estructura espacial de pantalla completa y slots para barras, paneles y lienzos. |
+| `src/components/MindMapCanvas.tsx` | **Organismo** | Orquestador central del lienzo interactivo (zoom, paneo, arrastre de nodos y coordenadas). |
+| `src/components/organisms/canvas/CanvasBackgroundLayer.tsx` | **Organismo** | Renderiza los 12 fondos del lienzo mediante patrones SVG vectoriales nativos. |
+| `src/components/organisms/canvas/CanvasDrawingOverlay.tsx` | **Organismo** | Marcos de diapositivas con `pointer-events-none` y trazado interactivo de recuadros en tiempo real. |
+| `src/components/organisms/canvas/CanvasPresentationHUD.tsx` | **Organismo** | Barra flotante de control de la Presentación Dinámica (herramientas, contador y tira de diapositivas). |
+| `src/components/organisms/canvas/CanvasContextMenu.tsx` | **Organismo** | Menú contextual al hacer clic derecho con acciones directas sobre nodos o lienzo. |
+| `src/components/NodeComponent.tsx` | **Organismo / Molécula** | Orquestador del nodo que delega el renderizado en sus 4 sub-moléculas especializadas. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | **Molécula** | Genera formas poligonales SVG (hexágonos, estrellas, flechas), colas de burbuja y tramas de fondo. |
+| `src/components/molecules/node/NodeHeaderRow.tsx` | **Molécula** | Título, textarea editable inline (`F2`), imágenes en 7 posiciones, progreso e iconos. |
+| `src/components/molecules/node/NodeBadgesBar.tsx` | **Molécula** | Insignias interactivas de notas Markdown, enlaces web, tags y barras de progreso. |
+| `src/components/molecules/node/NodeActionButtons.tsx` | **Molécula** | Píldora de plegado de rama, botón flotante `+` para agregar hijos y asa de arrastre. |
+| `src/components/ToolPanel.tsx` | **Organismo** | Inspector lateral derecho con pestañas modulares (`ContentTab`, `FormatTab`, etc.). |
+| `src/components/PresentationMode.tsx` | **Organismo** | Modo de presentación clásica automática en diapositivas con paginación de notas Markdown. |
+| `src/components/Presentation/ElaboratePresentationSystem.tsx` | **Organismo** | Modo de presentación espacial tridimensional con tarjetas interactivas y rotación continua. |
+| `src/components/MiniMap.tsx` | **Organismo** | Radar flotante con vista panorámica del mapa y controles `ZoomControls` integrados. |
+| `src/components/MenuBar.tsx` | **Organismo** | Menús superiores desplegables (Archivo, Editar, Insertar, Formato, Ver, Ayuda). |
+| `src/components/ToolBar.tsx` | **Organismo** | Accesos rápidos a operaciones frecuentes de edición, historial y presentación. |
+| `src/components/FilterBar.tsx` | **Organismo** | Barra colapsable de búsqueda y filtrado multi-criterio en tiempo real. |
+| `src/components/StatusBar.tsx` | **Organismo** | Barra inferior de estado con métricas en vivo (conteo de nodos, selección actual y zoom). |
+| `src/components/atoms/*` | **Átomos** | Primitivos de interfaz: `Button`, `IconButton`, `Input`, `Badge`, `ModalBackdrop`, `ErrorBoundary`, etc. |
+| `src/components/molecules/*` | **Moléculas** | Combinaciones funcionales: `SearchInput`, `HistoryControls`, `ModalHeader`, `ZoomControls`, etc. |
+| `src/components/Modals/*` | **Organismos** | Modales estandarizados sobre `ModalBackdrop` y `ModalHeader` (Exportación, Atajos, Plantillas, etc.). |
+| `src/hooks/useMindMapStore.ts` | **Store Hook** | Estado global reactivo con Zustand 5, historial inmutable de 40 niveles y mutaciones CRUD. |
+| `src/hooks/useKeyboardShortcuts.ts` | **Custom Hook** | Manejo global desacoplado de atajos de teclado de edición y navegación. |
+| `src/hooks/useSearchFilter.ts` | **Custom Hook** | Algoritmo acumulativo de búsqueda y filtrado por tags, notas y metadatos. |
+| `src/utils/layoutEngine.ts` | **Motor Matemático** | Algoritmos de layout (9 geometrías), cálculo de colisiones y curvas Bézier de aristas. |
+| `src/utils/connectorUtils.ts` | **Motor Matemático** | Cálculo de conectores flotantes entre nodos arbitrarios y geometría de nubes. |
+| `src/utils/freeplaneConverter.ts` | **Conversor** | Importador y exportador bidireccional nativo de archivos Freeplane XML `.mm`. |
+| `src/utils/htmlExporter.ts` | **Generador** | Generador de visor interactivo HTML autónomo de un solo archivo sin dependencias externas. |
+| `src/utils/markdownRenderer.tsx` | **Parser** | Parser y renderizador de Markdown integrado propio para notas enriquecidas. |
+| `src/utils/storage.ts` | **Adaptador** | Abstracción de lectura y escritura segura en el `localStorage` del navegador. |
+| `src/types/mindmap.ts` | **Tipos TS** | Declaraciones de tipos TypeScript de todo el modelo de datos del mapa mental y presentaciones. |
+
+---
+
+<div align="center">
+
+**FreeMind Map Studio — Arquitectura de Software v3.0**  
+*Mantenibilidad · Rendimiento · Privacidad Absoluta · Cero Dependencias Externas*
+
+</div>
