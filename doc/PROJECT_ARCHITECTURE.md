@@ -36,6 +36,12 @@
    - 6.3. [Estrategia de Persistencia Local](#63-estrategia-de-persistencia-local)
 7. [Infraestructura de Pruebas y Calidad de Código](#7-infraestructura-de-pruebas-y-calidad-de-código)
 8. [Matriz Código a Código del Repositorio](#8-matriz-código-a-código-del-repositorio)
+9. [Anatomía Visual de un Nodo y Mapeo a Código](#9-anatomía-visual-de-un-nodo-y-mapeo-a-código)
+10. [Guía Práctica de Extensión para Desarrolladores ("Cookbook")](#10-guía-práctica-de-extensión-para-desarrolladores-cookbook)
+   - 10.1. [Tutorial 1: Cómo Añadir Más Opciones al Título de un Nodo](#-tutorial-1-cómo-añadir-más-opciones-al-título-de-un-nodo)
+   - 10.2. [Tutorial 2: Cómo Modificar la Interfaz de las Presentaciones](#-tutorial-2-cómo-modificar-la-interfaz-de-las-presentaciones)
+   - 10.3. [Tutorial 3: Cómo Añadir una Nueva Forma de Nodo (Rombo/Diamante)](#-tutorial-3-cómo-añadir-una-nueva-forma-de-nodo-ejemplo-diamante--rombo)
+   - 10.4. [Tutorial 4: Conversión de Coordenadas de Pantalla a Mundo en el Canvas](#-tutorial-4-conversión-de-coordenadas-de-pantalla-a-mundo-en-el-canvas)
 
 ---
 
@@ -630,9 +636,325 @@ Suites de Pruebas Automatizadas (14 Tests / 100% Passing):
 
 ---
 
+## 9. Anatomía Visual de un Nodo y Mapeo a Código
+
+Para que cualquier desarrollador (incluso sin experiencia previa en el proyecto) comprenda exactamente **dónde se renderiza cada píxel** de un nodo y **qué archivo modificar**, este diagrama mapea cada capa visual a su sub-componente exacto:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ ANATOMÍA VISUAL DE UN NODO EN EL LIENZO                                               │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                        │
+│                                [✓ Badge de Selección / Staged]                         │
+│                                (NodeComponent.tsx — z-index 50)                       │
+│                                                                                        │
+│   ╭────────────────────────────────────────────────────────────────────────────────╮   │
+│   │ [1. FONDO VECTORIAL SVG] -> NodeBackgroundRenderer.tsx                        │   │
+│   │ Polígonos SVG (Hexágono, Estrella, Flecha), Tramas o Color/Degradado          │   │
+│   │                                                                                │   │
+│   │   ┌────────────────────────────────────────────────────────────────────────┐   │   │
+│   │   │ [2. FILA DE ENCABEZADO Y CONTENIDO] -> NodeHeaderRow.tsx               │   │   │
+│   │   │ 🖼️ Imagen Adjunta (Top, Fit, Left, Between, Bottom)                    │   │   │
+│   │   │ 🏷️ Iconos temáticos SVG (con color y escala en px)                     │   │   │
+│   │   │ 📊 Indicador Circular o Píldora de Progreso (0-100%)                   │   │   │
+│   │   │ ✏️ TÍTULO DEL NODO (Div o Textarea inline editable con F2)             │   │   │
+│   │   │ 📝 CUERPO DEL NODO (Subtítulo o texto explicativo multilínea)          │   │   │
+│   │   └────────────────────────────────────────────────────────────────────────┘   │   │
+│   │                                                                                │   │
+│   │   ┌────────────────────────────────────────────────────────────────────────┐   │   │
+│   │   │ [3. BARRA DE BADGES Y METADATOS] -> NodeBadgesBar.tsx                  │   │   │
+│   │   │ 🏷️ Chips de Tags (Etiquetas multicolor)                                │   │   │
+│   │   │ 🔗 Enlace Web (Icono clicable con target="_blank")                     │   │   │
+│   │   │ 📋 Badge de Nota Markdown (Hover tooltip / Clic abre drawer)           │   │   │
+│   │   │ 📶 Barra de Progreso lineal (si progressPosition === 'bottom')         │   │   │
+│   │   └────────────────────────────────────────────────────────────────────────┘   │   │
+│   │                                                                                │   │
+│   ╰──────────────────────────────────────┬─────────────────────────────────────────╯   │
+│                                          │                                             │
+│       [4. BOTONES DE ACCIÓN FLOTANTES]  │  [PUNTA DE BURBUJA]                         │
+│       -> NodeActionButtons.tsx          │  -> NodeBackgroundRenderer.tsx               │
+│       • (+) Botón Agregar Hijo          │  Cola triangular SVG apuntando a la rama     │
+│       • [2] Píldora Plegar/Desplegar    │                                              │
+│       • (⠿) Asa de Arrastre Drag&Drop    │                                              │
+└──────────────────────────────────────────┴─────────────────────────────────────────────┘
+```
+
+---
+
+## 10. Guía Práctica de Extensión para Desarrolladores ("Cookbook")
+
+Esta sección está especialmente diseñada como un manual de desarrollo paso a paso. Muestra con código real y rutas exactas cómo implementar nuevas funcionalidades sin romper nada en el sistema.
+
+---
+
+### 📘 Tutorial 1: Cómo Añadir Más Opciones al Título de un Nodo
+
+**Objetivo:** Supongamos que queremos añadir una nueva opción de formato al título: **Transformación de Texto** (`textTransform`: mayúsculas, minúsculas o capitalizar) y un interruptor de **Sombra de Texto** (`textShadow`).
+
+#### Paso 1: Definir las propiedades en el modelo de tipos
+Abre [`src/types/mindmap.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/types/mindmap.ts) y localiza la interfaz `MindNode`. Agrega los nuevos campos opcionales:
+
+```typescript
+// En src/types/mindmap.ts
+export interface MindNode {
+  // ... campos existentes ...
+  textColor?: string;
+  fontSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+  fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  
+  // 👉 NUEVOS CAMPOS:
+  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  textShadow?: boolean;
+}
+```
+
+#### Paso 2: Crear los controles visuales en el Inspector (`ToolPanel`)
+Abre [`src/components/organisms/toolpanel/ContentTab.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/toolpanel/ContentTab.tsx). En la sección de tipografía del título, añade el grupo de botones para `textTransform` y el toggle para `textShadow`:
+
+```tsx
+// En src/components/organisms/toolpanel/ContentTab.tsx
+import { ToggleButtonGroup } from '../../atoms/ToggleButtonGroup';
+import { ToggleButton } from '../../atoms/ToggleButton';
+
+// Dentro del JSX de ContentTab, en la sección de Tipografía del Título:
+<div className="space-y-3 mt-3 pt-3 border-t border-slate-700/60">
+  <label className="text-xs font-semibold text-slate-300">Transformación de Texto</label>
+  <ToggleButtonGroup
+    value={selectedNode.textTransform || 'none'}
+    onChange={(val) => onUpdateNode(selectedNode.id, { textTransform: val as any })}
+    options={[
+      { value: 'none', label: 'Normal' },
+      { value: 'uppercase', label: 'MAYÚS' },
+      { value: 'lowercase', label: 'minús' },
+      { value: 'capitalize', label: 'Capital' },
+    ]}
+  />
+
+  <div className="flex items-center justify-between pt-1">
+    <span className="text-xs text-slate-400">Sombra de Texto</span>
+    <ToggleButton
+      checked={Boolean(selectedNode.textShadow)}
+      onChange={(checked) => onUpdateNode(selectedNode.id, { textShadow: checked })}
+    />
+  </div>
+</div>
+```
+
+#### Paso 3: Renderizar los estilos en la molécula del nodo
+Abre [`src/components/molecules/node/NodeHeaderRow.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/node/NodeHeaderRow.tsx). Localiza el `div` donde se renderiza `node.text` (aproximadamente línea 200) y aplica las nuevas reglas CSS:
+
+```tsx
+// En src/components/molecules/node/NodeHeaderRow.tsx
+<div
+  className="leading-snug break-words whitespace-pre-wrap select-text w-full"
+  style={{
+    color: textColor,
+    fontSize: `${node.fontSize || (isRoot ? 16 : 14)}px`,
+    fontWeight: node.bold ? 700 : (isRoot ? 600 : 500),
+    fontStyle: node.italic ? 'italic' : 'normal',
+    textAlign: node.textAlign || 'left',
+    fontFamily: effectiveFontFamily,
+    // 👉 NUEVOS ESTILOS APLICADOS:
+    textTransform: node.textTransform || 'none',
+    textShadow: node.textShadow ? '0 2px 4px rgba(0,0,0,0.5)' : 'none',
+  }}
+>
+  {node.text || 'Nuevo Nodo'}
+</div>
+```
+
+#### Paso 4: Asegurar la propagación de estilos a ramas hijas
+Abre [`src/hooks/useMindMapStore.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/hooks/useMindMapStore.ts) y añade los dos campos a la función extractora `extractNodeStyleBundle`:
+
+```typescript
+// En src/hooks/useMindMapStore.ts
+function extractNodeStyleBundle(source: MindNode): Partial<MindNode> {
+  return {
+    // ... estilos existentes ...
+    textColor: source.textColor,
+    fontSize: source.fontSize,
+    bold: source.bold,
+    italic: source.italic,
+    // 👉 NUEVOS CAMPOS INCLUIDOS EN LA PROPAGACIÓN:
+    textTransform: source.textTransform,
+    textShadow: source.textShadow,
+  };
+}
+```
+
+¡Listo! El usuario ahora puede transformar el texto a mayúsculas y activar sombras desde el inspector, se renderizará en el lienzo y se propagará a todas las ramas hijas con el botón "Aplicar estilo a hijos".
+
+---
+
+### 📘 Tutorial 2: Cómo Modificar la Interfaz de las Presentaciones
+
+FreeMind Map Studio cuenta con 3 modos de presentación. Aquí se detalla exactamente cómo modificar cada uno:
+
+#### Caso 2.1: Modificar la Barra Superior de la Presentación Dinámica (`CanvasPresentationHUD.tsx`)
+**Objetivo:** Supongamos que queremos añadir un botón de **Temporizador de Diapositiva (30s)** en la barra superior.
+
+1. Abre [`src/components/organisms/canvas/CanvasPresentationHUD.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasPresentationHUD.tsx).
+2. Localiza la barra de herramientas flotante superior (alrededor de la línea 220).
+3. Importa un icono de Lucide (ejemplo: `Timer` de `lucide-react`).
+4. Añade el nuevo botón JSX con los estilos atómicos existentes:
+
+```tsx
+// En src/components/organisms/canvas/CanvasPresentationHUD.tsx
+import { Timer } from 'lucide-react';
+
+// Dentro del contenedor <div className="flex items-center gap-2 ...">
+<button
+  type="button"
+  onClick={() => {
+    // Lógica: Iniciar avance automático cada 30 segundos
+    alert('Temporizador activado: 30 segundos por diapositiva');
+  }}
+  className="flex items-center gap-1.5 px-3 py-1 rounded-xl font-bold text-xs bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer shadow-md"
+  title="Avanzar diapositiva automáticamente cada 30 segundos"
+>
+  <Timer className="w-3.5 h-3.5 text-amber-400" />
+  <span>30s Auto</span>
+</button>
+```
+
+#### Caso 2.2: Personalizar la Estética de los Marcos en el Lienzo (`CanvasDrawingOverlay.tsx`)
+**Objetivo:** Cambiar el color, bordes o añadir un efecto de resplandor especial cuando un marco está seleccionado.
+
+1. Abre [`src/components/organisms/canvas/CanvasDrawingOverlay.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/organisms/canvas/CanvasDrawingOverlay.tsx).
+2. Localiza el mapeo de `slides.map((slide, idx) => { ... })` (línea 30).
+3. Modifica la clase condicional para `isSelected`:
+
+```tsx
+// En CanvasDrawingOverlay.tsx
+className={`absolute top-0 left-0 rounded-3xl border-2 transition-all select-none pointer-events-none ${
+  isSelected
+    ? 'border-indigo-400 bg-indigo-500/20 shadow-[0_0_45px_rgba(99,102,241,0.5)] ring-4 ring-indigo-400/60 scale-[1.01]'
+    : 'border-dashed border-slate-500/40 bg-slate-800/5 hover:border-indigo-400'
+}`}
+```
+> **⚠️ Regla Fundamental de Eventos:** El contenedor del marco **siempre debe conservar `pointer-events-none`**. Solo la etiqueta/badge superior debe tener `pointer-events-auto` para no bloquear los clics dirigidos a los nodos que contiene.
+
+#### Caso 2.3: Crear un Nuevo Tema para la Presentación Clásica (`PresentationMode.tsx`)
+1. Abre [`src/components/PresentationMode.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/PresentationMode.tsx).
+2. Localiza el objeto de temas de presentación `PRESENTATION_THEMES`.
+3. Añade un nuevo tema con tus tokens de color:
+
+```typescript
+// En PresentationMode.tsx
+export const PRESENTATION_THEMES = {
+  // ... temas existentes ...
+  neon_future: {
+    id: 'neon_future',
+    name: 'Cyberpunk Futurista',
+    bg: 'bg-slate-950',
+    text: 'text-cyan-300',
+    accent: 'text-fuchsia-400',
+    cardBg: 'bg-slate-900/90 border border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.25)]',
+    cardText: 'text-slate-100',
+  }
+};
+```
+
+---
+
+### 📘 Tutorial 3: Cómo Añadir una Nueva Forma de Nodo (Ejemplo: Diamante / Rombo)
+
+**Objetivo:** Agregar una forma geométrica de **Diamante (Rombo)** a los nodos.
+
+```mermaid
+flowchart LR
+    Step1["1. types/mindmap.ts\nAgregar 'diamond' a NodeShape"] --> Step2["2. ShapeSelector.tsx\nAgregar botón con icono SVG"]
+    Step2 --> Step3["3. NodeBackgroundRenderer.tsx\nGenerar polígono SVG en diamante"]
+    Step3 --> Step4["4. layoutEngine.ts\nAjustar ancho/alto proporcional"]
+```
+
+#### Paso 1: Extender el tipo `NodeShape`
+En [`src/types/mindmap.ts`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/types/mindmap.ts):
+```typescript
+export type NodeShape =
+  | 'bubble'
+  | 'fork'
+  | 'rectangle'
+  | 'square'
+  | 'oval'
+  | 'circle'
+  | 'hexagon'
+  | 'pill'
+  | 'arrow'
+  | 'star'
+  | 'diamond'; // 👉 Nueva forma
+```
+
+#### Paso 2: Añadir la opción al selector visual
+En [`src/components/molecules/ShapeSelector.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/ShapeSelector.tsx):
+Añade la opción a la lista con su previsualización en icono:
+```tsx
+{ id: 'diamond', label: 'Diamante', icon: DiamondIcon }
+```
+
+#### Paso 3: Renderizar el polígono SVG del Diamante
+En [`src/components/molecules/node/NodeBackgroundRenderer.tsx`](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/src/components/molecules/node/NodeBackgroundRenderer.tsx):
+Calcula los 4 vértices del rombo en base al ancho ($W$) y alto ($H$) del layout:
+```tsx
+// Vértices del Diamante: Arriba(W/2, 0), Derecha(W, H/2), Abajo(W/2, H), Izquierda(0, H/2)
+if (node.shape === 'diamond') {
+  const points = `${layout.width / 2},0 ${layout.width},${layout.height / 2} ${layout.width / 2},${layout.height} 0,${layout.height / 2}`;
+  return (
+    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+      <polygon points={points} fill={bgColor} stroke={borderColor} strokeWidth={borderWidth} />
+    </svg>
+  );
+}
+```
+
+---
+
+### 📘 Tutorial 4: Conversión de Coordenadas de Pantalla a Mundo en el Canvas
+
+Cualquier funcionalidad que involucre hacer clic, arrastrar o soltar elementos en el lienzo debe convertir las coordenadas del ratón (píxeles de la pantalla del navegador) a coordenadas reales del mapa cartesiano.
+
+```
+Pantalla del Navegador (clientX, clientY)
+              │
+              ▼  Restar el desplazamiento del Paneo (pan.x, pan.y)
+    (clientX - pan.x, clientY - pan.y)
+              │
+              ▼  Dividir por el factor de escala del Zoom (zoom)
+Coordenadas del Mundo del Canvas (worldX, worldY)
+```
+
+**Fórmula Matemática:**
+$$worldX = \frac{clientX - pan.x}{zoom}$$
+$$worldY = \frac{clientY - pan.y}{zoom}$$
+
+**Función de conversión en TypeScript:**
+```typescript
+function screenToWorld(
+  screenX: number,
+  screenY: number,
+  pan: { x: number; y: number },
+  zoom: number
+): { x: number; y: number } {
+  return {
+    x: (screenX - pan.x) / zoom,
+    y: (screenY - pan.y) / zoom,
+  };
+}
+```
+Esta función se utiliza activamente en:
+- `handleMouseDown` y `handleMouseMove` en `MindMapCanvas.tsx` para dibujar recuadros de diapositivas (`draw_frame`).
+- La creación automática de marcos con 1 clic para ubicar el centro de encuadre.
+- El cálculo de colocación de nuevos nodos huérfanos o conectores flotantes.
+
+---
+
 <div align="center">
 
 **FreeMind Map Studio — Arquitectura de Software v3.0**  
 *Mantenibilidad · Rendimiento · Privacidad Absoluta · Cero Dependencias Externas*
 
 </div>
+
