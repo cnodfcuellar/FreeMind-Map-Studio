@@ -96,16 +96,21 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         width: `${layout.width}px`,
         minHeight: `${layout.height}px`,
         ...shapeStyles,
+        ...(isSelected && shape === 'fork' ? { filter: 'drop-shadow(0 2px 4px rgba(59,130,246,0.8))' } : {}),
       }}
-      className={`absolute select-none flex flex-col justify-center shadow-xs transition-all duration-150 group cursor-pointer ${
-        isSvgShape || shape === 'fork' ? 'px-0 py-0' : 'px-3 py-1.5'
+      className={`absolute select-none flex flex-col justify-center transition-all duration-150 group cursor-pointer ${
+        isSvgShape || shape === 'fork' ? 'px-0 py-0 shadow-none' : 'px-3 py-1.5 shadow-xs'
       } ${
         isStaged
           ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-slate-950 shadow-[0_0_35px_rgba(59,130,246,0.9)] scale-[1.03] z-50 animate-pulse'
           : isSelected
-          ? 'ring-3 ring-blue-500 ring-offset-2 ring-offset-slate-50 shadow-md z-30'
+          ? isSvgShape || shape === 'fork'
+            ? 'z-30'
+            : 'ring-3 ring-blue-500 ring-offset-2 ring-offset-slate-50 shadow-md z-30'
+          : isSvgShape || shape === 'fork'
+          ? 'z-10'
           : 'hover:shadow-md z-10'
-      } ${isMatch ? 'ring-2 ring-amber-400 bg-amber-50/90' : ''}`}
+      } ${isMatch ? (isSvgShape ? 'brightness-125' : 'ring-2 ring-amber-400 bg-amber-50/90') : ''}`}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(node.id, e);
@@ -131,6 +136,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         theme={theme}
         branchColor={branchColor}
         isRoot={isRoot}
+        isSelected={isSelected}
       />
 
       {/* 2. Visible Speech Bubble Pointy Tail */}

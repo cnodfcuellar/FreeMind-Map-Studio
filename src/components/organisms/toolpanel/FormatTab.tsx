@@ -66,7 +66,7 @@ export const FormatTab: React.FC<FormatTabProps> = ({
     });
   };
 
-  const bgType: NodeBackgroundType = selectedNode.bgType || (selectedNode.color ? 'color' : 'color');
+  const bgType: NodeBackgroundType = selectedNode.bgType || (selectedNode.bgImageUrl ? 'image' : 'color');
 
   return (
     <div className="space-y-3.5">

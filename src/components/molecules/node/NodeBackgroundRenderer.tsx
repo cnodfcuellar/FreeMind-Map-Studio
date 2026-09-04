@@ -7,6 +7,7 @@ export interface NodeBackgroundProps {
   theme: MindMapTheme;
   branchColor: string;
   isRoot: boolean;
+  isSelected?: boolean;
 }
 
 /**
@@ -36,7 +37,7 @@ export const getNodeBackgroundStyles = (
     ? (node.color || theme.rootBg)
     : (node.color || theme.nodeBg);
 
-  const bgType = node.bgType || 'color';
+  const bgType = node.bgType || (node.bgImageUrl ? 'image' : 'color');
 
   if (bgType === 'transparent') {
     return {
@@ -93,31 +94,28 @@ export const getNodeBackgroundStyles = (
     if (pat === 'lines') {
       return {
         backgroundColor: baseColor,
-        backgroundImage: `linear-gradient(to bottom, transparent calc(100% - 1px), ${patRgba} 1px)`,
+        backgroundImage: `linear-gradient(to bottom, ${patRgba} 1.5px, transparent 1.5px)`,
         backgroundSize: `100% ${size}px`,
       };
     }
     if (pat === 'squares') {
       return {
         backgroundColor: baseColor,
-        backgroundImage: `linear-gradient(to right, ${patRgba} 1px, transparent 1px), linear-gradient(to bottom, ${patRgba} 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(to right, ${patRgba} 1.5px, transparent 1.5px), linear-gradient(to bottom, ${patRgba} 1.5px, transparent 1.5px)`,
         backgroundSize: `${size}px ${size}px`,
       };
     }
     if (pat === 'stripes') {
       return {
         backgroundColor: baseColor,
-        backgroundImage: `repeating-linear-gradient(45deg, ${patRgba}, ${patRgba} 1.5px, transparent 1.5px, transparent ${size}px)`,
+        backgroundImage: `repeating-linear-gradient(45deg, ${patRgba} 0px, ${patRgba} 1.5px, transparent 1.5px, transparent ${size}px)`,
       };
     }
     if (pat === 'triangles') {
       const triW = size;
-      const triH = Math.round(size * 1.7320508);
-      const triH2 = Math.round(triH / 2);
-      const triW2 = Math.round(triW / 2);
-      const triPath = `M 0 0 L ${triW} 0 M 0 ${triH2} L ${triW} ${triH2} M 0 0 L ${triW} ${triH} M ${triW2} 0 L ${triW} ${triH2} M 0 ${triH2} L ${triW2} ${triH} M ${triW} 0 L 0 ${triH} M ${triW2} 0 L 0 ${triH2} M ${triW} ${triH2} L ${triW2} ${triH}`;
+      const triH = Math.max(8, Math.round(size * 0.866));
       const triSvg = encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${triW}" height="${triH}" viewBox="0 0 ${triW} ${triH}"><path d="${triPath}" fill="none" stroke="${patColor}" stroke-width="1" stroke-opacity="${opacity}"/></svg>`
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${triW}" height="${triH}" viewBox="0 0 ${triW} ${triH}"><polygon points="0,${triH} ${triW / 2},0 ${triW},${triH}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
       );
       return {
         backgroundColor: baseColor,
@@ -126,31 +124,27 @@ export const getNodeBackgroundStyles = (
       };
     }
     if (pat === 'hexagons') {
-      const R = size;
-      const W = Number((R * 1.7320508).toFixed(2));
-      const H = Number((R * 3).toFixed(2));
-      const W2 = Number((W / 2).toFixed(2));
-      const r05 = Number((R * 0.5).toFixed(2));
-      const r10 = Number((R * 1.0).toFixed(2));
-      
-      const d = `M 0,0 v ${r05} l ${W2},${r05} v ${r10} l -${W2},${r05} v ${r05} M ${W},0 v ${r05} l -${W2},${r05} v ${r10} l ${W2},${r05} v ${r05} M 0,${R * 1.5} h 0`;
+      const hexW = size;
+      const hexH = size;
       const hexSvg = encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-          <path d="${d}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>`
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${hexW}" height="${hexH}" viewBox="0 0 ${hexW} ${hexH}"><polygon points="${hexW * 0.25},0 ${hexW * 0.75},0 ${hexW},${hexH * 0.5} ${hexW * 0.75},${hexH} ${hexW * 0.25},${hexH} 0,${hexH * 0.5}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
       );
       return {
         backgroundColor: baseColor,
         backgroundImage: `url("data:image/svg+xml,${hexSvg}")`,
-        backgroundSize: `${W}px ${H}px`,
+        backgroundSize: `${hexW}px ${hexH}px`,
       };
     }
     if (pat === 'cross') {
+      const cLen = Math.max(3, Math.round(size * 0.35));
+      const cMid = size / 2;
+      const crossSvg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><line x1="${cMid - cLen}" y1="${cMid}" x2="${cMid + cLen}" y2="${cMid}" stroke="${patColor}" stroke-width="1.5" stroke-opacity="${opacity}" stroke-linecap="round"/><line x1="${cMid}" y1="${cMid - cLen}" x2="${cMid}" y2="${cMid + cLen}" stroke="${patColor}" stroke-width="1.5" stroke-opacity="${opacity}" stroke-linecap="round"/></svg>`
+      );
       return {
         backgroundColor: baseColor,
-        backgroundImage: `radial-gradient(circle, ${patRgba} 1.5px, transparent 1.5px), radial-gradient(circle, ${patRgba} 1.5px, transparent 1.5px)`,
+        backgroundImage: `url("data:image/svg+xml,${crossSvg}")`,
         backgroundSize: `${size}px ${size}px`,
-        backgroundPosition: `0 0, ${size / 2}px ${size / 2}px`,
       };
     }
 
@@ -161,25 +155,24 @@ export const getNodeBackgroundStyles = (
     };
   }
 
-  if (bgType === 'image' || node.bgImageUrl) {
+  if (bgType === 'image' && node.bgImageUrl) {
     const bgImg = node.bgImageUrl;
-    if (bgImg) {
-      const mode = node.bgImageMode || 'cover';
-      const bgSize = mode === 'fit' || mode === 'contain' ? 'contain' : mode === 'tile' ? 'auto' : 'cover';
-      const bgRepeat = mode === 'tile' ? 'repeat' : 'no-repeat';
-      const bgPos = 'center';
-      return {
-        backgroundColor: node.color || bgColor || '#ffffff',
-        backgroundImage: `url("${bgImg}")`,
-        backgroundSize: bgSize,
-        backgroundRepeat: bgRepeat,
-        backgroundPosition: bgPos,
-      };
-    }
+    const mode = node.bgImageMode || 'cover';
+    const bgSize = mode === 'fit' || mode === 'contain' ? 'contain' : mode === 'tile' ? 'auto' : 'cover';
+    const bgRepeat = mode === 'tile' ? 'repeat' : 'no-repeat';
+    const bgPos = 'center';
+    return {
+      backgroundColor: node.color || bgColor || '#ffffff',
+      backgroundImage: `url("${bgImg}")`,
+      backgroundSize: bgSize,
+      backgroundRepeat: bgRepeat,
+      backgroundPosition: bgPos,
+    };
   }
 
   return {
     backgroundColor: bgColor,
+    backgroundImage: 'none',
   };
 };
 
@@ -195,7 +188,10 @@ export const getNodeShapeStyles = (
   const bgStyles = getNodeBackgroundStyles(node, theme, isRoot);
   const shape = node.shape || 'bubble';
   const borderStyle = node.borderDash || node.borderStyle || 'solid';
-  const borderColor = node.borderColor || (isRoot ? 'transparent' : branchColor || theme.nodeBorder);
+  
+  // Resuelve el color de borde predeterminado para evitar que sea invisible si el usuario cambia el grosor
+  const fallbackBorderColor = branchColor || theme.nodeBorder || '#3b82f6';
+  const borderColor = node.borderColor || (isRoot ? (node.borderWidth ? fallbackBorderColor : 'transparent') : fallbackBorderColor);
   const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
 
   const baseStyle: React.CSSProperties = {
@@ -204,14 +200,12 @@ export const getNodeShapeStyles = (
   };
 
   if (shape === 'fork') {
-    const underlineColor = borderColor || branchColor || '#3b82f6';
-    const underlineWidth = Math.max(2.5, borderWidth || 2.5);
+    const underlineColor = borderColor || fallbackBorderColor;
+    const underlineWidth = borderWidth !== undefined ? borderWidth : 2.5;
     return {
       ...bgStyles,
-      borderTop: 'none !important',
-      borderLeft: 'none !important',
-      borderRight: 'none !important',
-      borderBottom: `${underlineWidth}px ${borderStyle} ${underlineColor}`,
+      border: 'none',
+      borderBottom: underlineWidth > 0 ? `${underlineWidth}px ${borderStyle} ${underlineColor}` : 'none',
       borderRadius: '0px',
       boxShadow: 'none',
       paddingBottom: '4px',
@@ -266,6 +260,7 @@ export const getNodeShapeStyles = (
     return {
       background: 'transparent',
       border: 'none',
+      boxShadow: 'none',
       paddingLeft: '32px',
       paddingRight: '32px',
     };
@@ -274,6 +269,7 @@ export const getNodeShapeStyles = (
     return {
       background: 'transparent',
       border: 'none',
+      boxShadow: 'none',
       paddingLeft: '24px',
       paddingRight: '36px',
     };
@@ -282,6 +278,7 @@ export const getNodeShapeStyles = (
     return {
       background: 'transparent',
       border: 'none',
+      boxShadow: 'none',
       padding: '24px 28px',
       textAlign: 'center',
     };
@@ -302,6 +299,7 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   theme,
   branchColor,
   isRoot,
+  isSelected,
 }) => {
   const shape = node.shape || 'bubble';
   const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star';
@@ -310,7 +308,8 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   const w = layout.width;
   const h = layout.height;
   const borderStyle = node.borderDash || node.borderStyle || 'solid';
-  const borderColor = node.borderColor || (isRoot ? 'transparent' : branchColor || theme.nodeBorder);
+  const fallbackBorderColor = branchColor || theme.nodeBorder || '#3b82f6';
+  const borderColor = node.borderColor || (isRoot ? (node.borderWidth ? fallbackBorderColor : 'transparent') : fallbackBorderColor);
   const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
   const strokeDash = borderStyle === 'dashed' ? '6 4' : borderStyle === 'dotted' ? '2.5 3' : undefined;
   const effectiveBorderColor = borderWidth > 0 ? borderColor : 'none';
@@ -322,8 +321,9 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   const bgImgId = `bg-img-${node.id}`;
   const bgImg = node.bgImageUrl;
   const bgColor = isRoot ? (node.color || theme.rootBg) : (node.color || theme.nodeBg);
+  const baseColor = node.color || bgColor || '#ffffff';
 
-  let fillAttr = node.color || bgColor || '#ffffff';
+  let fillAttr = baseColor;
   if (bgType === 'transparent') {
     fillAttr = 'transparent';
   } else if (bgType === 'image' && bgImg) {
@@ -338,15 +338,15 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
 
   if (shape === 'hexagon') {
     const inset = Math.min(w * 0.28, Math.max(28, h * 0.58));
-    const pad = effectiveBorderWidth / 2;
+    const pad = Math.max(effectiveBorderWidth / 2, 1);
     points = `${inset},${pad} ${w - inset},${pad} ${w - pad},${h / 2} ${w - inset},${h - pad} ${inset},${h - pad} ${pad},${h / 2}`;
   } else if (shape === 'arrow') {
     const arrowTip = Math.min(w * 0.32, Math.max(32, h * 0.70));
     const notch = Math.min(w * 0.16, Math.max(16, h * 0.40));
-    const pad = effectiveBorderWidth / 2;
+    const pad = Math.max(effectiveBorderWidth / 2, 1);
     points = `${pad},${pad} ${w - arrowTip},${pad} ${w - pad},${h / 2} ${w - arrowTip},${h - pad} ${pad},${h - pad} ${notch},${h / 2}`;
   } else if (shape === 'star') {
-    const pad = effectiveBorderWidth / 2;
+    const pad = Math.max(effectiveBorderWidth / 2, 1);
     const cx = w / 2;
     const cy = h / 2;
     const Rx = Math.max((w - 2 * pad) / 2, 10);
@@ -363,9 +363,16 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
     points = starPts.join(' ');
   }
 
+  const patSize = node.nodePatternSize || 16;
+  const patColor = node.nodePatternColor || '#475569';
+  const patOpacity = node.nodePatternOpacity ?? 0.4;
+  const patStyle = node.nodePattern || 'dots';
+  const patMid = patSize / 2;
+  const patLen = Math.max(3, Math.round(patSize * 0.35));
+
   return (
     <svg
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
       style={{ zIndex: 0 }}
       width={w}
       height={h}
@@ -388,35 +395,164 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
           </pattern>
         )}
         {bgType === 'gradient' && (
-          <linearGradient
-            id={gradId}
-            x1={node.gradientDirection === 'to-r' ? '0%' : '0%'}
-            y1={node.gradientDirection === 'to-b' ? '0%' : '0%'}
-            x2={node.gradientDirection === 'to-r' ? '100%' : node.gradientDirection === 'to-br' ? '100%' : '0%'}
-            y2={node.gradientDirection === 'to-b' ? '100%' : node.gradientDirection === 'to-br' ? '100%' : '100%'}
-          >
-            <stop offset="0%" stopColor={node.gradientColor1 || node.color || bgColor || '#3b82f6'} />
-            <stop offset="100%" stopColor={node.gradientColor2 || '#8b5cf6'} />
-          </linearGradient>
+          node.gradientDirection === 'radial' ? (
+            <radialGradient
+              id={gradId}
+              cx="50%"
+              cy="50%"
+              r="60%"
+              fx="50%"
+              fy="50%"
+            >
+              <stop offset="0%" stopColor={node.gradientColor1 || node.color || bgColor || '#3b82f6'} />
+              <stop offset="100%" stopColor={node.gradientColor2 || '#8b5cf6'} />
+            </radialGradient>
+          ) : (
+            <linearGradient
+              id={gradId}
+              x1={node.gradientDirection === 'to-r' ? '0%' : '0%'}
+              y1={node.gradientDirection === 'to-b' ? '0%' : '0%'}
+              x2={node.gradientDirection === 'to-r' ? '100%' : node.gradientDirection === 'to-br' ? '100%' : '0%'}
+              y2={node.gradientDirection === 'to-b' ? '100%' : node.gradientDirection === 'to-br' ? '100%' : '100%'}
+            >
+              <stop offset="0%" stopColor={node.gradientColor1 || node.color || bgColor || '#3b82f6'} />
+              <stop offset="100%" stopColor={node.gradientColor2 || '#8b5cf6'} />
+            </linearGradient>
+          )
         )}
         {bgType === 'pattern' && (
           <pattern
             id={patternId}
-            width={node.nodePatternSize || 16}
-            height={node.nodePatternSize || 16}
+            width={patSize}
+            height={patSize}
             patternUnits="userSpaceOnUse"
           >
-            <rect width="100%" height="100%" fill={node.color || bgColor || '#ffffff'} />
-            <circle
-              cx={(node.nodePatternSize || 16) / 2}
-              cy={(node.nodePatternSize || 16) / 2}
-              r={2}
-              fill={node.nodePatternColor || '#475569'}
-              opacity={node.nodePatternOpacity ?? 0.4}
-            />
+            <rect width="100%" height="100%" fill={baseColor} />
+            {patStyle === 'dots' && (
+              <circle
+                cx={patMid}
+                cy={patMid}
+                r={1.5}
+                fill={patColor}
+                opacity={patOpacity}
+              />
+            )}
+            {patStyle === 'lines' && (
+              <line
+                x1="0"
+                y1={patMid}
+                x2={patSize}
+                y2={patMid}
+                stroke={patColor}
+                strokeWidth="1.5"
+                strokeOpacity={patOpacity}
+              />
+            )}
+            {patStyle === 'stripes' && (
+              <>
+                <line
+                  x1="0"
+                  y1={patSize}
+                  x2={patSize}
+                  y2="0"
+                  stroke={patColor}
+                  strokeWidth="1.5"
+                  strokeOpacity={patOpacity}
+                />
+                <line
+                  x1={-patSize / 2}
+                  y1={patSize / 2}
+                  x2={patSize / 2}
+                  y2={-patSize / 2}
+                  stroke={patColor}
+                  strokeWidth="1.5"
+                  strokeOpacity={patOpacity}
+                />
+                <line
+                  x1={patSize / 2}
+                  y1={patSize * 1.5}
+                  x2={patSize * 1.5}
+                  y2={patSize / 2}
+                  stroke={patColor}
+                  strokeWidth="1.5"
+                  strokeOpacity={patOpacity}
+                />
+              </>
+            )}
+            {patStyle === 'squares' && (
+              <rect
+                x="0.75"
+                y="0.75"
+                width={patSize - 1.5}
+                height={patSize - 1.5}
+                fill="none"
+                stroke={patColor}
+                strokeWidth="1.5"
+                strokeOpacity={patOpacity}
+              />
+            )}
+            {patStyle === 'triangles' && (
+              <polygon
+                points={`0,${patSize} ${patSize / 2},0 ${patSize},${patSize}`}
+                fill="none"
+                stroke={patColor}
+                strokeWidth="1.2"
+                strokeOpacity={patOpacity}
+              />
+            )}
+            {patStyle === 'hexagons' && (
+              <polygon
+                points={`${patSize * 0.25},0 ${patSize * 0.75},0 ${patSize},${patSize * 0.5} ${patSize * 0.75},${patSize} ${patSize * 0.25},${patSize} 0,${patSize * 0.5}`}
+                fill="none"
+                stroke={patColor}
+                strokeWidth="1.2"
+                strokeOpacity={patOpacity}
+              />
+            )}
+            {patStyle === 'cross' && (
+              <>
+                <line
+                  x1={patMid - patLen}
+                  y1={patMid}
+                  x2={patMid + patLen}
+                  y2={patMid}
+                  stroke={patColor}
+                  strokeWidth="1.5"
+                  strokeOpacity={patOpacity}
+                  strokeLinecap="round"
+                />
+                <line
+                  x1={patMid}
+                  y1={patMid - patLen}
+                  x2={patMid}
+                  y2={patMid + patLen}
+                  stroke={patColor}
+                  strokeWidth="1.5"
+                  strokeOpacity={patOpacity}
+                  strokeLinecap="round"
+                />
+              </>
+            )}
           </pattern>
         )}
       </defs>
+
+      {/* Resplandor exterior de selección que sigue la geometría del polígono */}
+      {isSelected && (
+        <polygon
+          points={points}
+          fill="none"
+          stroke="#3b82f6"
+          strokeWidth={Math.max(effectiveBorderWidth + 3.5, 4)}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          style={{
+            filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.85))',
+          }}
+        />
+      )}
+
+      {/* Polígono principal con fondo y borde */}
       <polygon
         points={points}
         fill={fillAttr}
@@ -431,7 +567,7 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
 };
 
 /**
- * Speech bubble tail rendering
+ * Speech bubble tail rendering with synchronized border styling
  */
 export const NodeBubbleTail: React.FC<NodeBackgroundProps> = ({
   node,
@@ -447,9 +583,12 @@ export const NodeBubbleTail: React.FC<NodeBackgroundProps> = ({
   const bgColor = isRoot ? (node.color || theme.rootBg) : (node.color || theme.nodeBg);
   const fillCol = node.color || bgColor || '#ffffff';
   const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
-  const borderColor = node.borderColor || (isRoot ? 'transparent' : branchColor || theme.nodeBorder);
+  const fallbackBorderColor = branchColor || theme.nodeBorder || '#3b82f6';
+  const borderColor = node.borderColor || (isRoot ? (node.borderWidth ? fallbackBorderColor : 'transparent') : fallbackBorderColor);
   const borderCol = borderWidth > 0 ? borderColor : 'transparent';
-  const bWidth = borderWidth || 1.5;
+  const bWidth = borderWidth;
+  const borderStyle = node.borderDash || node.borderStyle || 'solid';
+  const strokeDash = borderStyle === 'dashed' ? '4 3' : borderStyle === 'dotted' ? '2 2' : undefined;
 
   return (
     <div
@@ -472,17 +611,21 @@ export const NodeBubbleTail: React.FC<NodeBackgroundProps> = ({
           fill={fillCol}
           stroke={borderCol}
           strokeWidth={bWidth}
+          strokeDasharray={strokeDash}
           strokeLinejoin="round"
         />
-        <line
-          x1="12"
-          y1="1"
-          x2="12"
-          y2="15"
-          stroke={fillCol}
-          strokeWidth={bWidth + 2}
-        />
+        {bWidth > 0 && (
+          <line
+            x1="12"
+            y1="1"
+            x2="12"
+            y2="15"
+            stroke={fillCol}
+            strokeWidth={bWidth + 2}
+          />
+        )}
       </svg>
     </div>
   );
 };
+

@@ -962,12 +962,12 @@ El MiniMapa ([`src/components/MiniMap.tsx`](file:///d:/admin/OneDrive/Documents/
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ CONTENEDOR EXTERIOR (div en MiniMap.tsx ~L218)        │
-│ backgroundColor: 'rgba(255, 255, 255, 0.65)'           │
+│ CONTENEDOR EXTERIOR (div en MiniMap.tsx ~L218)         │
+│ backgroundColor: 'rgba(255, 255, 255, 0.65)'         │
 │                                                        │
 │   ┌────────────────────────────────────────────────┐   │
 │   │ ÁREA INTERIOR SVG (<rect fill="..."> ~L295)    │   │
-│   │ fill="#0f172a" (Azul noche oscuro / Radar)     │   │
+│   │ fill="#0f172a" (Azul noche oscuro / Radar)   │   │
 │   │                                                │   │
 │   │      [ Nodo A ] ─── [ Nodo B ]                 │   │
 │   │          │                                     │   │
