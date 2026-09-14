@@ -11,6 +11,7 @@
 [![Zustand](https://img.shields.io/badge/Zustand-5-433D37?style=for-the-badge)](https://zustand-demo.pmnd.rs/)
 [![Vitest](https://img.shields.io/badge/Tests-14%2F14%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
 [![Motion](https://img.shields.io/badge/Motion-12-ea580c?style=for-the-badge&logo=framer&logoColor=white)](https://motion.dev)
+[![Antigravity IDE](https://img.shields.io/badge/Antigravity%20IDE-2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
 
 > Crea, organiza y presenta mapas mentales complejos con la velocidad del teclado,  
