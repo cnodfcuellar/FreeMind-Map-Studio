@@ -667,7 +667,7 @@ export function applyBackgroundUpdate(
 
 ## Qué hace este archivo
 
-`src/utils/layoutEngine.ts` (1861 líneas) es matemática pura sin DOM:
+`src/utils/layoutEngine.ts` (1940 líneas) es matemática pura sin DOM:
 dado un `MindMap`, devuelve `Map<id, CalculatedNodeLayout>` con `x, y,
 width, height, side, depth, branchIndex, bounds` por nodo. Proceso:
 
@@ -1259,7 +1259,7 @@ export interface MainEditorLayoutProps {
 - Props: `mindMap`, `canUndo/Redo`, callbacks `onNewMap/onOpenTemplates/
   onOpenSavedMaps/onSaveMap/onOpenExportModal/onOpenImportModal/onUndo/
   onRedo/onAddChild/onAddSibling/onDeleteNode/onToggleOutline/
-  onStartPresentation(mode)/onShowComingSoon/onOpenShortcuts/
+  onStartPresentation(mode)/onOpenShortcuts/
   onToggleFullscreen/onFoldAll/onUnfoldAll/onOpenConnectorModal/
   onToggleCloud/onTitleChange/onOpenIconPack/onChangeTheme/
   onChangeShape/onResetFormat`.
@@ -1274,7 +1274,7 @@ export interface MainEditorLayoutProps {
 - ⚠️ Quirk: el menú Formato ofrece temas `purple` y `warm` que NO existen
   en `THEMES` → `App` cae a `default` y parece no hacer nada.
 
-## 3. `ToolBar.tsx` — accesos rápidos (estructura completa, 659 líneas)
+## 3. `ToolBar.tsx` — accesos rápidos (estructura completa, 643 líneas)
 
 - Grupo izq: undo/redo (deshabilitados sin pila), Hijo (azul primario),
   Hermano, Borrar (vetado en raíz), fold, negrita/cursiva (responsive),
@@ -1298,10 +1298,11 @@ export interface MainEditorLayoutProps {
 // Todo oscuro: bg-slate-900, inputs bg-slate-800.
 // StatusBar: solo lectura. Nodos totales | "Selec." + ID | Zoom% |
 // Posición (X,Y) | Modo ('Editando' si editingNodeId si no 'Listo').
-// Nota: App le pasa zoom=100 y posición 0,0 fijos (pendiente cablear).
+// Nota (fix 2026-10-17): zoom y posición son REALES — MindMapCanvas
+// expone onViewportChange({zoom,x,y}) y App los guarda en estado `viewport`.
 ```
 
-## 5. `ToolPanel.tsx` (completo, 262 líneas) — inspector de 6 tabs
+## 5. `ToolPanel.tsx` (completo, 272 líneas) — inspector de 6 tabs
 
 ```tsx
 export type TabType = 'content' | 'format' | 'notes' | 'icons' | 'clouds' | 'theme';
@@ -1341,7 +1342,7 @@ export type TabType = 'content' | 'format' | 'notes' | 'icons' | 'clouds' | 'the
 
 # 📘 Guía de Estudio — Parte 7: Lienzo, presentaciones, modales y tests
 
-## 1. `NodeComponent.tsx` (completo, 199 líneas) — el nodo orquestador
+## 1. `NodeComponent.tsx` (completo, 211 líneas) — el nodo orquestador
 
 ```tsx
 // Props: node, layout (x/y/w/h del motor), isSelected, isEditing, theme,
@@ -1359,7 +1360,7 @@ export type TabType = 'content' | 'format' | 'notes' | 'icons' | 'clouds' | 'the
 // Clics con stopPropagation (no llegan al canvas); hover muestra drag y +.
 ```
 
-## 2. `MindMapCanvas.tsx` (1577 líneas) — el corazón
+## 2. `MindMapCanvas.tsx` (1584 líneas) — el corazón
 
 - **Estados locales**: zoom/pan (+isPanning), presentación (presMode
   editor/play, slide actual, overview, filmstrip, herramientas
@@ -1407,10 +1408,10 @@ export type TabType = 'content' | 'format' | 'notes' | 'icons' | 'clouds' | 'the
   notas con preview, imagen, alineación, tema, rotación ±180, escala
   0.5–2.5) que guarda en la tarjeta.
 
-## 4. Los 7 modales (`components/Modals/`)
+## 4. Los 6 modales (`components/Modals/`)
 
-Todos: `ModalBackdrop` + (`ModalHeader` menos ComingSoon que usa banner
-propio) + footer con `Button`. Comportamientos:
+Todos: `ModalBackdrop` + `ModalHeader` + footer con `Button`.
+Comportamientos:
 - **ExportImportModal** (xl, 2 tabs): descarga por Blob+`<a>` (nombres
   sanitizados), importa `.mm/.json/.xml` con `FileReader` y mensaje de error.
 - **TemplatesModal** (4xl): `TemplateMapPreview` calcula layout REAL por
@@ -1424,8 +1425,7 @@ propio) + footer con `Button`. Comportamientos:
   buscador + sugerencias, grid hasta 10 col, preview + copiar SVG/copiar ID,
   clic alterna icono del nodo.
 - **ShortcutsModal** (lg): tabla de 16 atajos con `kbd`.
-- **ComingSoonModal** (md, `rounded-3xl`): banner degradado por modo +
-  lista de promesas + atajo al modo clásico.
+- *(ComingSoonModal: **eliminado** 2026-10-17 — era un modal huérfano; ver `doc/DESIGN.md` §8.5.7)*
 
 ## 5. Tests: cómo están organizados (22 archivos, 106+ tests)
 

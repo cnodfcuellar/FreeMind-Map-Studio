@@ -47,7 +47,7 @@
 +--------------------------------------------------------------------------------------------------------------------------+
 | [7] BARRA DE ESTADO INFERIOR (StatusBar)                                                                [Altura: 24px]   |
 | Nodos totales: 28 | Seleccionado: "Atajos" (ID: node-1) | Zoom: 100% | Posicion: (0, 0) | Modo: Listo               |
-|                          (Zoom y Posicion son fijos en la app actual: App.tsx pasa 100 / 0,0 hardcodeados)            |
+|                          (Zoom y Posicion REALES del lienzo — fix 2026-10-17 vía onViewportChange)            |
 +--------------------------------------------------------------------------------------------------------------------------+
 ```
 
@@ -71,17 +71,17 @@
 
 ## 3. Estructura y Opciones de Cada Menu Superior
 
-Actualizado 2026-10-17 (fuente: `MenuBar.tsx` 562 lineas). Contrato visual y gotchas: `doc/DESIGN.md` §7.
+Actualizado 2026-10-17 (fuente: `MenuBar.tsx` 558 lineas). Contrato visual y gotchas: `doc/DESIGN.md` §7.
 
 ### 3.1. Menu Archivo (dropdown w-56)
-- Nuevo Mapa — reemplaza por `BLANK_MAP` con id/fechas nuevas y selecciona la raiz; **sin dialogo de confirmacion** (`App:159-168`)
+- Nuevo Mapa — reemplaza por `BLANK_MAP` con id/fechas nuevas y selecciona la raiz; **sin dialogo de confirmacion** (`App:155-164`)
 - Plantillas de Ejemplo — abre `TemplatesModal`
 - Mis Mapas Guardados — abre `SavedMapsModal`
 - ---
 - Guardar Ahora — `saveCurrentMap(mindMap)` (el hint `Ctrl+S` que muestra **no esta implementado**, ver 3.6)
 - ---
 - **Exportar (.mm / HTML)** (azul, destacado) — abre `ExportImportModal` (etiqueta corregida 2026-10-17: antes prometía "/ PNG" inexistente)
-- Importar Freeplane (.mm) — abre **el mismo** `ExportImportModal` (`App:172-173`; ninguno preselecciona pestana)
+- Importar Freeplane (.mm) — abre **el mismo** `ExportImportModal` (`App:169`; ninguno preselecciona pestana)
   - **Gotcha**: ✅ rotulo PNG **corregido** 2026-10-17 (sigue **sin existir** exportacion de imagenes: solo mm/html/md/json; el subtitulo del modal todavia menciona "imagenes"); la pestana por defecto es Exportar y **persiste** entre aperturas. Contenido funcional de los 6 modales (el 7º, `ComingSoonModal`, fue **eliminado**): `doc/DESIGN.md` §8.5.
 
 ### 3.2. Menu Editar (w-52)
@@ -341,7 +341,7 @@ Boton Editar/Opciones (`SlidersHorizontal`): abre el modal de opciones (tecla E)
 - ALINEACION DE CONTENIDO: Centro / Izquierda
 - ESCALA DEL TITULO: Compacta / Normal / Grande
 
-Footer: **"Editar en Lienzo"** (real: `onEditNode` cierra la presentacion, selecciona el nodo y abre el ToolPanel — `App:634-638`) y **"Aplicar y Ver Diapositiva"** (solo cierra el modal).
+Footer: **"Editar en Lienzo"** (real: `onEditNode` cierra la presentacion, selecciona el nodo y abre el ToolPanel — `App:597-601`) y **"Aplicar y Ver Diapositiva"** (solo cierra el modal).
 
 ### 6.5. Temas Disponibles para Presentacion (8 temas, inline)
 

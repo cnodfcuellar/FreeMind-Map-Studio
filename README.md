@@ -9,7 +9,7 @@
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Zustand](https://img.shields.io/badge/Zustand-5-433D37?style=for-the-badge)](https://zustand-demo.pmnd.rs/)
-[![Vitest](https://img.shields.io/badge/Tests-87%2F87%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
+[![Vitest](https://img.shields.io/badge/Tests-131%2F131%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
 [![Motion](https://img.shields.io/badge/Motion-12-ea580c?style=for-the-badge&logo=framer&logoColor=white)](https://motion.dev)
 [![Antigravity IDE](https://img.shields.io/badge/Antigravity%20IDE-2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
@@ -82,9 +82,9 @@ Inspirado en [Freeplane](https://www.freeplane.org/) y [Mindomo](https://www.min
 | **Formas** | `bubble` `fork` `rectangle` `square` `oval` `circle` `pill` `hexagon` `arrow` `star` |
 | **Fondo** | Color sólido · Transparente · Degradado (4 dir.) · Trama SVG (7 patrones) · Imagen de fondo |
 | **Tipografía** | Fuente · Tamaño · Negrita · Cursiva · Color · Alineación (para título y cuerpo por separado) |
-| **Imagen adjunta** | Posición: arriba · abajo · izq · der · entre · fondo · ajustar · Escala 60–300px |
+| **Imagen adjunta** | Posición: arriba · entre · abajo · izquierda · derecha · ajustar · Ancho 60–500px |
 | **Bordes** | Grosor 0–8px · Sólido / Discontinuo / Punteado · Color personalizado o automático |
-| **Tamaño** | Ancho 50–500px · Alto 30–300px · Modo automático |
+| **Tamaño** | Ancho 0–500px · Alto 0–300px · 0 = modo automático |
 | **Metadatos** | Progreso 0–100% · Iconos vectoriales · Tags · URL · Nota Markdown enriquecida |
 
 ### 🗂️ Gestión del Árbol y Productividad
@@ -145,7 +145,7 @@ Presentación continua con vuelo de cámara suave sobre el lienzo infinito:
 - **Creación Automática con 1 Clic (`1. Seleccionar Nodo`):** Al hacer clic sobre cualquier nodo, se crea al instante un marco perimetral con encuadre de cámara inmediato y se agrega a la tira inferior.
 - **Dibujo de Recuadros (`2. Dibujar Recuadro`):** Arrastra libremente un recuadro con indicador de dimensiones en tiempo real (`X × Y`) para agrupar múltiples nodos o regiones.
 - **Empezar de Cero:** Limpia el lienzo a 0 diapositivas para diseñar una presentación 100% personalizada.
-- **Tira Inferior (Filmstrip):** Navegación visual por miniaturas, ordenamiento y eliminación con un clic.
+- **Tira Inferior (Filmstrip):** Navegación visual por chips con el orden de cada marco; en el editor, eliminar un marco con el icono al pasar el cursor.
 - **Cero Bloqueo de Puntero:** Capas desacopladas con `pointer-events-none` en los marcos para permitir interacción libre con los nodos.
 
 ### 3. 🪐 Modo Presentación Espacial 3D (`ElaboratePresentationSystem.tsx`)
@@ -158,29 +158,26 @@ Experiencia tridimensional inmersiva:
 
 ## 🔗 Conectores Cruzados y Nubes
 
-- **Conectores flotantes** entre cualquier par de nodos: etiqueta personalizada, estilos de flecha (`start`/`end`/`both`/`none`), geometrías (`bezier`, `curved`, `straight`, `step`) y capas (`above`/`below`).
+- **Conectores flotantes** entre cualquier par de nodos: etiqueta personalizada, geometrías (`bezier`, `curved`, `straight`, `step`), capas (`above`/`below`), opacidad, estilo y color; la flecha es siempre final (`end`, sin selector en la UI).
 - **Nubes de agrupación visual** con 8 formas geométricas y color RGBA personalizable.
 
 ## 🔍 Búsqueda y Filtrado Acumulativo
 
 Filtros reactivos en tiempo real (`Ctrl+F`):
-- Búsqueda por texto libre (título, cuerpo y notas).
-- Filtrado por etiquetas (tags).
-- Rango numérico de progreso (0–100%).
-- Filtrado por tipo de icono.
-- Presencia de notas Markdown o enlaces externos.
-- Modos de visualización: mostrar ancestros y/o descendientes del resultado.
+- Búsqueda por texto libre (**título y notas**).
+- Filtrado por etiquetas (tags) exactas.
+- Progreso: solo 100% completados, ≥50% o "con progreso activo".
 
 ## 📤 Exportar e Importar
 
 | Formato | Descripción |
 |---------|-------------|
 | `.mm` (Freeplane XML) | Compatible con Freeplane 1.x — importación y exportación completa |
-| `.html` | Página web interactiva autónoma — **sin dependencias externas ni conexión a internet** |
-| `.svg` | Vector escalable de alta resolución |
-| `.png` | Imagen rasterizada con escalado proporcional |
+| `.html` | Página web interactiva autónoma — **sin dependencias externas ni conexión a internet** (incluye botón "Imprimir / PDF") |
 | `.md` | Árbol jerárquico como encabezados Markdown |
 | `.json` | Copia de seguridad integral del estado interno |
+
+> ⚠️ No hay exportación directa a imagen (PNG/SVG): para obtener una imagen, exporta el `.html` y usa "Imprimir / PDF" del navegador.
 
 ---
 
@@ -278,13 +275,12 @@ freemind-map-studio/
 │   │   └── StatusBar.tsx              # Barra de estado inferior con métricas en tiempo real
 │   │
 │   ├── 📂 Modals/                     # MODALES ESTANDARIZADOS (con ModalBackdrop + ModalHeader)
-│   │   ├── ExportImportModal.tsx      # Exportación a 6 formatos e importación Freeplane/.mm
+│   │   ├── ExportImportModal.tsx      # Exportación a 4 formatos e importación .mm/.json
 │   │   ├── ShortcutsModal.tsx         # Guía de atajos de teclado
 │   │   ├── TemplatesModal.tsx         # Galería con +20 plantillas profesionales
 │   │   ├── SavedMapsModal.tsx         # Gestor de mapas guardados en localStorage
 │   │   ├── ConnectorModal.tsx         # Asistente de conectores cruzados
-│   │   ├── IconPackModal.tsx          # Catálogo de iconos vectoriales
-│   │   └── ComingSoonModal.tsx        # Modal de funciones en desarrollo
+│   │   └── IconPackModal.tsx          # Catálogo de iconos vectoriales
 │   │
 │   └── 📂 utils/                      # UTILIDADES PURAS Y ALGORITMOS
 │       ├── layoutEngine.ts            # Motor matemático de layout (9 algoritmos)
@@ -334,9 +330,7 @@ freemind-map-studio/
 | `Ctrl+F` | Abrir / Cerrar barra de búsqueda y filtrado |
 | `Alt+O` | Abrir / Cerrar vista de Esquema (`OutlineView`) |
 | `Alt+P` | Abrir / Cerrar panel de propiedades (`ToolPanel`) |
-| `Ctrl+0` | Centrar y ajustar mapa al tamaño de la pantalla |
-| `F5` | Iniciar Modo Presentación |
-| `Ctrl+E` | Abrir ventana de Exportación / Importación |
+| `F5` | Alternar modo presentación (reabre el último modo usado) |
 
 ### Modos de Presentación
 
@@ -379,7 +373,7 @@ La aplicación estará disponible en **http://localhost:3000** (puerto fijado en
 # Comprobación de tipos estricta con TypeScript
 pnpm lint          # ejecuta tsc --noEmit
 
-# Suite de pruebas unitarias con Vitest (87 tests / 17 archivos)
+# Suite de pruebas unitarias con Vitest (131 tests / 29 archivos)
 pnpm test          # ejecuta vitest run (en Windows, si se cuelga: pnpm vitest run --pool=forks)
 
 # Compilación optimizada para producción

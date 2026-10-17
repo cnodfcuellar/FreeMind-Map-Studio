@@ -5,7 +5,7 @@ Offline mindmap editor. React 19 + TS 5.8 + Vite 6 + Tailwind v4 + Zustand 5. No
 ## Commands (pnpm mandatory)
 
 - ALWAYS use `pnpm` — never `npm`/`yarn`. Ask first if no pnpm alternative exists.
-- `pnpm dev` → http://localhost:3000 (`package.json` pins `--port=3000 --host=0.0.0.0`; README's 5173 reference is stale).
+- `pnpm dev` → http://localhost:3000 (`package.json` pins `--port=3000 --host=0.0.0.0`).
 - `pnpm lint` = `tsc --noEmit` (typecheck only; no ESLint config).
 - `pnpm test` = `vitest run`; single file: `pnpm vitest run src/utils/__tests__/<name>.test.ts`.
 - On Windows, `pnpm test` (default pool) can hang on OneDrive paths → use `pnpm test:regression` (`vitest run --pool=forks`), the reliable full pass.

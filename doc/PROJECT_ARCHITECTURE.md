@@ -32,7 +32,7 @@
 FreeMind Map Studio es una suite de mapas mentales y presentaciones interactivas de grado profesional diseñada para ejecutarse íntegramente en el navegador web cliente. No requiere servidores centrales, bases de datos remotas ni autenticación de usuarios.
 
 ### Comandos (fuente: `package.json`, manda sobre el README)
-- `pnpm install` / `pnpm dev` → http://localhost:3000 (`vite --port=3000 --host=0.0.0.0`; el README dice 5173, obsoleto).
+- `pnpm install` / `pnpm dev` → http://localhost:3000 (`vite --port=3000 --host=0.0.0.0` fijado en `package.json`).
 - `pnpm lint` = `tsc --noEmit` (solo tipos, no hay ESLint). Verificado: exit 0.
 - `pnpm test` = `vitest run` (22 tests). ⚠️ En Windows/OneDrive el pool de workers por defecto puede colgarse (timeout 60s, 0 tests); usar `pnpm vitest run --pool=forks`. Un archivo: `pnpm vitest run src/utils/__tests__/<n>.test.ts`.
 - `pnpm build` / `pnpm preview`. `pnpm clean` usa `rm -rf` → falla en PowerShell; borrar `dist/` a mano.
@@ -208,7 +208,7 @@ Vista detallada del editor con contenido real (nodos, aristas, minimapa e inspec
 2. `CanvasDrawingOverlay.tsx`: recuadro punteado azul en vivo con dimensiones (`Ancho × Alto`), etiquetas de diapositivas, `pointer-events-none` para no bloquear clics a nodos.
 3. `CanvasPresentationHUD.tsx`: barras flotantes de Presentación Dinámica (Editor de Marcos / Presentar, `1. Seleccionar Nodo`, `2. Dibujar Recuadro`, Empezar de Cero, Filmstrip).
 4. `CanvasContextMenu.tsx`: clic derecho sobre nodo (11 acciones en 5 grupos: hijo/hermano/editar, copiar/cortar/pegar, conector/nube, aplicar estilo a hijos/hermanos, eliminar — oculto en raíz) o fondo del lienzo (item único "Agregar Rama Principal"). Contrato: `doc/DESIGN.md` §9.
-5. Shell: `MenuBar` (Archivo/Editar/Insertar/Formato/Ver/Ayuda; contratos y gotchas en `doc/DESIGN.md` §7), `ToolBar` (accesos rápidos + popovers Vista/Presentar), `FilterBar` (`Ctrl+F`, filtros query/tag/minProgress), `StatusBar` (nodos, selección, modo — **zoom/posición hardcodeados** `100`/`(0,0)` en `App:622-624`), `OutlineView` (árbol lateral editable `Alt+O`), `MiniMap` (radar `bottom-2 right-5` = **inferior derecha**, 3 tamaños S/M/L, viewport arrastrable + `ZoomControls`).
+5. Shell: `MenuBar` (Archivo/Editar/Insertar/Formato/Ver/Ayuda; contratos y gotchas en `doc/DESIGN.md` §7), `ToolBar` (accesos rápidos + popovers Vista/Presentar), `FilterBar` (`Ctrl+F`, filtros query/tag/minProgress), `StatusBar` (nodos, selección, modo, **zoom/posición reales** vía `onViewportChange` de `MindMapCanvas` — fix 2026-10-17), `OutlineView` (árbol lateral editable `Alt+O`), `MiniMap` (radar `bottom-2 right-5` = **inferior derecha**, 3 tamaños S/M/L, viewport arrastrable + `ZoomControls`).
 
 #### B. Inspector (`ToolPanel.tsx`, `aside w-84`)
 6 pestañas en `src/components/organisms/toolpanel/`:
@@ -219,8 +219,8 @@ Vista detallada del editor con contenido real (nodos, aristas, minimapa e inspec
 - `CloudsTab.tsx`: 3 secciones tras switch maestro (apagar borra `cloud`): **8 formas**, márgenes -50–200, color+opacidad decimal, borde 0–6 con `borderDash` def `dashed`. Gotchas: sin control de `shadow`; `bgType` gradient/pattern/image solo en render. Detalle en `doc/DESIGN.md` §8.
 - `ThemeTab.tsx`: **8 temas**, 9 layouts, fondo = color + **6 patrones** de cuadrícula (no "12 presets": ese import está muerto), aristas globales (4 estilos, 4 perfiles, color/Multicolor/Randomizar, grosor 1–8) y espaciado (**cableado 2026-10-17** vía adaptador `onUpdateMapGaps`→`onUpdateMapSpacing`); queda **1 hueco de wiring**: `onApplyEdge*ToAllNodes` no se pasa (solo efecto mapa). Detalle en `doc/DESIGN.md` §8.
 
-#### C. Modales Estandarizados (7)
-`ExportImportModal` (xl), `ShortcutsModal` (lg), `TemplatesModal` (4xl, ~20 plantillas), `SavedMapsModal` (lg, galería `localStorage`), `ConnectorModal` (md), `IconPackModal` (5xl `h-[90vh]`), `ComingSoonModal` (md, `rounded-3xl`). Base común: `ModalBackdrop` (`fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs`) + `ModalHeader` (`px-6 py-4`, icono `w-10 h-10 rounded-xl`, cierre con `Escape`).
+#### C. Modales Estandarizados (6)
+`ExportImportModal` (xl), `ShortcutsModal` (lg), `TemplatesModal` (4xl, ~20 plantillas), `SavedMapsModal` (lg, galería `localStorage`), `ConnectorModal` (md), `IconPackModal` (5xl `h-[90vh]`). (`ComingSoonModal` **eliminado** 2026-10-17, ver `doc/DESIGN.md` §8.5.7.) Base común: `ModalBackdrop` (`fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs`) + `ModalHeader` (`px-6 py-4`, icono `w-10 h-10 rounded-xl`, cierre con `Escape`).
 
 ### 2.3. Nivel 2 — Moléculas
 - `ZoomControls` (píldora `shadow-lg`, `%` en mono), `HistoryControls` (`flex gap-0.5` + atajos visibles), `SearchInput` (Input sm + lupa + Badge conteo), `ModalHeader`, `FontFormatToolbar` (2 grupos, activo `bg-blue-100`), `ShapeSelector` (`grid-cols-5`, sel `border-blue-600 bg-blue-50/80`), `TagManager` (chips `bg-blue-50`, X `hover:text-red-500`).
@@ -294,8 +294,8 @@ Los setters aceptan valor o updater. `presentationType` **no** está en el store
 `extractNodeStyleBundle` (forma, colores, degradados, tramas, imagen, bordes, tipografía) → cascada sin tocar textos/notas/tags/links. Los iconos van por vía separada para no pisar geometría. ⚠️ Al añadir campos visuales a `MindNode`, incluirlos en `extractNodeStyleBundle` o no se propagarán (ver Cookbook T1).
 
 ### 3.4. Hooks Desacoplados
-- `useKeyboardShortcuts.ts`: un oyente global; inactivo escribiendo, en modal o en presentación. `F5` presenta · `Tab/Insert` hijo · `Enter` hermano · `F2` editar · `Espacio` fold · `Supr/Back` borrar · `Esc`→raíz · flechas por `side` · `Ctrl+F` filterbar · `Alt+O/P` outline/toolpanel · `Ctrl+0` centrar.
-- `useSearchFilter.ts`: `searchMatches: Set<string> | undefined` (`undefined` = sin filtros); match lower en texto+nota, tag exacto, `progress >= min`; `availableTags` global; incluye ancestros/descendientes opcional.
+- `useKeyboardShortcuts.ts`: un oyente global; inactivo escribiendo, en modal o en presentación. `F5` presenta · `Tab/Insert` hijo · `Enter` hermano · `F2` editar · `Espacio` fold · `Supr/Back` borrar · `Esc`→raíz · flechas por `side` · `Ctrl+F` filterbar · `Alt+O/P` outline/toolpanel. (**No** existe `Ctrl+0` centrar — era del spec viejo, ver `doc/INTERFACE_SPEC.md` §3.6.)
+- `useSearchFilter.ts`: `searchMatches: Set<string> | undefined` (`undefined` = sin filtros); match lower en **texto+nota**, tag exacto, `progress >= min`; `availableTags` global. (No incluye ancestros/descendientes: `showAncestors/showDescendants` existen en el tipo `FilterOptions` pero el hook los ignora.)
 
 ---
 
@@ -326,7 +326,7 @@ Puro, sin DOM: `estimateNodeSize(node)` + `computeMindMapLayout(map, center)` en
 
 ## 5. Los 3 Sistemas de Presentación
 
-- **Clásica** (`PresentationMode.tsx`): slides DFS por nodo en 3 fases (Tema → Notas Markdown paginadas ~9 líneas → Hijos en grid máx 6 tarjetas, salto directo + `Backspace` retorno). **8 temas** (no 7; mismos IDs que los del mapa: `default rainbow dark forest sunset minimal blueprint honeycomb`). Generador por defecto: `presentationGenerator.ts` (`generateDefaultPresentationSlides`: overview pad 120 + root pad 24 + ramas).
+- **Clásica** (`PresentationMode.tsx`): slides DFS por nodo en 3 fases (Tema → Notas Markdown paginadas ~9 líneas → Hijos en grid máx 6 tarjetas, salto directo + `Backspace` retorno). **8 temas** (no 7; mismos IDs que los del mapa: `default rainbow dark forest sunset minimal blueprint honeycomb`). Las slides se generan **dentro del propio componente** (recorrido pre-order del árbol); el generador `presentationGenerator.ts` (overview/raíz/ramas con pads) pertenece a la **dinámica**, no a la clásica.
 - **Dinámica** (`MindMapCanvas` + `CanvasPresentationHUD` + `CanvasDrawingOverlay`): vuelo de cámara (`translate3d+scale`, transición 750ms `cubic-bezier(0.25,1,0.5,1)`), crear marco con 1 clic (pad 28px, sin duplicados), dibujar recuadro (`X × Y` en vivo), Empezar de Cero, Filmstrip. Regla: marcos `pointer-events-none` (solo badge `pointer-events-auto`). Zoom con oyente nativo `{ passive: false }`, no `onWheel` JSX.
 - **Espacial 3D** (`ElaboratePresentationSystem.tsx`, Motion 12): tarjetas 720×440 (`spatialPresentationGenerator.ts`: `spiral/constellation/grid`), `camPan/Zoom/Rotation`, arrastre con compensación angular, persiste en `mindMap.elaborateSlides`, `SlideDetailModal` para inspección.
 
@@ -335,8 +335,8 @@ Puro, sin DOM: `estimateNodeSize(node)` + `computeMindMapLayout(map, center)` en
 ## 6. Interoperabilidad, Exportación y Almacenamiento
 
 - **Freeplane `.mm`** (`freeplaneConverter.ts`): `exportToFreeplaneXML/importFromFreeplaneXML/exportToMarkdown/escapeXML`. `DOMParser`/`XMLSerializer`, compatible Freeplane 1.x (`<map version="freeplane 1.7.0">`, `TEXT/ID/POSITION/BACKGROUND_COLOR/COLOR/STYLE/LINK/FOLDED`, `<font>`, `<icon BUILTIN>`, `<cloud>`, `<hook><text>` notas, `<arrowlink>`).
-- **HTML autónomo** (`htmlExporter.ts`): `exportToStandaloneHTML(map)` — un solo archivo, JSON inline, sin CDN; réplica layout, clouds/edges/connectors, búsqueda, fold, print/PNG, pan/zoom, notas en drawer.
-- **SVG/PNG**: caja exacta (`minX/minY/maxX/maxY`), sin márgenes vacíos. **Markdown**: jerarquía como encabezados.
+- **HTML autónomo** (`htmlExporter.ts`): `exportToStandaloneHTML(map)` — un solo archivo, JSON inline, sin CDN; réplica layout, clouds/edges/connectors, búsqueda, fold, impresión ("Imprimir / PDF" vía `window.print`), pan/zoom, notas en drawer.
+- **Markdown** (`exportToMarkdown`): jerarquía como encabezados. ⚠️ **No hay exportación SVG/PNG en la app** (solo mm/html/md/json); para una imagen se usa la impresión/PDF del navegador desde el HTML portátil.
 - **Persistencia** (`storage.ts`, solo `localStorage`): `freemind_current_map_v1` (auto-guardado) · `freemind_saved_maps_index_v1` (`{id,title,updatedAt,nodeCount}`) · `freemind_map_{id}`. `loadCurrentMap` valida rootId/nodes, fallback al tutorial.
 - **Path hosted AI Studio** (no local): `metadata.json` (`MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API`) + `.env` (`GEMINI_API_KEY`, `APP_URL` inyectadas en runtime) + deps `express`/`@google/genai` en `package.json`. No montar servidor local: en desarrollo la app es 100% frontend.
 - **Contenido**: `sampleMaps.ts` (`TUTORIAL_MAP`, `BLANK_MAP`, 9 mapas + 10 de `additionalTemplates` → `ALL_TEMPLATES` ~20) · `iconMap.tsx` (`AVAILABLE_ICONS`) + `vectorIconPack.tsx` (520+, 12 categorías, buscador) · `templateIllustrations.ts` (32 SVG DataURI) · `markdownRenderer.tsx` (parser propio: inline `[]() ** * code ~~`, bloques ``` `#` `>` `- []` `1.` `---`) · `enrich_shapes.py` (utilidad: reescribe `shape:'bubble'` por variedad en `additionalTemplates.ts`).
@@ -481,8 +481,8 @@ style={{
 
 ### 📘 Tutorial 2: Modificar presentaciones
 - **HUD dinámica** (`CanvasPresentationHUD.tsx`): añadir botones con clases atómicas existentes (iconos `lucide-react`, `w-3.5 h-3.5`).
-- **Marcos** (`CanvasDrawingOverlay.tsx`, `slides.map`): el contenedor **siempre conserva `pointer-events-none`**; solo el badge `pointer-events-auto`. Seleccionado: `border-indigo-400 bg-indigo-500/20 shadow-[0_0_45px_rgba(99,102,241,0.5)]`.
-- **Nuevo tema clásico** (`PresentationMode.tsx`, objeto de temas con 8 entradas): añadir `{ id, name, bg, text, accent, cardBg, cardText }` con la misma forma.
+- **Marcos** (`CanvasDrawingOverlay.tsx`, `slides.map`): el contenedor **siempre conserva `pointer-events-none`**; solo el badge `pointer-events-auto`. Seleccionado (`z-30`): `border-blue-400 bg-blue-500/10 shadow-[0_0_35px_rgba(59,130,246,0.3)] ring-2 ring-blue-400/50`; resto: `border-dashed border-slate-500/40 bg-slate-800/5` (`z-15`).
+- **Nuevo tema clásico** (`PresentationMode.tsx`, objeto de temas con 8 entradas): añadir una entrada con la forma real de `PresentationThemeConfig`: `{ id, name, backgroundColor, textColor, accentColor, cardBgColor, cardBorderColor, previewColor, badgeBg, isLight, branchColors, accentClass?, cardBgClass?, cardBorderClass? }`.
 
 ### 📘 Tutorial 3: Nueva forma de nodo (Diamante)
 `types/mindmap.ts` (`NodeShape += 'diamond'`) → `ShapeSelector.tsx` (botón + icono) → `NodeBackgroundRenderer.tsx` (polígono `W/2,0 W,H/2 W/2,H 0,H/2`) → `layoutEngine.ts` (ajuste proporcional). Verificado: 10 formas actuales, mismo procedimiento.

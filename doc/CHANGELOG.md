@@ -1092,3 +1092,213 @@ El árbol de arquitectura del spec estaba **desfasado del código real**: listab
 - [x] §10.11: grep de setters de `isFreeFloating` → 0 en componentes.
 - [x] §10.12: `extractNodeStyleBundle` (:79-109) y ambos handlers (:519-588) leídos completos.
 - [x] Sin cambios de código → sin lint/tests (regresión vigente: 131/131).
+
+---
+
+## 📚 [Docs] — 2026-10-17: DESIGN §10 — re-auditoría de los 3 modos de presentación (referencias y datos)
+
+### 🎯 Motivo
+El usuario señaló que la documentación de los modos de presentación "no está bien documentada". Se re-auditó **§10 completa del `DESIGN.md`** (wiring + §10.1 clásica + §10.2 dinámica + §10.3 elaborate) leyendo los 11 ficheros implicados (~4.900 líneas). El **contenido funcional** (descripciones, teclados, parámetros, gotchas) era correcto en su práctica totalidad; los errores estaban en **referencias de línea desfasadas** (el código había cambiado tras la última sincronización), un recuento de líneas obsoleto, una ruta incompleta y 2 imprecisiones menores.
+
+### ✏️ Cambios
+| Zona | Corrección |
+|------|------------|
+| §10 Wiring | Referencias de `App.tsx` **todas desfasadas** → renumeradas: estado `:101→:100`, MenuBar `:180-189→:176-185`, ToolBar `:284-293→:278-287`, dinámica `:459→:421`, slot clásica `:630-641→:593-604`, elaborate `:643-649→:606-612`, gotcha `(App:180-188,279-287)→(App:176-185, 278-287)`; `MindMapCanvas:1536→:1543` (guard del MiniMap); ruta completa de `MainEditorLayout` (`components/templates/`) — sus líneas 39-65 ✓ eran correctas. |
+| §10.1 Clásica | Recuento **1492 → 1607 líneas** (`PresentationMode.tsx`); `App:634-638→:597-601` (`onEditNode`). Internas verificadas correctas: temas `:54-159`, modal `:712-1002`, radar `:915`, Space `:530`, themeId `:308`. |
+| §10.2 Dinámica | 13 referencias de `MindMapCanvas.tsx` renumeradas: slides `:182-186→:188-193`, update `:206→:211`, undo/redo `:193-232→:201-244` (**+ dato nuevo: profundidad máx. 25**, `slice(-25)`), teclado `:345-387→:352-389`, drag `:471+→:478+`, cursor `:860-862→:867-869`, salto a marco existente `:1403-1407→:1410-1414`, cámara **`(:878)→(:269-307)` + transición `:885`**, atenuación `:1366→:1373-1382` (**+ valor real: opacity 0.18, transición 400ms**), capa de marcos `:1485-1499→:1492-1503` (**+ nombre real: componente `CanvasDrawingOverlay`**), wiring del HUD `:1500-1533→:1506-1540`. **Imprecisión corregida**: el atajo `N` (:380-382) *no* depende del contenido — alterna el estado siempre; lo que no se renderiza es el cajón sin contenido (IIFE :323-340). |
+| §10.3 Elaborate | `App:647→:610` (`setMindMap` sin `pushHistory`); escala de tarjetas de nota preciseada (×0.95 espiral/pila/matriz, ×0.9 randómico, ×0.8-1.1 constelación — antes decía ×0.95 genérico). Verificadas correctas: teclado `:182-226`, imports muertos `:14-23`, `SlideDetailModal:30-39`, y **todos** los parámetros del generador (0.48 rad/+180, escala mín 0.85, semilla 42, r=1200/1950, 880×580, offsets ×16/×14). |
+
+### 🔍 Verificación
+- [x] Recuentos de línea reales por `Get-Content .Count` (PresentationMode 1607, HUD 489, Elaborate 786, Card 373, Modal 277, generators 212/495, MindMapCanvas 1584, App 700, shortcuts 221).
+- [x] Ficheros leídos **enteros**: `CanvasPresentationHUD.tsx`, `ElaboratePresentationSystem.tsx`, `SpatialSlideCardComponent.tsx`, `SlideDetailModal.tsx`, `presentationGenerator.ts`, `spatialPresentationGenerator.ts` — descripciones feature-a-feature contrastadas (top bars, pill, filmstrip, spotlight z-60/opacity 0.2, trayectoria Q con gradiente, patrones size 24/opacity 0.45, handles de transformación, 8 temas del modal, sliders -180..180 y 0.5-2.5/0.05).
+- [x] `MainEditorLayout.tsx` localizado en `src/components/templates/` (no `src/templates/`).
+- [x] Sin cambios de código → sin lint/tests (regresión vigente: 131/131).
+
+---
+
+## 📚 [Docs] — 2026-10-17: DESIGN §9 — auditoría del Panel de Esquema (OutlineView)
+
+### 🎯 Motivo
+El usuario preguntó si el "panel de esquema o outliner" estaba bien documentado. Se auditaron las secciones de `DESIGN.md` sobre `OutlineView` (estilos `:465` + contrato funcional `:467-474`) contra el fichero completo `src/components/OutlineView.tsx` (463 líneas). El **contenido funcional era correcto** (cabecera, búsqueda, fila, edición en línea, recursión, gotchas a-d); se corrigieron 3 desajustes y se añadieron 2 matices omitidos.
+
+### ✏️ Cambios
+| Archivo | Modificación |
+|---------|--------------|
+| `doc/DESIGN.md` §9 (estilos) | Hover de fila `hover:bg-slate-50` → **`hover:bg-[var(--sp-hover)]`** (`OutlineView.tsx:156`, token de UI tras claro/oscuro/sepia); + `font-medium shadow-2xs` en el estado seleccionado; ref del `aside` `:345-350` → `:344-350`. |
+| `doc/DESIGN.md` §9 (contrato) | Recuento **464 → 463 líneas**; ref de la búsqueda `:102-123` → **`:101-122`** (useMemo `matchedNodeIds`); + aclaración de que **la selección tiene prioridad** sobre el resaltado de búsqueda y que la fila de input se pinta con `showSearch || searchQuery`; ref del chequeo de plegado `:335` → **`:334`**; título: la raíz **siempre** `font-bold text-[13px]` y defaults YIQ precisados (`#1e293b` slate-800 / `#0f172a` slate-900 en raíz); **gotcha nuevo (e)**: sin resultados el árbol queda **completamente vacío** (la raíz no entra al set si nada matchea, no hay mensaje de "sin coincidencias"). |
+
+### 🔍 Verificación
+- [x] `OutlineView.tsx` leído completo (463 l.): clases de `aside` (:344-349), header (:352-426), búsqueda (:101-122), fila (:148-331), edición (:213-233), recursión (:334-338), footer (:457-460) cotejadas una a una.
+- [x] Props interface sin `onUpdateBody` → gotcha (a) confirmado vigente.
+- [x] Sin cambios de código → sin lint/tests (regresión vigente: 131/131).
+
+---
+
+## 📚 [Docs] — 2026-10-17: DESIGN §10.1 — presentación clásica auditada y ampliada (UI de header/footer)
+
+### 🎯 Motivo
+El usuario preguntó qué decía `DESIGN.md` sobre la presentación clásica y, al compararlo con capturas reales, la sección §10.1 resultó **incompleta** (no describía el header derecho ni el footer) y con **2 errores**. Auditoría de `PresentationMode.tsx` completo (1607 líneas).
+
+### ✏️ Cambios
+| Zona | Corrección |
+|------|------------|
+| §10.1 Errores | (1) **Radar minimapa**: decía "esquina inferior" → real **centro superior** (`fixed top-2 left-1/2 -translate-x-1/2 z-40`, `:1430-1432`) — el doc había copiado el label del modal, que a su vez **miente** (gotcha nuevo). (2) Icono de **"Volver"**: decía `CornerLeftUp` → real **`CornerUpLeft`** (`:668`); `CornerLeftUp` es el del botón "Inicio: padre" del footer (`:1376`). |
+| §10.1 Header | **Nuevo detalle**: 2 clusters — izquierda (badge "Modo Presentación Clásica" `Sparkles` + badge de fase con icono `BookOpen`/`FileText`/`GitBranch` y paginación "(Parte X/Y)") y derecha (Volver, **"Editar"** `SlidersHorizontal` con estado activo, **contador `n / total`** `font-mono hidden sm:inline`, `X` salir). |
+| §10.1 Footer | **Nuevo bloque completo**: cluster izq. *Anterior* + *Inicio: {padre}*; centro **dots clicables** por slide (activo `w-6`, salto directo); cluster der. *Siguiente Tema* (púrpura) + *Siguiente* (azul). |
+| §10.1 Render por fases | **Nuevo bullet**: `body` (breadcrumb clicable, grid imagen 5/7 col, escalas de título, chips progreso/tags), `notes` (barra de contexto + `MarkdownView isDark`), `children` (grid 3 col, chip "Nota adjunta", bloque de **conectores máx. 3** `slice(0,3)` que saltan al destino). |
+| §10.1 Nav + gotchas | Nav ampliada (`Backspace` con condición `(altKey || !shiftKey)`, `E`, guard INPUT/TEXTAREA, dots). **Gotchas nuevos**: (a) `onUpdateNode` es prop muerta (App la pasa en `:602`, el componente no la desestructura); (b) 4 imports muertos (`ArrowUpRight`, `MapPin`, `Eye`, `EyeOff`); (c) label "MiniMapa en Esquina Inferior" engañoso; (d) `getContrastSafeColor` whitelist fija de 6+6 hex. |
+
+### 🔍 Verificación
+- [x] Fichero leído **entero** (1607 l.): header `:613-709`, modal `:712-1002`, main `:1004-1346`, footer `:1349-1428`, radar `:1430-1604`, teclado `:517-548`, generación de slides `:361-437`.
+- [x] Iconos confirmados por grep (`CornerUpLeft`=2 usos, `CornerLeftUp`=2, etc.); prop muerta confirmada leyendo `App:594-603` y la desestructuración `:302-306`.
+- [x] Sin cambios de código → sin lint/tests (regresión vigente: 131/131).
+
+---
+
+## 📚 [Docs] — 2026-10-17: DESIGN §10.3 — presentación elaborate auditada y ampliada (top bar + bottom HUD)
+
+### 🎯 Motivo
+El usuario preguntó qué decía `DESIGN.md` sobre la presentación **elaborate** y, al compararlo con capturas reales, §10.3 resultó **incompleta**: no describía el top bar completo ni el bottom HUD, y llamaba "idénticos a §10.2" unos controles que no lo son. Auditoría de `ElaboratePresentationSystem.tsx` (786 l.) + `SlideDetailModal.tsx` (header/footer).
+
+### ✏️ Cambios
+| Zona | Corrección |
+|------|------------|
+| §10.3 Top bar | **Nuevo bullet** (`:384-504`): badge gradiente "Presentación Elaborada (Prezi Espacial)", título del mapa, **mode switcher "Editor del Lienzo" (indigo) ↔ "Presentar (F5)" (emerald)** (`:396-421`), grupo derecho **solo en editor** ("Acomodar:" `hidden md:flex` + "Nueva Tarjeta", `:425-494`) y `X` "Salir al Mapa Mental (ESC)" (`:496-502`); default `isPresenterMode=false` (`:51`). |
+| §10.3 Bottom HUD | **Nuevo bullet** (`:668-769`): línea de progreso gradiente violeta→azul con glow (`:670-677`); filmstrip default `true` (`:54`) con chips activo `bg-blue-600/30`, badge `#orden`, título `max-w-[130px]` y clic `setSelectedSlideId`+`flyCameraToSlide`; barra `h-12` con **contador `n / total` + `• título`** (`:711-715`), *Anterior* **con wrap**, **`Compass` conmutador** "Volver al foco" ↔ "Vista Panorámica (O)" (`:730-745`), *Siguiente* gradiente azul→índigo **con wrap** (`:747-757`) y **toggle filmstrip `Layers`** (`:761-767`). |
+| §10.3 Imprecisión | Se corrige **"controles idénticos a §10.2"** → elaborate **no tiene botón de Notas (N)**; solo Previo/Compass/Siguiente + toggle filmstrip. |
+| §10.3 Presentador + Editor | Añadido: en presentador **se ocultan** zoom flotantes (`:640`) y controles de editor del top bar; "Nueva Tarjeta"/"Acomodar:" aclarados como **controles del top bar, solo editor**. |
+| §10.3 SlideDetailModal | Ampliado: overlay `backdrop-blur-md` + card `max-h-[90vh]` (`:67-69`), **header** con badge `Slide #{order}` + h2 fijo "Editar Diapositiva (Estilo Clásico)" + `X` (`:73-86`), footer "Cancelar"/"Guardar Cambios" (`:263,271`), refs de "Vista Previa" (`:138`), "Rotación Espacial" (`:226`), "Escala de Tarjeta" (`:240`); 🐛 nuevo: **`contentAlign` por defecto del modal = `'left'`** (`:37`), no `'center'`. |
+| §10.3 Cámara | Ampliado: botones flotantes **solo `!isPresenterMode`** (`:640-664`) con clamps exactos (`Math.min(z*1.2, 3.0)` / `Math.max(z*0.8, 0.15)`). |
+
+### 🔍 Verificación
+- [x] `ElaboratePresentationSystem.tsx` leído en zonas clave: top bar `:376-504`, zoom/flotantes `:637-664`, bottom HUD `:665-771`; estado `:40-68` (grep `isFilmstripOpen` default `true`).
+- [x] `SlideDetailModal.tsx` leído `:55-99` (overlay/header) + refs grep de sliders y footer (`:138,226,240,263,271`).
+- [x] Sin cambios de código → sin lint/tests (regresión vigente: 131/131).
+
+---
+
+## 📚 [Docs] — 2026-10-17: DESIGN §10.2 — presentación dinámica completada (capa de marcos + correcciones)
+
+### 🎯 Motivo
+Tras revisar las capturas del usuario del modo dinámico, §10.2 presentó lagunas: el componente `CanvasDrawingOverlay` (justo lo que se ve en el editor de marcos) estaba apenas mencionado, el **orden del pill de herramientas estaba invertido** respecto al DOM real y faltaban los tooltips/tooltips del HUD. Auditoría de `CanvasDrawingOverlay.tsx` (94 líneas, leído completo) + grep de tooltips en `CanvasPresentationHUD.tsx`.
+
+### ✏️ Cambios
+| Zona | Corrección |
+|------|------------|
+| §10.2 Capa de marcos | **Nuevo bullet completo**: rectángulos `rounded-3xl border-2` — seleccionado `border-blue-400 bg-blue-500/10` + glow + z-30, resto `border-dashed border-slate-500/40 bg-slate-800/5` z-15; todo `pointer-events-none` (**nodos siempre clicables**); **badge "Slide {order}" escalonado** (`16 + ((order−1)%4)×32` px) clicable para enfocar (ignorado en modo dibujar), con `• {título}` si está activo o hay ≤8 marcos; **caja en curso** "Nuevo marco (W × H)" con icono `Crop` (`:41-91`). |
+| §10.2 Orden pill | **Corregido**: el doc listaba navigate → pick_nodes → draw_frame; el orden DOM real es **"1. Seleccionar Nodo" (:209) → "2. Dibujar Recuadro" (:220) → "Navegar / Mover" (:231)** (coincide con las capturas), precedido del label **"Crear marco:"** (`:200`). |
+| §10.2 Top bar | Añadidos los tooltips reales: "Deshacer (Ctrl+Z)"/"Rehacer (Ctrl+Y / Ctrl+Shift+Z)", "Empezar desde cero (Eliminar todos los marcos)" (`:160`), "Generar marcos según la jerarquía" + label "Auto-generar" `hidden sm:inline` (`:175-179`), "Salir de la presentación (ESC)" (`:188`). |
+| §10.2 Bottom HUD | Añadidos tooltips: "Anterior (← o Retroceso)" (`:435`), **"Vista General (O / Home)" ↔ "Volver al foco"** (`:444`), "Siguiente (→ o Espacio)" (`:455`), "Notas del Orador (N)" (`:468`), "Tira de Diapositivas" (`:479`); X staged con title "Deseleccionar todos" (`:295`). |
+| §10.2 Banner | Texto completo del estado vacío (`:313-315`) con las instrucciones de "1. Seleccionar Nodos" / "2. Dibujar Recuadro". |
+| §10.2 Teclado | El final del bullet ahora referencia el nuevo "Capa de marcos del editor" en vez del componente suelto. |
+
+### 🔍 Verificación
+- [x] `CanvasDrawingOverlay.tsx` leído **entero** (94 líneas).
+- [x] Tooltips y orden del pill verificados por grep en `CanvasPresentationHUD.tsx` (`:114-479`).
+- [x] Sin cambios de código → sin lint/tests (regresión vigente: 131/131).
+
+---
+
+## 📚 [Docs] — 2026-10-17: Barrido de sincronización — TODA la documentación contra el código
+
+### 🎯 Motivo
+Tras las auditorías de hoy (§9 OutlineView, §10.1/§10.2/§10.3 presentaciones), el usuario pidió **actualizar toda la documentación**. Los otros 4 docs (`README.md`, `PROJECT_ARCHITECTURE.md`, `GUIA-ESTUDIO.md`, `INTERFACE_SPEC.md`) y `AGENTS.md` arrastraban afirmaciones ya corregidas o falsas (ComingSoonModal, exportación PNG/SVG inventada, atajos `Ctrl+0`/`Ctrl+E` ficticios, StatusBar hardcodeado, conteo de tests de hace semanas). Regresión ejecutada para confirmar el conteo real.
+
+### ✏️ Cambios por fichero
+| Fichero | Correcciones |
+|---------|--------------|
+| `README.md` | Badge de tests **87/87 → 131/131** · árbol sin `ComingSoonModal` · **tabla de exportación sin `.svg`/`.png`** (no existen; añadido aviso "usar Imprimir/PDF del HTML") · bloque de búsqueda reducido a lo real (texto **título+notas**, tags exactos, progreso — **sin** icono/ancestros/enlaces) · conectores: flecha **siempre `end`** (sin selector) · imagen adjunta: posiciones reales y ancho **60–500px** · tamaño 0–500/0–300 (0 = auto) · filmstrip sin "ordenamiento" (no existe) · **atajos ficticios `Ctrl+0` y `Ctrl+E` eliminados**, F5 = alternar · "Exportación a 6 formatos" → 4. |
+| `doc/PROJECT_ARCHITECTURE.md` | StatusBar **ya no hardcodeado** (real vía `onViewportChange`, fix 2026-10-17) · modales **7 → 6** · **§5 Clásica**: el generador `presentationGenerator.ts` es de la **dinámica** (la clásica genera slides en el componente) · HTML: `print/PNG` → "Imprimir/PDF" (`window.print`) · borrada la línea **"SVG/PNG: caja exacta"** (no hay tal export) · Cookbook marcos: colores **indigo → blue reales** · Cookbook tema clásico: forma real de `PresentationThemeConfig` (13 campos) · hooks: sin `Ctrl+0` (ficticio) y `useSearchFilter` **sin** ancestros/descendientes · nota 5173 obsoleta retirada. |
+| `doc/GUIA-ESTUDIO.md` | MenuBar props sin `onShowComingSoon` · StatusBar: nota "zoom=100/0,0 pendiente cablear" → **cableado real** · **"Los 7 modales" → "Los 6 modales"** sin la excepción de banner de ComingSoon · su entrada sustituida por nota de eliminación. |
+| `doc/INTERFACE_SPEC.md` | Diagrama ASCII: "(Zoom y Posicion son fijos… hardcodeados)" → **valores reales** (fix 2026-10-17). |
+| `AGENTS.md` | Nota obsoleta "README's 5173 reference is stale" retirada (el README ya dice :3000). |
+
+### 🔍 Verificación
+- [x] `pnpm test:regression`: **131/131 tests en 29 archivos** (badge y contadores del README ajustados al resultado real).
+- [x] Hechos verificados en código antes de escribir: `useKeyboardShortcuts.ts` completo (sin `Ctrl+0`/`Ctrl+E`), `useSearchFilter.ts` (solo text+note/tag/minProgress), `PresentationThemeConfig` (`PresentationMode.tsx:33-48`), `StatusBar.tsx` con `positionX/Y` reales, sin exportadores PNG/SVG en `src/utils` (solo `window.print` en `htmlExporter.ts`).
+- [x] Grep final en los 7 `.md`: los únicos "ComingSoon"/"87 tests"/"Ctrl+0" restantes son menciones **históricas correctas** (CHANGELOG, §8.5.7, notas "eliminado 2026-10-17").
+- [x] Sin cambios de código → sin lint (la suite completa ya corrió: 131/131).
+
+---
+
+## 🔍 [Docs] — 2026-10-17: Auditoría de la pestaña "Iconos" (§8 IconsTab) contra código
+
+### 🎯 Motivo
+El usuario preguntó qué decía `doc/DESIGN.md` de la pestaña Iconos y pidió proceder a la auditoría (patrón pregunta → auditoría → docs). Contrato §8 líneas 370-383 revisado punto por punto contra el código real.
+
+### 🔎 Auditoría (leídos completos: `src/components/organisms/toolpanel/IconsTab.tsx` 1-314, `useMindMapStore.ts:590-664`, grep de `App.tsx`)
+**✅ Correcto — todo lo demás coincide al detalle:**
+- 314 líneas exactas · 1 `CollapsibleSection` abierta por defecto (`isStyleSectionOpen`), sin barra Desplegar/Plegar · badge dot `w-3.5 h-3.5` solo con `iconColor`.
+- `ColorPicker` "Tinte del Icono" con Reset → `undefined` · paleta Sugeridos: **7** dots `w-4.5 h-4.5` con los hex exactos, **sin ring**, enlace "Original" (`ml-auto`) solo si hay color.
+- Slider "Tamaño del Icono" `iconSize || 14`, **10-36 step 1**, badge `{n}px` / `"14px (Estándar)"`, Reset → `undefined`.
+- Propagación `grid-cols-2` → store: bundle `icons` (clon o `[]`) + `iconColor/iconSize/iconPosition` en `useMindMapStore.ts:600-605`/`645-650` ✓ (refs exactas); guardas verificadas: hijos recursivo con veto sin hijos; hermanos veto raíz/padre ≤1 hijo; `pushHistory` + `saveCurrentMap`.
+- "Iconos Asignados" solo con `icons.length > 0`, "Quitar todos" → `icons: []` (no `undefined`) ✓, chips `bg-white border-blue-200` + `renderNodeIcon(id,'w-3.5 h-3.5',iconColor)` + `X`.
+- Buscador `pl-8.5` con placeholder `Buscar entre {TOTAL_VECTOR_ICONS_COUNT}+ iconos...` y `searchVectorIcons` en `useMemo` · categorías `overflow-x-auto` con `CATEGORY_EMOJIS` de **13** entradas y fallback `•` · **8** quick tags (labels y queries exactos) · grid `grid-cols-6 max-h-[300px]` con `slice(0,120)` y activo `bg-blue-600 … ring-2 ring-blue-400 scale-105` · botón "Ver Galería Completa de Iconos" `w-full border-blue-200`.
+
+**❌ 2 desfases corregidos (solo refs de línea de `App.tsx`, desplazadas por los cambios de hoy):**
+| Cita | Decía | Ahora |
+|------|-------|-------|
+| Cableado propagación | `App.tsx:486-487` | **`App.tsx:449-450`** |
+| Cableado IconPackModal | `App.tsx:614` | **`App.tsx:577`** |
+
+**➕ Precisión añadida:** los botones de propagación son **condicionales** (`{onApply… && …}`, solo si prop), como ya documenta el botón de galería.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/DESIGN.md` §8 (líneas 378 y 383) | Refs `App.tsx` actualizadas a `:449-450` y `:577` + nota "solo si prop" en los botones de propagación. |
+
+### 🔍 Verificación
+- [x] `IconsTab.tsx` leído completo (314 líneas = las que cita el doc).
+- [x] `useMindMapStore.ts:590-664` — bundle y guardas coinciden con lo escrito.
+- [x] Grep `App.tsx`: `onApplyIconsToChildren/Siblings` en `:449-450`, `onOpenIconPackModal` en `:577` (un solo punto de cableado cada uno).
+- [x] `INTERFACE_SPEC.md` §5.4 y `PROJECT_ARCHITECTURE.md` (IconsTab) revisados: **sin refs obsoletas**, no requieren cambio.
+- [x] Sin cambios de código → sin lint/tests.
+
+---
+
+## 🔍 [Docs] — 2026-10-17: Corrección — el layout SÍ tiene UI (§10.5 contradecía §8 y el código)
+
+### 🎯 Motivo
+Al responder "qué dice DESIGN sobre la pestaña Mapa" (§8 ThemeTab, 5 secciones, 2026-10-17) se detectó una **contradicción interna** del propio `doc/DESIGN.md`: §8 punto 2 documenta la sección "Diseño del Árbol (Layout)" con los 9 layouts y `onUpdateMapLayout`, mientras §10.5 afirmaba *"no existe UI para cambiar el layout — nunca la hubo"* y que solo cambiaba por plantillas/importación/JSON. El usuario aprobó proceder.
+
+### 🔎 Auditoría (grep en `src`)
+- `onUpdateMapLayout` **cableado de punta a punta**: `App.tsx:456` (handler `onUpdateMapLayout={(layout: LayoutType) => …}`) → `ToolPanel.tsx:37,240` → `ThemeTab.tsx:36,76,208-214` (LAYOUT_OPTIONS :59-69, botones con `onClick={() => onUpdateMapLayout(opt.id)}`).
+- Tests que lo ejercitan: `organisms/toolpanel/__tests__/ThemeTab.test.tsx` y `__tests__/ToolPanel.test.tsx`.
+- **Causa raíz del error**: el grep original de la auditoría §10.5 (entrada CHANGELOG previa) solo buscaba `onChangeLayout` — la **prop muerta del ToolBar**, eliminada 2026-10-17 — y no `onUpdateMapLayout`. `INTERFACE_SPEC.md` §5.6 sí lo documenta correctamente ("Layout: 9 algoritmos con iconos").
+- Barrido en los 7 `.md`: el único claim falso era `DESIGN.md:574`; las menciones del CHANGELOG histórico se conservan como registro, y `INTERFACE_SPEC:550` (sin UI para **nodos libres**) es correcto y distinto.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/DESIGN.md` §10.5 | Gotcha "no existe UI para cambiar el layout" → **✅ Gotcha corregido**: el layout sí tiene UI (ThemeTab "Diseño del Árbol", 9 botones, `onUpdateMapLayout` App:456 → ToolPanel:37,240 → ThemeTab:36,76,208-214 + tests); lo inexistente es el selector en el ToolBar (`onChangeLayout`, prop muerta); se conserva la nota de que plantillas/importación `.mm`/JSON también lo cambian.
+
+### 🔍 Verificación
+- [x] Grep `onUpdateMapLayout|LAYOUT_OPTIONS` en `src/` → 11 coincidencias entre App, ToolPanel, ThemeTab y 2 ficheros de tests.
+- [x] §8 (ThemeTab punto 2) y §10.5 ahora coherentes entre sí y con `INTERFACE_SPEC` §5.6.
+- [x] Sin cambios de código → sin lint/tests.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Barrido de sincronización doc↔código (refs de línea y recuentos obsoletos)
+
+### 🎯 Motivo
+Segundo barrido completo del día. Los fixes de hoy (eliminación de `ComingSoonModal`, limpieza de props muertas en MenuBar/ToolBar, fix de Zoom/Posición en StatusBar con `onViewportChange`, etc.) **encogieron/desplazaron** `App.tsx` (740+ → **700 líneas**) y otros ficheros, dejando obsoletas decenas de referencias de línea y varios recuentos citados en la documentación. El usuario pidió "actualiza toda la documentación".
+
+### 🔎 Auditoría (lectura directa, sin suposiciones)
+- Recuentos reales por `Get-Content .Count` de los 40 ficheros citados en los docs (componentes, modales, hooks, utils, tipos).
+- Cada ref de línea dudosa verificada por `grep`/`read` del fichero actual: `App.tsx` completo por tramos (MenuBar :155-256, ToolBar :258-313, FilterBar/Outline :315-348, canvas :349-438, ToolPanel :439-578, StatusBar/presentación/modales :580-693), `MindMapCanvas` (teclado :352-394, menú contextual :640-673 + wrapper :876, cadena de aristas :1265-1281, isHighlighted :1373, marco-existente :1410-1414, DrawingOverlay :1492-1503, HUD :1508/1538, MiniMap :1544), `NodeComponent` (:66/:70-74/:77), `ToolBar` (:192/:285/:407/:526), `MenuBar` (6 dropdowns :158-495), `ToolPanel` (:63-71/:234-266), `layoutEngine` (:1378/:1450), `ShapeSelector` (ruta real `molecules/` + 123 l.).
+- Hallazgos: 34 refs/valores desfasados en DESIGN, 5 recuentos en GUIA-ESTUDIO, 5 en INTERFACE_SPEC, 1 comentario de código obsoleto. `README.md` y `PROJECT_ARCHITECTURE.md` **sin desfases** (ya correctos tras el barrido de la mañana). Coherencia interna: §7/§8/§10 del DESIGN ahora citan rangos que existen (antes había citas hasta `:736` en un fichero de 700).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/DESIGN.md` (34 refs) | **Recuentos**: NodeComponent 203→**211**, MenuBar 562→**558**, ToolBar 659→**643**, TemplatesModal 606→**607**, IconPackModal 370→**395**, layoutEngine ~1900→**1940**. **App.tsx** (tras reflow): no-op formas :232-234→**:227-229**, fallback temas :138→**:135**, arranque presentaciones :180-189→**:176-185**, onClearFilter :360-362→**:323-325**, bloque ThemeTab :488-598→**:440-578** (ToolPanel :234-255→**:234-266**), Reset bg :562-573→**:525-536**, onUpdateMapBackground :552-561→**:515-524**, adaptador espaciado :590-598→**:553-561**, ShortcutsModal :191→**:186**, ConnectorModal :435/:201,297→**:397/:196,289**, import :681-685→**:637-641**, plantillas :696-700→**:652-656**, loadMap :707-711→**:663-667**, onNewMap :712-721→**:668-677**, submit conector :729-736→**:685-692**, montaje :724-737→**:680-693**, hooks :131-134→**:128-131**. **MindMapCanvas**: key :1372→**:1379**, teclado :345-387/:352-389→**:352-394**, menú contextual :633-677→**:640-673**, wrapper onContextMenu :869→**:876**, cadena aristas :1258-1274→**:1265-1281** y color :1270→**:1277**. **NodeComponent**: useEffect :67-73→**:70-74**, ternario :69→**:77**. **ToolBar**: popover :423,542→**:407,526**, móvil :301→**:285**, grupo negrita :208→**:192**. **MenuBar dropdowns**: :162,217,257,316,434,499→**:158,213,253,312,430,495** + aclaración de que **solo el menú Archivo** tiene `animate-in` (los otros 5 dropdowns se pintan sin animación). |
+| `doc/GUIA-ESTUDIO.md` (5) | Recuentos: layoutEngine 1861→**1940**, ToolBar 659→**643**, ToolPanel 262→**272**, NodeComponent 199→**211**, MindMapCanvas 1577→**1584**. |
+| `doc/INTERFACE_SPEC.md` (5) | Fuente MenuBar 562→**558**; `App:159-168`→**:155-164** (Nuevo Mapa), `App:172-173`→**:169** (Importar), `App:634-638`→**:597-601** (Editar en Lienzo); ruta y contenido de `ShapeSelector` verificados correctos (`molecules/`, 123 l.). |
+| `src/components/ToolPanel.tsx` | Comentario interno del adaptador de espaciado: ref `App.tsx:590` → **`App.tsx:553`** (solo comentario, sin cambio de comportamiento). |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (tsc --noEmit) tras tocar ToolPanel.tsx → exit 0.
+- [x] Cada valor/referencia citada releída del código; DESIGN §7/§8/§9/§10 interno coherente y con `INTERFACE_SPEC`/`GUIA-ESTUDIO`.
+- [x] `README.md` y `PROJECT_ARCHITECTURE.md`: grep sin números obsoletos (ya sincronizados en el barrido matinal).

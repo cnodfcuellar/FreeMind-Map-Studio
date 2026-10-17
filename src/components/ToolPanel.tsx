@@ -250,7 +250,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
                   props.onUpdateMapGaps ??
                   ((gaps) => {
                     // Cableado 2026-10-17: App no pasa onUpdateMapGaps; adaptamos al
-                    // handler onUpdateMapSpacing(h, v) que App sí inyecta (App.tsx:590).
+                    // handler onUpdateMapSpacing(h, v) que App sí inyecta (App.tsx:553).
                     props.onUpdateMapSpacing?.(
                       gaps.horizontal ?? props.mindMap?.horizontalGap ?? 54,
                       gaps.vertical ?? props.mindMap?.verticalGap ?? 14
