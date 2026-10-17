@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MindMap, NodeShape } from '../types/mindmap';
+import { UiTheme } from '../utils/uiTheme';
 import {
   FileText,
   Save,
@@ -30,13 +31,15 @@ import {
   Eraser,
   Map,
   Zap,
+  Sun,
+  Moon,
+  Coffee,
 } from 'lucide-react';
 
 interface MenuBarProps {
   mindMap: MindMap;
   canUndo: boolean;
   canRedo: boolean;
-  isOutlineMode: boolean;
   onNewMap: () => void;
   onOpenTemplates: () => void;
   onOpenSavedMaps: () => void;
@@ -50,7 +53,6 @@ interface MenuBarProps {
   onDeleteNode: () => void;
   onToggleOutline: () => void;
   onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
-  onShowComingSoon?: (data: { title: string; subtitle: string; mode: 'elaborate' | 'dynamic' }) => void;
   onOpenShortcuts: () => void;
   onToggleFullscreen: () => void;
   onFoldAll: () => void;
@@ -62,13 +64,14 @@ interface MenuBarProps {
   onChangeTheme?: (themeId: string) => void;
   onChangeShape?: (shape: NodeShape) => void;
   onResetFormat?: () => void;
+  uiTheme?: UiTheme;
+  onCycleTheme?: () => void;
 }
 
 export const MenuBar: React.FC<MenuBarProps> = ({
   mindMap,
   canUndo,
   canRedo,
-  isOutlineMode,
   onNewMap,
   onOpenTemplates,
   onOpenSavedMaps,
@@ -82,7 +85,6 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onDeleteNode,
   onToggleOutline,
   onStartPresentation,
-  onShowComingSoon,
   onOpenShortcuts,
   onToggleFullscreen,
   onFoldAll,
@@ -94,6 +96,8 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onChangeTheme,
   onChangeShape,
   onResetFormat,
+  uiTheme = 'claro',
+  onCycleTheme,
 }) => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -130,7 +134,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   return (
     <header
       ref={menuRef}
-      className="h-10 bg-slate-900 text-white px-3 flex items-center justify-between z-50 relative shrink-0 select-none border-b border-slate-800 text-xs"
+      className="h-10 bg-[var(--chrome-bar)] text-white px-3 flex items-center justify-between z-50 relative shrink-0 select-none border-b border-slate-800 text-xs"
     >
       {/* Left: Brand & Dropdown Menus */}
       <div className="flex items-center gap-2">
@@ -151,7 +155,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
             Archivo
           </button>
           {openMenu === 'file' && (
-            <div className="absolute top-full left-0 mt-1 w-56 bg-white text-slate-800 rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--sp-bg)] text-[var(--sp-text)] rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
               <button
                 onClick={() => { onNewMap(); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600"
@@ -183,7 +187,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                 onClick={() => { onOpenExportModal(); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center justify-between font-semibold text-blue-600 hover:bg-blue-50"
               >
-                <span className="flex items-center gap-2"><FileDown className="w-3.5 h-3.5" /> Exportar (.mm / HTML / PNG)</span>
+                <span className="flex items-center gap-2"><FileDown className="w-3.5 h-3.5" /> Exportar (.mm / HTML)</span>
               </button>
               <button
                 onClick={() => { onOpenImportModal(); setOpenMenu(null); }}
@@ -206,7 +210,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
             Editar
           </button>
           {openMenu === 'edit' && (
-            <div className="absolute top-full left-0 mt-1 w-52 bg-white text-slate-800 rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
+            <div className="absolute top-full left-0 mt-1 w-52 bg-[var(--sp-bg)] text-[var(--sp-text)] rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
               <button
                 disabled={!canUndo}
                 onClick={() => { onUndo(); setOpenMenu(null); }}
@@ -246,7 +250,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
             Insertar
           </button>
           {openMenu === 'insert' && (
-            <div className="absolute top-full left-0 mt-1 w-56 bg-white text-slate-800 rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
+            <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--sp-bg)] text-[var(--sp-text)] rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
               <button
                 onClick={() => { onAddChild(); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600"
@@ -305,7 +309,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
             Formato
           </button>
           {openMenu === 'format' && (
-            <div className="absolute top-full left-0 mt-1 w-56 bg-white text-slate-800 rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
+            <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--sp-bg)] text-[var(--sp-text)] rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
               <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Temas Visuales</div>
               <button
                 onClick={() => { onChangeTheme?.('default'); setOpenMenu(null); }}
@@ -320,13 +324,13 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                 <span className="w-3 h-3 rounded-full bg-emerald-500"></span> Bosque Esmeralda
               </button>
               <button
-                onClick={() => { onChangeTheme?.('purple'); setOpenMenu(null); }}
+                onClick={() => { onChangeTheme?.('rainbow'); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600"
               >
-                <span className="w-3 h-3 rounded-full bg-purple-500"></span> Creativo Púrpura
+                <span className="w-3 h-3 rounded-full bg-gradient-to-r from-red-500 via-amber-400 to-blue-500"></span> Arcoiris Vibrante
               </button>
               <button
-                onClick={() => { onChangeTheme?.('warm'); setOpenMenu(null); }}
+                onClick={() => { onChangeTheme?.('sunset'); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600"
               >
                 <span className="w-3 h-3 rounded-full bg-amber-500"></span> Atardecer Cálido
@@ -423,7 +427,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
             Ver
           </button>
           {openMenu === 'view' && (
-            <div className="absolute top-full left-0 mt-1 w-56 bg-white text-slate-800 rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
+            <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--sp-bg)] text-[var(--sp-text)] rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
               <button
                 onClick={() => { onToggleOutline(); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600"
@@ -488,7 +492,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
             Ayuda
           </button>
           {openMenu === 'help' && (
-            <div className="absolute top-full left-0 mt-1 w-56 bg-white text-slate-800 rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
+            <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--sp-bg)] text-[var(--sp-text)] rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
               <button
                 onClick={() => { onOpenShortcuts(); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 font-medium"
@@ -530,12 +534,24 @@ export const MenuBar: React.FC<MenuBarProps> = ({
         )}
       </div>
 
-      {/* Right: Offline Indicator */}
+      {/* Right: Offline Indicator + UI Theme */}
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-[11px] font-medium">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className="hidden md:inline">100% Offline</span>
         </div>
+        {onCycleTheme && (
+          <button
+            type="button"
+            onClick={onCycleTheme}
+            title={`Tema de interfaz: ${uiTheme} (clic para cambiar)`}
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            {uiTheme === 'claro' && <Sun className="w-4 h-4" />}
+            {uiTheme === 'oscuro' && <Moon className="w-4 h-4" />}
+            {uiTheme === 'sepia' && <Coffee className="w-4 h-4" />}
+          </button>
+        )}
       </div>
     </header>
   );

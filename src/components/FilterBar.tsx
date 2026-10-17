@@ -30,7 +30,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     filterOptions.minProgress !== undefined;
 
   return (
-    <div className="h-10 bg-slate-900 text-white px-4 flex items-center justify-between z-30 relative shrink-0 text-xs shadow-md border-b border-slate-800 animate-in slide-in-from-top-2 duration-150 select-none">
+    <div className="h-10 bg-[var(--chrome-bar)] text-white px-4 flex items-center justify-between z-30 relative shrink-0 text-xs shadow-md border-b border-slate-800 animate-in slide-in-from-top-2 duration-150 select-none">
       <div className="flex items-center gap-3 flex-1 max-w-3xl">
         <div className="flex items-center gap-2 text-slate-300 font-semibold">
           <Search className="w-3.5 h-3.5 text-blue-400" />

@@ -527,7 +527,7 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
         return;
       }
 
-      if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'Enter') {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         handleNext();
       } else if (e.key === 'ArrowLeft') {

@@ -27,7 +27,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-1 p-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-lg shadow-slate-900/5 select-none ${className}`}
+      className={`flex items-center gap-1 p-1 bg-[var(--sp-bg)] backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-lg shadow-slate-900/5 select-none ${className}`}
     >
       {onToggleMiniMap && (
         <>
@@ -37,9 +37,9 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
             onClick={onToggleMiniMap}
             size="sm"
             rounded="xl"
-            className={showMiniMap ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 font-bold' : 'text-slate-600'}
+            className={showMiniMap ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600'}
           />
-          <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-800 my-auto mx-0.5" />
+          <div className="w-[1px] h-4 bg-slate-200 my-auto mx-0.5" />
         </>
       )}
 
@@ -54,7 +54,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
         type="button"
         onClick={onResetZoom}
         title="Restablecer zoom al 100% (Ctrl + 0)"
-        className="px-2 py-0.5 text-xs font-bold font-mono text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-800 rounded-lg transition-colors tabular-nums cursor-pointer"
+        className="px-2 py-0.5 text-xs font-bold font-mono text-slate-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors tabular-nums cursor-pointer"
       >
         {zoomPercentage}%
       </button>
@@ -65,7 +65,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
         size="sm"
         rounded="xl"
       />
-      <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-800 my-auto mx-0.5" />
+      <div className="w-[1px] h-4 bg-slate-200 my-auto mx-0.5" />
       {onFitToScreen && (
         <IconButton
           icon={<Maximize2 className="w-3.5 h-3.5" />}

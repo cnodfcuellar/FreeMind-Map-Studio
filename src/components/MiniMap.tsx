@@ -205,7 +205,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
 
   return (
     <div
-      className="absolute bottom-5 right-5 z-40 flex flex-col items-end gap-2 select-none pointer-events-auto"
+      className="absolute bottom-2 right-5 z-40 flex flex-col items-end gap-1.5 select-none pointer-events-auto"
       onMouseUp={handleMouseUp}
     >
       {/* MiniMap Canvas Card (Toggleable & Ultra-Crystal Glassmorphism) */}
@@ -215,18 +215,20 @@ export const MiniMap: React.FC<MiniMapProps> = ({
             borderColor: 'rgba(226, 232, 240, 0.85)',
             borderWidth: '1px',
             borderStyle: 'solid',
-            backgroundColor: 'rgba(255, 255, 255, 0.65)',
+            backgroundColor: 'var(--sp-glass, rgba(255, 255, 255, 0.65))',
             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
           }}
-          className={`backdrop-blur-md hover:bg-white/90 p-2 rounded-2xl ${sizeConfig.cardWidth} flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 group opacity-85 hover:opacity-100`}
+          className={`backdrop-blur-md hover:bg-white/90 p-1.5 rounded-2xl ${sizeConfig.cardWidth} flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 group opacity-85 hover:opacity-100`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-1 py-0.5 mb-1.5 text-slate-500 gap-1">
-            <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center justify-between px-1 py-0.5 mb-1 text-slate-500 gap-1">
+            <div className="flex items-center gap-1.5 min-w-0" title="MiniMapa">
               <Compass className="w-3.5 h-3.5 text-blue-600 shrink-0 opacity-80 group-hover:opacity-100 transition-opacity" />
-              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider truncate">
-                MiniMapa
-              </span>
+              {size !== 'compact' && (
+                <span className="text-[11px] font-bold text-[var(--sp-text)] uppercase tracking-wider truncate">
+                  MiniMapa
+                </span>
+              )}
             </div>
 
             <div className="flex items-center gap-1">

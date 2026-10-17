@@ -21,6 +21,10 @@ export interface NodeHeaderRowProps {
   textColor: string;
   effectiveFontFamily?: string;
   children?: React.ReactNode;
+  /** Ancho máximo del contenido (ej. '68%' en hexágono para respetar el polígono). */
+  contentMaxWidth?: string;
+  /** Tope en px para imágenes de contenido (ej. '96px' en hexágono). */
+  mediaMaxWidth?: string;
 }
 
 export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
@@ -41,6 +45,8 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
   textColor,
   effectiveFontFamily,
   children,
+  contentMaxWidth,
+  mediaMaxWidth,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -67,11 +73,26 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
     onFinishEditing();
   };
 
+  // Formas con contenido centrado (el hexágono además se ciñe al polígono)
+  const centeredShape =
+    node.shape === 'circle' ||
+    node.shape === 'square' ||
+    node.shape === 'star' ||
+    node.shape === 'hexagon';
+  const contentStyle: React.CSSProperties | undefined = contentMaxWidth
+    ? { maxWidth: contentMaxWidth, marginLeft: 'auto', marginRight: 'auto' }
+    : undefined;
+  // Las imágenes se acotan más (vértices estrechos) con tope fijo en px
+  // para que la medición del motor coincida con lo dibujado.
+  const mediaStyle: React.CSSProperties | undefined = mediaMaxWidth
+    ? { maxWidth: mediaMaxWidth, marginLeft: 'auto', marginRight: 'auto' }
+    : contentStyle;
+
   return (
     <>
       {/* Top Image if position is top, fit or default */}
       {!isImageHidden && node.imageUrl && (!node.imagePosition || node.imagePosition === 'top' || node.imagePosition === 'fit') && (
-        <div className="w-full flex justify-center mb-1.5 overflow-hidden rounded-lg relative z-10">
+        <div className="w-full flex justify-center mb-1.5 overflow-hidden rounded-lg relative z-10" style={mediaStyle}>
           <img
             src={node.imageUrl}
             alt=""
@@ -90,7 +111,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
         (!isProgressHidden && node.progress !== undefined && node.progressPosition !== 'left')) && (
         <div
           className={`flex items-center gap-1.5 mb-1 relative z-10 w-full ${
-            node.textAlign === 'center' || node.shape === 'circle' || node.shape === 'square' || node.shape === 'star'
+            node.textAlign === 'center' || centeredShape
               ? 'justify-center'
               : node.textAlign === 'right'
               ? 'justify-end'
@@ -159,7 +180,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
 
         {/* Left Attached Content Image */}
         {!isImageHidden && node.imageUrl && node.imagePosition === 'left' && (
-          <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 mr-1.5">
+          <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 mr-1.5" style={mediaStyle}>
             <img
               src={node.imageUrl}
               alt=""
@@ -174,7 +195,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
         )}
 
         {/* Main Text Content (Title & Body) */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center overflow-hidden z-10">
+        <div className="flex-1 min-w-0 flex flex-col justify-center overflow-hidden z-10" style={contentStyle}>
           {isEditing ? (
             <textarea
               ref={textareaRef}
@@ -188,7 +209,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
                 fontSize: `${node.fontSize || (isRoot ? 16 : 14)}px`,
                 fontWeight: node.bold ? 700 : 500,
                 fontStyle: node.italic ? 'italic' : 'normal',
-                textAlign: node.textAlign || (node.shape === 'circle' || node.shape === 'square' || node.shape === 'star' ? 'center' : 'left'),
+                textAlign: node.textAlign || (centeredShape ? 'center' : 'left'),
                 wordBreak: 'break-word',
                 overflowWrap: 'break-word',
               }}
@@ -215,7 +236,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
 
               {/* Between Image (between title and body) */}
               {!isImageHidden && node.imageUrl && node.imagePosition === 'between' && (
-                <div className="w-full flex justify-center my-1.5 overflow-hidden rounded-lg relative z-10">
+                <div className="w-full flex justify-center my-1.5 overflow-hidden rounded-lg relative z-10" style={mediaStyle}>
                   <img
                     src={node.imageUrl}
                     alt=""
@@ -238,7 +259,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
                     fontSize: `${node.bodyFontSize || (isRoot ? 13 : 12)}px`,
                     fontWeight: node.bodyBold ? 700 : 400,
                     fontStyle: node.bodyItalic ? 'italic' : 'normal',
-                    textAlign: node.bodyAlign || (node.shape === 'circle' || node.shape === 'square' || node.shape === 'star' ? 'center' : 'left'),
+                    textAlign: node.bodyAlign || (centeredShape ? 'center' : 'left'),
                     fontFamily: node.bodyFontFamily || effectiveFontFamily,
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',

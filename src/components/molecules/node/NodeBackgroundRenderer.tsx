@@ -201,9 +201,14 @@ export const getNodeShapeStyles = (
 
   if (shape === 'fork') {
     const underlineColor = borderColor || fallbackBorderColor;
-    const underlineWidth = borderWidth !== undefined ? borderWidth : 2.5;
+    // El subrayado es la forma: siempre visible (2.5px por defecto),
+    // independiente de que el borde de caja sea 0.
+    const underlineWidth = borderWidth && borderWidth > 0 ? borderWidth : 2.5;
     return {
       ...bgStyles,
+      background: 'transparent',
+      backgroundColor: 'transparent',
+      backgroundImage: 'none',
       border: 'none',
       borderBottom: underlineWidth > 0 ? `${underlineWidth}px ${borderStyle} ${underlineColor}` : 'none',
       borderRadius: '0px',
@@ -215,10 +220,10 @@ export const getNodeShapeStyles = (
     return {
       ...baseStyle,
       borderRadius: isRoot ? '24px' : '16px',
-      paddingLeft: '16px',
-      paddingRight: '16px',
-      paddingTop: '8px',
-      paddingBottom: '8px',
+      paddingLeft: '10px',
+      paddingRight: '10px',
+      paddingTop: '5px',
+      paddingBottom: '5px',
       boxShadow: '0 4px 14px -2px rgba(0,0,0,0.10), 0 2px 6px -1px rgba(0,0,0,0.06)',
     };
   }

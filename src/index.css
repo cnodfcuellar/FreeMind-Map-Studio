@@ -1,5 +1,55 @@
 @import "tailwindcss";
 
+/* Tema oscuro por clase (no por SO): lo gobierna data-theme + .dark,
+   persistido en localStorage (freemind_ui_theme_v1). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Superficies de barras por tema de interfaz (sepia incluido) */
+:root,
+:root[data-theme="claro"] {
+  --chrome-bar: #0f172a;
+  --chrome-toolbar: #ffffff;
+  --sp-bg: #ffffff;
+  --sp-bg2: #f8fafc;
+  --sp-hover: #f1f5f9;
+  --sp-glass: rgba(255, 255, 255, 0.65);
+  --sp-pop: rgba(255, 255, 255, 0.95);
+  --sp-text: #1e293b;
+  --sp-muted: #64748b;
+  --sp-border: #e2e8f0;
+  --sp-input: #ffffff;
+}
+:root[data-theme="oscuro"] {
+  --chrome-toolbar: #1e293b;
+  --sp-bg: #0f172a;
+  --sp-bg2: #1e293b;
+  --sp-hover: #1e293b;
+  --sp-glass: rgba(15, 23, 42, 0.65);
+  --sp-pop: rgba(15, 23, 42, 0.95);
+  --sp-text: #e2e8f0;
+  --sp-muted: #94a3b8;
+  --sp-border: #334155;
+  --sp-input: #1e293b;
+}
+:root[data-theme="sepia"] {
+  --chrome-bar: #433422;
+  --chrome-toolbar: #efe3c8;
+  --sp-bg: #f7efdc;
+  --sp-bg2: #efe2c6;
+  --sp-hover: #e9dcc0;
+  --sp-glass: rgba(247, 239, 220, 0.65);
+  --sp-pop: rgba(247, 239, 220, 0.95);
+  color-scheme: light;
+}
+:root[data-theme="sepia"] {
+  --chrome-bar: #433422;
+  --chrome-toolbar: #efe3c8;
+  color-scheme: light;
+}
+:root[data-theme="oscuro"] {
+  color-scheme: dark;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

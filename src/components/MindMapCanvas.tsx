@@ -87,6 +87,7 @@ interface MindMapCanvasProps {
   onClosePresentation?: () => void;
   onUpdateMindMap?: (updated: MindMap) => void;
   initialPresentationMode?: 'editor' | 'play';
+  onViewportChange?: (viewport: { zoom: number; x: number; y: number }) => void;
 }
 
 interface ContextMenuState {
@@ -125,6 +126,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   onClosePresentation,
   onUpdateMindMap,
   initialPresentationMode = 'play',
+  onViewportChange,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -133,6 +135,11 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Report zoom/pan to parent (StatusBar) whenever the viewport changes
+  useEffect(() => {
+    onViewportChange?.({ zoom, x: pan.x, y: pan.y });
+  }, [zoom, pan.x, pan.y, onViewportChange]);
 
   // Presentation Mode Internal States
   const [presMode, setPresMode] = useState<'editor' | 'play'>(initialPresentationMode);

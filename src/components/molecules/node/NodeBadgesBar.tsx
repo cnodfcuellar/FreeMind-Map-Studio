@@ -17,6 +17,10 @@ export interface NodeBadgesBarProps {
   globalVisibility?: {
     showAllNotesInline?: boolean;
   };
+  /** Acota tags/enlace/nota (ej. '68%' en hexágono). */
+  contentMaxWidth?: string;
+  /** Tope en px para imágenes (ej. '96px' en hexágono). */
+  mediaMaxWidth?: string;
 }
 
 export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
@@ -31,12 +35,20 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
   side,
   onOpenNote,
   globalVisibility,
+  contentMaxWidth,
+  mediaMaxWidth,
 }) => {
+  const contentStyle: React.CSSProperties | undefined = contentMaxWidth
+    ? { maxWidth: contentMaxWidth, marginLeft: 'auto', marginRight: 'auto' }
+    : undefined;
+  const mediaStyle: React.CSSProperties | undefined = mediaMaxWidth
+    ? { maxWidth: mediaMaxWidth, marginLeft: 'auto', marginRight: 'auto' }
+    : contentStyle;
   return (
     <>
       {/* Right Attached Content Image */}
       {!isImageHidden && node.imageUrl && node.imagePosition === 'right' && (
-        <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 ml-1.5">
+        <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 ml-1.5" style={mediaStyle}>
           <img
             src={node.imageUrl}
             alt=""
@@ -90,6 +102,7 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
       {/* Inline Note (Notas visibles debajo del cuerpo sin tooltip con contraste automático) */}
       {(node.showNoteInline || globalVisibility?.showAllNotesInline) && node.note && node.note.trim().length > 0 && (
         <div
+          style={contentStyle}
           className={`mt-2 pt-2 border-t rounded-lg p-2.5 text-xs select-text w-full shadow-2xs transition-all ${
             isDarkNodeBackground
               ? 'border-white/20 bg-black/35 text-slate-100 backdrop-blur-xs'
@@ -111,7 +124,7 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
 
       {/* Bottom Image if position is bottom */}
       {!isImageHidden && node.imageUrl && node.imagePosition === 'bottom' && (
-        <div className="w-full flex justify-center mt-1.5 overflow-hidden rounded-lg relative z-10">
+        <div className="w-full flex justify-center mt-1.5 overflow-hidden rounded-lg relative z-10" style={mediaStyle}>
           <img
             src={node.imageUrl}
             alt=""
@@ -127,6 +140,7 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
 
       {/* Dedicated Prominent Link Badge */}
       {!isLinkHidden && node.link && node.link.trim().length > 0 && (
+        <div className="w-full flex justify-center" style={contentStyle}>
         <a
           href={node.link}
           target="_blank"
@@ -140,11 +154,12 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
             {node.link.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '')}
           </span>
         </a>
+        </div>
       )}
 
       {/* Tags in the bottom area of the node (Centrados) */}
       {!isTagsHidden && node.tags && node.tags.length > 0 && (
-        <div className="flex flex-wrap items-center justify-center gap-1 mt-1 pt-1 border-t border-black/10 dark:border-white/10 w-full shrink-0 relative z-10">
+        <div className="flex flex-wrap items-center justify-center gap-1 mt-1 pt-1 border-t border-black/10 dark:border-white/10 w-full shrink-0 relative z-10" style={contentStyle}>
           {node.tags.map((tg, idx) => (
             <span
               key={idx}

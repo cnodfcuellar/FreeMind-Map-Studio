@@ -136,6 +136,9 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
     const styles = getNodeShapeStyles(forkNode, mockTheme, '#3b82f6', false);
     expect(styles.border).toBe('none');
     expect(styles.borderBottom).toContain('2px solid');
+    expect(styles.background).toBe('transparent');
+    expect(styles.backgroundColor).toBe('transparent');
+    expect(styles.backgroundImage).toBe('none');
     expect(JSON.stringify(styles)).not.toContain('!important');
 
     const zeroForkNode = createNode({
@@ -145,7 +148,7 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
       borderWidth: 0,
     });
     const zeroStyles = getNodeShapeStyles(zeroForkNode, mockTheme, '#3b82f6', false);
-    expect(zeroStyles.borderBottom).toBe('none');
+    expect(zeroStyles.borderBottom).toContain('2.5px solid');
   });
 
   it('renders SVG shape containers (hexagon, arrow, star) without rectangular borders', () => {

@@ -8,6 +8,8 @@ export interface ModalHeaderProps {
   icon?: React.ReactNode;
   onClose: () => void;
   badge?: React.ReactNode;
+  /** Solo claro aunque el SO esté en oscuro (requiere ModalBackdrop forceLight). */
+  forceLight?: boolean;
 }
 
 export const ModalHeader: React.FC<ModalHeaderProps> = ({
@@ -16,24 +18,25 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
   icon,
   onClose,
   badge,
+  forceLight = false,
 }) => {
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 select-none">
+    <div className={`flex items-center justify-between px-6 py-4 border-b border-slate-100 ${forceLight ? '' : 'dark:border-slate-800/80'} bg-[var(--sp-bg2)] ${forceLight ? '' : 'dark:bg-slate-900/50'} select-none`}>
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 shadow-xs">
+          <div className={`flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 ${forceLight ? '' : 'dark:bg-blue-950/60 dark:text-blue-400'} border border-blue-100 ${forceLight ? '' : 'dark:border-blue-900/50'} shadow-xs`}>
             {icon}
           </div>
         )}
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+            <h2 className={`text-lg font-bold text-slate-900 ${forceLight ? '' : 'dark:text-white'} tracking-tight`}>
               {title}
             </h2>
             {badge}
           </div>
           {subtitle && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className={`text-xs text-slate-500 ${forceLight ? '' : 'dark:text-slate-400'} mt-0.5`}>
               {subtitle}
             </p>
           )}

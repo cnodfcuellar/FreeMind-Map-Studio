@@ -16,6 +16,81 @@ export function estimateNodeSize(
     showAllNotesInline?: boolean;
   }
 ): { width: number; height: number } {
+  const boxShape = !node.shape || node.shape === 'bubble' || node.shape === 'rectangle';
+  const hasCustomW = Boolean(node.customWidth && node.customWidth > 0);
+  const hasCustomH = Boolean(node.customHeight && node.customHeight > 0);
+
+  // Con ambas dimensiones personalizadas manda el usuario.
+  if (hasCustomW && hasCustomH) {
+    return estimateNodeSizeInner(node, mapOptions, undefined);
+  }
+
+  // Solo ancho personalizado: la altura es la natural envuelta (ceñida).
+  if (boxShape && hasCustomW && !hasCustomH) {
+    return estimateNodeSizeInner(node, mapOptions, undefined);
+  }
+
+  // Solo alto personalizado: el ancho es el natural (ceñido).
+  if (boxShape && !hasCustomW && hasCustomH) {
+    return estimateNodeSizeInner(node, mapOptions, undefined);
+  }
+
+  // Totalmente automático en forma de caja: 4:3 como GUÍA de envoltura.
+  // Se calcula el tamaño natural, se deriva un ancho objetivo de igual área
+  // en 4:3 y se re-envuelve el texto a ese ancho. La altura resultante es
+  // la natural envuelta (el nodo se ciñe al contenido, sin huecos).
+  if (boxShape) {
+    const natural = estimateNodeSizeInner(node, mapOptions, undefined);
+    const targetW = Math.min(420, Math.max(80, Math.round(Math.sqrt(natural.width * natural.height * (4 / 3)))));
+    return estimateNodeSizeInner(node, mapOptions, targetW);
+  }
+
+  // Hexágono automático: el contenido visible es el 68% (polígono en punta),
+  // así que se envuelve angosto y la CAJA se deriva del contenido acotado:
+  // si hay mucho contenido, el nodo crece en vez de desbordar.
+  if (!hasCustomW && !hasCustomH && node.shape === 'hexagon') {
+    const natural = estimateNodeSizeInner(node, mapOptions, undefined);
+    const guide = Math.min(420, Math.max(80, Math.round(Math.sqrt(natural.width * natural.height * (4 / 3)))));
+    const targetW = Math.min(300, Math.max(100, Math.round(guide * 0.72)));
+    const wrapped = estimateNodeSizeInner(node, mapOptions, targetW);
+    return {
+      width: Math.max(wrapped.width, Math.round(targetW / 0.68)),
+      height: wrapped.height,
+    };
+  }
+
+  // Square/circle automáticos: cuadrado MÍNIMO que encaja el contenido
+  // (búsqueda binaria del ancho menor cuya altura envuelta cabe en el lado),
+  // en vez del lado máximo que dejaba huecos.
+  if (!hasCustomW && !hasCustomH && (node.shape === 'square' || node.shape === 'circle')) {
+    const natural = estimateNodeSizeInner(node, mapOptions, undefined);
+    let lo = 48;
+    let hi = Math.max(natural.width, natural.height, 48);
+    for (let i = 0; i < 8; i++) {
+      const mid = Math.round((lo + hi) / 2);
+      const probe = estimateNodeSizeInner(node, mapOptions, mid);
+      if (probe.height <= mid) hi = mid;
+      else lo = mid + 1;
+      if (lo >= hi) break;
+    }
+    return { width: hi, height: hi };
+  }
+
+  return estimateNodeSizeInner(node, mapOptions, undefined);
+}
+
+function estimateNodeSizeInner(
+  node: MindNode,
+  mapOptions: {
+    hideAllBodies?: boolean;
+    hideAllImages?: boolean;
+    hideAllTags?: boolean;
+    hideAllIcons?: boolean;
+    hideAllLinks?: boolean;
+    showAllNotesInline?: boolean;
+  } | undefined,
+  forcedWidth?: number
+): { width: number; height: number } {
   const isRoot = !node.parentId;
   const fontSize = node.fontSize || (isRoot ? 16 : 14);
   
@@ -26,9 +101,9 @@ export function estimateNodeSize(
   const isLinkHidden = node.hideLink || mapOptions?.hideAllLinks;
   const isProgressHidden = node.hideProgress;
 
-  // Base padding
-  const paddingX = isRoot ? 24 : 14;
-  const paddingY = isRoot ? 12 : 8;
+  // Base padding (ceñido: acompaña al padding visual del nodo)
+  const paddingX = isRoot ? 16 : 10;
+  const paddingY = isRoot ? 8 : 6;
   
   // Extra width / height for icons, progress, badges
   const iconPos = node.iconPosition || 'top';
@@ -58,21 +133,22 @@ export function estimateNodeSize(
     extraWidth += 18;
   }
 
-  // Node Image dimensions
+  // Node Image dimensions (hexágono: tope 96px como en el render)
   let imageExtraHeight = 0;
   let imageMinWidth = 0;
+  const hexImgCap = node.shape === 'hexagon' ? 96 : Number.POSITIVE_INFINITY;
   if (!isImageHidden && node.imageUrl) {
     if (node.imagePosition === 'background') {
       imageMinWidth = 70;
       imageExtraHeight = 20;
     } else if (node.imagePosition === 'left' || node.imagePosition === 'right') {
-      const imgW = node.imageWidth || 100;
+      const imgW = Math.min(node.imageWidth || 100, hexImgCap);
       const imgH = node.imageHeight || Math.round(imgW * 0.75);
       extraWidth += imgW + 10;
       imageExtraHeight = Math.max(0, imgH - 28);
     } else {
       // 'top', 'bottom', 'between'
-      const imgW = node.imageWidth || 140;
+      const imgW = Math.min(node.imageWidth || 140, hexImgCap);
       const imgH = node.imageHeight || Math.round(imgW * 0.65);
       imageExtraHeight = imgH + 12;
       imageMinWidth = imgW + 16;
@@ -84,6 +160,8 @@ export function estimateNodeSize(
   let tagMinWidth = 0;
   if (!isTagsHidden && node.tags && node.tags.length > 0) {
     extraHeight += 22; // Tag bar height + top border/margin
+    // En hexágono la columna es angosta: reserva una fila extra de tags
+    if (node.shape === 'hexagon') extraHeight += 22;
     tagMinWidth = Math.min(node.tags.reduce((acc, t) => acc + t.length * 7 + 16, 0), 280);
   }
 
@@ -100,9 +178,10 @@ export function estimateNodeSize(
   const lines = (node.text || ' ').split('\n');
 
   // Check if there is a specified custom width or symmetrical 1:1 shape
-  let customW = node.customWidth;
+  // (forcedWidth re-envuelve el texto para el 4:3 compacto sin tocar el nodo)
+  let customW = node.customWidth ?? forcedWidth;
   if (node.shape === 'square' || node.shape === 'circle') {
-    customW = Math.max(node.customWidth || 0, node.customHeight || 0);
+    customW = Math.max(node.customWidth || 0, node.customHeight || 0, forcedWidth || 0);
   }
 
   let titleWidth = 0;
@@ -210,7 +289,7 @@ export function estimateNodeSize(
     width = node.customWidth || (width + 52);
     height = node.customHeight || Math.max(height, 42);
   }
-  
+
   return { width, height };
 }
 

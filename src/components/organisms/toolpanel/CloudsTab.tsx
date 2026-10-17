@@ -56,6 +56,14 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
     setSectionsOpen((prev) => ({ ...prev, [s]: !prev[s] }));
   };
 
+  const handleExpandAll = (expand: boolean) => {
+    setSectionsOpen({
+      shape: expand,
+      fill: expand,
+      border: expand,
+    });
+  };
+
   const handleToggleCloud = () => {
     if (isCloudEnabled) {
       onUpdateNode(selectedNode.id, { cloud: undefined });
@@ -116,6 +124,30 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
 
       {isCloudEnabled && (
         <div className="space-y-3 animate-in fade-in duration-150">
+          {/* Barra superior de plegar / desplegar */}
+          <div className="flex items-center justify-between pb-0.5">
+            <span className="text-[10.5px] font-bold text-[var(--sp-muted)] uppercase tracking-wider">
+              Formato de la Nube
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleExpandAll(true)}
+                className="text-[10.5px] text-blue-600 hover:text-blue-800 font-semibold hover:underline cursor-pointer"
+              >
+                Desplegar todo
+              </button>
+              <span className="text-slate-300 text-[10px]">|</span>
+              <button
+                type="button"
+                onClick={() => handleExpandAll(false)}
+                className="text-[10.5px] text-slate-500 hover:text-slate-700 font-medium hover:underline cursor-pointer"
+              >
+                Plegar todo
+              </button>
+            </div>
+          </div>
+
           {/* 1. Forma y Dimensiones de la Nube */}
           <CollapsibleSection
             title="Forma y Márgenes"

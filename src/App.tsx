@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   MindNode,
   NodeShape,
@@ -11,6 +11,8 @@ import {
 import { THEMES } from './utils/themes';
 import { BLANK_MAP } from './utils/sampleMaps';
 import { saveCurrentMap } from './utils/storage';
+import { applyThemeRestyle, applyBackgroundUpdate } from './utils/mapTheme';
+import { loadUiTheme, applyUiTheme, getNextTheme, UiTheme } from './utils/uiTheme';
 import { ListTree, Sliders } from 'lucide-react';
 
 // Store Zustand & Hooks
@@ -40,7 +42,6 @@ import { TemplatesModal } from './components/Modals/TemplatesModal';
 import { SavedMapsModal } from './components/Modals/SavedMapsModal';
 import { ConnectorModal } from './components/Modals/ConnectorModal';
 import { IconPackModal } from './components/Modals/IconPackModal';
-import { ComingSoonModal, ComingSoonModalData } from './components/Modals/ComingSoonModal';
 import { ElaboratePresentationSystem } from './components/Presentation/ElaboratePresentationSystem';
 
 export default function App() {
@@ -97,7 +98,13 @@ export default function App() {
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
   const [presentationType, setPresentationType] = useState<'classic' | 'dynamic' | 'elaborate'>('dynamic');
-  const [comingSoonModalData, setComingSoonModalData] = useState<ComingSoonModalData | null>(null);
+  const [viewport, setViewport] = useState<{ zoom: number; x: number; y: number }>({ zoom: 1, x: 0, y: 0 });
+
+  // Tema de interfaz claro/oscuro/sepia (persistido, aplicado a <html>)
+  const [uiTheme, setUiTheme] = useState<UiTheme>(() => loadUiTheme());
+  useEffect(() => {
+    applyUiTheme(uiTheme);
+  }, [uiTheme]);
 
   const isAnyModalOpen = Boolean(
     isExportModalOpen ||
@@ -105,8 +112,7 @@ export default function App() {
       isTemplatesModalOpen ||
       isSavedMapsModalOpen ||
       isIconPackModalOpen ||
-      connectorSourceId ||
-      comingSoonModalData
+      connectorSourceId
   );
 
   const handleCloseModals = () => {
@@ -116,7 +122,6 @@ export default function App() {
     setIsSavedMapsModalOpen(false);
     setIsIconPackModalOpen(false);
     setConnectorSourceId(null);
-    setComingSoonModalData(null);
   };
 
   // Atajos de teclado globales
@@ -147,7 +152,6 @@ export default function App() {
           mindMap={mindMap}
           canUndo={historyPast.length > 0}
           canRedo={historyFuture.length > 0}
-          isOutlineMode={isOutlineOpen}
           onNewMap={() => {
             pushHistory(mindMap);
             setMindMap({
@@ -179,7 +183,6 @@ export default function App() {
             }
             setIsPresentationMode(true);
           }}
-          onShowComingSoon={(data) => setComingSoonModalData(data)}
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
           onToggleFullscreen={() => {
             if (!document.fullscreenElement) {
@@ -215,6 +218,8 @@ export default function App() {
             setMindMap((m) => ({ ...m, title: newTitle, updatedAt: Date.now() }))
           }
           onOpenIconPack={() => setIsIconPackModalOpen(true)}
+          uiTheme={uiTheme}
+          onCycleTheme={() => setUiTheme((t) => getNextTheme(t))}
           onChangeTheme={(themeId) => {
             pushHistory(mindMap);
             setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));
@@ -256,7 +261,6 @@ export default function App() {
           selectedNode={selectedNode}
           canUndo={historyPast.length > 0}
           canRedo={historyFuture.length > 0}
-          isOutlineOpen={isOutlineOpen}
           isToolPanelOpen={isToolPanelOpen}
           isFilterBarOpen={isFilterBarOpen}
           onUndo={handleUndo}
@@ -267,6 +271,10 @@ export default function App() {
           onToggleOutline={() => setIsOutlineOpen((o) => !o)}
           onToggleToolPanel={() => setIsToolPanelOpen((t) => !t)}
           onToggleFilterBar={() => setIsFilterBarOpen((f) => !f)}
+          onToggleGlobalVisibility={(key: 'hideAllBodies' | 'hideAllImages' | 'hideAllTags' | 'hideAllIcons' | 'hideAllLinks') => {
+            pushHistory(mindMap);
+            setMindMap((m) => ({ ...m, [key]: !m[key], updatedAt: Date.now() }));
+          }}
           onStartPresentation={(mode) => {
             if (mode === 'elaborate') {
               setPresentationType('elaborate');
@@ -277,8 +285,6 @@ export default function App() {
             }
             setIsPresentationMode(true);
           }}
-          onOpenTemplates={() => setIsTemplatesModalOpen(true)}
-          onOpenSavedMaps={() => setIsSavedMapsModalOpen(true)}
           onOpenExportModal={() => setIsExportModalOpen(true)}
           onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
           onToggleCloud={() => {
@@ -301,38 +307,9 @@ export default function App() {
               });
             }
           }}
-          onChangeLayout={(layout: LayoutType) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, layout, updatedAt: Date.now() }));
-          }}
-          onChangeTheme={(themeId) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));
-          }}
           onChangeShape={(shape: NodeShape) => {
             if (selectedNode) updateNode(selectedNode.id, { shape });
           }}
-          onChangeColor={(color) => {
-            if (selectedNode) updateNode(selectedNode.id, { color, bgType: 'color' });
-          }}
-          onChangeEdgeStyle={(edgeStyle: EdgeStyle) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, edgeStyle, updatedAt: Date.now() }));
-          }}
-          onChangeEdgeProfile={(edgeProfile: EdgeProfile) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, edgeProfile, updatedAt: Date.now() }));
-          }}
-          onChangeEdgeWidth={(edgeWidth: number) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, edgeWidth, updatedAt: Date.now() }));
-          }}
-          onChangeEdgeColor={(edgeColor: string) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, edgeColor, updatedAt: Date.now() }));
-          }}
-          onOpenIconPack={() => setIsIconPackModalOpen(true)}
-          onSave={() => saveCurrentMap(mindMap)}
         />
       }
       filterBar={
@@ -360,7 +337,6 @@ export default function App() {
             setFocusTarget({ nodeId: id, timestamp: Date.now() });
           }}
           onUpdateText={(id, text) => updateNode(id, { text })}
-          onUpdateBody={(id, body) => updateNode(id, { body })}
           onAddChild={(pid) => handleAddChild(pid)}
           onAddSibling={(sid) => handleAddSibling(sid)}
           onDeleteNode={(nid) => handleDeleteNode(nid)}
@@ -445,6 +421,7 @@ export default function App() {
               isPresentationMode={isPresentationMode && presentationType === 'dynamic'}
               onClosePresentation={() => setIsPresentationMode(false)}
               onUpdateMindMap={(updated) => setMindMap(updated)}
+              onViewportChange={setViewport}
               onUpdateConnector={(connectorId, updates) => {
                 pushHistory(mindMap);
                 setMindMap((m) => ({
@@ -474,7 +451,7 @@ export default function App() {
           onRandomizeEdgeColors={handleRandomizeEdgeColors}
           onUpdateMapTheme={(themeId) => {
             pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));
+            setMindMap((m) => applyThemeRestyle(m, themeId));
           }}
           onUpdateMapLayout={(layout: LayoutType) => {
             pushHistory(mindMap);
@@ -535,6 +512,28 @@ export default function App() {
             pushHistory(mindMap);
             setMindMap((m) => ({ ...m, backgroundColor, updatedAt: Date.now() }));
           }}
+          onUpdateMapBackground={(config: {
+            backgroundColor?: string;
+            backgroundPattern?: BackgroundPatternStyle;
+            backgroundPatternColor?: string;
+            backgroundPatternSize?: number;
+            backgroundPatternOpacity?: number;
+          }) => {
+            pushHistory(mindMap);
+            setMindMap((m) => applyBackgroundUpdate(m, config));
+          }}
+          onResetMapBackground={() => {
+            pushHistory(mindMap);
+            setMindMap((m) => ({
+              ...m,
+              backgroundColor: undefined,
+              backgroundPattern: undefined,
+              backgroundPatternColor: undefined,
+              backgroundPatternSize: undefined,
+              backgroundPatternOpacity: undefined,
+              updatedAt: Date.now(),
+            }));
+          }}
           onUpdateMapBackgroundPattern={(patternConfig: {
             pattern?: BackgroundPatternStyle;
             patternColor?: string;
@@ -583,9 +582,9 @@ export default function App() {
           totalNodes={Object.keys(mindMap.nodes).length}
           selectedNodeText={selectedNode?.text || null}
           selectedNodeId={selectedNodeId}
-          zoom={100}
-          positionX={0}
-          positionY={0}
+          zoom={Math.round(viewport.zoom * 100)}
+          positionX={Math.round(viewport.x)}
+          positionY={Math.round(viewport.y)}
           mode={editingNodeId ? 'Editando' : 'Listo'}
         />
       }
@@ -615,13 +614,6 @@ export default function App() {
       }
       modals={
         <>
-          <ComingSoonModal
-            isOpen={Boolean(comingSoonModalData)}
-            data={comingSoonModalData}
-            onClose={() => setComingSoonModalData(null)}
-            onStartClassic={() => setIsPresentationMode(true)}
-          />
-
           <IconPackModal
             isOpen={isIconPackModalOpen}
             onClose={() => setIsIconPackModalOpen(false)}

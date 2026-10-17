@@ -89,12 +89,12 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
   if (!isOpen) return null;
 
   return (
-    <aside className="w-84 bg-white border-l border-slate-200 shadow-xl flex flex-col z-10 h-full overflow-hidden transition-all select-none">
+    <aside className="w-84 bg-[var(--sp-bg)] border-l border-[var(--sp-border)] shadow-xl flex flex-col z-10 h-full overflow-hidden transition-all select-none">
       {/* 1. Header del panel */}
-      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-[var(--sp-bg2)]">
         <div className="flex items-center gap-2">
           <Sliders className="w-4 h-4 text-blue-600" />
-          <h2 className="font-semibold text-sm text-slate-800">Panel de Propiedades</h2>
+          <h2 className="font-semibold text-sm text-[var(--sp-text)]">Panel de Propiedades</h2>
         </div>
         <button
           type="button"
@@ -106,7 +106,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
       </div>
 
       {/* 2. Navegación de pestañas en grid / scroll adaptable */}
-      <div className="grid grid-cols-6 border-b border-slate-200 bg-slate-50/50 text-[11px] font-medium divide-x divide-slate-200/60 select-none">
+      <div className="grid grid-cols-6 border-b border-slate-200 bg-[var(--sp-bg2)] text-[11px] font-medium divide-x divide-slate-200/60 select-none">
         <button
           type="button"
           onClick={() => setActiveTab('content')}
@@ -114,7 +114,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
           className={`flex flex-col items-center justify-center py-2 px-1 transition-all cursor-pointer ${
             activeTab === 'content'
               ? 'bg-white text-blue-600 font-semibold border-b-2 border-blue-600 shadow-2xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-[var(--sp-muted)] hover:bg-[var(--sp-hover)] hover:text-[var(--sp-text)]'
           }`}
         >
           <Type className="w-3.5 h-3.5 mb-0.5" />
@@ -127,7 +127,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
           className={`flex flex-col items-center justify-center py-2 px-1 transition-all cursor-pointer ${
             activeTab === 'format'
               ? 'bg-white text-blue-600 font-semibold border-b-2 border-blue-600 shadow-2xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-[var(--sp-muted)] hover:bg-[var(--sp-hover)] hover:text-[var(--sp-text)]'
           }`}
         >
           <Palette className="w-3.5 h-3.5 mb-0.5" />
@@ -140,7 +140,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
           className={`flex flex-col items-center justify-center py-2 px-1 transition-all cursor-pointer ${
             activeTab === 'notes'
               ? 'bg-white text-blue-600 font-semibold border-b-2 border-blue-600 shadow-2xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-[var(--sp-muted)] hover:bg-[var(--sp-hover)] hover:text-[var(--sp-text)]'
           }`}
         >
           <FileText className="w-3.5 h-3.5 mb-0.5" />
@@ -153,7 +153,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
           className={`flex flex-col items-center justify-center py-2 px-1 transition-all cursor-pointer ${
             activeTab === 'icons'
               ? 'bg-white text-blue-600 font-semibold border-b-2 border-blue-600 shadow-2xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-[var(--sp-muted)] hover:bg-[var(--sp-hover)] hover:text-[var(--sp-text)]'
           }`}
         >
           <Smile className="w-3.5 h-3.5 mb-0.5" />
@@ -166,7 +166,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
           className={`flex flex-col items-center justify-center py-2 px-1 transition-all cursor-pointer ${
             activeTab === 'clouds'
               ? 'bg-white text-blue-600 font-semibold border-b-2 border-blue-600 shadow-2xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-[var(--sp-muted)] hover:bg-[var(--sp-hover)] hover:text-[var(--sp-text)]'
           }`}
         >
           <Cloud className="w-3.5 h-3.5 mb-0.5" />
@@ -179,7 +179,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
           className={`flex flex-col items-center justify-center py-2 px-1 transition-all cursor-pointer ${
             activeTab === 'theme'
               ? 'bg-white text-blue-600 font-semibold border-b-2 border-blue-600 shadow-2xs'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-[var(--sp-muted)] hover:bg-[var(--sp-hover)] hover:text-[var(--sp-text)]'
           }`}
         >
           <Layers className="w-3.5 h-3.5 mb-0.5" />
@@ -188,7 +188,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
       </div>
 
       {/* 3. Contenido de las pestañas */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs text-slate-700">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs text-[var(--sp-text)]">
         {!selectedNode && activeTab !== 'theme' ? (
           <div className="py-12 text-center text-slate-400">
             <p className="font-medium text-sm text-slate-600">Ningún nodo seleccionado</p>
@@ -246,7 +246,17 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
                 onApplyEdgeStyleToAllNodes={props.onApplyEdgeStyleToAllNodes}
                 onApplyEdgeProfileToAllNodes={props.onApplyEdgeProfileToAllNodes}
                 onRandomizeEdgeColors={props.onRandomizeEdgeColors}
-                onUpdateMapGaps={props.onUpdateMapGaps}
+                onUpdateMapGaps={
+                  props.onUpdateMapGaps ??
+                  ((gaps) => {
+                    // Cableado 2026-10-17: App no pasa onUpdateMapGaps; adaptamos al
+                    // handler onUpdateMapSpacing(h, v) que App sí inyecta (App.tsx:590).
+                    props.onUpdateMapSpacing?.(
+                      gaps.horizontal ?? props.mindMap?.horizontalGap ?? 54,
+                      gaps.vertical ?? props.mindMap?.verticalGap ?? 14
+                    );
+                  })
+                }
                 onOpenConnectorModal={props.onOpenConnectorModal}
                 onDeleteConnector={props.onDeleteConnector}
                 onUpdateConnector={props.onUpdateConnector}

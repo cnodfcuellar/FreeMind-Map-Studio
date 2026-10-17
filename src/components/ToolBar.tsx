@@ -35,11 +35,9 @@ interface ToolBarProps {
   canUndo: boolean;
   canRedo: boolean;
   isOutlineMode?: boolean;
-  isOutlineOpen?: boolean;
   isFilterBarOpen: boolean;
   isToolPanelOpen: boolean;
   mindMap?: MindMap;
-  onSave?: () => void;
 
   onToggleGlobalVisibility?: (key: 'hideAllBodies' | 'hideAllImages' | 'hideAllTags' | 'hideAllIcons' | 'hideAllLinks') => void;
   onAddChild: () => void;
@@ -54,25 +52,12 @@ interface ToolBarProps {
   onRedo: () => void;
   onToggleOutline: () => void;
   onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
-  onShowComingSoon?: (data: { title: string; subtitle: string; mode: 'elaborate' | 'dynamic' }) => void;
   onToggleFilterBar: () => void;
   onToggleToolPanel: () => void;
   onOpenConnectorModal: () => void;
   onToggleCloud: () => void;
   onOpenExportModal: () => void;
   onOpenIconPackModal?: () => void;
-  onOpenTemplates?: () => void;
-  onOpenSavedMaps?: () => void;
-  onChangeLayout?: (layout: LayoutType) => void;
-  onChangeTheme?: (themeId: string) => void;
-  onChangeColor?: (color: string) => void;
-  onChangeEdgeStyle?: (edgeStyle: EdgeStyle) => void;
-  onChangeEdgeProfile?: (edgeProfile: EdgeProfile) => void;
-  onChangeEdgeWidth?: (edgeWidth: number) => void;
-  onChangeEdgeColor?: (edgeColor: string) => void;
-  onChangeEdgeDash?: (edgeDash: 'solid' | 'dashed' | 'dotted') => void;
-  onResetEdges?: () => void;
-  onOpenIconPack?: () => void;
 }
 
 
@@ -96,7 +81,6 @@ export const ToolBar: React.FC<ToolBarProps> = ({
   onRedo,
   onToggleOutline,
   onStartPresentation,
-  onShowComingSoon,
   onToggleFilterBar,
   onToggleToolPanel,
   onOpenConnectorModal,
@@ -137,7 +121,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
   }, []);
 
   return (
-    <div className="h-11 bg-white border-b border-slate-200 px-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-2 z-40 shrink-0 select-none relative">
+    <div className="h-11 bg-[var(--chrome-toolbar)] border-b border-slate-200 px-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-2 z-40 shrink-0 select-none relative">
       {/* Left group: Node Actions & History */}
       <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
         {/* Undo / Redo */}
@@ -146,7 +130,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
             title="Deshacer (Ctrl+Z)"
             disabled={!canUndo}
             onClick={onUndo}
-            className="p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-35 disabled:hover:bg-transparent transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center"
+            className="p-1.5 rounded-lg text-[var(--sp-text)] hover:bg-[var(--sp-hover)] disabled:opacity-35 disabled:hover:bg-transparent transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center"
           >
             <Undo2 className="w-4 h-4" />
           </button>
@@ -154,7 +138,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
             title="Rehacer (Ctrl+Y)"
             disabled={!canRedo}
             onClick={onRedo}
-            className="p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-35 disabled:hover:bg-transparent transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center"
+            className="p-1.5 rounded-lg text-[var(--sp-text)] hover:bg-[var(--sp-hover)] disabled:opacity-35 disabled:hover:bg-transparent transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center"
           >
             <Redo2 className="w-4 h-4" />
           </button>
@@ -176,7 +160,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
         <button
           title="Agregar Nodo Hermano (Enter)"
           onClick={onAddSibling}
-          className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors shrink-0"
+          className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-lg text-[var(--sp-text)] hover:bg-[var(--sp-hover)] font-semibold text-xs transition-colors shrink-0"
         >
           <FolderPlus className="w-3.5 h-3.5 text-emerald-600" />
           <span className="hidden sm:inline">Hermano</span>
@@ -197,7 +181,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           title="Plegar / Desplegar Rama (Espacio)"
           disabled={!selectedNode || !selectedNode.children || selectedNode.children.length === 0}
           onClick={onToggleFold}
-          className="p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center shrink-0"
+          className="p-1.5 rounded-lg text-[var(--sp-text)] hover:bg-[var(--sp-hover)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center shrink-0"
         >
           {selectedNode?.folded ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
         </button>
@@ -205,13 +189,13 @@ export const ToolBar: React.FC<ToolBarProps> = ({
         <div className="w-px h-5 bg-slate-200 mx-0.5 sm:mx-1 shrink-0" />
 
         {/* Typography Quick Formats (visible from sm and up) */}
-        <div className="hidden xs:flex items-center gap-0.5">
+        <div className="hidden sm:flex items-center gap-0.5">
           <button
             title="Negrita (Bold)"
             disabled={!selectedNode}
             onClick={onToggleBold}
             className={`p-1.5 rounded-lg transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center ${
-              selectedNode?.bold ? 'bg-blue-100 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-100'
+              selectedNode?.bold ? 'bg-blue-100 text-blue-700 font-bold' : 'text-[var(--sp-text)] hover:bg-[var(--sp-hover)]'
             } disabled:opacity-30 disabled:hover:bg-transparent`}
           >
             <Bold className="w-3.5 h-3.5" />
@@ -222,7 +206,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
             disabled={!selectedNode}
             onClick={onToggleItalic}
             className={`p-1.5 rounded-lg transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center ${
-              selectedNode?.italic ? 'bg-blue-100 text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+              selectedNode?.italic ? 'bg-blue-100 text-blue-700' : 'text-[var(--sp-text)] hover:bg-[var(--sp-hover)]'
             } disabled:opacity-30 disabled:hover:bg-transparent`}
           >
             <Italic className="w-3.5 h-3.5" />
@@ -235,7 +219,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
             disabled={!selectedNode}
             value={selectedNode?.shape || 'bubble'}
             onChange={(e) => onChangeShape(e.target.value as NodeShape)}
-            className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-medium outline-none focus:border-blue-500 disabled:opacity-35 max-w-[105px] md:max-w-none truncate"
+            className="bg-[var(--sp-input)] border border-[var(--sp-border)] rounded-lg px-2 py-1 text-xs text-[var(--sp-text)] font-medium outline-none focus:border-blue-500 disabled:opacity-35 max-w-[105px] md:max-w-none truncate"
           >
             <option value="bubble">Burbuja</option>
             <option value="fork">Horquilla</option>
@@ -253,7 +237,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           title="Crear Conector / Relación entre 2 nodos"
           disabled={!selectedNode}
           onClick={onOpenConnectorModal}
-          className="hidden md:flex items-center gap-1 px-2 py-1.5 rounded-lg text-slate-700 hover:bg-slate-100 font-medium text-xs disabled:opacity-35 shrink-0"
+          className="hidden md:flex items-center gap-1 px-2 py-1.5 rounded-lg text-[var(--sp-text)] hover:bg-[var(--sp-hover)] font-medium text-xs disabled:opacity-35 shrink-0"
         >
           <Link className="w-3.5 h-3.5 text-cyan-600" />
           <span className="hidden lg:inline">Conector</span>
@@ -265,7 +249,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           disabled={!selectedNode}
           onClick={onToggleCloud}
           className={`hidden md:flex items-center gap-1 px-2 py-1.5 rounded-lg font-medium text-xs transition-colors ${
-            selectedNode?.cloud?.enabled ? 'bg-amber-100 text-amber-800' : 'text-slate-700 hover:bg-slate-100'
+            selectedNode?.cloud?.enabled ? 'bg-amber-100 text-amber-800' : 'text-[var(--sp-text)] hover:bg-[var(--sp-hover)]'
           } disabled:opacity-35 shrink-0`}
         >
           <Cloud className="w-3.5 h-3.5 text-amber-500" />
@@ -290,7 +274,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           <button
             title="Más opciones de nodo"
             onClick={() => setIsMoreMenuOpen((o) => !o)}
-            className={`p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center ${
+            className={`p-1.5 rounded-lg text-[var(--sp-text)] hover:bg-[var(--sp-hover)] transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center ${
               isMoreMenuOpen ? 'bg-slate-100 text-blue-600' : ''
             }`}
           >
@@ -298,7 +282,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           </button>
 
           {isMoreMenuOpen && (
-            <div className="absolute top-full left-0 mt-1 w-52 bg-white text-slate-800 rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 text-xs">
+            <div className="absolute top-full left-0 mt-1 w-52 bg-[var(--sp-bg)] text-slate-800 rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 text-xs">
               <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Formato & Enlaces
               </div>
@@ -395,7 +379,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           title="Buscar y Filtrar (Ctrl+F)"
           onClick={onToggleFilterBar}
           className={`p-1.5 rounded-lg transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center shrink-0 ${
-            isFilterBarOpen ? 'bg-blue-100 text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+            isFilterBarOpen ? 'bg-blue-100 text-blue-700' : 'text-[var(--sp-text)] hover:bg-[var(--sp-hover)]'
           }`}
         >
           <Search className="w-4 h-4" />
@@ -411,7 +395,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 ? 'bg-amber-100 text-amber-800 shadow-2xs'
                 : hasAnyHiddenGlobal
                 ? 'bg-amber-50 text-amber-700 border border-amber-300'
-                : 'text-slate-700 hover:bg-slate-100'
+                : 'text-[var(--sp-text)] hover:bg-[var(--sp-hover)]'
             }`}
           >
             {hasAnyHiddenGlobal ? <EyeOff className="w-3.5 h-3.5 text-amber-600" /> : <Eye className="w-3.5 h-3.5 text-slate-600" />}
@@ -420,7 +404,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           </button>
 
           {isVisibilityMenuOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-64 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 select-none">
+            <div className="absolute right-0 top-full mt-1.5 w-64 bg-[var(--sp-pop)] backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 select-none">
               <div className="px-2.5 py-1.5 border-b border-slate-100 mb-1 flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Visibilidad Global (Modo Enfoque)
@@ -432,7 +416,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 onClick={() => onToggleGlobalVisibility?.('hideAllBodies')}
                 className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="flex items-center gap-2 text-[var(--sp-text)] font-medium">
                   <FileText className="w-4 h-4 text-emerald-600" />
                   <span>Cuerpos / Explicación</span>
                 </div>
@@ -448,7 +432,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 onClick={() => onToggleGlobalVisibility?.('hideAllImages')}
                 className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="flex items-center gap-2 text-[var(--sp-text)] font-medium">
                   <ImageIcon className="w-4 h-4 text-purple-600" />
                   <span>Imágenes adjuntas</span>
                 </div>
@@ -464,7 +448,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 onClick={() => onToggleGlobalVisibility?.('hideAllTags')}
                 className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="flex items-center gap-2 text-[var(--sp-text)] font-medium">
                   <Tag className="w-4 h-4 text-amber-600" />
                   <span>Etiquetas (#Tags)</span>
                 </div>
@@ -480,7 +464,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 onClick={() => onToggleGlobalVisibility?.('hideAllIcons')}
                 className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="flex items-center gap-2 text-[var(--sp-text)] font-medium">
                   <Sparkles className="w-4 h-4 text-blue-600" />
                   <span>Iconos temáticos</span>
                 </div>
@@ -496,7 +480,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 onClick={() => onToggleGlobalVisibility?.('hideAllLinks')}
                 className="w-full px-2.5 py-2 rounded-xl text-left hover:bg-slate-50 flex items-center justify-between text-xs transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="flex items-center gap-2 text-[var(--sp-text)] font-medium">
                   <Link className="w-4 h-4 text-cyan-600" />
                   <span>Insignias de enlace</span>
                 </div>
@@ -515,7 +499,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           title="Mostrar / Ocultar panel lateral de esquema (Alt+O)"
           onClick={onToggleOutline}
           className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg font-semibold text-xs transition-colors shrink-0 ${
-            isOutlineMode ? 'bg-indigo-100 text-indigo-700 font-bold shadow-2xs' : 'text-slate-700 hover:bg-slate-100'
+            isOutlineMode ? 'bg-indigo-100 text-indigo-700 font-bold shadow-2xs' : 'text-[var(--sp-text)] hover:bg-[var(--sp-hover)]'
           }`}
         >
           <ListTree className="w-3.5 h-3.5" />
@@ -539,7 +523,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           </button>
 
           {isPresentationMenuOpen && (
-            <div className="absolute right-0 top-full mt-1.5 w-72 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 select-none">
+            <div className="absolute right-0 top-full mt-1.5 w-72 bg-[var(--sp-pop)] backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 select-none">
               <div className="px-2.5 py-1.5 border-b border-slate-100 mb-1 flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Tipos de Presentación
@@ -562,7 +546,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-bold text-xs text-slate-800 group-hover:text-purple-900">
+                    <span className="font-bold text-xs text-[var(--sp-text)] group-hover:text-purple-900">
                       Clásico
                     </span>
                     <span className="px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px] font-bold">
@@ -588,7 +572,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-bold text-xs text-slate-800 group-hover:text-indigo-900">
+                    <span className="font-bold text-xs text-[var(--sp-text)] group-hover:text-indigo-900">
                       Elaborado (Espacial Prezi)
                     </span>
                     <span className="px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px] font-bold">
@@ -614,7 +598,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-bold text-xs text-slate-800 group-hover:text-pink-900">
+                    <span className="font-bold text-xs text-[var(--sp-text)] group-hover:text-pink-900">
                       Dinámico (Estilo Mindomo)
                     </span>
                     <span className="px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[9px] font-bold">
@@ -632,7 +616,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
 
         {/* Export / Portable HTML */}
         <button
-          title="Exportar archivo .mm / HTML Portable / Imágenes"
+          title="Exportar archivo .mm / HTML Portable"
           onClick={onOpenExportModal}
           className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold text-xs shadow-xs transition-colors shrink-0"
         >
@@ -647,7 +631,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           title="Alternar Panel de Propiedades (Alt+P)"
           onClick={onToggleToolPanel}
           className={`p-1.5 rounded-lg transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center shrink-0 ${
-            isToolPanelOpen ? 'bg-blue-100 text-blue-700' : 'text-slate-700 hover:bg-slate-100'
+            isToolPanelOpen ? 'bg-blue-100 text-blue-700' : 'text-[var(--sp-text)] hover:bg-[var(--sp-hover)]'
           }`}
         >
           <Sliders className="w-4 h-4" />

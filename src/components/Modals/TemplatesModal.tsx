@@ -360,17 +360,18 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
   });
 
   return (
-    <ModalBackdrop isOpen={isOpen} onClose={onClose} maxWidth="4xl">
+    <ModalBackdrop isOpen={isOpen} onClose={onClose} maxWidth="4xl" forceLight>
       <ModalHeader
         title="Galería de Plantillas y Ejemplos"
         subtitle="Mapas preconfigurados con etiquetas de nodo, estilos de enlace, perfiles de grosor y paletas"
         icon={<Sparkles className="w-5 h-5 text-blue-600" />}
         badge={
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
-            20 Modelos
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+            {ALL_TEMPLATES.length} Modelos
           </span>
         }
         onClose={onClose}
+        forceLight
       />
 
         {/* Filter and Search Bar */}
@@ -593,7 +594,7 @@ export const TemplatesModal: React.FC<TemplatesModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+        <div className="px-6 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500 shrink-0">
           <span>Selecciona cualquier plantilla para cargar su contenido y configuración visual completa.</span>
           <Button variant="secondary" size="sm" onClick={onClose}>
             Cerrar

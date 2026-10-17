@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { MindNode, CalculatedNodeLayout, MindMapTheme } from '../types/mindmap';
 import {
@@ -65,6 +65,14 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [editText, setEditText] = useState<string>(node.text);
 
+  // Resync editText when entering edit mode: node.text may have changed since mount
+  // (outline edits, undo/redo, templates, paste) and nodes are keyed by id (no remount).
+  useEffect(() => {
+    if (isEditing) {
+      setEditText(node.text);
+    }
+  }, [isEditing]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const isRoot = !node.parentId;
   const shape = node.shape || (isRoot ? 'rounded' : 'rounded');
   const hasChildren = Boolean(node.children && node.children.length > 0);
@@ -99,7 +107,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         ...(isSelected && shape === 'fork' ? { filter: 'drop-shadow(0 2px 4px rgba(59,130,246,0.8))' } : {}),
       }}
       className={`absolute select-none flex flex-col justify-center transition-all duration-150 group cursor-pointer ${
-        isSvgShape || shape === 'fork' ? 'px-0 py-0 shadow-none' : 'px-3 py-1.5 shadow-xs'
+        isSvgShape || shape === 'fork' ? 'px-0 py-0 shadow-none' : 'px-2 py-1 shadow-xs'
       } ${
         isStaged
           ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-slate-950 shadow-[0_0_35px_rgba(59,130,246,0.9)] scale-[1.03] z-50 animate-pulse'
@@ -166,6 +174,8 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         isBodyHidden={isBodyHidden}
         textColor={textColor}
         effectiveFontFamily={effectiveFontFamily}
+        contentMaxWidth={shape === 'hexagon' ? '68%' : undefined}
+        mediaMaxWidth={shape === 'hexagon' ? '96px' : undefined}
       />
 
       {/* 4. Badges Bar (Right Image, Bottom Image, Note icon/inline, Prominent Link, Tags, Tooltip) */}
@@ -181,6 +191,8 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         side={layout.side}
         onOpenNote={onOpenNote}
         globalVisibility={globalVisibility}
+        contentMaxWidth={shape === 'hexagon' ? '68%' : undefined}
+        mediaMaxWidth={shape === 'hexagon' ? '96px' : undefined}
       />
 
       {/* 5. Action Buttons (Fold/Unfold branch badge & Quick Add child button) */}

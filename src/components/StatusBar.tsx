@@ -20,7 +20,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   mode = 'Listo',
 }) => {
   return (
-    <div className="h-6 bg-slate-900 text-slate-400 px-3 flex items-center gap-4 z-30 shrink-0 select-none border-t border-slate-800 text-[10px] sm:text-xs">
+    <div className="h-6 bg-[var(--chrome-bar)] text-slate-400 px-3 flex items-center gap-4 z-30 shrink-0 select-none border-t border-slate-800 text-[10px] sm:text-xs">
       <div>
         Nodos totales: <span className="text-slate-200">{totalNodes}</span>
       </div>

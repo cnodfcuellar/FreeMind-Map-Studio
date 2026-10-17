@@ -65,7 +65,6 @@ interface OutlineViewProps {
   onToggleFullscreen?: () => void;
   onSelectNode: (id: string) => void;
   onUpdateText: (id: string, text: string) => void;
-  onUpdateBody?: (id: string, body?: string) => void;
   onAddChild: (parentId: string) => void;
   onAddSibling: (siblingId: string) => void;
   onDeleteNode: (id: string) => void;
@@ -154,7 +153,7 @@ export const OutlineView: React.FC<OutlineViewProps> = ({
               ? 'bg-blue-50/90 border-blue-600 text-blue-950 font-medium shadow-2xs'
               : isSearchMatch
               ? 'bg-amber-50/80 border-amber-400 text-slate-800'
-              : 'border-transparent hover:bg-slate-50 text-slate-700'
+              : 'border-transparent hover:bg-[var(--sp-hover)] text-[var(--sp-text)]'
           }`}
         >
           {/* Fold/Unfold Arrow */}
@@ -346,18 +345,18 @@ export const OutlineView: React.FC<OutlineViewProps> = ({
       className={`${
         isFullscreen
           ? 'flex-1 z-30'
-          : 'w-80 md:w-88 border-r border-slate-200 shadow-xl z-20 shrink-0'
-      } bg-white flex flex-col h-full overflow-hidden transition-all select-none`}
+          : 'w-80 md:w-88 border-r border-[var(--sp-border)] shadow-xl z-20 shrink-0'
+      } bg-[var(--sp-bg)] flex flex-col h-full overflow-hidden transition-all select-none`}
     >
       {/* Outline Panel Header */}
-      <div className="px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/90 flex items-center justify-between shrink-0">
+      <div className="px-3.5 py-2.5 border-b border-slate-100 bg-[var(--sp-bg2)] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-md bg-indigo-50 border border-indigo-200/60 flex items-center justify-center text-indigo-600">
             <ChevronsUpDown className="w-3.5 h-3.5" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h2 className="font-bold text-xs text-slate-800">Panel de Esquema</h2>
+              <h2 className="font-bold text-xs text-[var(--sp-text)]">Panel de Esquema</h2>
               <span className="px-1.5 py-0.2 rounded-full bg-slate-200/70 text-[10px] font-semibold text-slate-600">
                 {totalNodesCount}
               </span>
@@ -436,7 +435,7 @@ export const OutlineView: React.FC<OutlineViewProps> = ({
             placeholder="Filtrar por texto o #etiqueta..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-white border border-slate-200 rounded-md px-2 py-1 text-xs text-slate-800 outline-none focus:border-blue-500 shadow-2xs"
+            className="flex-1 bg-[var(--sp-input)] border border-[var(--sp-border)] rounded-md px-2 py-1 text-xs text-[var(--sp-text)] outline-none focus:border-blue-500 shadow-2xs"
           />
           {searchQuery && (
             <button
@@ -455,7 +454,7 @@ export const OutlineView: React.FC<OutlineViewProps> = ({
       </div>
 
       {/* Outline Footer Helper */}
-      <div className="px-3 py-2 border-t border-slate-100 bg-slate-50/80 text-[10px] text-slate-400 flex items-center justify-between">
+      <div className="px-3 py-2 border-t border-slate-100 bg-[var(--sp-bg2)] text-[10px] text-slate-400 flex items-center justify-between">
         <span>Tab: hijo • Enter: hermano</span>
         <span>Doble clic: editar</span>
       </div>

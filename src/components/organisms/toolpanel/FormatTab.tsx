@@ -72,7 +72,7 @@ export const FormatTab: React.FC<FormatTabProps> = ({
     <div className="space-y-3.5">
       {/* Barra superior de plegar / desplegar */}
       <div className="flex items-center justify-between pb-0.5">
-        <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider">
+        <span className="text-[10.5px] font-bold text-[var(--sp-muted)] uppercase tracking-wider">
           Formato Visual del Nodo
         </span>
         <div className="flex items-center gap-1.5">
