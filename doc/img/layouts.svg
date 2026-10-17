@@ -1,0 +1,174 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="940" viewBox="0 0 1240 940" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="banner" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1d4ed8"/><stop offset="0.5" stop-color="#7c3aed"/><stop offset="1" stop-color="#db2777"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1240" height="940" rx="16" fill="#0f172a"/>
+
+  <!-- TÍTULO MUY RESALTADO -->
+  <rect x="24" y="24" width="1192" height="120" rx="16" fill="url(#banner)"/>
+  <rect x="24" y="24" width="1192" height="120" rx="16" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.35"/>
+  <text x="620" y="82" font-size="44" font-weight="800" text-anchor="middle" fill="#ffffff" letter-spacing="1">LOS 9 LAYOUTS DEL MOTOR GEOMÉTRICO</text>
+  <text x="620" y="118" font-size="17" text-anchor="middle" fill="#e0e7ff">layoutEngine.ts · computeMindMapLayout() · un color por algoritmo</text>
+
+  <!-- 1 STANDARD blue -->
+  <g>
+    <rect x="32" y="168" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="32" y="168" width="376" height="52" rx="14" fill="#2563eb"/>
+    <rect x="32" y="196" width="376" height="24" fill="#2563eb"/>
+    <text x="220" y="201" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">standard · Bifurcado</text>
+    <g stroke="#3b82f6" stroke-width="2.5">
+      <line x1="220" y1="300" x2="130" y2="270"/><line x1="220" y1="300" x2="130" y2="340"/>
+      <line x1="220" y1="300" x2="310" y2="270"/><line x1="220" y1="300" x2="310" y2="340"/>
+    </g>
+    <circle cx="220" cy="300" r="16" fill="#2563eb" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="130" cy="270" r="11" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="130" cy="340" r="11" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="310" cy="270" r="11" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+    <circle cx="310" cy="340" r="11" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+    <text x="220" y="384" font-size="12.5" text-anchor="middle" fill="#93c5fd">Alterna ramas izq / der como Freeplane</text>
+  </g>
+
+  <!-- 2 BALANCED violet -->
+  <g>
+    <rect x="432" y="168" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="432" y="168" width="376" height="52" rx="14" fill="#7c3aed"/>
+    <rect x="432" y="196" width="376" height="24" fill="#7c3aed"/>
+    <text x="620" y="201" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">balanced-horizontal</text>
+    <g stroke="#8b5cf6" stroke-width="2.5">
+      <line x1="620" y1="300" x2="520" y2="262"/><line x1="620" y1="300" x2="520" y2="340"/>
+      <line x1="620" y1="300" x2="720" y2="262"/><line x1="620" y1="300" x2="720" y2="310"/><line x1="620" y1="300" x2="720" y2="352"/>
+    </g>
+    <circle cx="620" cy="300" r="16" fill="#7c3aed" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="520" cy="262" r="11" fill="#1e293b" stroke="#8b5cf6" stroke-width="2.5"/>
+    <circle cx="520" cy="340" r="11" fill="#1e293b" stroke="#8b5cf6" stroke-width="2.5"/>
+    <circle cx="720" cy="262" r="11" fill="#1e293b" stroke="#8b5cf6" stroke-width="2.5"/>
+    <circle cx="720" cy="310" r="11" fill="#1e293b" stroke="#8b5cf6" stroke-width="2.5"/>
+    <circle cx="720" cy="352" r="11" fill="#1e293b" stroke="#8b5cf6" stroke-width="2.5"/>
+    <text x="620" y="384" font-size="12.5" text-anchor="middle" fill="#c4b5fd">Greedy por altura · minimiza disparidad</text>
+  </g>
+
+  <!-- 3 LEFT amber -->
+  <g>
+    <rect x="832" y="168" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="832" y="168" width="376" height="52" rx="14" fill="#b45309"/>
+    <rect x="832" y="196" width="376" height="24" fill="#b45309"/>
+    <text x="1020" y="201" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">left · Solo izquierda</text>
+    <g stroke="#f59e0b" stroke-width="2.5">
+      <line x1="1120" y1="305" x2="980" y2="260"/><line x1="1120" y1="305" x2="980" y2="305"/><line x1="1120" y1="305" x2="980" y2="350"/>
+    </g>
+    <circle cx="1120" cy="305" r="16" fill="#d97706" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="980" cy="260" r="11" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+    <circle cx="980" cy="305" r="11" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+    <circle cx="980" cy="350" r="11" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+    <text x="1020" y="384" font-size="12.5" text-anchor="middle" fill="#fcd34d">Todo proyectado a −X</text>
+  </g>
+
+  <!-- 4 RIGHT emerald -->
+  <g>
+    <rect x="32" y="420" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="32" y="420" width="376" height="52" rx="14" fill="#047857"/>
+    <rect x="32" y="448" width="376" height="24" fill="#047857"/>
+    <text x="220" y="453" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">right · Solo derecha</text>
+    <g stroke="#10b981" stroke-width="2.5">
+      <line x1="120" y1="557" x2="260" y2="512"/><line x1="120" y1="557" x2="260" y2="557"/><line x1="120" y1="557" x2="260" y2="602"/>
+    </g>
+    <circle cx="120" cy="557" r="16" fill="#059669" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="260" cy="512" r="11" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+    <circle cx="260" cy="557" r="11" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+    <circle cx="260" cy="602" r="11" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+    <text x="220" y="636" font-size="12.5" text-anchor="middle" fill="#6ee7b7">Todo a +X · cronologías y flujos</text>
+  </g>
+
+  <!-- 5 TOP cyan -->
+  <g>
+    <rect x="432" y="420" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="432" y="420" width="376" height="52" rx="14" fill="#0e7490"/>
+    <rect x="432" y="448" width="376" height="24" fill="#0e7490"/>
+    <text x="620" y="453" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">top · Solo arriba</text>
+    <g stroke="#06b6d4" stroke-width="2.5">
+      <line x1="620" y1="600" x2="560" y2="520"/><line x1="620" y1="600" x2="620" y2="515"/><line x1="620" y1="600" x2="680" y2="520"/>
+    </g>
+    <circle cx="560" cy="520" r="11" fill="#1e293b" stroke="#06b6d4" stroke-width="2.5"/>
+    <circle cx="620" cy="515" r="11" fill="#1e293b" stroke="#06b6d4" stroke-width="2.5"/>
+    <circle cx="680" cy="520" r="11" fill="#1e293b" stroke="#06b6d4" stroke-width="2.5"/>
+    <circle cx="620" cy="600" r="16" fill="#0891b2" stroke="#fff" stroke-width="2.5"/>
+    <text x="620" y="636" font-size="12.5" text-anchor="middle" fill="#67e8f9">Proyección a −Y</text>
+  </g>
+
+  <!-- 6 BOTTOM orange -->
+  <g>
+    <rect x="832" y="420" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="832" y="420" width="376" height="52" rx="14" fill="#c2410c"/>
+    <rect x="832" y="448" width="376" height="24" fill="#c2410c"/>
+    <text x="1020" y="453" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">bottom · Solo abajo</text>
+    <g stroke="#f97316" stroke-width="2.5">
+      <line x1="1020" y1="510" x2="960" y2="585"/><line x1="1020" y1="510" x2="1020" y2="590"/><line x1="1020" y1="510" x2="1080" y2="585"/>
+    </g>
+    <circle cx="1020" cy="510" r="16" fill="#ea580c" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="960" cy="585" r="11" fill="#1e293b" stroke="#f97316" stroke-width="2.5"/>
+    <circle cx="1020" cy="590" r="11" fill="#1e293b" stroke="#f97316" stroke-width="2.5"/>
+    <circle cx="1080" cy="585" r="11" fill="#1e293b" stroke="#f97316" stroke-width="2.5"/>
+    <text x="1020" y="636" font-size="12.5" text-anchor="middle" fill="#fdba74">Proyección a +Y</text>
+  </g>
+
+  <!-- 7 TREE-DOWN rose -->
+  <g>
+    <rect x="32" y="672" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="32" y="672" width="376" height="52" rx="14" fill="#be123c"/>
+    <rect x="32" y="700" width="376" height="24" fill="#be123c"/>
+    <text x="220" y="705" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">tree-down · Árbol</text>
+    <g stroke="#f43f5e" stroke-width="2.5">
+      <line x1="220" y1="748" x2="160" y2="800"/><line x1="220" y1="748" x2="280" y2="800"/>
+      <line x1="160" y1="800" x2="130" y2="852"/><line x1="280" y1="800" x2="310" y2="852"/>
+    </g>
+    <circle cx="220" cy="748" r="15" fill="#e11d48" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="160" cy="800" r="11" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5"/>
+    <circle cx="280" cy="800" r="11" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5"/>
+    <circle cx="130" cy="852" r="9" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5"/>
+    <circle cx="310" cy="852" r="9" fill="#1e293b" stroke="#f43f5e" stroke-width="2.5"/>
+    <text x="220" y="890" font-size="12.5" text-anchor="middle" fill="#fda4af">Jerárquico descendente · organigramas</text>
+  </g>
+
+  <!-- 8 RADIAL fuchsia -->
+  <g>
+    <rect x="432" y="672" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="432" y="672" width="376" height="52" rx="14" fill="#a21caf"/>
+    <rect x="432" y="700" width="376" height="24" fill="#a21caf"/>
+    <text x="620" y="705" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">radial · Radial</text>
+    <g stroke="#e879f9" stroke-width="2.5">
+      <line x1="620" y1="800" x2="620" y2="742"/><line x1="620" y1="800" x2="670" y2="771"/>
+      <line x1="620" y1="800" x2="670" y2="829"/><line x1="620" y1="800" x2="620" y2="858"/>
+      <line x1="620" y1="800" x2="570" y2="829"/><line x1="620" y1="800" x2="570" y2="771"/>
+    </g>
+    <circle cx="620" cy="800" r="15" fill="#c026d3" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="620" cy="742" r="10" fill="#1e293b" stroke="#e879f9" stroke-width="2.5"/>
+    <circle cx="670" cy="771" r="10" fill="#1e293b" stroke="#e879f9" stroke-width="2.5"/>
+    <circle cx="670" cy="829" r="10" fill="#1e293b" stroke="#e879f9" stroke-width="2.5"/>
+    <circle cx="620" cy="858" r="10" fill="#1e293b" stroke="#e879f9" stroke-width="2.5"/>
+    <circle cx="570" cy="829" r="10" fill="#1e293b" stroke="#e879f9" stroke-width="2.5"/>
+    <circle cx="570" cy="771" r="10" fill="#1e293b" stroke="#e879f9" stroke-width="2.5"/>
+    <text x="620" y="890" font-size="12.5" text-anchor="middle" fill="#f0abfc">Anillos concéntricos · X = r·cos θ</text>
+  </g>
+
+  <!-- 9 CIRCULAR teal -->
+  <g>
+    <rect x="832" y="672" width="376" height="228" rx="14" fill="#1e293b"/>
+    <rect x="832" y="672" width="376" height="52" rx="14" fill="#0f766e"/>
+    <rect x="832" y="700" width="376" height="24" fill="#0f766e"/>
+    <text x="1020" y="705" font-size="20" font-weight="800" text-anchor="middle" fill="#ffffff">circular · Orbital</text>
+    <circle cx="1020" cy="800" r="58" fill="none" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="7 5"/>
+    <g stroke="#2dd4bf" stroke-width="2.5">
+      <line x1="1020" y1="800" x2="1020" y2="742"/><line x1="1020" y1="800" x2="1070" y2="800"/>
+      <line x1="1020" y1="800" x2="1020" y2="858"/><line x1="1020" y1="800" x2="970" y2="800"/>
+    </g>
+    <circle cx="1020" cy="800" r="15" fill="#0d9488" stroke="#fff" stroke-width="2.5"/>
+    <circle cx="1020" cy="742" r="10" fill="#1e293b" stroke="#2dd4bf" stroke-width="2.5"/>
+    <circle cx="1070" cy="800" r="10" fill="#1e293b" stroke="#2dd4bf" stroke-width="2.5"/>
+    <circle cx="1020" cy="858" r="10" fill="#1e293b" stroke="#2dd4bf" stroke-width="2.5"/>
+    <circle cx="970" cy="800" r="10" fill="#1e293b" stroke="#2dd4bf" stroke-width="2.5"/>
+    <text x="1020" y="890" font-size="12.5" text-anchor="middle" fill="#5eead4">Hijos en el perímetro de la raíz</text>
+  </g>
+</svg>

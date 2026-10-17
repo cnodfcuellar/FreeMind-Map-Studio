@@ -9,7 +9,7 @@
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Zustand](https://img.shields.io/badge/Zustand-5-433D37?style=for-the-badge)](https://zustand-demo.pmnd.rs/)
-[![Vitest](https://img.shields.io/badge/Tests-14%2F14%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
+[![Vitest](https://img.shields.io/badge/Tests-87%2F87%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
 [![Motion](https://img.shields.io/badge/Motion-12-ea580c?style=for-the-badge&logo=framer&logoColor=white)](https://motion.dev)
 [![Antigravity IDE](https://img.shields.io/badge/Antigravity%20IDE-2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
@@ -63,6 +63,14 @@ Inspirado en [Freeplane](https://www.freeplane.org/) y [Mindomo](https://www.min
 ╚══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
+> El diagrama anterior resume la disposición. Estas son las zonas exactas del `MainEditorLayout` (cada slot con su título):
+>
+> ![Áreas de la interfaz](doc/img/wireframe-areas.svg)
+>
+> Y así se ve el editor con contenido real — barras, nodos, minimapa e inspector con la sección de color:
+>
+> ![Wireframe detallado de la interfaz](doc/img/wireframe-interfaz.svg)
+
 ---
 
 ## 🚀 Características Principales
@@ -72,7 +80,7 @@ Inspirado en [Freeplane](https://www.freeplane.org/) y [Mindomo](https://www.min
 | Propiedad | Opciones |
 |-----------|---------|
 | **Formas** | `bubble` `fork` `rectangle` `square` `oval` `circle` `pill` `hexagon` `arrow` `star` |
-| **Fondo** | Color sólido · Transparente · Degradado (4 dir.) · Trama SVG (8 patrones) · Imagen de fondo |
+| **Fondo** | Color sólido · Transparente · Degradado (4 dir.) · Trama SVG (7 patrones) · Imagen de fondo |
 | **Tipografía** | Fuente · Tamaño · Negrita · Cursiva · Color · Alineación (para título y cuerpo por separado) |
 | **Imagen adjunta** | Posición: arriba · abajo · izq · der · entre · fondo · ajustar · Escala 60–300px |
 | **Bordes** | Grosor 0–8px · Sólido / Discontinuo / Punteado · Color personalizado o automático |
@@ -97,18 +105,18 @@ Operaciones sobre el árbol
 
 ### 🎨 Temas y Algoritmos de Layout
 
-**9 Temas Visuales:**
+**8 Temas Visuales:**
 ```
-  🔵 Clásico Azul     🌈 Arcoíris       🌑 Modo Oscuro
-  🌲 Bosque Esmeralda  🌅 Atardecer      ⬜ Minimalista
-  📐 Blueprint Técnico  🍯 Panal Creativo
+  🔵 Clásico Azul     🌈 Arcoíris Vibrante   🌑 Modo Oscuro
+  🌲 Bosque Esmeralda  🌅 Atardecer Cálido    ⬜ Minimalista Mono
+  📐 Plano Técnico Blueprint  🍯 Panal Creativo
 ```
 
 **9 Algoritmos de Layout Geométrico:**
 ```
-  Standard (bifurcado)    Horizontal Balanceado    Solo Izquierda
-  Solo Derecha            Solo Arriba              Solo Abajo
-  Árbol Vertical          Radial ●                 Circular ○
+  Standard (bifurcado)    Balanced-horizontal    Left (solo izquierda)
+  Right (solo derecha)    Top (solo arriba)      Bottom (solo abajo)
+  Tree-down (árbol)       Radial ●               Circular ○
 ```
 
 **12 Fondos de Lienzo Interactivos:**
@@ -130,7 +138,7 @@ Convierte el mapa mental en una secuencia de diapositivas automáticas sin scrol
 - **Fase 1 — Tema Principal:** Título, cuerpo e imagen principal auto-paginados.
 - **Fase 2 — Notas del Presentador:** Markdown formateado (~9 líneas por slide con paginación limpia).
 - **Fase 3 — Subtemas e Hijos:** Grid de tarjetas interactivas (máximo 6 por diapositiva) con salto directo y tecla `Backspace` para volver.
-- **7 Temas Visuales:** Estudio Oscuro, Medianoche OLED, Cyberpunk Neón, Azul Ejecutivo, Esmeralda, Atardecer y Luz Minimalista.
+- **8 Temas Visuales:** los mismos del mapa (Clásico Azul, Arcoíris, Oscuro, Bosque, Atardecer, Minimalista, Blueprint, Panal).
 
 ### 2. ✨ Modo Presentación Dinámica (Lienzo Cinematográfico Prezi-Style)
 Presentación continua con vuelo de cámara suave sobre el lienzo infinito:
@@ -151,7 +159,7 @@ Experiencia tridimensional inmersiva:
 ## 🔗 Conectores Cruzados y Nubes
 
 - **Conectores flotantes** entre cualquier par de nodos: etiqueta personalizada, estilos de flecha (`start`/`end`/`both`/`none`), geometrías (`bezier`, `curved`, `straight`, `step`) y capas (`above`/`below`).
-- **Nubes de agrupación visual** con 4 formas geométricas y color RGBA personalizable.
+- **Nubes de agrupación visual** con 8 formas geométricas y color RGBA personalizable.
 
 ## 🔍 Búsqueda y Filtrado Acumulativo
 
@@ -280,7 +288,7 @@ freemind-map-studio/
 │   │
 │   └── 📂 utils/                      # UTILIDADES PURAS Y ALGORITMOS
 │       ├── layoutEngine.ts            # Motor matemático de layout (9 algoritmos)
-│       ├── themes.ts                  # Definición de 9 temas y 12 fondos de lienzo
+│       ├── themes.ts                  # Definición de 8 temas y 12 fondos de lienzo
 │       ├── markdownRenderer.tsx       # Parser Markdown propio sin dependencias
 │       ├── connectorUtils.ts          # Cálculo geométrico de curvas de Bézier y conectores
 │       ├── freeplaneConverter.ts      # Importador y exportador nativo de XML .mm
@@ -293,11 +301,12 @@ freemind-map-studio/
 │       ├── vectorIconPack.tsx         # Paquete de iconos vectoriales premium
 │       └── 📂 __tests__/              # Pruebas unitarias de utilidades matemáticas y convertidores
 │
-├── 📂 doc/                            # DOCUMENTACIÓN Y AUDITORÍAS
-│   ├── REFACTORING_EVALUATION.md      # Matriz de calidad de refactorización (Fases 0 a 9)
-│   ├── code_quality_and_atomic_design_audit.md # Auditoría arquitectónica y puntuaciones
-│   ├── Evaluación Arquitectónica.md   # Informe de madurez de código
-│   └── walkthrough.md                 # Registro de cambios y validaciones en navegador
+├── 📂 doc/                            # DOCUMENTACIÓN
+│   ├── PROJECT_ARCHITECTURE.md        # Arquitectura v4.0 verificada contra código + cookbook + guía GitHub
+│   ├── DESIGN.md                      # Sistema de diseño verificado (tokens, componentes, reglas)
+│   ├── INTERFACE_SPEC.md              # Especificación de interfaz
+│   ├── CHANGELOG.md                   # Historial de cambios
+│   └── 📂 img/                        # Diagramas SVG (áreas, wireframe, layouts) y capturas
 ```
 
 ---
@@ -362,7 +371,7 @@ pnpm install
 pnpm dev
 ```
 
-La aplicación estará disponible en **http://localhost:5173** (o el puerto asignado por Vite).
+La aplicación estará disponible en **http://localhost:3000** (puerto fijado en `package.json`).
 
 ### Verificación y Pruebas Automatizadas
 
@@ -370,8 +379,8 @@ La aplicación estará disponible en **http://localhost:5173** (o el puerto asig
 # Comprobación de tipos estricta con TypeScript
 pnpm lint          # ejecuta tsc --noEmit
 
-# Ejecución de la suite completa de pruebas unitarias con Vitest
-pnpm test          # ejecuta vitest run
+# Suite de pruebas unitarias con Vitest (87 tests / 17 archivos)
+pnpm test          # ejecuta vitest run (en Windows, si se cuelga: pnpm vitest run --pool=forks)
 
 # Compilación optimizada para producción
 pnpm build
@@ -401,12 +410,10 @@ localStorage
 
 ## 📚 Documentación Técnica Detallada
 
-Para consultar los informes de evolución arquitectónica y auditoría de calidad:
-
-- [`doc/REFACTORING_EVALUATION.md`](doc/REFACTORING_EVALUATION.md): Matriz de verificación de las 9 fases de refactorización y aseguramiento de cero pérdida de funcionalidad.
-- [`doc/code_quality_and_atomic_design_audit.md`](doc/code_quality_and_atomic_design_audit.md): Auditoría completa de modularidad, principios SOLID y cumplimiento de Atomic Design (puntuación **8.8/10**).
-- [`doc/Evaluación Arquitectónica.md`](doc/Evaluación%20Arquitectónica.md): Análisis comparativo de desacoplamiento y mantenimiento.
-- [`doc/walkthrough.md`](doc/walkthrough.md): Resumen de cambios implementados y capturas de validación interactiva en navegador.
+- [`doc/PROJECT_ARCHITECTURE.md`](doc/PROJECT_ARCHITECTURE.md): arquitectura v4.0 verificada contra el código, cookbook de extensión y guía de qué subir a GitHub.
+- [`doc/DESIGN.md`](doc/DESIGN.md): sistema de diseño verificado (tokens, componentes, reglas para futuras implementaciones).
+- [`doc/INTERFACE_SPEC.md`](doc/INTERFACE_SPEC.md): especificación de la interfaz.
+- [`doc/CHANGELOG.md`](doc/CHANGELOG.md): historial de cambios.
 
 ---
 

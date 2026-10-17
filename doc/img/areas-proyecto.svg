@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="760" viewBox="0 0 1240 760" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1e3a8a"/><stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1240" height="760" rx="16" fill="#0f172a"/>
+  <rect width="1240" height="92" rx="16" fill="url(#hdr)"/>
+  <text x="32" y="42" font-size="24" font-weight="700" fill="#ffffff">FreeMind Map Studio — Áreas del proyecto</text>
+  <text x="32" y="68" font-size="13" fill="#93c5fd">React 19 · TS 5.8 · Vite 6 · Tailwind v4 · Zustand 5 · Atomic Design · 100% offline (localStorage)</text>
+
+  <!-- Entrada -->
+  <g>
+    <rect x="32" y="112" width="1176" height="64" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="52" y="138" font-size="13" font-weight="700" fill="#38bdf8">ENTRADA</text>
+    <text x="52" y="160" font-size="13" fill="#e2e8f0">index.html → src/main.tsx → src/App.tsx (store + ErrorBoundary) → templates/MainEditorLayout (slots)</text>
+  </g>
+
+  <!-- Nivel 4 + Nivel 3 -->
+  <g>
+    <rect x="32" y="192" width="580" height="150" rx="12" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="52" y="218" font-size="13" font-weight="700" fill="#60a5fa">NIVEL 4 · TEMPLATE</text>
+    <text x="52" y="242" font-size="12.5" fill="#f1f5f9">MainEditorLayout.tsx — slots:</text>
+    <text x="52" y="262" font-size="12" fill="#cbd5e1">menuBar · toolBar · filterBar · canvas · toolPanel</text>
+    <text x="52" y="282" font-size="12" fill="#cbd5e1">outlineView · statusBar · modals · presentationOverlay</text>
+    <text x="52" y="308" font-size="11.5" fill="#64748b">En presentación se ocultan las barras</text>
+  </g>
+  <g>
+    <rect x="628" y="192" width="580" height="150" rx="12" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="648" y="218" font-size="13" font-weight="700" fill="#60a5fa">NIVEL 3 · ORGANISMOS</text>
+    <text x="648" y="242" font-size="12" fill="#cbd5e1">Lienzo: MindMapCanvas + BackgroundLayer + DrawingOverlay</text>
+    <text x="648" y="262" font-size="12" fill="#cbd5e1">+ PresentationHUD + ContextMenu · NodeComponent</text>
+    <text x="648" y="282" font-size="12" fill="#cbd5e1">Shell: MenuBar · ToolBar · FilterBar · StatusBar · OutlineView · MiniMap</text>
+    <text x="648" y="302" font-size="12" fill="#cbd5e1">Inspector: ToolPanel (6 tabs) · 3 presentaciones · 7 modales</text>
+  </g>
+
+  <!-- Nivel 2 + Nivel 1 -->
+  <g>
+    <rect x="32" y="358" width="580" height="150" rx="12" fill="#1e293b" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="52" y="384" font-size="13" font-weight="700" fill="#a78bfa">NIVEL 2 · MOLÉCULAS (11)</text>
+    <text x="52" y="408" font-size="12" fill="#cbd5e1">ModalHeader · SearchInput · HistoryControls · ZoomControls</text>
+    <text x="52" y="428" font-size="12" fill="#cbd5e1">FontFormatToolbar · ShapeSelector · TagManager</text>
+    <text x="52" y="452" font-size="12" fill="#fbbf24">node/: HeaderRow · BadgesBar · ActionButtons · BgRenderer</text>
+    <text x="52" y="476" font-size="11.5" fill="#64748b">Combinan átomos con una función concreta</text>
+  </g>
+  <g>
+    <rect x="628" y="358" width="580" height="150" rx="12" fill="#1e293b" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="648" y="384" font-size="13" font-weight="700" fill="#a78bfa">NIVEL 1 · ÁTOMOS (11)</text>
+    <text x="648" y="408" font-size="12" fill="#cbd5e1">Button · IconButton · Input · Badge · ModalBackdrop</text>
+    <text x="648" y="428" font-size="12" fill="#cbd5e1">ErrorBoundary · CollapsibleSection · ColorPicker · SliderInput</text>
+    <text x="648" y="448" font-size="12" fill="#cbd5e1">ToggleButton · ToggleButtonGroup</text>
+    <text x="648" y="472" font-size="11.5" fill="#64748b">Sin lógica de negocio · 100% reutilizables</text>
+  </g>
+
+  <!-- Estado + Motores -->
+  <g>
+    <rect x="32" y="524" width="380" height="110" rx="12" fill="#052e2b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="52" y="550" font-size="13" font-weight="700" fill="#34d399">ESTADO · hooks/</text>
+    <text x="52" y="574" font-size="12" fill="#cbd5e1">useMindMapStore (Zustand · historial 40)</text>
+    <text x="52" y="594" font-size="12" fill="#cbd5e1">useKeyboardShortcuts · useSearchFilter</text>
+    <text x="52" y="614" font-size="11.5" fill="#64748b">Única fuente de verdad inmutable</text>
+  </g>
+  <g>
+    <rect x="428" y="524" width="380" height="110" rx="12" fill="#052e2b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="448" y="550" font-size="13" font-weight="700" fill="#34d399">MOTORES · utils/</text>
+    <text x="448" y="574" font-size="12" fill="#cbd5e1">layoutEngine (9 layouts) · connectorUtils</text>
+    <text x="448" y="594" font-size="12" fill="#cbd5e1">freeplaneConverter (.mm) · htmlExporter</text>
+    <text x="448" y="614" font-size="12" fill="#cbd5e1">presentationGenerator · spatialPresentationGenerator</text>
+  </g>
+  <g>
+    <rect x="824" y="524" width="384" height="110" rx="12" fill="#052e2b" stroke="#10b981" stroke-width="1.5"/>
+    <text x="844" y="550" font-size="13" font-weight="700" fill="#34d399">DATOS · types/ + contenido</text>
+    <text x="844" y="574" font-size="12" fill="#cbd5e1">mindmap.ts · storage.ts (localStorage ×3)</text>
+    <text x="844" y="594" font-size="12" fill="#cbd5e1">sampleMaps + additionalTemplates (~20)</text>
+    <text x="844" y="614" font-size="12" fill="#cbd5e1">iconMap + vectorIconPack (520+) · themes (8+12)</text>
+  </g>
+
+  <!-- Tests + docs -->
+  <g>
+    <rect x="32" y="650" width="580" height="78" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="52" y="676" font-size="13" font-weight="700" fill="#fbbf24">CALIDAD · 22 tests / 6 archivos (Vitest + jsdom)</text>
+    <text x="52" y="700" font-size="12" fill="#cbd5e1">pnpm lint (tsc) · pnpm test (pool=forks en Windows) · pnpm build</text>
+  </g>
+  <g>
+    <rect x="628" y="650" width="580" height="78" rx="12" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="648" y="676" font-size="13" font-weight="700" fill="#fbbf24">DOCS · doc/ + raíz</text>
+    <text x="648" y="700" font-size="12" fill="#cbd5e1">PROJECT_ARCHITECTURE · DESIGN · INTERFACE_SPEC · CHANGELOG · AGENTS.md</text>
+  </g>
+</svg>

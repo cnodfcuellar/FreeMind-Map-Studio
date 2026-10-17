@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="1020" viewBox="0 0 1240 1020" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <rect width="1240" height="1020" rx="16" fill="#0f172a"/>
+  <rect x="24" y="24" width="1192" height="110" rx="16" fill="#1d4ed8"/>
+  <text x="620" y="72" font-size="36" font-weight="800" text-anchor="middle" fill="#ffffff">DESIGN.md — de qué trata</text>
+  <text x="620" y="106" font-size="15" text-anchor="middle" fill="#dbeafe">El contrato visual del proyecto: qué usar y cómo, verificado del código</text>
+
+  <!-- 1 Fundamentos -->
+  <g>
+    <rect x="32" y="152" width="376" height="200" rx="12" fill="#1e293b"/>
+    <text x="52" y="180" font-size="15" font-weight="800" fill="#38bdf8">1 · FUNDAMENTOS</text>
+    <text x="52" y="206" font-size="18" font-weight="700" fill="#ffffff">Aa Plus Jakarta Sans</text>
+    <text x="52" y="228" font-size="12" fill="#94a3b8">Mono solo para valores técnicos</text>
+    <text x="52" y="256" font-size="12" fill="#e2e8f0">Texto: 10px micro · 12px normal · grande títulos</text>
+    <text x="52" y="278" font-size="12" fill="#e2e8f0">Esquinas: md chips · xl botones · 2xl cards</text>
+    <text x="52" y="300" font-size="12" fill="#e2e8f0">Sombras crecen con importancia</text>
+    <rect x="52" y="312" width="120" height="22" rx="11" fill="#1e293b" stroke="#475569"/>
+    <text x="112" y="327" font-size="10" text-anchor="middle" fill="#94a3b8">scrollbar 6px</text>
+  </g>
+
+  <!-- 2 Temas -->
+  <g>
+    <rect x="432" y="152" width="376" height="200" rx="12" fill="#1e293b"/>
+    <text x="452" y="180" font-size="15" font-weight="800" fill="#38bdf8">2 · 8 TEMAS + 12 FONDOS</text>
+    <g>
+      <circle cx="470" cy="205" r="11" fill="#2563eb"/><circle cx="500" cy="205" r="11" fill="#0f172a" stroke="#475569"/>
+      <circle cx="530" cy="205" r="11" fill="#3b82f6"/><circle cx="560" cy="205" r="11" fill="#047857"/>
+      <circle cx="590" cy="205" r="11" fill="#ea580c"/><circle cx="620" cy="205" r="11" fill="#18181b" stroke="#475569"/>
+      <circle cx="650" cy="205" r="11" fill="#0284c7"/><circle cx="680" cy="205" r="11" fill="#d97706"/>
+    </g>
+    <text x="452" y="238" font-size="12" fill="#e2e8f0">Cada tema: fondo · raíz · nodo · ramas</text>
+    <text x="452" y="260" font-size="12" fill="#e2e8f0">Fondos: puntos · líneas · panal · blueprint…</text>
+    <rect x="452" y="274" width="336" height="58" rx="8" fill="#0f172a"/>
+    <text x="620" y="296" font-size="12" text-anchor="middle" fill="#fbbf24">Regla: colores solo de themes.ts</text>
+    <text x="620" y="316" font-size="12" text-anchor="middle" fill="#64748b">nada de paletas inventadas</text>
+  </g>
+
+  <!-- 3 Átomos -->
+  <g>
+    <rect x="832" y="152" width="376" height="200" rx="12" fill="#1e293b"/>
+    <text x="852" y="180" font-size="15" font-weight="800" fill="#38bdf8">3 · ÁTOMOS (11 piezas)</text>
+    <rect x="852" y="192" width="110" height="32" rx="8" fill="#2563eb"/>
+    <text x="907" y="213" font-size="12" text-anchor="middle" fill="#fff">Botón</text>
+    <rect x="968" y="192" width="110" height="32" rx="8" fill="#1e293b" stroke="#475569"/>
+    <text x="1023" y="213" font-size="12" text-anchor="middle" fill="#cbd5e1">Secundario</text>
+    <rect x="852" y="230" width="90" height="24" rx="12" fill="#eff6ff"/>
+    <text x="897" y="247" font-size="11" text-anchor="middle" fill="#1d4ed8">Badge</text>
+    <rect x="948" y="230" width="130" height="24" rx="8" fill="#0f172a" stroke="#475569"/>
+    <text x="1013" y="247" font-size="11" text-anchor="middle" fill="#94a3b8">🔍 Buscar… 3</text>
+    <text x="852" y="278" font-size="12" fill="#e2e8f0">Modal = Backdrop + Header + card 2xl</text>
+    <text x="852" y="300" font-size="12" fill="#e2e8f0">ColorPicker · Slider · Toggles · Switch</text>
+    <text x="852" y="322" font-size="12" fill="#64748b">Todo nuevo REUTILIZA átomos</text>
+  </g>
+
+  <!-- 4 Nodos -->
+  <g>
+    <rect x="32" y="368" width="576" height="220" rx="12" fill="#1e293b"/>
+    <text x="52" y="396" font-size="15" font-weight="800" fill="#38bdf8">4 · NODOS: 10 formas + estados</text>
+    <rect x="52" y="408" width="120" height="60" rx="16" fill="#ffffff"/>
+    <text x="112" y="443" font-size="12" text-anchor="middle" fill="#0f172a">bubble 4:3</text>
+    <rect x="182" y="408" width="120" height="60" rx="60" fill="#ffffff"/>
+    <text x="242" y="443" font-size="12" text-anchor="middle" fill="#0f172a">pill</text>
+    <text x="322" y="435" font-size="14" fill="#e2e8f0">Texto solo</text>
+    <line x1="322" y1="445" x2="420" y2="445" stroke="#3b82f6" stroke-width="3"/>
+    <text x="322" y="462" font-size="11" fill="#64748b">fork = solo subrayado</text>
+    <text x="52" y="500" font-size="12" fill="#e2e8f0">normal → hover sombra → <tspan fill="#60a5fa">selección anillo azul</tspan></text>
+    <text x="52" y="522" font-size="12" fill="#e2e8f0"><tspan fill="#fbbf24">ámbar = búsqueda</tspan> · badges · progreso · fold · drag</text>
+    <text x="52" y="544" font-size="12" fill="#e2e8f0">Tooltip oscuro · nota ámbar · enlace azul</text>
+    <text x="52" y="570" font-size="12" fill="#64748b">Cola de burbuja · imágenes 140/100px</text>
+  </g>
+
+  <!-- 5 Barras+paneles -->
+  <g>
+    <rect x="632" y="368" width="576" height="220" rx="12" fill="#1e293b"/>
+    <text x="652" y="396" font-size="15" font-weight="800" fill="#38bdf8">5 · BARRAS Y PANELES</text>
+    <rect x="652" y="408" width="536" height="30" rx="6" fill="#020617"/>
+    <text x="920" y="428" font-size="11" text-anchor="middle" fill="#e2e8f0">MenuBar oscura · FilterBar oscura · StatusBar oscura</text>
+    <rect x="652" y="444" width="536" height="30" rx="6" fill="#ffffff"/>
+    <text x="920" y="464" font-size="11" text-anchor="middle" fill="#0f172a">ToolBar clara · ToolPanel 6 tabs · Outline · MiniMap cristal</text>
+    <text x="652" y="496" font-size="12" fill="#e2e8f0">Tab activa: borde inferior azul · opción: card con borde azul</text>
+    <text x="652" y="518" font-size="12" fill="#e2e8f0">Canvas por capas: fondo → aristas → nodos → overlays</text>
+    <text x="652" y="540" font-size="12" fill="#e2e8f0">z-40 HUD · z-50 menús · viewport translate3d</text>
+    <text x="652" y="566" font-size="12" fill="#64748b">Presentación: 8 temas de slides · fases body/notas/hijos</text>
+  </g>
+
+  <!-- 6 Reglas -->
+  <g>
+    <rect x="32" y="604" width="1176" height="200" rx="12" fill="#1e3a8a"/>
+    <text x="52" y="634" font-size="16" font-weight="800" fill="#ffffff">6 · LAS 10 REGLAS DE ORO</text>
+    <text x="52" y="662" font-size="13" fill="#dbeafe">1 Reutiliza átomos · 2 Azul = activo · 3 Dark con prefijo (flotantes siempre claros) · 4 Densidad compacta · 5 Lucide, no emojis</text>
+    <text x="52" y="686" font-size="13" fill="#dbeafe">6 Los nodos mandan · 7 Canvas por capas · 8 Temas por tokens · 9 Transiciones cortas · 10 Responsive mínimo</text>
+    <text x="52" y="724" font-size="13" font-weight="700" fill="#fbbf24">Para qué sirve: que cualquier implementación futura conserve el estilo sin adivinar.</text>
+    <text x="52" y="748" font-size="12" fill="#bfdbfe">Lee doc/DESIGN.md para valores exactos (hex, px, clases) · diagramas en doc/img/</text>
+    <text x="52" y="772" font-size="12" fill="#bfdbfe">Relacionados: AGENTS.md (trabajo) · PROJECT_ARCHITECTURE.md (código) · diseno-ui.svg (interfaz)</text>
+  </g>
+
+  <text x="620" y="840" font-size="13" text-anchor="middle" fill="#64748b">doc/img/diseno-resumen.svg · generado desde doc/DESIGN.md</text>
+</svg>

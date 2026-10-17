@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="760" viewBox="0 0 1240 760" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <rect width="1240" height="760" rx="16" fill="#0f172a"/>
+  <text x="32" y="42" font-size="24" font-weight="700" fill="#ffffff">FreeMind Map Studio — Áreas de la interfaz</text>
+  <text x="32" y="68" font-size="13" fill="#93c5fd">Cada zona con su título · MainEditorLayout (slots)</text>
+
+  <g>
+    <rect x="32" y="92" width="1176" height="636" rx="12" fill="#f1f5f9"/>
+
+    <!-- MenuBar -->
+    <rect x="32" y="92" width="1176" height="56" fill="#0f172a"/>
+    <rect x="32" y="124" width="1176" height="24" fill="#0f172a"/>
+    <text x="620" y="127" font-size="17" font-weight="800" text-anchor="middle" fill="#ffffff">MenuBar</text>
+
+    <!-- ToolBar -->
+    <rect x="32" y="148" width="1176" height="56" fill="#ffffff" stroke="#e2e8f0"/>
+    <text x="620" y="182" font-size="17" font-weight="800" text-anchor="middle" fill="#0f172a">ToolBar</text>
+
+    <!-- FilterBar -->
+    <rect x="32" y="204" width="1176" height="56" fill="#0f172a"/>
+    <text x="620" y="238" font-size="17" font-weight="800" text-anchor="middle" fill="#ffffff">FilterBar</text>
+
+    <!-- OutlineView -->
+    <rect x="32" y="260" width="200" height="368" fill="#ffffff" stroke="#e2e8f0"/>
+    <text x="132" y="444" font-size="17" font-weight="800" text-anchor="middle" fill="#0f172a">OutlineView</text>
+
+    <!-- Canvas -->
+    <rect x="232" y="260" width="716" height="368" fill="#f8fafc" stroke="#38bdf8" stroke-width="2" stroke-dasharray="10 6"/>
+    <text x="590" y="438" font-size="22" font-weight="800" text-anchor="middle" fill="#0f172a">MindMapCanvas</text>
+    <text x="590" y="464" font-size="13" text-anchor="middle" fill="#64748b">BackgroundLayer · DrawingOverlay · HUD · ContextMenu</text>
+
+    <!-- MiniMap badge inside canvas -->
+    <rect x="788" y="540" width="140" height="72" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+    <text x="858" y="569" font-size="14" font-weight="800" text-anchor="middle" fill="#0f172a">MiniMap</text>
+    <text x="858" y="590" font-size="11" text-anchor="middle" fill="#64748b">+ ZoomControls</text>
+
+    <!-- ToolPanel -->
+    <rect x="948" y="260" width="260" height="368" fill="#ffffff" stroke="#e2e8f0"/>
+    <text x="1078" y="438" font-size="17" font-weight="800" text-anchor="middle" fill="#0f172a">ToolPanel</text>
+    <text x="1078" y="464" font-size="12" text-anchor="middle" fill="#64748b">Content · Format · Notes</text>
+    <text x="1078" y="482" font-size="12" text-anchor="middle" fill="#64748b">Icons · Clouds · Theme</text>
+
+    <!-- StatusBar -->
+    <rect x="32" y="628" width="1176" height="56" fill="#0f172a"/>
+    <rect x="32" y="628" width="1176" height="44" fill="#0f172a"/>
+    <text x="620" y="663" font-size="17" font-weight="800" text-anchor="middle" fill="#ffffff">StatusBar</text>
+    <rect x="32" y="660" width="1176" height="68" rx="12" fill="#0f172a"/>
+  </g>
+</svg>

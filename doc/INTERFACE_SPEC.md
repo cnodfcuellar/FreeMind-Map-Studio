@@ -12,14 +12,14 @@
 
 ```text
 +--------------------------------------------------------------------------------------------------------------------------+
-| [1] BARRA DE MENU SUPERIOR (MenuBar)                                                                    [Altura: 48px]   |
-| [Logo + Titulo Editable]  [Archivo] [Editar] [Insertar] [Formato] [Ver] [Ayuda]   [Guardado] [Esquema] [Prop] [F5-Pres]  |
+| [1] BARRA DE MENU SUPERIOR (MenuBar)                                                                    [Altura: 40px]    |
+| [Logo + Titulo Editable]  [Archivo] [Editar] [Insertar] [Formato] [Ver] [Ayuda]   [100% Offline] [Tema UI (Sol/Luna/Cafe)]  |
 +--------------------------------------------------------------------------------------------------------------------------+
 | [2] BARRA DE HERRAMIENTAS RAPIDAS (ToolBar)                                                             [Altura: 44px]   |
-| [+Hijo] [+Hermano] [Cortar] [Pegar] | [Forma] [Color] [Nube] [Relacion] | [Deshacer] [Rehacer] | [-100%+][Full] | [Filtro] |
+| [Desh] [Redo] | [+Hijo] [+Hermano] [Elim] [Plegar] | [B/I] [Forma] | [Conector] [Nube] [Iconos] || [Filtro] [Vista] [Esquema] [Presentar] [Exportar] [Prop] |
 +--------------------------------------------------------------------------------------------------------------------------+
 | [3] BARRA DE FILTRO / BUSQUEDA (FilterBar -- Ctrl+F)                                                    [Altura: 40px]   |
-| [Buscar texto...]  [Tags]  [Progreso]  [Icono]  [Limpiar Filtros]                                    (Coincidencias: 8/32)|
+| [Buscar texto...]  [Tags]  [Progreso]  [Limpiar filtros] [X]                                    (Contador: "8 coincidencias")|
 +--------------------------------------------------------------------------------------------------------------------------+
 |                                                                                            |                             |
 |                                                                                            | [5] PANEL LATERAL DERECHO   |
@@ -40,11 +40,14 @@
 |                                                                                            |                             |
 | +------------------------------------+                                                     |                             |
 | | [6] MINIMAPA RADAR (MiniMap)       |                                                     |                             |
-| | [ S(160px) M(220px) L(300px) ]     |                                                     |                             |
+| | (en la app: esquina inferior       |                                                     |                             |
+| |  DERECHA del lienzo, no izquierda) |                                                     |                             |
+| | [ S(176px) M(224px) L(288px) ]     |                                                     |                             |
 | +------------------------------------+                                                     |                             |
 +--------------------------------------------------------------------------------------------------------------------------+
 | [7] BARRA DE ESTADO INFERIOR (StatusBar)                                                                [Altura: 24px]   |
-| Nodos totales: 28 | Seleccionado: "Atajos" (ID: sc-1) | Zoom: 100% | Posicion: (0, 0) | Modo: Listo                      |
+| Nodos totales: 28 | Seleccionado: "Atajos" (ID: node-1) | Zoom: 100% | Posicion: (0, 0) | Modo: Listo               |
+|                          (Zoom y Posicion son fijos en la app actual: App.tsx pasa 100 / 0,0 hardcodeados)            |
 +--------------------------------------------------------------------------------------------------------------------------+
 ```
 
@@ -54,13 +57,13 @@
 
 | Componente UI | Tipo / Posicion | Ancho | Alto | Z-Index |
 | :--- | :--- | :--- | :--- | :--- |
-| **MenuBar** | Fijo Superior | `100vw` | `48px` | `z-40` |
-| **ToolBar** | Fijo bajo MenuBar | `100vw` | `44px` | `z-30` |
-| **FilterBar** | Plegable (Ctrl+F) | `100vw` | `40px` | `z-25` |
+| **MenuBar** | Fijo Superior | `100vw` | `40px` (`h-10`) | `z-50` |
+| **ToolBar** | Fijo bajo MenuBar | `100vw` | `44px` (`h-11`) | `z-40` |
+| **FilterBar** | Plegable (Ctrl+F) | `100vw` | `40px` | `z-30` |
 | **Canvas Central** | Flexible, pan infinito | `calc(100vw - 350px)` | `calc(100vh - 116px)` | `z-0` |
-| **ToolPanel (Inspector)** | Panel Lateral Derecho | `350px` (Movil: `100vw`) | `calc(100vh - 92px)` | `z-30` |
-| **OutlineView** | Panel Lateral Izq / Modal | `340px-420px` | `calc(100vh - 92px)` | `z-30` |
-| **MiniMap** | Flotante Inferior Izq | `S:160px / M:220px / L:300px` | `100-190px` | `z-20` |
+| **ToolPanel (Inspector)** | Panel Lateral Derecho | `336px` (`w-84`; Movil: `100vw`) | `calc(100vh - 92px)` | `z-10` |
+| **OutlineView** | Panel Lateral Izq / Modal | `320px` (`w-80`, `md:w-88` = 352px) | `calc(100vh - 92px)` | `z-20` (fullscreen `z-30`) |
+| **MiniMap** | Flotante Inferior **Derecha** (`bottom-2 right-5`) | `S:176px / M:224px / L:288px` | `96 / 128 / 176px` | `z-40` |
 | **Modales** | Ventana emergente centrada | `520px-780px` | Auto (Max 85vh) | `z-50` |
 | **Modo Presentacion** | Pantalla Completa | `100vw` | `100vh` | `z-50` |
 
@@ -68,58 +71,80 @@
 
 ## 3. Estructura y Opciones de Cada Menu Superior
 
-### 3.1. Menu Archivo
-- Nuevo Mapa (Ctrl + Alt + N)
-- Abrir / Importar... (Ctrl + O): Freeplane .mm XML, Respaldo JSON, Esquema Markdown
-- Guardar ahora (Ctrl + S)
-- Mis Mapas Guardados
-- Plantillas Predefinidas (Alt + T)
-- Exportar Mapa como... (Ctrl + E): .mm XML, .html autonomo, .svg, .png, .md, .json
-- Imprimir / Guardar PDF (Ctrl + P)
+Actualizado 2026-10-17 (fuente: `MenuBar.tsx` 562 lineas). Contrato visual y gotchas: `doc/DESIGN.md` §7.
 
-### 3.2. Menu Editar
-- Deshacer (Ctrl + Z) / Rehacer (Ctrl + Y)
-- Cortar, Copiar, Pegar rama (Ctrl+X/C/V)
-- Eliminar Nodo y Sub-ramas (Supr / Backspace)
-- Editar Texto del Nodo (F2 / Doble Clic)
-- Editar Cuerpo (Alt + B)
-- Buscar y Reemplazar (Ctrl + F)
-- Seleccionar Todos (Ctrl + A)
+### 3.1. Menu Archivo (dropdown w-56)
+- Nuevo Mapa — reemplaza por `BLANK_MAP` con id/fechas nuevas y selecciona la raiz; **sin dialogo de confirmacion** (`App:159-168`)
+- Plantillas de Ejemplo — abre `TemplatesModal`
+- Mis Mapas Guardados — abre `SavedMapsModal`
+- ---
+- Guardar Ahora — `saveCurrentMap(mindMap)` (el hint `Ctrl+S` que muestra **no esta implementado**, ver 3.6)
+- ---
+- **Exportar (.mm / HTML)** (azul, destacado) — abre `ExportImportModal` (etiqueta corregida 2026-10-17: antes prometía "/ PNG" inexistente)
+- Importar Freeplane (.mm) — abre **el mismo** `ExportImportModal` (`App:172-173`; ninguno preselecciona pestana)
+  - **Gotcha**: ✅ rotulo PNG **corregido** 2026-10-17 (sigue **sin existir** exportacion de imagenes: solo mm/html/md/json; el subtitulo del modal todavia menciona "imagenes"); la pestana por defecto es Exportar y **persiste** entre aperturas. Contenido funcional de los 6 modales (el 7º, `ComingSoonModal`, fue **eliminado**): `doc/DESIGN.md` §8.5.
 
-### 3.3. Menu Insertar
-- Nuevo Nodo Hijo (Tab / Insert)
-- Nuevo Nodo Hermano (Enter)
-- Nuevo Hermano Superior (Shift + Enter)
-- Nota Markdown (Alt + N)
-- Enlace Web URL (Alt + K)
-- Barra de Progreso (Alt + Shift + P)
-- Iconos / Banderas (Alt + I)
-- Etiquetas / Tags (Alt + G)
-- Imagen Adjunta al Nodo
-- Conector Flotante (Alt + C)
-- Nube de Agrupacion (Alt + W)
+### 3.2. Menu Editar (w-52)
+- Deshacer (Ctrl+Z) — disabled sin historial
+- Rehacer (Ctrl+Y) — disabled sin historial
+- ---
+- Eliminar Rama (Supr) — rojo; **no se deshabilita en la raiz** (el veto lo hace el store)
 
-### 3.4. Menu Formato
+> No contiene Cortar/Copiar/Pegar (estan en el menu contextual y en `Ctrl+X/C/V`), F2, buscar/reemplazar ni "seleccionar todos" (no existen).
 
-Temas Visuales Predefinidos (9 temas):
-- Clasico Azul (default), Arcoiris Vibrante (rainbow), Modo Oscuro (dark)
-- Bosque Esmeralda (forest), Atardecer Calido (sunset), Minimalista Mono (minimal)
-- Plano Tecnico Blueprint, Panal Creativo (honeycomb)
+### 3.3. Menu Insertar (w-56)
+- Nodo Hijo (Tab) · Nodo Hermano (Enter)
+- ---
+- Conector de Relacion · Nube de Rama
+- ---
+- Pack Iconos Vectoriales + badge `500+` (solo si se pasa `onOpenIconPack`)
 
-Forma del Nodo (10 formas): bubble, fork, rectangle, square, oval, circle, pill, hexagon, arrow, star
+> Nota, enlace, progreso, tags, imagen e iconos individuales **no estan en este menu**: se editan en el ToolPanel (ContentTab/NotesTab/IconsTab).
 
-Tipografia, Paleta de Color, Restablecer Formato
+### 3.4. Menu Formato (w-56)
+- Bloque "TEMAS VISUALES" — **solo 5 de los 8 temas**: Clasico Freeplane (`default`), Bosque Esmeralda (`forest`), Arcoiris Vibrante (`rainbow`), Atardecer Calido (`sunset`), Modo Oscuro (`dark`).
+  - **Fix 2026-10-17**: antes estos 2 items enviaban `'purple'`/`'warm'` (ids inexistentes) → clic sin efecto visual (`|| THEMES.default`) que ademas escribia un `themeId` invalido en el mapa; ahora son `rainbow`/`sunset` (tests en `MenuBar.test.tsx`). Sin acceso por menu (solo ThemeTab): `minimal`, `blueprint`, `honeycomb`.
+- Bloque "FORMA DEL NODO" — las **10 formas** con previews; sin `disabled` (sin seleccion es no-op silencioso)
+- ---
+- Restablecer Formato (rojo) — `onResetFormat` (bubble + colores/tipografia a `undefined`)
 
-### 3.5. Menu Ver
-- Centrar Vista en Nodo Raiz (Espacio / Home)
-- Ajustar Todo al Lienzo (Ctrl + 0)
-- Aumentar / Reducir Zoom (Ctrl+Plus / Ctrl+Minus)
-- Panel de Esquema (Alt + O)
-- Panel de Propiedades (Alt + P)
-- Mostrar / Ocultar MiniMapa: S(160px), M(220px), L(300px)
-- Plegar / Desplegar Todas las Ramas
-- Pantalla Completa (Alt + Enter)
-- Modo Presentacion Clasica (F5)
+> Tipografia y paleta de color **no** estan en este menu (viven en FormatTab/ContentTab).
+
+### 3.5. Menu Ver (w-56)
+- Panel Lateral de Esquema (Alt+O)
+- Presentacion Clasica [badge verde "Activo"]
+- Presentacion Dinamica (Lienzo) (hint `F5`)
+- Presentacion Elaborada (Espacial) [badge verde "Activo"]
+- ---
+- Desplegar Todo el Mapa · Plegar Todas las Ramas
+- ---
+- Pantalla Completa (F11)
+
+> Los badges **"Activo" son estaticos** (no reflejan el modo en curso). **No** contiene: centrar vista, zoom, ajustar al lienzo ni mostrar/ocultar MiniMapa (esos controles no existen como menu).
+
+### 3.6. Atajos de teclado REALES vs hints decorativos
+
+**Implementados** (`useKeyboardShortcuts.ts`, 221 lineas, `window keydown`):
+
+| Tecla | Accion |
+| --- | --- |
+| `F5` | alterna modo presentacion (funciona tambien dentro de el) |
+| `Ctrl/Cmd+Z` | deshacer (`Ctrl+Shift+Z` tambien rehace) |
+| `Ctrl/Cmd+Y` | rehacer |
+| `Ctrl/Cmd+C / X / V` | copiar / cortar / pegar rama |
+| `Ctrl/Cmd+F` | abre/cierra FilterBar |
+| `Alt+O` / `Alt+P` | OutlineView / ToolPanel |
+| `Tab` o `Insert` | agregar hijo |
+| `Enter` | agregar hermano |
+| `F2` | editar texto del nodo |
+| `Espacio` | plegar/desplegar rama |
+| `Supr` / `Retroceso` | eliminar nodo |
+| `Esc` | selecciona raiz (o cierra modal / sale de edicion de texto) |
+| `↑ ↓` | hermanos; `→ ←` navega por lado (raiz → primer hijo del lado) |
+
+**Guardas**: escribiendo en `INPUT/TEXTAREA` → solo `Esc` reacciona; modal abierto → solo `Esc`; en presentacion → solo `F5` (la navegacion de slides vive aparte: `→/Espacio/Enter` siguiente, `←/Backspace` anterior, `O/Home` overview, `N` notas, `E` play/editor, `Esc` sale — `MindMapCanvas.tsx:345-387`).
+
+**Hints mostrados en la UI sin handler**: `Ctrl+S` ("Guardar Ahora" del menu Archivo) y `?` ("Atajos de Teclado" de Ayuda). `F11` lo maneja el navegador. **No existen** (aunque el spec viejo los listaba): `Ctrl+Alt+N`, `Ctrl+O`, `Ctrl+E`, `Ctrl+P` (imprimir), `Alt+B`, `Ctrl+A`, `Shift+Enter`, `Alt+N/K/G/I/C/W`, `Ctrl+0`, `Ctrl+ +/-`, `Alt+Enter`, `Alt+T`, `Home` (fuera de presentacion).
 
 ---
 
@@ -176,68 +201,70 @@ Cuerpo / Subtexto:
 - Alineacion independiente
 
 ### 5.2. Tab "Formato" (FormatTab)
-Forma y Geometria:
-- ShapeSelector (molecula): grid de 10 formas con preview visual
-- SliderInput (atomo): ancho (50-500px) con boton 'Auto'
-- SliderInput (atomo): alto (30-300px) con boton 'Auto'
-- Para square/circle: un solo slider actualiza ambas dimensiones
+Fuente de verdad: `doc/DESIGN.md` §8 (contrato funcional). Resumen verificado 2026-10-17:
 
-Fondo del Nodo (4 modos via ToggleButtonGroup):
-- COLOR SOLIDO: ColorPicker (atomo) + paleta rapida de 6 colores + boton 'Por defecto'
-- TRANSPARENTE: Sin controles adicionales
-- DEGRADADO: 2 ColorPickers + 4 ToggleButtons de direccion + 6 presets
-- TRAMA: 7 ToggleButtons de patron + ColorPicker + SliderInput tamano + SliderInput opacidad
+Forma y Geometria:
+- ShapeSelector (molecula): grid-cols-5 de 10 formas con preview visual (nombre en espanol, tooltip)
+- SliderInput (atomo): 'Ancho personalizado' customWidth 0-500px step 10, badge 'Automático' cuando 0/undefined (0 borra el valor)
+- SliderInput (atomo): 'Alto personalizado' customHeight 0-300px step 5, mismo patron
+- Dos sliders SIEMPRE independientes (no hay slider doble para square/circle)
+
+Fondo del Nodo (5 tipos via grid-cols-5, escribe bgType):
+- COLOR SOLIDO: ColorPicker 'Color de Fondo' (16 presets + Reset; onClear borra color y bgType)
+- DEGRADADO: 2 ColorPickers SIN Reset (defaults #3b82f6/#1d4ed8) + 4 botones de direccion (to-r/to-b/to-br/radial, def to-r). Sin presets.
+- TRAMA: 7 botones de patron (Puntos/Lineas/Rayas/Cuadros/Triangulos/Panal/Cruces) + ColorPicker 'Fondo Base' (compartido con color) + ColorPicker 'Trazo' (#475569) + Slider tamano 8-40px def 16 + Slider opacidad 10-100% def 40 (se guarda como decimal 0.1-1)
+- IMAGEN: input URL + Upload local (FileReader dataURL) + Trash (solo si hay imagen) + preview h-24 + 3 modos de ajuste (cover Expandir/contain Completa/tile Repetir, def cover)
+- TRANSPARENTE: sin controles adicionales
 
 Contornos y Bordes:
-- 5 ToggleButtons de grosor predefinido: 0 / 1 / 2 / 3.5 / 5px
-- SliderInput continuo de grosor (0-8px)
-- 3 ToggleButtons de estilo: solid / dashed / dotted
-- ColorPicker de borde
-- Checkbox 'Auto (color de rama)'
+- ColorPicker 'Color del Borde' (con Reset -> hereda rama/tema)
+- SliderInput grosor 0-8px def 1 (sin presets fijos, sin checkbox 'Auto')
+- 3 botones de estilo con preview de linea: solid / dashed / dotted (escribe borderDash y borderStyle)
 
-Imagenes:
-- Imagen de Contenido (imageUrl): URL + 7 posiciones + SliderInput escala + boton Eliminar
-- Imagen de Fondo (bgImageUrl): URL + 4 modos + SliderInput opacidad + boton Eliminar
+Imagenes (en ContentTab, no en FormatTab):
+- Imagen de Contenido (imageUrl): URL + Upload dataURL + 6 posiciones (top/between/bottom/left/right/fit; 'background' existe en el tipo pero el panel NO lo ofrece) + SliderInput ancho 60-500px def 140 + Eliminar
+- Imagen de Fondo (bgImageUrl): vive en FormatTab; URL + Upload + 3 modos (cover/contain/tile; el tipo admite ademas 'fit' ≡ contain) + Eliminar. Sin slider de opacidad.
 
-Aristas del Nodo (override individual):
-- 5 ToggleButtons de estilo: bezier / linear / sharp / horizontal / hidden
-- 4 ToggleButtons de perfil: uniform / tapered / spindle / hourglass
-- SliderInput de grosor + ColorPicker + 3 ToggleButtons de patron linea
-- Boton 'Heredar del mapa'
+Aristas del Nodo (override individual, seccion 'Aristas y Propagacion'):
+- 4 botones de forma: bezier Curva / linear Recta / sharp Escuadra / horizontal Horiz. ('hidden' existe en el tipo EdgeStyle pero NO en el panel)
+- ColorPicker 'Color de la Arista' (con Reset)
+- Propagacion: boton 'Aplicar a Hijos' (recursivo en subarbol) + boton 'Aplicar a Hermanos' (solo directos; no-op en raiz o padre con <=1 hijo). Copia 26 campos via extractNodeStyleBundle (forma, fondo, bordes, texto, aristas, customWidth/Height); NO copia body/imagen/tags/link/progreso.
+- NOTA: perfiles (uniform/tapered/spindle/hourglass) y grosor de arista NO estan aqui: son nivel de MAPA en ThemeTab. Cadena de render: node -> map -> theme ('bezier'/'uniform'/defaultWidth).
 
 ### 5.3. Tab "Notas" (NotesTab)
-- Barra de progreso: SliderInput 0-100 + input numerico
-- Enlace URL: campo de texto libre
-- Nota Markdown: textarea con preview renderizado
-- Boton aplicar estilo a hijos / hermanos
+Actualizado 2026-10-17 (progreso y enlace NO viven aqui; migraron a ContentTab "Metadatos"):
+- Header: label 'Nota Markdown' con CSS uppercase (se ve en MAYUSCULAS) + toggle 'Mostrar en Nodo'/'Debajo del Cuerpo ✓' (icono LayoutList, showNoteInline) + grupo de 3 vistas edit/split/preview (def preview)
+- viewMode es estado local: al salir y volver a la pestaña vuelve a 'preview' (NotesTab solo monta con activeTab='notes', ToolPanel.tsx:216)
+- Toolbar markdown de 9 botones (negrita/cursiva/H1/H2/lista/numerada/checklist/codigo/cita) con placeholders fijos; H1/H2/lista/numerada/checklist/cita insertan SOLO prefijo (sin sufijo)
+- Textarea guarda '' al vaciar (no undefined: unica excepcion al patron 'vaciar = undefined')
+- Preview via MarkdownView (max-h 350px). Gotcha: '>' no genera <blockquote>
+- Progreso 0-100% y enlace URL: se editan en ContentTab > Metadatos y Visibilidad
 
 ### 5.4. Tab "Iconos" (IconsTab)
-- Grid de iconos basicos del iconMap (toggle individual)
-- Boton para abrir IconPackModal completo
-- Indicador de iconos activos
+Actualizado 2026-10-17 (fuente: IconsTab.tsx 314 lineas):
+- 1 CollapsibleSection 'Color y Tamano' (sin Desplegar/Plegar todo) con badge = dot de iconColor
+- ColorPicker 'Tinte del Icono' (iconColor, con Reset) + 7 colores Sugeridos + enlace 'Original'
+- SliderInput 'Tamano del Icono' 10-36px def 14 (badge '14px (Estándar)'; Reset -> undefined)
+- Propagacion: 'Copiar a Hijos'/'Copiar a Hermanos' (cableados) -> copian icons/iconColor/iconSize/iconPosition
+- 'Iconos Asignados' (solo si hay): 'Quitar todos' -> icons: [] (array vacio, no undefined) + chips con X
+- Buscador (searchVectorIcons), categorias con emojis, 8 quick tags; grid-cols-6 con tope de 120 iconos
+- Boton 'Ver Galeria Completa de Iconos' -> IconPackModal
 
 ### 5.5. Tab "Nubes" (CloudsTab)
-- ToggleButton ON/OFF para activar/desactivar nube
-- 4 ToggleButtons de forma: arc / rectangle / round-rectangle / star
-- ColorPicker RGBA para color de nube
+Actualizado 2026-10-17 (fuente: CloudsTab.tsx 288 lineas; solo escribe node.cloud):
+- Switch maestro ON/OFF (apagar borra cloud entero -> pierde estilo al reactivar; encender crea defaults #3b82f6/scallop/0.08/dashed)
+- 8 formas (cloud-scallop arc round-rectangle rectangle bubble oval hexagon star) + 2 sliders de margen -50..200 step 5 (Reset)
+- Relleno: ColorPicker color de nube (sin Reset) + Opacidad 0-100% def 8 (guardada en decimal)
+- Borde: ColorPicker (sin Reset) + Grosor 0-6px step 0.5 def 1.5 + Estilo solid/dashed/dotted def 'dashed' (solo borderDash)
+- Gotchas: seccion 'Borde y Sombra' sin control de shadow; bgType gradient/pattern/image se renderizan en lienzo pero el panel solo escribe 'color'
 
 ### 5.6. Tab "Tema" (ThemeTab — Config del Mapa)
-Tema visual:
-- Selector de 9 temas con preview (cambia toda la paleta de colores)
-
-Layout:
-- Selector de 9 algoritmos de disposicion con iconos
-
-Fondo del lienzo:
-- 12 presets de fondo + color personalizado + patron personalizado
-
-Aristas globales:
-- Estilo, perfil, grosor, color, patron de linea
-- Botones: 'Aplicar a todos los nodos'
-
-Espaciado:
-- SliderInput horizontal gap
-- SliderInput vertical gap
+Actualizado 2026-10-17 (unico tab sin nodo seleccionado; fuente: ThemeTab.tsx 623 lineas):
+- Tema visual: 8 tarjetas (THEMES) con dot de raiz + 4 colores de rama; badge con nombre del tema
+- Layout: 9 algoritmos (standard/balanceado/right/left/top/bottom/tree-down/radial/circular) con iconos
+- Fondo del lienzo: ColorPicker + 6 patrones de cuadricula (none/dots/lines/squares/triangles/hexagons); si patron != none: color de trazo (sin reset) + tamano 12-64px step 2 + opacidad 5-100% (guardada como decimal). NO existe selector de '12 presets' (import BACKGROUND_PRESET_THEMES muerto)
+- Aristas globales: 4 formas (mismos SVG que por nodo) + 4 perfiles (═◣◆⧖) + Multicolor/Randomizar + ColorPicker 'Color Uniforme' + 8 colores Sugeridos + Estilo de Linea (3) + Grosor 1-8px step 0.5 def 2.5. Gotcha: 'Aplicar a todos' (onApplyEdge*) NO esta cableado por App -> solo efecto mapa
+- Espaciado: sliders Horizontal 20-150 def 54 / Vertical 4-60 def 14. Cableado 2026-10-17: ToolPanel adapta onUpdateMapGaps -> onUpdateMapSpacing(h,v) (gap faltante = valor del mapa); tests ToolPanel.test.tsx
 
 ---
 
@@ -289,56 +316,61 @@ Notas Markdown           | ~9 lineas / ~550 chars          | "Notas (Parte X de 
 Subtemas / Hijos         | Maximo 6 tarjetas por slide     | "Subtemas (X-Y de N)"
 Imagen del nodo          | Siempre visible en Fase 1       | Miniatura en cabecera de Fases 2 y 3
 
-### 6.3. Barra Superior del Modo Presentacion (PresentationControls organismo)
+### 6.3. Barra Superior del Modo Presentacion (inline en PresentationMode.tsx)
 
-    [Logo Presentacion] [Badge Fase] [<-- Volver*] [Editar] [N/Total] [X Cerrar]
+    [Badge Fase] ... [<-- Volver*] [Editar/Opciones] [N/Total] [X Cerrar]
 
+- **Correccion 2026-10-17**: no existe ningun organismo `PresentationControls` — los controles viven **dentro de `PresentationMode.tsx`** (no hay fichero aparte).
 Badge de Fase (color segun tipo):
 - Azul        -> Tema Principal
 - Ambar       -> Notas del Tema
 - Cian/Verde  -> Subtemas
 
-Boton Volver: SOLO visible si se salto de nodo por clic en tarjeta.
-Al pulsarlo regresa al slide de origen. Soporta multiples saltos en pila (jumpHistory stack).
-Activable tambien con tecla Backspace.
+Boton Volver: SOLO visible si hay historial de saltos (`jumpHistory`). Al pulsarlo regresa al slide de origen. Soporta multiples saltos en pila (LIFO). Activable tambien con tecla Backspace.
+Boton Editar/Opciones (`SlidersHorizontal`): abre el modal de opciones (tecla E).
 
-Boton Editar: abre modal de opciones (tecla E).
+### 6.4. Modal de Opciones de Presentacion (real, `PresentationMode.tsx:712-1002`)
 
-### 6.4. Modal de Opciones de Presentacion
-
-Opciones configurables en tiempo real:
-- TEMA DE PRESENTACION: 7 temas visuales (definidos en presentationThemes.ts)
+8 opciones en estado local (verificadas en `:308-315`):
+- TEMA DE PRESENTACION: **8 temas** (los `PRESENTATION_THEMES` definidos **inline** en `PresentationMode.tsx:54-159` — **no existe `presentationThemes.ts`**; mismos ids/nombres que los temas del mapa, ver 6.5)
 - NOTAS DEL PRESENTADOR: ON/OFF
-- TAMANO DE IMAGENES ADJUNTAS: Pequenya / Mediana / Grande / Ocultar
+- TAMANO DE IMAGENES ADJUNTAS: Pequena / Mediana / Grande / **Ocultar** (hidden)
 - DIAPOSITIVAS DE SUB-NODOS HIJOS: ON/OFF
 - CONEXIONES CRUZADAS: ON/OFF
+- **RADAR MINI-MAPA: ON/OFF** (`:915`) — el spec viejo lo omitia
 - ALINEACION DE CONTENIDO: Centro / Izquierda
-- ESCALA DEL TITULO: Compact / Normal / Grande
+- ESCALA DEL TITULO: Compacta / Normal / Grande
 
-Botones: "Editar en Lienzo" y "Aplicar y Ver Diapositiva"
+Footer: **"Editar en Lienzo"** (real: `onEditNode` cierra la presentacion, selecciona el nodo y abre el ToolPanel — `App:634-638`) y **"Aplicar y Ver Diapositiva"** (solo cierra el modal).
 
-### 6.5. Temas Disponibles para Presentacion (7 temas)
+### 6.5. Temas Disponibles para Presentacion (8 temas, inline)
 
-ID               | Nombre            | Fondo   | Acento
----------------- | ----------------- | ------- | -------
-dark-studio      | Estudio Oscuro    | #0f172a | Azul
-midnight-oled    | Medianoche OLED   | #000000 | Cian
-cyberpunk-purple | Cyberpunk Neon    | #120726 | Rosa
-navy-executive   | Azul Ejecutivo    | #09152b | Ambar
-emerald-forest   | Esmeralda Natural | #051c14 | Verde
-sunset-warm      | Atardecer Calido  | #210c14 | Naranja
-light-clean      | Luz Minimalista   | #f8fafc | Azul600
+Definidos en `PRESENTATION_THEMES` (`PresentationMode.tsx:54-159`), sincronizados con `THEMES` del mapa (`branchColors` compartidos). El spec viejo listaba 7 temas ficticios (dark-studio, midnight-oled, cyberpunk-purple...) que **no existen**.
 
-### 6.6. Atajos de Teclado en el Modo Presentacion
+ID       | Nombre                  | Fondo   | Claro
+--------- | ----------------------- | ------- | -----
+default  | Clasico Azul            | #f8fafc | si
+rainbow  | Arcoiris Vibrante       | #ffffff | si
+dark     | Modo Oscuro             | #0f172a | no
+forest   | Bosque Esmeralda        | #f0fdf4 | si
+sunset   | Atardecer Calido        | #fffbeb | si
+minimal  | Minimalista Mono        | #fafafa | si
+blueprint| Plano Tecnico Blueprint | #0a2540 | no
+honeycomb| Panal Creativo          | #fffdf5 | si
+
+### 6.6. Atajos de Teclado en el Modo Presentacion (verificados `:517-548`)
 
 Tecla                    | Accion
 ------------------------ | ------------------------------------------
-Flecha Derecha / Espacio | Siguiente diapositiva
+Flecha Derecha / Enter   | Siguiente diapositiva
+**Espacio**              | **Corregido 2026-10-17**: no avanzaba (el handler comparaba `e.key === 'Space'`; el valor real es `' '`) — ahora avanza igual que en los modos dinamico y elaborate
 Flecha Izquierda         | Diapositiva anterior
-Backspace                | Regresar al punto de salto
+Backspace                | Regresar al punto de salto (pila jumpHistory)
 E                        | Abrir / cerrar modal de opciones
-Esc                      | Cerrar modal / Salir de la presentacion
-Clic en Card de Subtema  | Saltar a la diapositiva de ese nodo
+Esc                      | Cerrar modal de opciones / Salir de la presentacion
+Clic en Card de Subtema  | Saltar a la diapositiva de ese nodo (empuja en jumpHistory)
+
+Sin wrap: al final/inicio la navegacion se detiene.
 
 ---
 
@@ -375,61 +407,66 @@ circular            | Circular              | Disposicion circular equilibrada
 
 ---
 
-## 9. Atajos Globales de Teclado
+## 9. Atajos Globales de Teclado (resumen verificado)
 
-Manejados por el hook `useKeyboardShortcuts`, que se conecta directamente al store Zustand.
+> Sincronizado 2026-10-17 con el hook real `useKeyboardShortcuts` (221 lineas, conectado al store Zustand). La tabla anterior contenia atajos ficticios (`Shift+Enter`, `Ctrl+E`, `Ctrl+0`, `Alt+Enter`) y describia mal `F5`; el detalle de cableado y guardas vive en **§3.6** (canonico) y `doc/DESIGN.md` §10.5.
 
 Atajo de Teclado          | Accion en la Interfaz
 ------------------------- | -------------------------------------------------
 Tab / Insert              | Crear nuevo nodo Hijo
 Enter                     | Crear nuevo nodo Hermano al mismo nivel
-Shift + Enter             | Crear nodo hermano en posicion superior
 Espacio                   | Plegar / desplegar rama seleccionada
-F2 / Doble Clic           | Entrar en modo edicion de texto
-Flechas Arriba/Abajo/Izq/Der | Navegar seleccion entre nodos
-Ctrl + C / X / V          | Copiar, cortar, pegar ramas completas
-Supr / Backspace          | Eliminar el nodo y todas sus sub-ramas
+F2                        | Entrar en modo edicion de texto (el doble clic vive en el nodo)
+Flechas Arriba/Abajo      | Navegar seleccion entre hermanos
+Flechas Izq/Der           | Navegar por lado (raiz → primer hijo del lado)
+Ctrl + C / X / V          | Copiar, cortar, pegar ramas completas (el pegado clona con IDs nuevos)
+Supr / Retroceso          | Eliminar el nodo y todas sus sub-ramas (veto en la raiz)
+Ctrl + Z / Ctrl + Y       | Deshacer / Rehacer (`Ctrl+Shift+Z` tambien rehace)
+Ctrl + F                  | Abrir / cerrar barra de Busqueda y Filtro
 Alt + O                   | Abrir / Cerrar panel de Esquema
 Alt + P                   | Abrir / Cerrar panel de Propiedades
-Ctrl + F                  | Abrir barra de Busqueda y Filtro
-F5                        | Iniciar Modo Presentacion Clasica
-Ctrl + E                  | Abrir modal de Exportacion e Importacion
-Ctrl + Z / Ctrl + Y       | Deshacer / Rehacer cambios
-Ctrl + 0                  | Ajustar todo el mapa al lienzo
-Alt + Enter               | Pantalla completa
+F5                        | Alternar modo presentacion (con el modo ACTIVO, por defecto el dinamico — no fuerza la clasica)
+Esc                       | Seleccionar raiz / cerrar modal / salir de edicion de texto
+
+**Guardas** (en este orden): escribiendo en `INPUT`/`TEXTAREA` → solo `Esc`; modal abierto → solo `Esc`; en presentacion → solo `F5` (la navegacion de slides es de cada modo: §6.6 clasica; los modos dinamico y elaborate se documentan en `doc/DESIGN.md` §10.2 y §10.3).
+
+**No existen** (hints decorativos sin handler: `Ctrl+S`, `?`; o ficticios del spec viejo): `Shift+Enter`, `Ctrl+E`, `Ctrl+0`, `Alt+Enter`, `Ctrl+P`, `Ctrl+O`, `Alt+B`, `Ctrl+A`, `Ctrl+/-`, `Alt+T`, `Ctrl+Alt+N`, `Alt+N/K/G/I/C/W`, `Home` (fuera de presentacion).
 
 ---
 
 ## 10. Catalogo de Funciones Avanzadas
 
 ### 10.1. Formas Geometricas de Nodos (10 tipos)
+
+> Orden corregido 2026-10-17 para coincidir con `NodeShape` (`types/mindmap.ts:1-11`).
+
 1. bubble    - Caja redondeada moderna con fondo solido, degradado o trama
 2. fork      - Linea de subrayado inferior estilo Freeplane clasico
 3. rectangle - Bordes rectos para procesos y diagramas tecnicos
 4. square    - Proporcion 1:1 simetrica para tarjetas y bloques
 5. oval      - Curvatura eliptica armonica para conceptos principales
 6. circle    - Simetrico con texto centrado y soporte degradados radiales
-7. pill      - Bordes 100% redondeados para etiquetas compactas
-8. hexagon   - Poligono SVG de 6 caras con contorno dinamico
+7. hexagon   - Poligono SVG de 6 caras con contorno dinamico (contenido al 68%)
+8. pill      - Bordes 100% redondeados para etiquetas compactas
 9. arrow     - Poligono SVG con punta triangular para flujos y procesos
 10. star     - Poligono SVG de 5 puntas estilizado
 
 ### 10.2. Dimensiones y Auto-Ajuste
-- customWidth: deslizador 50px a 500px
-- customHeight: deslizador 30px a 300px
-- Para square/circle: un solo deslizador actualiza ambas dimensiones
-- Boton "Automatico": restablece dimensionamiento por contenido
+- customWidth: deslizador 0-500px step 10 ('Automático' = undefined; 0 borra)
+- customHeight: deslizador 0-300px step 5 (mismo patron)
+- Los dos sliders son independientes (no hay slider doble para square/circle)
 - Texto envuelto automaticamente sin desbordamiento (break-words, hyphens)
 
-### 10.3. Modos de Fondo del Nodo (4 tipos)
-1. color: Selector RGB/Hex + paleta rapida + boton "Por defecto"
-2. transparent: Sin relleno, solo borde visible
-3. gradient: Color1 + Color2, 4 direcciones, 6 presets (Ocean/Sunset/Emerald/Neon/Indigo/Carbon)
-4. pattern: 7 estilos (dots/lines/squares/stripes/triangles/hexagons/cross), tamano 8-36px, opacidad 10-100%
+### 10.3. Modos de Fondo del Nodo (5 tipos: bgType)
+1. color: ColorPicker con 16 presets + Reset (onClear borra color y bgType)
+2. transparent: Sin relleno, solo borde visible (sin controles extra)
+3. gradient: Color1 (#3b82f6) + Color2 (#1d4ed8 en panel; fallback de render #8b5cf6), 4 direcciones (to-r/to-b/to-br/radial). Sin presets.
+4. pattern: 7 estilos (dots/lines/squares/stripes/triangles/hexagons/cross), tamano 8-40px def 16, opacidad 10-100% def 40 (guardada como decimal)
+5. image: bgImageUrl (URL o dataURL) + modos cover/contain/tile def cover ('fit' existe en el tipo ≡ contain, no ofrecido en panel)
 
 ### 10.4. Imagenes en el Nodo (2 tipos)
-- imageUrl: posicion top/bottom/left/right/between/background/fit, escala 60-300px
-- bgImageUrl: modo fit/cover/contain/tile, control de opacidad
+- imageUrl (contenido): posiciones top/between/bottom/left/right/fit ('background' en el tipo pero no en panel), ancho 60-500px def 140
+- bgImageUrl (fondo): modos cover/contain/tile. Sin control de opacidad en panel.
 
 ### 10.5. Tipos de Aristas
 - bezier    - Curva Bezier suave (defecto)
@@ -457,7 +494,9 @@ bg-dark-isometric    | Malla Neon Triangular    | Oscuro
 bg-graphite-lines    | Grafito con Rayas        | Oscuro
 bg-mint-breeze       | Brisa de Menta (Puntos)  | Claro
 
-### 10.7. Temas de Mapa (9 temas globales)
+### 10.7. Temas de Mapa (8 temas globales)
+
+> Recuento corregido 2026-10-17: son **8** (`THEMES` en `themes.ts:15-135`), no 9 como decía el spec viejo.
 
 ID        | Nombre               | Fondo   | Tipo
 --------- | -------------------- | ------- | ------
@@ -472,15 +511,16 @@ honeycomb | Panal Creativo       | #fffdf5 | Claro
 
 ### 10.8. Filtrado y Busqueda (useSearchFilter hook)
 
-Filtros acumulativos disponibles (calculados via useMemo en useSearchFilter):
-- Texto: busqueda en titulo, cuerpo y notas del nodo
-- Tags: filtrar por etiqueta especifica
-- Progreso: rango 0-100%
-- Icono: filtrar por tipo de icono asignado
-- Tiene Nota: solo nodos con nota Markdown
-- Tiene Enlace: solo nodos con URL
-- Mostrar Ancestros: incluye ruta completa al nodo encontrado
-- Mostrar Descendientes: incluye sub-arbol del nodo encontrado
+> Verificado 2026-10-17 contra `useSearchFilter.ts` (51 l.): el hook **solo implementa 3 filtros**. La interfaz `FilterOptions` (`types/mindmap.ts:340-349`) declara más campos, pero **el hook los ignora** (gotcha documentado: `filterOptions.icon` muerto, etc.).
+
+**Implementados** (acumulativos, computados via `useMemo`; sin ninguno, `searchMatches` es `undefined` y no se filtra):
+- **Texto** (`query`): substring lower-case sobre **`text` + `note`** del nodo — **no busca en `body`** (el spec viejo decía "titulo, cuerpo y notas").
+- **Tags** (`tag`): coincidencia exacta en `n.tags`.
+- **Progreso** (`minProgress`): `progress >= minProgress`.
+
+**Declarados en `FilterOptions` pero NO implementados en el hook**: `icon`, `hasNote`, `hasLink`, `showAncestors`, `showDescendants` (los dos últimos se resetean a `true` en `App:324` y `store:128-129` pero nunca se usan para filtrar — un match no despliega ramas plegadas, ver §9 OutlineView).
+
+El hook devuelve también `availableTags` (tags únicos del mapa, para el desplegable del FilterBar).
 
 ### 10.9. Historial de Deshacer / Rehacer
 - Gestionado dentro del store Zustand (useMindMapStore)
@@ -490,60 +530,80 @@ Filtros acumulativos disponibles (calculados via useMemo en useSearchFilter):
 
 ### 10.10. Exportacion e Importacion
 
-Exportar a:
-- .mm        Freeplane XML (compatible con Freeplane 1.x)
-- .html      Pagina web autonoma con mapa interactivo embebido
-- .svg       Vector escalable
-- .png       Imagen alta resolucion
-- .md        Documento Markdown con jerarquia de encabezados
-- .json      Respaldo completo del estado interno
+> Corregido 2026-10-17 contra `ExportImportModal.tsx`: el spec viejo listaba `.svg` y `.png` que **no existen** (solo 4 formatos de export; el modal tampoco exporta imágenes — ver §8.5.1).
 
-Importar desde:
-- .mm        Freeplane XML
-- .json      Respaldo FreeMind Studio
+Exportar a (4 formatos, `ExportImportModal.tsx:49-69`):
+- .mm        Freeplane XML (`exportToFreeplaneXML`, `application/xml`)
+- .html      Pagina web autonoma con mapa embebido (`exportToStandaloneHTML`, `*_portable.html`)
+- .md        Markdown con jerarquia de encabezados (`exportToMarkdown`)
+- .json      Respaldo completo del estado interno (`JSON.stringify`)
+
+**NO existe** export a .svg ni .png.
+
+Importar desde (`accept=".mm,.json,.xml"`, :276):
+- .json      Respaldo FreeMind Studio (si `parsed.rootId && parsed.nodes`)
+- .mm / .xml Freeplane XML (fallback: `importFromFreeplaneXML`)
 
 ### 10.11. Nodos Libres (Free Floating / Post-it)
-- isFreeFloating: true
-- Posicionamiento libre por coordenadas x,y independiente del layout automatico
-- Ideal para notas adicionales o etiquetas visuales en el lienzo
+- `isFreeFloating: true` + `freePosition: {x, y}` (`types/mindmap.ts:161-162`)
+- Posicionamiento libre por coordenadas x,y independiente del layout automatico (`layoutEngine.ts:593`; si falta `freePosition`, fallback a `canvasCenter` +200/−150)
+- 🐛 **Gotcha**: **no existe UI** para crear/editar nodos libres (ningún setter de `isFreeFloating` en componentes; el soporte vive en el motor de layout y en tests — util solo vía importación/JSON o plantillas que los incluyan)
 
 ### 10.12. Propagacion de Estilos
-- Aplicar estilo del nodo seleccionado a todos sus hijos directos
-- Aplicar estilo del nodo seleccionado a todos sus hermanos
-- Se propagan: forma, colores, fondo, bordes, tipografia, aristas, dimensiones
+
+> Corregido 2026-10-17: "hijos directos" era **incorrecto** — la propagación a hijos es **recursiva** (todo el subárbol, `applyRecursively` en `useMindMapStore.ts:532-541`).
+
+- **A hijos**: el estilo del nodo fuente se aplica a **todos los descendientes** (recursivo, niveles profundos incluidos). Veto: no hace nada sin hijos.
+- **A hermanos**: se aplica a **todos los hermanos** del nodo fuente (excluido el propio nodo fuente). Veto: raíz (`targetId === rootId`) y padres con un solo hijo.
+- **Bundle propagado** (`extractNodeStyleBundle`, `useMindMapStore.ts:79-109`, 25 campos): forma, color/bgType + degradados (c1/c2/dirección) + tramas (estilo/color/tamaño/opacidad), bordes (color/ancho/dash/estilo), tipografía (color/tamaño/bold/italic/fuente/alineación), aristas (color/estilo/ancho/dash/perfil) y dimensiones (customWidth/customHeight).
+- **NO se propagan**: cuerpo, nota, tags, iconos, imagen (ni `imageUrl` ni `bgImageUrl`), progreso, enlace, nube, plegado.
 
 ---
 
 ## 11. Arquitectura de Componentes (Atomic Design)
 
+> Árbol corregido 2026-10-17 contra el código real: desaparecen los ficticios `PresentationControls.tsx`, `presentationThemes.ts` y `CanvasZoomControls.tsx`; se añaden los organismos reales (`Presentation/`, `canvas/` completo, `templates/MainEditorLayout`), el subgrupo `molecules/node/` y los átomos/moléculas que faltaban.
+
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│ PAGINA: App.tsx (consume Zustand, compone organismos, gestiona modales)│
+│ PAGINA: App.tsx (700 l. orquesta store+uiTheme, estado local de modales│
+│         y presentationType; envuelve en ErrorBoundary + MainEditorLayout│
 ├────────────────────────────────────────────────────────────────────────┤
 │ ORGANISMOS DE PAGINA:                                                  │
-│   MenuBar · ToolBar · FilterBar · MindMapCanvas · ToolPanel            │
-│   PresentationMode · OutlineView · StatusBar · MiniMap · Modals/       │
+│   MenuBar(558) · ToolBar(643) · FilterBar(119) · MindMapCanvas(1584)   │
+│   ToolPanel(272) · PresentationMode(1607) · OutlineView(463)           │
+│   StatusBar(51) · MiniMap(466) · Modals/ (6)                           │
 ├────────────────────────────────────────────────────────────────────────┤
 │ ORGANISMOS INTERNOS:                                                   │
 │   toolpanel/ → ContentTab · FormatTab · NotesTab · IconsTab            │
 │                CloudsTab · ThemeTab                                     │
-│   canvas/   → CanvasContextMenu · CanvasZoomControls                   │
-│   presentation/ → PresentationControls · presentationThemes            │
+│   canvas/   → CanvasBackgroundLayer · CanvasContextMenu                │
+│               CanvasDrawingOverlay · CanvasPresentationHUD              │
+│   Presentation/ (elaborate/Prezi) → ElaboratePresentationSystem         │
+│               SpatialSlideCardComponent · SlideDetailModal              │
+│   templates/ → MainEditorLayout (slot layout del editor)                │
 ├────────────────────────────────────────────────────────────────────────┤
 │ MOLECULAS:                                                             │
-│   FontFormatToolbar · ShapeSelector · TagManager                       │
+│   FontFormatToolbar · ShapeSelector · TagManager · HistoryControls      │
+│   ModalHeader · SearchInput · ZoomControls                              │
+│   node/ (subgrupo del nodo): NodeHeaderRow · NodeBadgesBar              │
+│          NodeActionButtons · NodeBackgroundRenderer                      │
 ├────────────────────────────────────────────────────────────────────────┤
 │ ATOMOS:                                                                │
-│   CollapsibleSection · ColorPicker · SliderInput                       │
-│   ToggleButton · ToggleButtonGroup                                     │
+│   CollapsibleSection · ColorPicker · SliderInput                        │
+│   ToggleButton · ToggleButtonGroup                                      │
+│   Badge · Button · IconButton · Input · ModalBackdrop · ErrorBoundary   │
 ├────────────────────────────────────────────────────────────────────────┤
 │ HOOKS:                                                                 │
-│   useMindMapStore (Zustand) · useSearchFilter · useKeyboardShortcuts   │
+│   useMindMapStore (Zustand, 716 l.) · useSearchFilter ·                │
+│   useKeyboardShortcuts (221 l.)                                         │
 ├────────────────────────────────────────────────────────────────────────┤
 │ UTILS:                                                                 │
-│   layoutEngine · themes · storage · freeplaneConverter · htmlExporter  │
-│   connectorUtils · markdownRenderer · iconMap · vectorIconPack         │
-│   sampleMaps · additionalTemplates · templateIllustrations             │
+│   layoutEngine · themes · mapTheme · uiTheme · storage ·                │
+│   freeplaneConverter · htmlExporter · connectorUtils ·                  │
+│   markdownRenderer · presentationGenerator ·                            │
+│   spatialPresentationGenerator · iconMap · vectorIconPack ·             │
+│   sampleMaps · additionalTemplates · templateIllustrations              │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -551,79 +611,109 @@ Importar desde:
 
 ## 12. Arquitectura de Archivos del Proyecto
 
+> Árbol reconstruido 2026-10-17 desde el disco (líneas reales entre paréntesis). Corrige los ficheros fantasma del spec anterior (`PresentationControls.tsx`, `presentationThemes.ts`, `CanvasZoomControls.tsx` — ninguno existe) y añade los ~20 ficheros que faltaban (`Presentation/`, `templates/`, subgrupo `molecules/node/`, 6 átomos, 4 utils). **Tests**: 29 suites / 131 tests en carpetas `__tests__/` (Vitest + jsdom, setup en `src/test/setup.ts`).
+
 ```
 src/
-├── App.tsx                              Pagina / Orquestador (consume Zustand)
-├── main.tsx                             ReactDOM.createRoot
+├── App.tsx                              Pagina / orquestador (700 l.)
+├── App.test.tsx                         Test de humo del orquestador
+├── main.tsx                             ReactDOM.createRoot (10 l.)
 ├── index.css                            Estilos globales + Tailwind v4
 │
 ├── types/
-│   └── mindmap.ts                       Tipos TypeScript: MindMap, MindNode, Connector, etc.
+│   └── mindmap.ts                       Tipos: MindMap, MindNode, Connector, LayoutType… (355)
 │
 ├── hooks/
-│   ├── useMindMapStore.ts               Store Zustand centralizado (toda la logica)
-│   ├── useSearchFilter.ts               Hook de filtro/busqueda reactivo
-│   └── useKeyboardShortcuts.ts          Hook de atajos de teclado globales
+│   ├── useMindMapStore.ts               Store Zustand centralizado, CRUD + undo/redo (716)
+│   ├── useSearchFilter.ts               Hook de filtro/busqueda reactivo (51)
+│   └── useKeyboardShortcuts.ts          Atajos globales con guardas (221)
 │
 ├── components/
-│   ├── MenuBar.tsx                      Barra de menu superior
-│   ├── ToolBar.tsx                      Barra de herramientas rapidas
-│   ├── FilterBar.tsx                    Barra de busqueda y filtros colapsable
-│   ├── MindMapCanvas.tsx                Lienzo SVG/HTML infinito con pan/zoom
-│   ├── NodeComponent.tsx                Renderizado de cada nodo (10 formas)
-│   ├── ToolPanel.tsx                    Contenedor de 6 tabs-organismo
-│   ├── PresentationMode.tsx             Modo presentacion (3 fases, 7 temas)
-│   ├── OutlineView.tsx                  Vista de esquema en arbol
-│   ├── MiniMap.tsx                      Minimapa radar flotante
-│   ├── StatusBar.tsx                    Barra de estado inferior
+│   ├── MenuBar.tsx                      Barra de menu superior (558)
+│   ├── ToolBar.tsx                      Barra de herramientas rapidas (643)
+│   ├── FilterBar.tsx                    Barra de busqueda y filtros (119)
+│   ├── MindMapCanvas.tsx                Lienzo SVG/HTML con pan/zoom + presentation dinamica (1584)
+│   ├── NodeComponent.tsx                Renderizado de cada nodo (10 formas) (211)
+│   ├── ToolPanel.tsx                    Contenedor de 6 tabs-organismo (272)
+│   ├── PresentationMode.tsx             Presentacion clasica + 8 temas inline (1607)
+│   ├── OutlineView.tsx                  Vista de esquema en arbol (463)
+│   ├── MiniMap.tsx                      Minimapa radar flotante (466)
+│   ├── StatusBar.tsx                    Barra de estado inferior (51)
 │   │
 │   ├── atoms/                           Primitivos UI reutilizables
-│   │   ├── CollapsibleSection.tsx
-│   │   ├── ColorPicker.tsx
-│   │   ├── SliderInput.tsx
-│   │   ├── ToggleButton.tsx
-│   │   └── ToggleButtonGroup.tsx
+│   │   ├── Badge.tsx (63)
+│   │   ├── Button.tsx (67)
+│   │   ├── CollapsibleSection.tsx (76)
+│   │   ├── ColorPicker.tsx (78)
+│   │   ├── ErrorBoundary.tsx (87)
+│   │   ├── IconButton.tsx (72)
+│   │   ├── Input.tsx (98)
+│   │   ├── ModalBackdrop.tsx (60)        Backdrop+card de TODOS los modales
+│   │   ├── SliderInput.tsx (60)
+│   │   ├── ToggleButton.tsx (38)
+│   │   └── ToggleButtonGroup.tsx (50)
 │   │
 │   ├── molecules/                       Combinaciones de atomos
-│   │   ├── FontFormatToolbar.tsx
-│   │   ├── ShapeSelector.tsx
-│   │   └── TagManager.tsx
+│   │   ├── FontFormatToolbar.tsx (80)
+│   │   ├── HistoryControls.tsx (40)
+│   │   ├── ModalHeader.tsx (56)
+│   │   ├── SearchInput.tsx (40)
+│   │   ├── ShapeSelector.tsx (123)
+│   │   ├── TagManager.tsx (74)
+│   │   ├── ZoomControls.tsx (81)         Controles de zoom del lienzo
+│   │   └── node/                        Subgrupo del nodo (moléculas internas)
+│   │       ├── NodeHeaderRow.tsx (281)    texto/edicion inline (textarea)
+│   │       ├── NodeBadgesBar.tsx (207)    progreso/iconos/tags
+│   │       ├── NodeActionButtons.tsx (84) addChild/delete/fold
+│   │       └── NodeBackgroundRenderer.tsx (636) SVG formas+gradientes+patrones
 │   │
 │   ├── organisms/                       Secciones funcionales complejas
 │   │   ├── toolpanel/
-│   │   │   ├── ContentTab.tsx
-│   │   │   ├── FormatTab.tsx
-│   │   │   ├── NotesTab.tsx
-│   │   │   ├── IconsTab.tsx
-│   │   │   ├── CloudsTab.tsx
-│   │   │   └── ThemeTab.tsx
+│   │   │   ├── ContentTab.tsx (477)
+│   │   │   ├── FormatTab.tsx (540)
+│   │   │   ├── NotesTab.tsx (224)
+│   │   │   ├── IconsTab.tsx (314)
+│   │   │   ├── CloudsTab.tsx (288)
+│   │   │   └── ThemeTab.tsx (623)
 │   │   ├── canvas/
-│   │   │   ├── CanvasContextMenu.tsx
-│   │   │   └── CanvasZoomControls.tsx
-│   │   └── presentation/
-│   │       ├── PresentationControls.tsx
-│   │       └── presentationThemes.ts
+│   │   │   ├── CanvasBackgroundLayer.tsx (148)
+│   │   │   ├── CanvasContextMenu.tsx (250)
+│   │   │   ├── CanvasDrawingOverlay.tsx (94)
+│   │   │   └── CanvasPresentationHUD.tsx (489)   Presentacion dinamica (Mindomo)
+│   │   └── Presentation/                Presentacion elaborate (Prezi espacial)
+│   │       ├── ElaboratePresentationSystem.tsx (786)
+│   │       ├── SpatialSlideCardComponent.tsx (373)
+│   │       └── SlideDetailModal.tsx (277)
 │   │
-│   └── Modals/
-│       ├── ExportImportModal.tsx
-│       ├── ShortcutsModal.tsx
-│       ├── TemplatesModal.tsx
-│       ├── SavedMapsModal.tsx
-│       ├── ConnectorModal.tsx
-│       ├── IconPackModal.tsx
-│       └── ComingSoonModal.tsx
+│   ├── templates/
+│   │   └── MainEditorLayout.tsx (71)    Layout de slots (menu/panel/canvas/status)
+│   │
+│   └── Modals/                          6 modales (el 7º ComingSoonModal eliminado 2026-10-17)
+│       ├── ExportImportModal.tsx (293)
+│       ├── ShortcutsModal.tsx (65)
+│       ├── TemplatesModal.tsx (607)
+│       ├── SavedMapsModal.tsx (131)
+│       ├── ConnectorModal.tsx (216)
+│       └── IconPackModal.tsx (395)
+│
+├── test/
+│   └── setup.ts (25)                    Polyfilla matchMedia + ResizeObserver
 │
 └── utils/
-    ├── layoutEngine.ts                  Motor de layout (9 algoritmos)
-    ├── themes.ts                        9 temas de mapa + 12 fondos de lienzo
-    ├── markdownRenderer.tsx             Parser Markdown propio (sin librerias)
-    ├── connectorUtils.ts                Calcular rutas de conectores Bezier
-    ├── freeplaneConverter.ts            Import/Export Freeplane .mm XML
-    ├── htmlExporter.ts                  Exportador a HTML autonomo
-    ├── storage.ts                       Persistencia en localStorage
-    ├── sampleMaps.ts                    Mapa tutorial + mapa en blanco
-    ├── additionalTemplates.ts           Plantillas adicionales predefinidas
-    ├── templateIllustrations.ts         Ilustraciones SVG para las plantillas
-    ├── iconMap.tsx                       String icono -> componente React
-    └── vectorIconPack.tsx               Pack de iconos vectoriales premium
+    ├── layoutEngine.ts                  Motor de layout (9 algoritmos) (1940)
+    ├── themes.ts                        8 temas de mapa + 12 fondos (291)
+    ├── mapTheme.ts (43)                 applyThemeRestyle/applyBackgroundUpdate
+    ├── uiTheme.ts (41)                  UI tema claro/oscuro/sepia
+    ├── markdownRenderer.tsx             Parser Markdown propio (351)
+    ├── connectorUtils.ts                Rutas Bezier de conectores (100)
+    ├── freeplaneConverter.ts            Import/Export Freeplane .mm XML (264)
+    ├── htmlExporter.ts                  Exportador HTML autonomo (2226)
+    ├── storage.ts                       Persistencia en localStorage (106)
+    ├── presentationGenerator.ts         Slides de la presentacion clasica (212)
+    ├── spatialPresentationGenerator.ts  Slides espaciales elaborate (495)
+    ├── sampleMaps.ts                    Tutorial + blanco (3879)
+    ├── additionalTemplates.ts           Plantillas adicionales (2528)
+    ├── templateIllustrations.ts         Ilustraciones SVG (464)
+    ├── iconMap.tsx                      String icono -> componente React (140)
+    └── vectorIconPack.tsx               Pack de iconos vectoriales (531)
 ```
