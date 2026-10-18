@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="760" viewBox="0 0 1300 760" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <marker id="cap" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,4 L1,7" fill="none" stroke="#f59e0b" stroke-width="1.4"/>
+    </marker>
+    <style>
+      .cota { stroke:#f59e0b; stroke-width:1; }
+      .cota-txt { font-size:11px; fill:#b45309; font-weight:700; }
+      .lbl { font-size:12px; fill:#334155; font-weight:600; }
+      .lbl-sm { font-size:10.5px; fill:#64748b; }
+      .name { font-size:12px; font-weight:800; }
+    </style>
+  </defs>
+
+  <rect width="1300" height="760" rx="16" fill="#0f172a"/>
+  <text x="32" y="40" font-size="22" font-weight="700" fill="#ffffff">OutlineView (Panel de Esquema) — Medidas detalladas</text>
+  <text x="32" y="62" font-size="12.5" fill="#93c5fd">Escala 1:1 (1px = 1px real) · OutlineView.tsx:344-461 · w-80 = 320px (md:w-88 = 352px)</text>
+
+  <!-- ================= PANEL REAL A ESCALA (320 x 560) ================= -->
+  <rect x="60" y="96" width="320" height="560" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+
+  <!-- Cabecera (px-3.5 py-2.5 → alto ~50px) -->
+  <rect x="61" y="97" width="318" height="50" fill="#f8fafc" stroke="#f1f5f9"/>
+  <rect x="74" y="110" width="24" height="24" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="86" y="127" font-size="11" text-anchor="middle" fill="#4f46e5">⇅</text>
+  <text x="106" y="120" class="name" font-size="11" fill="#0f172a">Panel de Esquema</text>
+  <rect x="196" y="110" width="24" height="14" rx="7" fill="#e2e8f0"/>
+  <text x="208" y="120" font-size="8" text-anchor="middle" fill="#475569">50</text>
+  <text x="106" y="136" font-size="8.5" fill="#94a3b8">Jerarquía y vista outline</text>
+  <g font-size="11" text-anchor="middle" fill="#64748b">
+    <text x="290" y="126">🔍</text>
+    <text x="310" y="126">📂</text>
+    <text x="330" y="126">📁</text>
+    <text x="350" y="126">⤢</text>
+    <text x="368" y="126">⇤</text>
+  </g>
+
+  <!-- Buscador (condicional: px-3 py-2 → alto ~40px) -->
+  <rect x="61" y="147" width="318" height="40" fill="#f8fafc" stroke="#f1f5f9"/>
+  <rect x="74" y="156" width="24" height="22" rx="4" fill="#f1f5f9"/>
+  <text x="86" y="171" font-size="10" text-anchor="middle" fill="#94a3b8">🔍</text>
+  <rect x="104" y="156" width="200" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="112" y="171" font-size="8.5" fill="#94a3b8">Filtrar por texto o #etiqueta...</text>
+  <text x="360" y="171" font-size="10" text-anchor="middle" fill="#94a3b8">✕</text>
+
+  <!-- Lista de nodos (flex-1, py-2.5) -->
+  <rect x="61" y="187" width="318" height="439" fill="#ffffff"/>
+  <!-- Fila raíz (seleccionada) con indentación base 10px -->
+  <rect x="61" y="197" width="318" height="56" fill="#eff6ff" stroke="#2563eb" stroke-width="0" />
+  <rect x="61" y="197" width="2" height="56" fill="#2563eb"/>
+  <text x="73" y="214" font-size="9" fill="#475569">›</text>
+  <circle cx="88" cy="210" r="4" fill="#2563eb" stroke="#93c5fd" stroke-width="2"/>
+  <rect x="96" y="203" width="26" height="12" rx="3" fill="#e2e8f0"/>
+  <text x="109" y="212" font-size="7.5" text-anchor="middle" fill="#475569">62%</text>
+  <text x="128" y="213" font-size="9" fill="#0f172a" font-weight="700">🧠 FreeMind Map Studio</text>
+  <text x="73" y="230" font-size="8" fill="#64748b">Aplicación moderna, portable y 100% offl...</text>
+  <rect x="73" y="236" width="56" height="12" rx="3" fill="#f1f5f9"/>
+  <text x="101" y="245" font-size="7" text-anchor="middle" fill="#475569">#Guía Oficial</text>
+  <rect x="133" y="236" width="66" height="12" rx="3" fill="#f1f5f9"/>
+  <text x="166" y="245" font-size="7" text-anchor="middle" fill="#475569">#FreeMind Studio</text>
+  <rect x="203" y="236" width="52" height="12" rx="3" fill="#f1f5f9"/>
+  <text x="229" y="245" font-size="7" text-anchor="middle" fill="#475569">#Tutorial 2026</text>
+  <text x="366" y="213" font-size="9" fill="#94a3b8">📄</text>
+  <!-- Fila hija (depth 1: paddingLeft = 1*18+10 = 28px) -->
+  <rect x="61" y="253" width="318" height="26" fill="#ffffff"/>
+  <text x="91" y="270" font-size="9" fill="#475569">›</text>
+  <circle cx="104" cy="266" r="3" fill="#64748b"/>
+  <text x="114" y="269" font-size="8.5" fill="#334155">Nodo hijo (depth 1)</text>
+  <!-- Fila hija depth 2 (paddingLeft = 2*18+10 = 46px) -->
+  <rect x="61" y="279" width="318" height="26" fill="#ffffff"/>
+  <text x="109" y="296" font-size="9" fill="#475569">›</text>
+  <circle cx="122" cy="292" r="3" fill="#64748b"/>
+  <text x="132" y="295" font-size="8.5" fill="#334155">depth 2 (46px)</text>
+  <text x="73" y="330" font-size="8.5" fill="#94a3b8">(lista continua con py-2.5 y space-y-0.5)</text>
+
+  <!-- Footer (px-3 py-2 → alto ~30px) -->
+  <rect x="61" y="626" width="318" height="30" fill="#f8fafc" stroke="#f1f5f9"/>
+  <text x="74" y="645" font-size="8.5" fill="#94a3b8">Tab: hijo • Enter: hermano</text>
+  <text x="300" y="645" font-size="8.5" fill="#94a3b8">Doble clic: editar</text>
+
+  <!-- ============ COTAS VERTICALES DEL PANEL ============ -->
+  <line x1="46" y1="96" x2="46" y2="147" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="126" class="cota-txt" text-anchor="end">50</text>
+  <line x1="46" y1="147" x2="46" y2="187" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="171" class="cota-txt" text-anchor="end">40</text>
+  <line x1="46" y1="187" x2="46" y2="626" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="410" class="cota-txt" text-anchor="end">flex-1</text>
+  <line x1="46" y1="626" x2="46" y2="656" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="645" class="cota-txt" text-anchor="end">30</text>
+
+  <!-- Cota ancho panel -->
+  <line x1="60" y1="672" x2="380" y2="672" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="220" y="688" class="cota-txt" text-anchor="middle">320px (w-80) · 352px con md (≥768px) · flex-1 si maximizado</text>
+
+  <!-- ============ DETALLE 1: CABECERA AMPLIADA ============ -->
+  <text x="440" y="96" class="lbl" fill="#93c5fd">Cabecera — px-3.5 py-2.5 (14px/10px) · border-b slate-100</text>
+  <rect x="440" y="108" width="380" height="78" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="454" y="122" width="24" height="24" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="466" y="139" font-size="11" text-anchor="middle" fill="#4f46e5">⇅</text>
+  <text x="486" y="134" font-size="11" fill="#0f172a" font-weight="700">Panel de Esquema</text>
+  <rect x="586" y="124" width="26" height="14" rx="7" fill="#e2e8f0"/>
+  <text x="599" y="134" font-size="8" text-anchor="middle" fill="#475569">50</text>
+  <text x="486" y="152" font-size="9" fill="#94a3b8">Jerarquía y vista outline</text>
+  <g font-size="12" text-anchor="middle" fill="#64748b">
+    <rect x="640" y="122" width="26" height="26" rx="7" fill="#e0e7ff"/><text x="653" y="140" fill="#4338ca">🔍</text>
+    <rect x="672" y="122" width="26" height="26" rx="7" fill="#f1f5f9"/><text x="685" y="140">📂</text>
+    <rect x="704" y="122" width="26" height="26" rx="7" fill="#f1f5f9"/><text x="717" y="140">📁</text>
+    <rect x="736" y="122" width="26" height="26" rx="7" fill="#f1f5f9"/><text x="749" y="140">⤢</text>
+    <rect x="768" y="122" width="26" height="26" rx="7" fill="#f1f5f9"/><text x="781" y="140">⇤</text>
+  </g>
+  <text x="454" y="176" class="lbl-sm">icono 24×24 (interno 14px) · gap-2 (8px) · título text-xs + badge px-1.5 py-0.2 text-[10px] · subtítulo text-[10px]</text>
+
+  <text x="440" y="210" class="lbl-sm" fill="#93c5fd">5 botones de acción: p-1.5 (6px) · gap-1 (4px) · icono w-3.5 h-3.5 (14px) · el de cerrar icono w-4 h-4 (16px)</text>
+  <g class="lbl-sm">
+    <text x="440" y="228">1. Buscar (alterna input) · 2. Desplegar todas FolderOpen · 3. Plegar todas FolderClosed</text>
+    <text x="440" y="244">4. Maximizar/Reducir Maximize2/Minimize2 · 5. Ocultar panel Alt+O PanelLeftClose</text>
+  </g>
+
+  <!-- ============ DETALLE 2: FILA DE NODO AMPLIADA ============ -->
+  <text x="440" y="286" class="lbl" fill="#93c5fd">Fila de nodo — py-1.5 (6px) · pr-2.5 (10px) · gap-1.5 (6px) · border-l-2 (2px) · text-xs (12px)</text>
+  <rect x="440" y="298" width="820" height="64" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="440" y="298" width="3" height="64" fill="#2563eb"/>
+  <!-- indentación paddingLeft = depth*18+10 -->
+  <line x1="454" y1="370" x2="474" y2="370" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <line x1="474" y1="370" x2="492" y2="370" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="440" y="386" class="cota-txt" font-size="9.5">Indentación: paddingLeft = depth×18 + 10 (base 10px, +18px por nivel)</text>
+  <!-- elementos -->
+  <text x="454" y="322" font-size="11" fill="#475569">⌄</text>
+  <circle cx="472" cy="318" r="4" fill="#2563eb" stroke="#93c5fd" stroke-width="2"/>
+  <rect x="484" y="311" width="30" height="14" rx="3" fill="#e2e8f0"/>
+  <text x="499" y="321" font-size="8" text-anchor="middle" fill="#475569">62%</text>
+  <text x="522" y="322" font-size="11" fill="#0f172a" font-weight="700">🧠 Título (root text-[13px] · hijo text-xs)</text>
+  <text x="762" y="322" font-size="10" fill="#94a3b8">📄 nota</text>
+  <text x="806" y="322" font-size="10" fill="#3b82f6">↗ enlace</text>
+  <text x="874" y="322" font-size="10" fill="#2563eb">＋ ⌫ hover</text>
+  <text x="454" y="340" font-size="9.5" fill="#64748b">Cuerpo: text-[11px] truncate mt-0.5</text>
+  <rect x="454" y="346" width="60" height="13" rx="3" fill="#f1f5f9"/>
+  <text x="484" y="355" font-size="8" text-anchor="middle" fill="#475569">#tag text-[9px]</text>
+  <rect x="522" y="346" width="66" height="13" rx="3" fill="#f1f5f9"/>
+  <text x="555" y="355" font-size="8" text-anchor="middle" fill="#475569">px-1.5 py-0.2</text>
+  <text x="600" y="356" class="lbl-sm">tags: flex-wrap gap-1 (4px) mt-1 (4px)</text>
+
+  <text x="440" y="412" class="lbl-sm" fill="#93c5fd">Elementos de la fila (izq → der): chevron 14px (p-0.5, o placeholder 14px) · bullet w-2 h-2 (8px, root ring-2) · iconos 12px gap-0.5 · badge progreso text-[9px] px-1</text>
+  <text x="440" y="430" class="lbl-sm">título/cuerpo/tags flex-1 min-w-0 · indicadores nota/enlace w-3 h-3 (12px) gap-1 · hover: +hijo y borrar p-1 (4px) icono 12px, opacity-0 → 100 (oculto en raíz el borrar)</text>
+
+  <!-- Estados -->
+  <text x="440" y="462" class="lbl" fill="#93c5fd">Estados de fila</text>
+  <rect x="440" y="474" width="176" height="30" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="454" y="493" font-size="10" fill="#1e3a8a">Seleccionada: bg-blue-50 border-blue-600</text>
+  <rect x="628" y="474" width="176" height="30" rx="6" fill="#fef3c7" stroke="#fcd34d"/>
+  <text x="642" y="493" font-size="10" fill="#92400e">Match búsqueda: bg-amber-50 border-amber-400</text>
+  <rect x="816" y="474" width="160" height="30" rx="6" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="830" y="493" font-size="10" fill="#475569">Normal/hover: border-transparent</text>
+
+  <!-- ============ DETALLE 3: BUSCADOR Y FOOTER ============ -->
+  <text x="440" y="536" class="lbl" fill="#93c5fd">Buscador (condicional) — px-3 py-2 (12px/8px) · gap-1.5</text>
+  <rect x="440" y="548" width="380" height="44" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="454" y="575" font-size="10" fill="#475569">🔍</text>
+  <rect x="474" y="558" width="280" height="24" rx="5" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="484" y="574" font-size="9.5" fill="#94a3b8">Filtrar por texto o #etiqueta... (input flex-1 px-2 py-1 text-xs)</text>
+  <text x="768" y="575" font-size="10" fill="#94a3b8">✕ p-1 icono 12px</text>
+  <text x="440" y="610" class="lbl-sm">Aparece al pulsar Buscar · busca en título, cuerpo y tags (#)</text>
+  <text x="440" y="624" class="lbl-sm">· el × solo si hay query · estado: showSearch || searchQuery</text>
+
+  <text x="856" y="536" class="lbl" fill="#93c5fd">Footer — px-3 py-2 (12px/8px) · text-[10px]</text>
+  <rect x="856" y="548" width="380" height="44" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="870" y="575" font-size="10" fill="#64748b">Tab: hijo • Enter: hermano</text>
+  <text x="1090" y="575" font-size="10" fill="#64748b">Doble clic: editar</text>
+  <text x="856" y="610" class="lbl-sm">justify-between · border-t slate-100</text>
+  <text x="856" y="624" class="lbl-sm">bg-sp-bg2 (mismo que cabecera)</text>
+
+  <!-- ============ NOTAS ============ -->
+  <text x="440" y="648" class="lbl-sm" fill="#93c5fd">Árbol: render recursivo — depth anida hijos · node.folded oculta subárbol · lista con overflow-y-auto (scroll propio) · space-y-0.5 (2px) entre filas</text>
+  <text x="440" y="666" class="lbl-sm">Edición en línea: input px-1.5 py-0.5 text-xs (Enter=hermano, Tab=hijo, Esc=cierra) · búsqueda: matchedNodeIds conserva ancestros para ver la jerarquía</text>
+  <text x="440" y="684" class="lbl-sm" fill="#93c5fd">Estados: !isOpen || !rootNode → return null · fullscreen: flex-1 z-30 (en vez de w-80/w-88 z-20) · sin media queries (mismo ancho en todos los breakpoints, solo cambia con md)</text>
+</svg>

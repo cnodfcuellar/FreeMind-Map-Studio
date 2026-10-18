@@ -1302,3 +1302,388 @@ Segundo barrido completo del día. Los fixes de hoy (eliminación de `ComingSoon
 - [x] `pnpm lint` (tsc --noEmit) tras tocar ToolPanel.tsx → exit 0.
 - [x] Cada valor/referencia citada releída del código; DESIGN §7/§8/§9/§10 interno coherente y con `INTERFACE_SPEC`/`GUIA-ESTUDIO`.
 - [x] `README.md` y `PROJECT_ARCHITECTURE.md`: grep sin números obsoletos (ya sincronizados en el barrido matinal).
+
+---
+
+## 📚 [Docs] — 2026-10-17: Nuevo `doc/FEATURE_TREE.md` (árbol de características funcional + por interfaz)
+
+### 🎯 Motivo
+El usuario preguntó qué es un árbol de características y pidió dos para FreeMind Map Studio: uno **funcional** (capacidades del producto) y otro **basado en la interfaz** (superficie por superficie). Después ordenó añadir ambos a la documentación.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/FEATURE_TREE.md` | **Nuevo**. Intro (qué es un feature tree, eje de cada árbol), **§1 árbol funcional** (ediciones/estilo/lienzo/presentaciones/persistencia/interfaz con hojas atómicas verificadas), **§2 árbol por interfaz** (MenuBar → ToolBar → FilterBar → Lienzo → Outline → ToolPanel 6 tabs → StatusBar → 6 modales → overlays de presentación → capa global de atajos), **§3 cómo usarlo** (roadmap con tags, mapeo funcional↔interfaz, aviso de sincronización). |
+| `README.md` | `doc/FEATURE_TREE.md` añadido al árbol de ficheros y a la lista "Documentación Técnica Detallada". |
+
+### 🔍 Verificación
+- [x] Hojas de ambos árboles contrastadas con las auditorías del propio día (DESIGN §6-§10, INTERFACE_SPEC): 10 formas, 9 layouts, 8 temas, 3 presentaciones, 6 modales, 4 formatos de export, 520+ iconos, etc.
+- [x] Sin cambios de código.
+
+---
+
+## 📚 [Docs] — 2026-10-17: `FEATURE_TREE.md` §2 ampliado a nivel de control (qué botón y qué hace)
+
+### 🎯 Motivo
+El usuario pidió detallar más el árbol por interfaz: "termina con el control a manipulas, qué botones tiene y qué hace".
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/FEATURE_TREE.md` | §2 reescrito **control a control** por superficie: MenuBar (6 menús con cada item y su accion), ToolBar (cada boton, disabled/visibilidad responsive, popovers Vista/Presentar), FilterBar (input/selects/contador), Lienzo (clic/doble clic/hover/drag de nodos, menu contextual 11 items, MiniMap, ZoomControls con sus 5 botones), HUD de presentacion dinamica (top bar, pill, staged, filmstrip), OutlineView (cabecera, fila, footer), ToolPanel 6 pestanas (cada slider/colorpicker/toggle con rango), StatusBar, 6 modales (cada campo/boton), presentacion Clasica (header/slide/footer/opciones) y Elaborada (camara, transformaciones de tarjeta, editor), y capa global de atajos. Marcados como decorativos los hints de atajos no implementados (Ctrl+S, Ctrl+0/Ctrl+-/+). §3 con nuevo punto "QA por control" y "Honestidad de hints". |
+| `README.md` | (sin cambios nuevos; los 2 enlaces de la entrada anterior siguen vigentes) |
+
+### 🔍 Verificación
+- [x] Controles de nodo y de ZoomControls leidos directamente de `src/components/molecules/node/NodeActionButtons.tsx` y `src/components/molecules/ZoomControls.tsx` antes de escribirlos (nodo hover = plegar + añadir hijo, sin borrar; ZoomControls = Compass MiniMap, ZoomOut, % reset, ZoomIn, Maximize2 ajustar).
+- [x] Resto de hojas tomadas de las auditorias del propio dia (DESIGN §7/§8/§8.5/§9/§10, INTERFACE_SPEC).
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Nueva hoja de medidas `doc/MEASURES.md` (áreas grandes de la interfaz)
+
+### 🎯 Motivo
+El usuario pidió crear un documento de medidas donde se documenta cada medida de las opciones de la interfaz, empezando **solo por las áreas grandes**.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/MEASURES.md` | **Nuevo**. Hoja de medidas de las áreas grandes, cada una verificada leyendo las clases Tailwind de `src/`: §1 estructura raíz (MainEditorLayout `h-screen w-screen`), §2 zona de trabajo (fila `flex-1`), §3 MenuBar (h-10/40px, dropdowns w-56/w-52), §4 ToolBar (h-11/44px, botones 30x30), §5 Outline (w-80 320px / md:w-88 352px / flex-1 maximizado), §6 ToolPanel (w-84 336px, grid 6 pestañas de 56px), §7 FilterBar (h-10, max-w-3xl/max-w-xs), §8 StatusBar (h-6/24px, texto 10-12px), §9 controles flotantes (MiniMap S/M/L = w-44/w-56/w-72 con svg h-24/h-32/h-44, ZoomControls). Resúmenes de alturas (columna) y anchos (fila). Convención de medida (1 unidad = 4px) y aviso de fase 2 (controles internos). |
+| `README.md` | `doc/MEASURES.md` añadido al árbol de ficheros y a la lista "Documentación Técnica Detallada". |
+
+### 🔍 Verificación
+- [x] Cada medida leída del código: MainEditorLayout.tsx:37/48/53, MenuBar.tsx:137/158/213, ToolBar.tsx:124/133/147, OutlineView.tsx:347-348, ToolPanel.tsx:92/109, FilterBar.tsx:33/34/41, StatusBar.tsx:23, MiniMap.tsx:208/82-89/95-96, ZoomControls.tsx:30-77.
+- [x] Conversión Tailwind→px con base 4px (w-80=320, w-84=336, w-88=352, w-44=176, w-56=224, w-72=288, h-24=96, h-32=128, h-44=176).
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: SVG de medidas de las áreas grandes (`img/medidas-areas.svg`)
+
+### 🎯 Motivo
+El usuario pidió crear un SVG con las medidas de las áreas segun `doc/MEASURES.md`.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-areas.svg` | **Nuevo**. Wireframe a escala 1:1 (1px = 1px) del MainEditorLayout con cotas en ámbar: alturas apiladas MenuBar 40 + ToolBar 44 + FilterBar 40 + zona de trabajo (flex-1) + StatusBar 24 = 100vh; anchos horizontales Outline 320 (352 en md) + Canvas flex-1 + ToolPanel 336 = 100vw; grid de 6 pestañas de 56px del ToolPanel; MiniMap/ZoomControls flotantes con tamaños S/M/L. Nota lateral aclarando que el Canvas es relativo al viewport. |
+| `doc/MEASURES.md` | Insertada la imagen del diagrama bajo la introducción (antes de §1). |
+
+### 🔍 Verificación
+- [x] SVG valido renderizado sin errores.
+- [x] Cotas contrastadas con las clases Tailwind de MainEditorLayout.tsx:37-62, ToolPanel.tsx:109, MiniMap.tsx:82-96.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas detalladas del MenuBar (fase 2, por área)
+
+### 🎯 Motivo
+El usuario dio comienzo a la fase 2 de la hoja de medidas (controles internos), área por área, empezando **solo por el MenuBar**: detallar cada control y su medida, añadirlo a `doc/MEASURES.md` y crear su propio SVG.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-menubar.svg` | **Nuevo**. SVG a escala 1:1 del MenuBar con cotas: barra h-10 (40px), padding px-3 (12px), gap-2 (8px), botones de menú (px-2.5/py-1 → 10px/4px) con su ancho real por label (Archivo 56, Editar 52, Insertar 58, Formato 58, Ver 42, Ayuda 50), los 6 dropdowns (Archivo/Insertar/Formato/Ver/Ayuda w-56 = 224px, Editar w-52 = 208px) con sus ítems, título central (max-w-sm 384px), badge offline y botón de tema. Nota responsive. |
+| `doc/MEASURES.md` | §3 ampliada a "MenuBar — detallada": 3.1 contenedor raíz, 3.2 marca + botones de menú con ancho por label, 3.3 dropdowns (anchos, ítems, medidas base de ítem/encabezado/badge), 3.4 título editable, 3.5 badge offline + tema UI. Insertada la imagen del SVG bajo el encabezado. |
+
+### 🔍 Verificación
+- [x] Cada medida leída directamente de MenuBar.tsx:137-556 (h-10, px-3, gap-2, px-2.5/py-1 de los botones, w-56/w-52 de los dropdowns, max-w-sm del título, text-[11px]/text-[10px] responsive).
+- [x] SVG valido renderizado sin errores.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas detalladas del ToolBar (fase 2, área 2)
+
+### 🎯 Motivo
+Segunda área de la fase 2 (controles internos por área), tras el MenuBar: detallar el ToolBar, añadirlo a `doc/MEASURES.md` y crear su propio SVG.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-toolbar.svg` | **Nuevo**. SVG a escala 1:1 del ToolBar con cotas: barra h-11 (44px), px-2/px-3, gap-1/gap-2, botones de icono 30x30 (p-1.5, icono 16px), botones con texto ~26px, select Forma (tope 105px), separadores w-px h-5, popover Vista (w-64=256px), popover Presentar (w-72=288px), menú movil Más (w-52=208px), grupo derecho (Buscar/Vista/Esquema/Presentar/Exportar/Panel). Nota responsive. |
+| `doc/MEASURES.md` | §4 ampliada a "ToolBar — detallada": 4.1 raíz, 4.2 botones de icono (30x30, icono 16/14px), 4.3 botones con texto, 4.4 separadores, 4.5 select Forma, 4.6 popovers (Visibilidad 256px, Presentación 288px), 4.7 menú movil Más, 4.8 visibilidad responsive. Insertada la imagen bajo el encabezado. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de ToolBar.tsx:124-640 (h-11, px-2/sm:px-3, gap-1/sm:gap-2, min-w/min-h 30px, w-64/w-72/w-52 de los flotantes, max-w-[105px] del select).
+- [x] SVG valido renderizado sin errores.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Corregido bug XML en los 3 SVG de medidas (comentarios con guion doble)
+
+### 🎯 Motivo
+El usuario reporto "no puedo ver el svg". Causa: los SVG usaban comentarios decorativos tipo <!-- ==== ... ==== -->, y el doble guion (--) dentro de un comentario es ilegal en XML. Como SVG es XML (no HTML), el navegador detenia el render en el primer error y solo se veia la cabecera.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-toolbar.svg` | 12 comentarios decorativos reescritos sin guiones dobles (BARRA, GRUPO IZQUIERDO/DERECHO, COTA ALTURA, DESGLOSE icono/select, POPOVER Visibilidad/Presentar, MENÚ MÓVIL, DERECHA, NOTA RESPONSIVE). |
+| `doc/img/medidas-menubar.svg` | 7 comentarios decorativos reescritos (BARRA, COTA ALTURA, DESGLOSE boton/dropdown/centro, COTA ANCHO TOTAL, NOTA RESPONSIVE). |
+| `doc/img/medidas-areas.svg` | 6 bloques multilínea con ==== reescritos a comentarios de una línea (ZONA DEL WIREFRAME, ZONA DE TRABAJO, COTAS VERTICALES, COTA TOTAL VERTICAL, COTAS HORIZONTALES, COTA TOTAL HORIZONTAL). |
+
+### 🔍 Verificación
+- [x] Validación XML con .NET XmlDocument: los 3 ficheros dan "OK" (well-formed).
+- [x] Render visual confirmado en navegador via servidor (:3000/@fs): los 3 SVG dibujan completo, sin la caja roja de error.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-07-18: Ajuste del SVG de medidas del ToolBar para reflejar la app real
+
+### 🎯 Motivo
+El usuario senalo que su captura real del ToolBar mostraba un grupo derecho distinto al de mi diagrama: faltaba el boton "Presentar" en la barra ilustrativa y el orden no coincidia. Su captura es la fuente de verdad.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-toolbar.svg` | En la barra ilustrativa superior se completo el grupo derecho con el orden real de la app (Buscar, Vista, Esquema, Presentar, Exportar, Panel); antes "Presentar" era un rect de ancho 0 y faltaban Exportar y Panel. Se ensancho el lienzo (viewBox y fondo a 1460) para que quepa el grupo completo. La seccion detallada inferior ya era correcta y no cambio. |
+
+### 🔍 Verificación
+- [x] Orden del grupo derecho confirmado contra el codigo (ToolBar.tsx: Esquema :506, Presentar :509-523, Exportar :619, Panel :629-637).
+- [x] Validacion XML (.NET): OK. Render visual en navegador: la barra muestra los 6 controles del grupo derecho en el orden de la app.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas detalladas del FilterBar (fase 2, area 3)
+
+### 🎯 Motivo
+Tercera area de la fase 2 (controles internos por area), tras MenuBar y ToolBar: detallar el FilterBar, añadirlo a doc/MEASURES.md y crear su propio SVG.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-filterbar.svg` | **Nuevo**. SVG a escala 1:1 del FilterBar con cotas: barra h-10 (40px), px-4 (16px), gap-3 (12px), input query (flex-1, tope max-w-xs 320px, alto 28px), select etiquetas y select progreso (px-2 py-1, alto 28px), badge contador (px-2 py-0.5, text-[11px]), grupo derecho (gap-2 8px, link Limpiar + botón cerrar p-1 icono 16px). Nota de comportamiento (sin media queries, return null si isOpen=false). |
+| `doc/MEASURES.md` | §7 ampliada a "FilterBar — detallada": 7.1 raíz, 7.2 grupo izquierdo (input, selects, badge), 7.3 grupo derecho, 7.4 comportamiento. Insertada la imagen bajo el encabezado. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de FilterBar.tsx:33-117 (h-10, px-4, flex-1 max-w-3xl, gap-3, max-w-xs, px-2.5/py-1, px-2/py-1, px-2/py-0.5, p-1).
+- [x] SVG validado (.NET XmlDocument): OK. Render visual en navegador: correcto, 57 KB.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas detalladas del StatusBar (fase 2, area 4)
+
+### 🎯 Motivo
+Cuarta area de la fase 2 (controles internos por area), tras MenuBar, ToolBar y FilterBar: detallar el StatusBar, añadirlo a doc/MEASURES.md y crear su propio SVG.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-statusbar.svg` | **Nuevo**. SVG a escala 1:1 del StatusBar con cotas: barra h-6 (24px), px-3 (12px), gap-4 (16px), 5 segmentos (Nodos totales y Seleccionado siempre visibles; Zoom/Posición/Modo con hidden sm:block) separados por w-px h-3 (1x12px), tipografía y color, bloques de estructura y responsive. |
+| `doc/MEASURES.md` | §8 ampliada a "StatusBar — detallada": 8.1 raíz (24px, borde superior, z-30), 8.2 tabla de los 5 segmentos con visibilidad y límites (Seleccionado max-w 200px → 448px), 8.3 tipografía/color. Insertada la imagen bajo el encabezado. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de StatusBar.tsx:23-49 (h-6, px-3, gap-4, text-[10px] sm:text-xs, max-w-[200px] sm:max-w-md, w-px h-3, hidden sm:block).
+- [x] Validacion XML (.NET) de los 5 SVG: OK. Pestaña cargada sin error (la ventana del navegador estaba oculta, no se pudo capturar screenshot).
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas detalladas del OutlineView (fase 2, area 5)
+
+### 🎯 Motivo
+Quinta area de la fase 2: detallar el OutlineView (Panel de Esquema) con sus subsecciones, añadirlo a doc/MEASURES.md y crear su propio SVG. El usuario aporto una captura real del panel que confirmo la estructura (cabecera con badge de contador, fila raiz con tags, footer con atajos).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-outline.svg` | **Nuevo**. SVG con el panel real a escala 1:1 (320x560: cabecera ~50px, buscador ~40px, lista flex-1, footer ~30px) + cotas verticales y de ancho; detalles ampliados: cabecera (icono 24px, 5 botones de accion p-1.5), fila de nodo (indentacion depth*18+10, chevron 14, bullet 8, badge progreso 9px, tags 9px, hover 12px) con sus 3 estados, buscador y footer; notas de arbol/recursion/edicion/estados. |
+| `doc/MEASURES.md` | §5 ampliada a "OutlineView — detallada": 5.1 aside (w-80/88, fullscreen flex-1 z-30, return null), 5.2 cabecera (~50px, 5 botones), 5.3 buscador condicional (~40px), 5.4 lista (indentacion, fila completa con 11 elementos medidos + 3 estados), 5.5 footer (~30px). Insertada la imagen bajo el encabezado. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de OutlineView.tsx:344-461 (y filas :148-331); estructura contrastada con la captura del usuario.
+- [x] Validacion XML (.NET): OK. Render visual capturado tras corregir dos solapes de texto (notas buscador/footer y cotas de indentacion).
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas detalladas del MiniMap + ZoomControls (fase 2, area 9)
+
+### 🎯 Motivo
+Sexta y ultima area de la fase 2: detallar los controles flotantes del lienzo (tarjeta MiniMap y fila ZoomControls), añadirlos a doc/MEASURES.md y crear su SVG. Cierra la fase 2: ya estan detalladas MenuBar, ToolBar, FilterBar, StatusBar, OutlineView y MiniMap/ZoomControls.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-minimap.svg` | **Nuevo**. SVG con las 3 tarjetas S/M/L a escala 1:1 (176/224/288px de ancho, altos 132/164/212) con cotas, el HUD ZoomControls a 1:1 (256x36) y paneles de detalle: cabecera (Compass 14px, selector SML text-[9px], boton plegar), interior del SVG (minimos de nodos 50x30/36x20/24x16, rx 8/6/4, bordes, punto de plegado r=4, rect de viewport sky punteado), desglose de ZoomControls (IconButton sm 28x28, alto total 36px, separadores 1x16) e interaccion/estados. |
+| `doc/MEASURES.md` | §9 ampliada a "Controles flotantes del lienzo (MiniMap + ZoomControls) — detallada": 9.1 contenedor raiz (bottom-2 right-5, gap-1.5, z-40), 9.2 tabla de tamaños con alto total, 9.3 cabecera y estilo (glassmorphism, localStorage), 9.4 interior del SVG (viewBox, minimos, strokes, aristas, viewport), 9.5 interaccion, 9.6 ZoomControls. Insertada la imagen bajo el encabezado. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de MiniMap.tsx:206-463, ZoomControls.tsx:29-78 e IconButton.tsx:25-37 (size sm = w-7 h-7).
+- [x] Correccion respecto a la version anterior: el alto real de ZoomControls es 36px (28 + p-1), no ~28px.
+- [x] Validacion XML (.NET): OK (7/7 SVG). Render visual capturado sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas del ToolPanel contenedor (fase 2, area 6.0)
+
+### 🎯 Motivo
+El ToolPanel son 7 ficheros (~2.600 lineas): el usuario senalo que detallarlo de golpe seria mala idea. Se acordó dividirlo en 7 sub-areas (6.0 contenedor + una por pestaña, de menor a mayor lineas). Esta entrada documenta §6.0 (ToolPanel.tsx).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-toolpanel.svg` | **Nuevo**. SVG con el panel real a escala 1:1 (336x560: cabecera ~44px, barra de 6 pestañas ~46px, contenido flex-1 con estado vacio) + cotas; detalles: cabecera (Sliders 16px, X 16px p-1), barra grid-cols-6 (celdas 56px, activa border-b-2, iconos 14px), area de contenido (p-4, space-y-5, py-12 en vacio) y panel de estados/cableado (sin media queries, ThemeTab sin nodo, adaptador onUpdateMapGaps). |
+| `doc/MEASURES.md` | §6 ampliada a "ToolPanel — detallada" con §6.0.1 (aside + cabecera), §6.0.2 (barra de pestañas) y §6.0.3 (contenido y estados), imagen enlazada y nota del plan de sub-areas §6.1-§6.6 (Contenido, Formato, Notas, Iconos, Nubes, Mapa). |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de ToolPanel.tsx:85-272 (w-84, px-4 py-3, grid-cols-6, py-2 px-1, w-3.5 h-3.5, border-b-2, p-4, space-y-5, py-12).
+- [x] Validacion XML (.NET): OK (8/8 SVG). Render visual capturado sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas de la pestana Notas (fase 2, area 6.3)
+
+### 🎯 Motivo
+Primera pestana del ToolPanel documentada tras el acuerdo de dividirlo en 7 sub-areas: NotesTab (216 lineas), la mas pequena. Quedan §6.1 Contenido, §6.2 Formato, §6.4 Iconos, §6.5 Nubes y §6.6 Mapa.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-notes-tab.svg` | **Nuevo**. SVG con la pila real a escala 1:1 (304px utiles: cabecera ~30px, toolbar ~28px, textarea split ~141px, preview 120px, gaps 12px) + cotas; detalles: cabecera (toggle amber ON/gris OFF px-2 py-1, segmentado 3 botones p-1.5), toolbar Markdown (10 botones p-1 icono 14px + 3 separadores, handleInsertMarkdown), editor/preview (rows 12/6, p-3 font-mono, min-h 120 max-h 350) y modos de vista. |
+| `doc/MEASURES.md` | §6.3 anadida tras §6.0: 6.3.1 cabecera (~30px, toggle showNoteInline, segmentado Edit3/Columns/Eye), 6.3.2 toolbar Markdown (solo edit/split, 10 botones, grupos), 6.3.3 editor y vista previa (textarea rows 12/6, preview min-h 120/max-h 350, MarkdownView), 6.3.4 modos de vista (viewMode default preview). Imagen enlazada. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de NotesTab.tsx:26-224 (space-y-3, px-2 py-1, p-1.5, p-1 icono 14px, rows 12/6, p-3, min-h-[120px] max-h-[350px]).
+- [x] Validacion XML (.NET): OK (9/9 SVG). Render visual capturado sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas de la pestana Nubes (fase 2, area 6.5)
+
+### 🎯 Motivo
+Segunda pestana del ToolPanel documentada (de menor a mayor): CloudsTab (288 lineas). Documenta tambien los atomos compartidos CollapsibleSection, SliderInput y ColorPicker, que reutilizaran las demas pestanas.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-clouds-tab.svg` | **Nuevo**. SVG con la pila real a escala 1:1 (304px: interruptor maestro ~54px, barra plegar, seccion Forma abierta con grid 4x2 de 8 formas ~64x48 y 2 sliders, Relleno y Borde cerradas) + cotas; detalles del interruptor (toggle 36x20 knob 16), CollapsibleSection (header px-3.5 py-3, icono 24, chevron 16), atomos SliderInput/ColorPicker (range 6px, presets grid-cols-8) y contenido de las 3 secciones (rangos, defaults). |
+| `doc/MEASURES.md` | §6.5 anadida tras §6.3: 6.5.1 interruptor maestro (toggle h-5 w-9, defaults cloud), 6.5.2 barra y secciones (estado inicial solo Forma, grids y rangos), 6.5.3 atomos de control (SliderInput/ColorPicker medidos para reutilizar). Imagen enlazada. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de CloudsTab.tsx:35-288, CollapsibleSection.tsx:28-73, SliderInput.tsx:29-57 y ColorPicker.tsx:30-75.
+- [x] Corregido un typo en el path del marker de cotas del SVG antes de validar.
+- [x] Validacion XML (.NET): OK (10/10 SVG). Render visual capturado sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: §6.5 Nubes completada (correccion tras feedback del usuario)
+
+### 🎯 Motivo
+El usuario senalo que el SVG de la pestana Nubes estaba incompleto: solo dibujaba Relleno y Borde como cabeceras cerradas, pero en la app real aparecen desplegados con todos sus controles (presets de color, sliders con badge, estilo de linea).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-clouds-tab.svg` | Reescrito. Ahora las 3 secciones estan EXPANDIDAS a escala 1:1: Relleno (Color de Nube con valor RGBA(168,255,247,0.08), 16 presets en 2 filas de 8 ~31px, Opacidad 8%) y Borde (Color #38B2F6, Grosor 1.5px, Estilo de Linea con 3 botones ~88x48 y muestra w-8 border-t-2). viewBox ampliado a 1400x1060, cotas por seccion (281/201/275). |
+| `doc/MEASURES.md` | §6.5.3 corregida: el ColorPicker muestra el color COMPLETO del nodo (hex o rgba con alfa), no solo hex. Anadida nota con los valores reales de la captura del usuario y la observacion de que bgType no tiene selector en la pestana. |
+
+### 🔍 Verificación
+- [x] Contraste directo con la captura del usuario (secciones desplegadas, valores RGBA/#38B2F6/1.5px/8%, Guiones seleccionado).
+- [x] Validacion XML (.NET): OK (10/10 SVG). Render visual capturado sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas de la pestana Iconos (fase 2, area 6.4)
+
+### 🎯 Motivo
+Tercera pestana del ToolPanel documentada: IconsTab (314 lineas), la que integra el pack VECTOR_ICON_PACK (520+). Dibujada en estado real (seccion de estilo desplegada por defecto, como en la app).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-icons-tab.svg` | **Nuevo**. SVG a escala 1:1 (304px): seccion Estilo desplegada ~303px (ColorPicker Tinte con Reset, paleta rapida de 7 circulos 18px, slider Tamaño 10..36 badge "14px (Estandard)", Propagacion Copiar a Hijos/Hermanos grid-cols-2) + card Iconos Asignados ~62px con chips, buscador ~36px, 13 chips de categoria, 8 quick tags, grid 6 columnas celda ~44px con 24 iconos (uno seleccionado) y boton Galleria; cotas por bloque. |
+| `doc/MEASURES.md` | §6.4 insertada entre §6.3 y §6.5: 6.4.1 seccion Estilo (badge de color, paleta 7 colores, slider con badge especial, propagacion condicional), 6.4.2 Iconos Asignados (chips 14px + X 12px), 6.4.3 buscador/categorias/tags (13 + 8 chips), 6.4.4 grid (celda 44px, slice 0..120, estados) y estado del nodo. Imagen enlazada. |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de IconsTab.tsx:51-314 (w-4.5 h-4.5, pl-8.5 pr-3 py-2, px-2.5 py-1, grid-cols-6, max-h-[300px], slice(0,120)).
+- [x] Validacion XML (.NET): OK (11/11 SVG). Render visual capturado sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: Medidas de la pestana Contenido (fase 2, area 6.1)
+
+### 🎯 Motivo
+Cuarta pestana del ToolPanel documentada: ContentTab (455 lineas), la pestana principal de edicion de texto del nodo. Dibujada en estado real (solo «Titulo del Nodo» desplegado por defecto, como en la app).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-content-tab.svg` | **Nuevo**. SVG a escala 1:1 (304px): barra «SECCIONES DE CONTENIDO» ~16px + seccion Titulo del Nodo desplegada ~303px (textarea rows-2, FontFormatToolbar con grupos Negrita/Cursiva e Izquierda/Centro/Derecha ~28px, ColorPicker Color del Texto con 16 presets, slider Tamano de Fuente 10..36px badge 14px) + 3 secciones cerradas ~53px c/u (Cuerpo con badge Activo, Imagen con badge Activa, Metadatos); cotas por bloque. viewBox 1400x1052. |
+| `doc/MEASURES.md` | §6.1 insertada entre §6.0.3 y §6.3: 6.1.1 Titulo del Nodo (badge fontSize, textarea rows-2, molecules FontFormatToolbar y ColorPicker), 6.1.2 Cuerpo (action/badge condicionales a body, textarea rows-3, slider 9..24), 6.1.3 Imagen (URL + Upload FileReader dataURL + Trash2, grid-cols-3 de 6 posiciones, slider Ancho 60..500 sin onReset), 6.1.4 Metadatos (TagManager, Enlace, Progreso badge «Sin asignar», Iconos (n), Galeria). Imagen enlazada. |
+| `D:\Temp\opencode\validate-svg.ps1` | Validador ampliado con el nuevo SVG (lista de 12). |
+
+### 🔍 Verificación
+- [x] Cada medida leida directamente de ContentTab.tsx:36-476, FontFormatToolbar.tsx:22-78 y TagManager.tsx:32-72 (rows-2/rows-3, p-1.5, px-2.5 py-1.5, grid-cols-3, 60..500 step 10, 0..100 step 5, 9..24).
+- [x] Validacion XML (.NET): OK (12/12 SVG). Render visual capturado dos veces (corregido borde inferior de la caja 5) sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📚 [Docs] — 2026-10-17: §6.1 Contenido rehecho con las 4 secciones desplegadas (feedback del usuario)
+
+### 🎯 Motivo
+El usuario pidio que la pestana Contenido se documentara con TODOS los paneles desplegados (no solo «Titulo del Nodo», el default) y aporto dos capturas reales de la app con valores concretos.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-content-tab.svg` | Reescrito (viewBox 1400x1570): las 4 secciones EXPANDIDAS a 1:1 con los valores reales de las capturas — Titulo ~301px (badge 18px, «FreeMind Map Studio», #FFFFFF, toolbar B activo, slider 18px + Reset) · Cuerpo ~311px (badge Activo, textarea rows-3 de 3 lineas, #8BEAFE, 12px + Reset, toolbar B inactivo) · Imagen ~279px (dataURL, Upload blue 36x36 + Trash red 36x36, grid de 6 posiciones con «Arriba» seleccionado, Ancho 64px sin Reset) · Metadatos ~419px (TagManager con 3 tags en 2 filas, Enlace sin toggle por link indefinido, Progreso «Sin asignar» + Reset, Iconos (2) Visibles, boton «Abrir Galleria de Iconos»). Cota por seccion + 6 cajas de medidas en la columna derecha; nota final corregida tras recorte en el primer render. |
+| `doc/MEASURES.md` | §6.1: anadida nota con el criterio del SVG (4 desplegadas por peticion del usuario, default real = solo Titulo) y los valores reales de las capturas + altos expandidos. |
+
+### 🔍 Verificación
+- [x] Valores contrastados con las 2 capturas del usuario (18px, #FFFFFF, #8BEAFE, 12px, Arriba, 64px, Sin asignar, 3 tags, Iconos (2)).
+- [x] Texto del boton de galeria confirmado en ContentTab.tsx:469 («Abrir Galleria de Iconos»).
+- [x] Validacion XML (.NET): OK (12/12 SVG). Render visual capturado dos veces (recorte inferior corregido) sin solapes.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📏 [Docs] — 2026-10-17: §6.2 Pestaña Formato — SVG 1:1 con las 4 secciones desplegadas
+
+### 🎯 Motivo
+Continuar la fase 2 de `doc/MEASURES.md` (detalle de cada área con SVG propio a escala 1:1), siguiendo el criterio ya cerrado con el usuario de «todo desplegado».
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-format-tab.svg` | Nuevo (viewBox 1400x1800, XML 13/13): pila de la pestaña Formato a 1:1 (304px) con las 4 secciones EXPANDIDAS y valores reales — Barra «FORMATO VISUAL DEL NODO» (~16px) · S1 Forma y Geometría ~299px (badge «Bubble», ShapeSelector 2x5 con «Burbuja» seleccionado, sliders Ancho `0..500`/Alto `0..300` con badge «Automático» + Reset + description) · S2 Fondo y Relleno ~226px con `bgType='color'` (grid de 5 tipos con «Sólido» seleccionado, ColorPicker #3B82F6 + 16 presets) · S3 Bordes y Contorno ~290px (CP del borde, Grosor «1px», 3 botones de estilo con «Sólido» seleccionado) · S4 Aristas y Propagación ~324px (4 formas de conexión con «Curva», Color de la Arista «Auto», «Aplicar a Hijos/Hermanos»). 6 cajas de medidas en la columna derecha (barra/estado, una por sección, notas) + cotas por sección. |
+| `doc/MEASURES.md` | Nueva sección **§6.2 Pestaña Formato** (6.2.1-6.2.4) insertada entre §6.1 y §6.3: estado local, barra, nota del SVG (criterio «todo desplegado», variante `bgType='color'` dibujada por ser default; gradient/pattern/image documentados en 6.2.2), tabla de Forma, variantes de Fondo, tablas de Bordes y Aristas, y aviso de imports sin uso (`ToggleButtonGroup`, `RotateCcw`, `SlidersHorizontal`, `ChevronDown`, `ImageIcon`). |
+| `D:\Temp\opencode\validate-svg.ps1` | Añadido `medidas-format-tab.svg` a la lista (13 ficheros). |
+
+### 🔍 Verificación
+- [x] Líneas de código contrastadas con `FormatTab.tsx` (estado 49-54, barra 74-95, S1 98-142, S2 145-383 con variantes 181/190/231/289, S3 386-436, S4 439-537) y `ShapeSelector.tsx` (grid 101, label 117).
+- [x] Validación XML (.NET): OK (13/13 SVG). Render visual capturado (314 KB) sin solapes ni recortes; pestañas `/@fs/` cerradas.
+- [x] Sin cambios de codigo.
+
+---
+
+## 📏 [Docs] — 2026-10-17: §6.2 — panel «Fondo y Relleno con Trama» anadido al SVG (captura del usuario)
+
+### 🎯 Motivo
+El usuario aporto una captura real de la pestaña Formato con el tipo de fondo «Trama» (`bgType='pattern'`) activo y pidio anadir ese panel al documento.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-format-tab.svg` | Ampliado a viewBox 1400x2200: nuevo bloque inferior izquierdo «Variante Trama (bgType='pattern') — estado real» con la seccion «Fondo y Relleno» EXPANDIDA a 1:1 (559px, cota propia) — selector de tipo con «Trama» activo · «Estilo de Trama» con las 7 opciones en 2 filas (4.ª celda vacia, ninguna activa) · Color del Fondo Base #1D4ED8 + Reset · Color del Trazo #475569 + Reset CON anillo en el preset de la fila 2 · Tamaño del patrón 16px (knob 25%, sin Reset) · Opacidad del trazo 40% (knob 33%, sin Reset) · width-cota + nota inferior. Labels de tipo corregidos en AMBAS rejillas a como renderiza la app («Degra…», «Ima…», «Tran…» por `truncate`). Caja nueva en la columna derecha («Sección 2 variante Trama», 14 lineas de medidas: altos, variantes de knob, diferencia vs variante color, radios excluyentes). |
+| `doc/MEASURES.md` | §6.2.2: anotado el truncado real de los labels del selector de tipo + blockquote nuevo que describe el estado dibujado de la variante Trama (valores reales, cota 559px, caja de referencia). |
+
+### 🔍 Verificación
+- [x] Valores contrastados con la captura del usuario: #1D4ED8 · #475569 (con anillo) · 16px · 40% · «Trama» activo · ningún estilo de trama seleccionado · labels truncados.
+- [x] Codigo revisado (FormatTab:231-287, PATTERN_OPTIONS:33-41) para ranges, defaults y ausencia de `onReset`.
+- [x] Validacion XML (.NET): OK (13/13 SVG).
+- [x] Verificacion por DOM (browser.evaluate): 190 textos, 0 desbordes de columna, 0 fuera de lienzo.
+- [x] Render visual capturado (408 KB): sin solapes ni recortes; pestañas /@fs/ cerradas.
+- [x] Sin cambios de codigo.

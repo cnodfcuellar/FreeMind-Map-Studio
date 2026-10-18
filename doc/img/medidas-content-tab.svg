@@ -1,0 +1,366 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1570" viewBox="0 0 1400 1570" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <marker id="cap" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,4 L1,7" fill="none" stroke="#f59e0b" stroke-width="1.4"/>
+    </marker>
+    <style>
+      .cota { stroke:#f59e0b; stroke-width:1; }
+      .cota-txt { font-size:11px; fill:#b45309; font-weight:700; }
+      .lbl { font-size:12px; fill:#334155; font-weight:600; }
+      .body { font-size:10.5px; fill:#334155; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="1570" rx="16" fill="#0f172a"/>
+  <text x="32" y="40" font-size="22" font-weight="700" fill="#ffffff">ToolPanel §6.1 — Pestaña Contenido (ContentTab) — Medidas detalladas</text>
+  <text x="32" y="62" font-size="12.5" fill="#93c5fd">Escala 1:1 (1px = 1px real) · ContentTab.tsx:36-476 · las 4 secciones EXPANDIDAS (petición del usuario) sobre un nodo de ejemplo · molecules: FontFormatToolbar · TagManager</text>
+
+  <!-- ============ COLUMNA IZQUIERDA: pila real a 1:1 (304px) ============ -->
+
+  <!-- Barra plegar/desplegar (~16px) -->
+  <text x="60" y="108" font-size="8.5" font-weight="700" fill="#94a3b8">SECCIONES DE CONTENIDO</text>
+  <text x="272" y="108" font-size="8.5" font-weight="600" fill="#2563eb">Desplegar todo</text>
+  <text x="326" y="108" font-size="8" fill="#cbd5e1">|</text>
+  <text x="334" y="108" font-size="8.5" fill="#64748b">Plegar todo</text>
+
+  <!-- Seccion 1: Titulo del Nodo (ABIERTA) 126..427 = 301 -->
+  <rect x="60" y="126" width="304" height="301" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="140" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <text x="86" y="158" font-size="12" font-weight="700" text-anchor="middle" fill="#1d4ed8">T</text>
+  <text x="106" y="150" font-size="10.5" font-weight="600" fill="#1e293b">Título del Nodo</text>
+  <text x="106" y="164" font-size="8" fill="#94a3b8">Texto principal y tipografía</text>
+  <rect x="298" y="141" width="40" height="16" rx="8" fill="#dbeafe"/>
+  <text x="318" y="152" font-size="8" font-weight="600" text-anchor="middle" fill="#1e40af">18px</text>
+  <path d="M342,148 L350,148 L346,154 Z" fill="#94a3b8"/>
+  <line x1="61" y1="179" x2="363" y2="179" stroke="#e2e8f0"/>
+
+  <!-- Textarea rows=2 con texto real -->
+  <rect x="74" y="183" width="276" height="50" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="84" y="202" font-size="8.5" font-weight="500" fill="#1e293b">FreeMind Map Studio</text>
+  <rect x="340" y="222" width="6" height="6" fill="#cbd5e1"/>
+
+  <!-- FontFormatToolbar (B activo, alinear izquierda activo) -->
+  <line x1="74" y1="243" x2="350" y2="243" stroke="#e2e8f0"/>
+  <rect x="74" y="251" width="54" height="28" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="75" y="252" width="26" height="26" fill="#dbeafe"/>
+  <text x="88" y="270" font-size="10" font-weight="700" text-anchor="middle" fill="#1d4ed8">B</text>
+  <line x1="101" y1="252" x2="101" y2="278" stroke="#e2e8f0"/>
+  <text x="114" y="270" font-size="10" font-style="italic" text-anchor="middle" fill="#64748b">I</text>
+  <rect x="134" y="251" width="82" height="28" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="135" y="252" width="26" height="26" fill="#dbeafe"/>
+  <g stroke="#1d4ed8" stroke-width="1.4">
+    <line x1="140" y1="261" x2="156" y2="261"/>
+    <line x1="140" y1="265" x2="151" y2="265"/>
+    <line x1="140" y1="269" x2="156" y2="269"/>
+  </g>
+  <line x1="161" y1="252" x2="161" y2="278" stroke="#e2e8f0"/>
+  <g stroke="#64748b" stroke-width="1.4">
+    <line x1="166" y1="261" x2="182" y2="261"/>
+    <line x1="169" y1="265" x2="179" y2="265"/>
+    <line x1="166" y1="269" x2="182" y2="269"/>
+  </g>
+  <line x1="188" y1="252" x2="188" y2="278" stroke="#e2e8f0"/>
+  <g stroke="#64748b" stroke-width="1.4">
+    <line x1="193" y1="261" x2="209" y2="261"/>
+    <line x1="198" y1="265" x2="209" y2="265"/>
+    <line x1="193" y1="269" x2="209" y2="269"/>
+  </g>
+
+  <!-- ColorPicker Color del Texto = #FFFFFF -->
+  <text x="74" y="299" font-size="9.5" font-weight="500" fill="#334155">Color del Texto</text>
+  <rect x="236" y="287" width="88" height="18" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="241" y="292" width="9" height="9" rx="2" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.5"/>
+  <text x="254" y="299" font-size="7" font-family="monospace" fill="#64748b">#FFFFFF</text>
+  <text x="330" y="299" font-size="7" fill="#94a3b8">Reset</text>
+  <g stroke="#e2e8f0" stroke-width="0.8">
+    <rect x="74" y="311" width="31" height="31" rx="6" fill="#ffffff"/>
+    <rect x="109" y="311" width="31" height="31" rx="6" fill="#f8fafc"/>
+    <rect x="144" y="311" width="31" height="31" rx="6" fill="#eff6ff"/>
+    <rect x="179" y="311" width="31" height="31" rx="6" fill="#f0fdf4"/>
+    <rect x="214" y="311" width="31" height="31" rx="6" fill="#fefce8"/>
+    <rect x="249" y="311" width="31" height="31" rx="6" fill="#fff7ed"/>
+    <rect x="284" y="311" width="31" height="31" rx="6" fill="#faf5ff"/>
+    <rect x="319" y="311" width="31" height="31" rx="6" fill="#ecfeff"/>
+    <rect x="74" y="346" width="31" height="31" rx="6" fill="#2563eb"/>
+    <rect x="109" y="346" width="31" height="31" rx="6" fill="#059669"/>
+    <rect x="144" y="346" width="31" height="31" rx="6" fill="#d97706"/>
+    <rect x="179" y="346" width="31" height="31" rx="6" fill="#dc2626"/>
+    <rect x="214" y="346" width="31" height="31" rx="6" fill="#7c3aed"/>
+    <rect x="249" y="346" width="31" height="31" rx="6" fill="#0891b2"/>
+    <rect x="284" y="346" width="31" height="31" rx="6" fill="#475569"/>
+    <rect x="319" y="346" width="31" height="31" rx="6" fill="#0f172a"/>
+  </g>
+
+  <!-- Slider Tamano de Fuente 18px + Reset -->
+  <text x="74" y="397" font-size="9.5" font-weight="500" fill="#334155">Tamaño de Fuente</text>
+  <rect x="274" y="385" width="40" height="16" rx="4" fill="#eff6ff"/>
+  <text x="294" y="396" font-size="7.5" font-weight="600" text-anchor="middle" fill="#2563eb">18px</text>
+  <text x="322" y="397" font-size="7" fill="#94a3b8">Reset</text>
+  <rect x="74" y="407" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="159" cy="410" r="6" fill="#2563eb"/>
+
+  <!-- Seccion 2: Cuerpo (ABIERTA) 441..752 = 311 -->
+  <rect x="60" y="441" width="304" height="311" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="455" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <text x="86" y="472" font-size="11" text-anchor="middle" fill="#1d4ed8">¶</text>
+  <text x="106" y="465" font-size="10.5" font-weight="600" fill="#1e293b">Cuerpo / Subtexto</text>
+  <text x="106" y="479" font-size="8" fill="#94a3b8">Descripción adicional del nodo</text>
+  <rect x="264" y="456" width="44" height="16" rx="8" fill="#d1fae5"/>
+  <text x="286" y="467" font-size="8" font-weight="600" text-anchor="middle" fill="#047857">Activo</text>
+  <rect x="314" y="458" width="20" height="20" rx="6" fill="transparent"/>
+  <text x="324" y="473" font-size="10" text-anchor="middle" fill="#94a3b8">◉</text>
+  <path d="M342,462 L350,462 L346,468 Z" fill="#94a3b8"/>
+  <line x1="61" y1="494" x2="363" y2="494" stroke="#e2e8f0"/>
+
+  <!-- Textarea rows=3 con texto real (3 lineas) -->
+  <rect x="74" y="498" width="276" height="66" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="84" y="516" font-size="8" fill="#334155">Aplicación moderna, portable y 100% offline</text>
+  <text x="84" y="532" font-size="8" fill="#334155">para organizar ideas con la potencia de</text>
+  <text x="84" y="548" font-size="8" fill="#334155">Freeplane y la fluidez visual interactiva</text>
+  <rect x="340" y="550" width="6" height="6" fill="#cbd5e1"/>
+
+  <!-- FontFormatToolbar cuerpo (B inactivo, alinear izquierda activo) -->
+  <line x1="74" y1="574" x2="350" y2="574" stroke="#e2e8f0"/>
+  <rect x="74" y="578" width="54" height="28" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="88" y="596" font-size="10" font-weight="700" text-anchor="middle" fill="#64748b">B</text>
+  <line x1="101" y1="579" x2="101" y2="605" stroke="#e2e8f0"/>
+  <text x="114" y="596" font-size="10" font-style="italic" text-anchor="middle" fill="#64748b">I</text>
+  <rect x="134" y="578" width="82" height="28" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="135" y="579" width="26" height="26" fill="#dbeafe"/>
+  <g stroke="#1d4ed8" stroke-width="1.4">
+    <line x1="140" y1="588" x2="156" y2="588"/>
+    <line x1="140" y1="592" x2="151" y2="592"/>
+    <line x1="140" y1="596" x2="156" y2="596"/>
+  </g>
+  <line x1="161" y1="579" x2="161" y2="605" stroke="#e2e8f0"/>
+  <g stroke="#64748b" stroke-width="1.4">
+    <line x1="166" y1="588" x2="182" y2="588"/>
+    <line x1="169" y1="592" x2="179" y2="592"/>
+    <line x1="166" y1="596" x2="182" y2="596"/>
+  </g>
+  <line x1="188" y1="579" x2="188" y2="605" stroke="#e2e8f0"/>
+  <g stroke="#64748b" stroke-width="1.4">
+    <line x1="193" y1="588" x2="209" y2="588"/>
+    <line x1="198" y1="592" x2="209" y2="592"/>
+    <line x1="193" y1="596" x2="209" y2="596"/>
+  </g>
+
+  <!-- ColorPicker Color del Cuerpo = #8BEAFE -->
+  <text x="74" y="626" font-size="9.5" font-weight="500" fill="#334155">Color del Cuerpo</text>
+  <rect x="236" y="614" width="88" height="18" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="241" y="619" width="9" height="9" rx="2" fill="#8beafe" stroke="#cbd5e1" stroke-width="0.5"/>
+  <text x="254" y="626" font-size="7" font-family="monospace" fill="#64748b">#8BEAFE</text>
+  <text x="330" y="626" font-size="7" fill="#94a3b8">Reset</text>
+  <g stroke="#e2e8f0" stroke-width="0.8">
+    <rect x="74" y="636" width="31" height="31" rx="6" fill="#ffffff"/>
+    <rect x="109" y="636" width="31" height="31" rx="6" fill="#f8fafc"/>
+    <rect x="144" y="636" width="31" height="31" rx="6" fill="#eff6ff"/>
+    <rect x="179" y="636" width="31" height="31" rx="6" fill="#f0fdf4"/>
+    <rect x="214" y="636" width="31" height="31" rx="6" fill="#fefce8"/>
+    <rect x="249" y="636" width="31" height="31" rx="6" fill="#fff7ed"/>
+    <rect x="284" y="636" width="31" height="31" rx="6" fill="#faf5ff"/>
+    <rect x="319" y="636" width="31" height="31" rx="6" fill="#ecfeff"/>
+    <rect x="74" y="671" width="31" height="31" rx="6" fill="#2563eb"/>
+    <rect x="109" y="671" width="31" height="31" rx="6" fill="#059669"/>
+    <rect x="144" y="671" width="31" height="31" rx="6" fill="#d97706"/>
+    <rect x="179" y="671" width="31" height="31" rx="6" fill="#dc2626"/>
+    <rect x="214" y="671" width="31" height="31" rx="6" fill="#7c3aed"/>
+    <rect x="249" y="671" width="31" height="31" rx="6" fill="#0891b2"/>
+    <rect x="284" y="671" width="31" height="31" rx="6" fill="#475569"/>
+    <rect x="319" y="671" width="31" height="31" rx="6" fill="#0f172a"/>
+  </g>
+
+  <!-- Slider Tamano del Cuerpo 12px + Reset -->
+  <text x="74" y="722" font-size="9.5" font-weight="500" fill="#334155">Tamaño del Cuerpo</text>
+  <rect x="274" y="710" width="40" height="16" rx="4" fill="#eff6ff"/>
+  <text x="294" y="721" font-size="7.5" font-weight="600" text-anchor="middle" fill="#2563eb">12px</text>
+  <text x="322" y="722" font-size="7" fill="#94a3b8">Reset</text>
+  <rect x="74" y="732" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="129" cy="735" r="6" fill="#2563eb"/>
+
+  <!-- Seccion 3: Imagen (ABIERTA, con imagen) 766..1045 = 279 -->
+  <rect x="60" y="766" width="304" height="279" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="780" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <text x="86" y="797" font-size="11" text-anchor="middle" fill="#1d4ed8">◧</text>
+  <text x="106" y="790" font-size="10.5" font-weight="600" fill="#1e293b">Imagen Adjunta</text>
+  <text x="106" y="804" font-size="8" fill="#94a3b8">Ilustración dentro del nodo</text>
+  <rect x="264" y="781" width="44" height="16" rx="8" fill="#dbeafe"/>
+  <text x="286" y="792" font-size="8" font-weight="600" text-anchor="middle" fill="#1e40af">Activa</text>
+  <rect x="314" y="783" width="20" height="20" rx="6" fill="transparent"/>
+  <text x="324" y="798" font-size="10" text-anchor="middle" fill="#94a3b8">◉</text>
+  <path d="M342,787 L350,787 L346,793 Z" fill="#94a3b8"/>
+  <line x1="61" y1="819" x2="363" y2="819" stroke="#e2e8f0"/>
+
+  <!-- Fila URL + Upload + Trash -->
+  <rect x="74" y="823" width="192" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="82" y="845" font-size="7" font-family="monospace" fill="#64748b">data:image/svg+xml;utf8,%3Csvg...</text>
+  <rect x="272" y="823" width="36" height="36" rx="8" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="290" y="847" font-size="13" text-anchor="middle" fill="#2563eb">↑</text>
+  <rect x="314" y="823" width="36" height="36" rx="8" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="332" y="847" font-size="12" text-anchor="middle" fill="#dc2626">🗑</text>
+
+  <!-- Posicion de Imagen: 6 botones, Arriba seleccionado -->
+  <text x="74" y="885" font-size="9.5" font-weight="600" fill="#334155">Posición de Imagen</text>
+  <rect x="74" y="895" width="88" height="46" rx="12" fill="#eff6ff" stroke="#2563eb"/>
+  <text x="118" y="916" font-size="12" text-anchor="middle" fill="#1d4ed8">↑</text>
+  <text x="118" y="933" font-size="8" font-weight="700" text-anchor="middle" fill="#1e40af">Arriba</text>
+  <rect x="168" y="895" width="88" height="46" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="212" y="916" font-size="12" text-anchor="middle" fill="#64748b">⇅</text>
+  <text x="212" y="933" font-size="8" text-anchor="middle" fill="#64748b">Entre texto</text>
+  <rect x="262" y="895" width="88" height="46" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="306" y="916" font-size="12" text-anchor="middle" fill="#64748b">↓</text>
+  <text x="306" y="933" font-size="8" text-anchor="middle" fill="#64748b">Abajo</text>
+  <rect x="74" y="947" width="88" height="46" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="118" y="968" font-size="12" text-anchor="middle" fill="#64748b">←</text>
+  <text x="118" y="985" font-size="8" text-anchor="middle" fill="#64748b">Izquierda</text>
+  <rect x="168" y="947" width="88" height="46" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="212" y="968" font-size="12" text-anchor="middle" fill="#64748b">→</text>
+  <text x="212" y="985" font-size="8" text-anchor="middle" fill="#64748b">Derecha</text>
+  <rect x="262" y="947" width="88" height="46" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="306" y="968" font-size="12" text-anchor="middle" fill="#64748b">⤢</text>
+  <text x="306" y="985" font-size="8" text-anchor="middle" fill="#64748b">Ajustar</text>
+
+  <!-- Slider Ancho de imagen 64px, sin Reset -->
+  <text x="74" y="1015" font-size="9.5" font-weight="500" fill="#334155">Ancho de imagen</text>
+  <rect x="310" y="1003" width="40" height="16" rx="4" fill="#eff6ff"/>
+  <text x="330" y="1014" font-size="7.5" font-weight="600" text-anchor="middle" fill="#2563eb">64px</text>
+  <rect x="74" y="1025" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="80" cy="1028" r="6" fill="#2563eb"/>
+
+  <!-- Seccion 4: Metadatos (ABIERTA) 1059..1478 = 419 -->
+  <rect x="60" y="1059" width="304" height="419" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="1073" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <text x="86" y="1090" font-size="11" text-anchor="middle" fill="#1d4ed8">⚙</text>
+  <text x="106" y="1083" font-size="10.5" font-weight="600" fill="#1e293b">Metadatos y Visibilidad</text>
+  <text x="106" y="1097" font-size="8" fill="#94a3b8">Tags, enlace, progreso e iconos</text>
+  <path d="M342,1081 L350,1081 L346,1087 Z" fill="#94a3b8"/>
+  <line x1="61" y1="1112" x2="363" y2="1112" stroke="#e2e8f0"/>
+
+  <!-- Tags -->
+  <text x="74" y="1128" font-size="9.5" font-weight="600" fill="#334155">Etiquetas (Tags)</text>
+  <text x="304" y="1128" font-size="8" fill="#94a3b8">◉</text>
+  <text x="316" y="1128" font-size="8" fill="#94a3b8">Visible</text>
+  <rect x="74" y="1136" width="234" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="82" y="1158" font-size="8.5" fill="#94a3b8">Añadir etiqueta...</text>
+  <rect x="314" y="1136" width="36" height="36" rx="8" fill="#2563eb"/>
+  <text x="332" y="1160" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">+</text>
+  <rect x="74" y="1180" width="96" height="22" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="82" y="1195" font-size="8" fill="#1d4ed8">Guía Oficial</text>
+  <text x="158" y="1195" font-size="8" fill="#60a5fa">✕</text>
+  <rect x="176" y="1180" width="118" height="22" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="184" y="1195" font-size="8" fill="#1d4ed8">FreeMind Studio</text>
+  <text x="284" y="1195" font-size="8" fill="#60a5fa">✕</text>
+  <rect x="74" y="1206" width="106" height="22" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="82" y="1221" font-size="8" fill="#1d4ed8">Tutorial 2026</text>
+  <text x="168" y="1221" font-size="8" fill="#60a5fa">✕</text>
+
+  <!-- Enlace Web (sin toggle: link no definido) -->
+  <line x1="74" y1="1240" x2="350" y2="1240" stroke="#e2e8f0"/>
+  <text x="74" y="1260" font-size="9.5" font-weight="600" fill="#334155">Enlace Web</text>
+  <text x="82" y="1292" font-size="10" fill="#94a3b8">🔗</text>
+  <rect x="96" y="1268" width="254" height="32" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="104" y="1289" font-size="8.5" fill="#94a3b8">https://ejemplo.com</text>
+
+  <!-- Barra de Progreso: Sin asignar + Reset -->
+  <line x1="74" y1="1312" x2="350" y2="1312" stroke="#e2e8f0"/>
+  <text x="74" y="1332" font-size="9.5" font-weight="600" fill="#334155">Barra de Progreso</text>
+  <text x="74" y="1352" font-size="9.5" font-weight="500" fill="#334155">Porcentaje</text>
+  <rect x="247" y="1340" width="67" height="16" rx="4" fill="#eff6ff"/>
+  <text x="280" y="1351" font-size="7.5" font-weight="600" text-anchor="middle" fill="#2563eb">Sin asignar</text>
+  <text x="322" y="1352" font-size="7" fill="#94a3b8">Reset</text>
+  <rect x="74" y="1362" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="80" cy="1365" r="6" fill="#2563eb"/>
+
+  <!-- Iconos (2) -->
+  <line x1="74" y1="1380" x2="350" y2="1380" stroke="#e2e8f0"/>
+  <text x="74" y="1400" font-size="9.5" font-weight="600" fill="#334155">Iconos (2)</text>
+  <text x="298" y="1400" font-size="8" fill="#94a3b8">◉</text>
+  <text x="310" y="1400" font-size="8" fill="#94a3b8">Visibles</text>
+
+  <!-- Galleria -->
+  <line x1="74" y1="1420" x2="350" y2="1420" stroke="#e2e8f0"/>
+  <rect x="74" y="1428" width="276" height="36" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="144" y="1451" font-size="11" text-anchor="middle" fill="#1d4ed8">😊</text>
+  <text x="158" y="1451" font-size="9.5" font-weight="700" fill="#1d4ed8">Abrir Galería de Iconos</text>
+
+  <!-- Cotas -->
+  <line x1="46" y1="96" x2="46" y2="112" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="108" class="cota-txt" text-anchor="end">16</text>
+  <line x1="46" y1="126" x2="46" y2="427" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="280" class="cota-txt" text-anchor="end">301</text>
+  <line x1="46" y1="441" x2="46" y2="752" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="598" class="cota-txt" text-anchor="end">311</text>
+  <line x1="46" y1="766" x2="46" y2="1045" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="907" class="cota-txt" text-anchor="end">279</text>
+  <line x1="46" y1="1059" x2="46" y2="1478" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="1270" class="cota-txt" text-anchor="end">419</text>
+
+  <line x1="60" y1="1496" x2="364" y2="1496" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="212" y="1512" class="cota-txt" text-anchor="middle">304px útiles · raíz space-y-3.5 (14px) · barra pb-0.5</text>
+  <text x="212" y="1528" font-size="9" text-anchor="middle" fill="#93c5fd">4 secciones EXPANDIDAS · nodo ejemplo: 18px, body, imagen dataURL, 3 tags, 2 iconos</text>
+
+  <!-- ============ COLUMNA DERECHA ============ -->
+
+  <text x="440" y="88" class="lbl" fill="#93c5fd">Barra de plegar/desplegar + estado — ContentTab:41-85</text>
+  <rect x="440" y="96" width="800" height="154" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="456" y="122" class="body">Estado local (41-46): {title: true, body: false, image: false, metadata: false} — la app real arranca solo con «Título del Nodo»</text>
+  <text x="456" y="144" class="body">Barra (64-85): pb-0.5 · label text-[10.5px] font-bold uppercase tracking-wider + grupo con gap-1.5</text>
+  <text x="456" y="166" class="body">«Desplegar todo» text-[10.5px] blue-600 font-semibold → handleExpandAll(true) · «Plegar todo» slate-500 → (false) (52-59)</text>
+  <text x="456" y="188" class="body">handleExpandAll sincroniza las 4 claves (title/body/image/metadata) de una vez — reproduce el estado dibujado a la izquierda</text>
+  <text x="456" y="210" class="body">Las 4 secciones: CollapsibleSection (cabecera 53px · cuerpo pt-1 pb-3.5 space-y-2.5)</text>
+  <text x="456" y="232" class="body">SVG con las 4 desplegadas por petición del usuario (2026-10-17); el default real es solo «Título»</text>
+
+  <text x="440" y="294" class="lbl" fill="#93c5fd">Sección 1 — Título del Nodo (abierta por defecto, ~301px) — ContentTab:88-135</text>
+  <rect x="440" y="302" width="800" height="204" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="456" y="328" class="body">Badge cabecera: text-[10px] bg-blue-100 px-2 py-0.5 rounded-full con «{fontSize || 14}px» — dibujado con 18px real · icon Type (94-98)</text>
+  <text x="456" y="350" class="body">Textarea: rows=2 · p-2 text-xs font-medium resize-y · placeholder «Escribe el título...» · alto ~50px (100-106)</text>
+  <text x="456" y="372" class="body">Divisor: space-y-2 pt-1 border-t border-slate-200/80 (108)</text>
+  <text x="456" y="394" class="body">FontFormatToolbar (molecule): 2 grupos rounded-lg border overflow-hidden — [Negrita, Cursiva] y [Izquierda, Centro, Derecha]</text>
+  <text x="456" y="416" class="body">Botones p-1.5 + icono w-3.5 h-3.5 (14px) → ~28px alto · activo bg-blue-100 text-blue-700 · border-l entre botones (FontFormatToolbar:23-77)</text>
+  <text x="456" y="438" class="body">ColorPicker «Color del Texto» (ejemplo #FFFFFF) + Reset · SliderInput «Tamaño de Fuente» 10..36 px badge «18px» + Reset (118-133)</text>
+  <text x="456" y="460" class="body">SliderInput: space-y-1.5 — fila text-xs (label + badge blue-600 + Reset) + range h-1.5 (6px) · knob en (18-10)/(36-10) = 31%</text>
+  <text x="456" y="482" class="body">Campos afectados: text · bold · italic · textAlign · textColor · fontSize (110-133)</text>
+
+  <text x="440" y="550" class="lbl" fill="#93c5fd">Sección 2 — Cuerpo / Subtexto (desplegada, ~311px) — ContentTab:138-210</text>
+  <rect x="440" y="558" width="800" height="204" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="456" y="584" class="body">action (solo si body): botón ojo p-1 rounded-md w-3.5 h-3.5 · oculto bg-amber-100 text-amber-700 · alterna hideBody (144-162)</text>
+  <text x="456" y="606" class="body">badge (solo si body): «Activo» emerald-100/700 o «Oculto» amber-100/700 — text-[10px] px-2 py-0.5 rounded-full (163-171)</text>
+  <text x="456" y="628" class="body">Textarea rows=3 (~66px, 3 líneas visibles) · placeholder «Escribe detalles o párrafos explicativos...» · resize-y (173-179)</text>
+  <text x="456" y="650" class="body">Controles SOLO si body definido (181-209): FontFormatToolbar (bodyBold/bodyItalic/bodyAlign) + ColorPicker «Color del Cuerpo»</text>
+  <text x="456" y="672" class="body">Ejemplo dibujado: #8BEAFE + Reset · SliderInput «Tamaño del Cuerpo» 9..24 px badge «12px» + Reset (default 12) (199-207)</text>
+  <text x="456" y="694" class="body">Formato del cuerpo INDEPENDIENTE del título: bodyBold vs bold · bodyColor vs textColor · bodyAlign vs textAlign</text>
+  <text x="456" y="716" class="body">hideBody se guarda en el nodo (persistencia vía store), no en localStorage</text>
+  <text x="456" y="738" class="body">Divisores internos: pt-1 border-t border-slate-200/80 · space-y-2 (8px) entre controles</text>
+
+  <text x="440" y="806" class="lbl" fill="#93c5fd">Sección 3 — Imagen Adjunta (desplegada con imagen, ~279px) — ContentTab:213-339</text>
+  <rect x="440" y="814" width="800" height="244" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="456" y="840" class="body">action/badge condicionales a imageUrl: ojo alterna hideImage · badge «Activa» blue / «Oculta» amber (219-247)</text>
+  <text x="456" y="862" class="body">Fila (249-294): input URL flex-1 p-2 text-xs (~192px) + label Upload p-2 bg-blue-50 border-blue-200 (36x36) + Trash2 red 36x36</text>
+  <text x="456" y="884" class="body">input file oculto accept image/* → FileReader.readAsDataURL → imageUrl = dataURL (263-281) — ejemplo dibujado con dataURL</text>
+  <text x="456" y="906" class="body">Trash2 (solo si imageUrl): borra imageUrl, imagePosition, imageWidth y imageHeight de una pasada (285-293)</text>
+  <text x="456" y="928" class="body">Si imageUrl (296-337): «Posición de Imagen» text-[11px] + grid grid-cols-3 gap-1.5 — 6 botones p-2 rounded-xl (~88x46px)</text>
+  <text x="456" y="950" class="body">Opciones: ↑ Arriba · ⇅ Entre texto · ↓ Abajo · ← Izquierda · → Derecha · ⤢ Ajustar — icono 14px + label text-[10px] mt-1</text>
+  <text x="456" y="972" class="body">Seleccionado: border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs · default 'top' (dibujado «Arriba»)</text>
+  <text x="456" y="994" class="body">SliderInput «Ancho de imagen» 60..500 step 10 px badge «64px» (ejemplo) — SIN onReset → sin «Reset» (327-335)</text>
+  <text x="456" y="1016" class="body">Al subir archivo local: imagePosition se fija a 'top' si no estaba (274) · estado: imageUrl · imagePosition · imageWidth · imageHeight</text>
+
+  <text x="440" y="1102" class="lbl" fill="#93c5fd">Sección 4 — Metadatos y Visibilidad (desplegada, ~419px) — ContentTab:342-474</text>
+  <rect x="440" y="1110" width="800" height="250" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="456" y="1136" class="body">Bloque Tags: «Etiquetas (Tags)» text-[11px] + toggle «Visible/Oculto» (solo si tags.length &gt; 0) → alterna hideTags (352-367)</text>
+  <text x="456" y="1158" class="body">TagManager (molecule): input flex-1 px-2.5 py-1.5 (36px) + botón Plus p-1.5 bg-blue-600 (36x36) · Enter o clic añade · duplicados ignorados</text>
+  <text x="456" y="1180" class="body">Chips: flex flex-wrap gap-1.5 — bg-blue-50 text-blue-700 border-blue-200/60 px-2 py-0.5 rounded-md text-[11px] + X w-3 h-3 · ejemplo: 3 tags en 2 filas</text>
+  <text x="456" y="1202" class="body">Bloque Enlace (divider pt-2 border-t): «Enlace Web» + LinkIcon w-4 h-4 + input px-2.5 py-1.5 · toggle hideLink SOLO si link definido (380-407)</text>
+  <text x="456" y="1224" class="body">Bloque Progreso (divider pt-2 border-t): «Barra de Progreso» + SliderInput «Porcentaje» 0..100 step 5 % badge «Sin asignar» + Reset (410-438)</text>
+  <text x="456" y="1246" class="body">Ejemplo: progress undefined → badge «Sin asignar», knob al inicio · con valor: badge «{n}%» + toggle «Visible/Oculto»</text>
+  <text x="456" y="1268" class="body">Bloque Iconos (solo si icons.length &gt; 0): «Iconos (2)» + toggle «Visibles/Ocultos» → hideIcons (441-458)</text>
+  <text x="456" y="1290" class="body">Galería (461-472): botón w-full py-2 px-3 bg-blue-50 border-blue-200 rounded-xl text-xs + Smile w-4 h-4 → «Abrir Galería de Iconos»</text>
+  <text x="456" y="1312" class="body">Bloques separados por space-y-3 (12px) con divisor pt-2 border-t border-slate-200/80 (349, 380, 410, 442, 462)</text>
+  <text x="456" y="1334" class="body">Toggles de visibilidad: hideTags · hideLink · hideProgress · hideIcons — todos se guardan en el nodo, no en localStorage</text>
+
+  <text x="440" y="1404" class="lbl" fill="#93c5fd">Notas sobre el estado dibujado</text>
+  <rect x="440" y="1412" width="800" height="126" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="456" y="1438" class="body">Pila izquierda = las 4 secciones EXPANDIDAS (petición del usuario 2026-10-17) sobre un nodo de ejemplo completo.</text>
+  <text x="456" y="1460" class="body">La app real solo despliega «Título del Nodo» al abrir (estado local 41-46); «Desplegar todo» reproduce el estado dibujado.</text>
+  <text x="456" y="1482" class="body">Valores reales de las capturas: #FFFFFF (texto) · #8BEAFE (cuerpo) · 18px · 12px · posición «Arriba» · ancho 64px · «Sin asignar».</text>
+  <text x="456" y="1504" class="body">Medidas de CollapsibleSection, SliderInput y ColorPicker → §6.5.3 · FontFormatToolbar y TagManager → §6.1.1 / §6.1.4.</text>
+</svg>

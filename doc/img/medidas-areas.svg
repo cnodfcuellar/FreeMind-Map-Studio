@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="680" viewBox="0 0 1120 680" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <marker id="cap" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,4 L1,7" fill="none" stroke="#f59e0b" stroke-width="1.4"/>
+    </marker>
+    <style>
+      .cota { stroke:#f59e0b; stroke-width:1; }
+      .cota-txt { font-size:11px; fill:#b45309; font-weight:700; }
+      .lbl { font-size:12px; fill:#334155; font-weight:600; }
+      .lbl-sm { font-size:10.5px; fill:#64748b; }
+      .area-name { font-size:12px; font-weight:800; }
+    </style>
+  </defs>
+
+  <rect width="1120" height="680" rx="16" fill="#0f172a"/>
+  <text x="32" y="40" font-size="22" font-weight="700" fill="#ffffff">FreeMind Map Studio — Medidas de las áreas grandes</text>
+  <text x="32" y="62" font-size="12.5" fill="#93c5fd">Escala 1:1 (1 px = 1 px real) · cotas en ámbar · según doc/MEASURES.md · MainEditorLayout:37-62</text>
+
+  <!-- ZONA DEL WIREFRAME (x: 100 a 940, ancho real 840px). Alturas apiladas = 508 -->
+  <rect x="100" y="100" width="840" height="508" rx="10" fill="#f1f5f9" stroke="#cbd5e1"/>
+
+  <!-- MenuBar (h-10 = 40) -->
+  <rect x="100" y="100" width="840" height="40" fill="#0f172a"/>
+  <text x="132" y="125" class="area-name" fill="#ffffff">MenuBar</text>
+  <text x="220" y="125" class="lbl-sm" fill="#94a3b8">Archivo · Editar · Insertar · Formato · Ver · Ayuda</text>
+
+  <!-- ToolBar (h-11 = 44) -->
+  <rect x="100" y="140" width="840" height="44" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="132" y="167" class="area-name" fill="#0f172a">ToolBar</text>
+  <text x="220" y="167" class="lbl-sm" fill="#64748b">botones 30×30 · icono 16 · separador h-5</text>
+
+  <!-- FilterBar (h-10 = 40) -->
+  <rect x="100" y="184" width="840" height="40" fill="#1e293b"/>
+  <text x="132" y="209" class="area-name" fill="#ffffff">FilterBar</text>
+  <text x="220" y="209" class="lbl-sm" fill="#94a3b8">Ctrl+F · input max-w-xs 320 · grupo max-w-3xl 768</text>
+
+  <!-- ZONA DE TRABAJO (y: 224 a 584, alto 360) -->
+  <!-- OutlineView (w-80 = 320) -->
+  <rect x="100" y="224" width="320" height="360" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="260" y="392" class="area-name" font-size="13" text-anchor="middle" fill="#0f172a">OutlineView</text>
+  <text x="260" y="410" class="lbl-sm" text-anchor="middle">w-80 = 320px</text>
+  <text x="260" y="426" class="lbl-sm" text-anchor="middle">(md:w-88 = 352px)</text>
+
+  <!-- Canvas (flex-1 = 184) -->
+  <rect x="420" y="224" width="184" height="360" fill="#f8fafc" stroke="#38bdf8" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="512" y="392" class="area-name" font-size="13" text-anchor="middle" fill="#0f172a">Canvas</text>
+  <text x="512" y="410" class="lbl-sm" text-anchor="middle">flex-1</text>
+  <text x="512" y="426" class="lbl-sm" text-anchor="middle">resto</text>
+
+  <!-- MiniMap + ZoomControls flotantes (bottom-2 right-5) -->
+  <rect x="448" y="470" width="140" height="80" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="518" y="498" class="area-name" font-size="11" text-anchor="middle" fill="#0f172a">MiniMap</text>
+  <text x="518" y="514" class="lbl-sm" text-anchor="middle">S 176×96</text>
+  <text x="518" y="528" class="lbl-sm" text-anchor="middle">M 224×128 · L 288×176</text>
+  <rect x="448" y="532" width="140" height="14" rx="4" fill="#e2e8f0"/>
+  <text x="518" y="542" font-size="8.5" text-anchor="middle" fill="#64748b">ZoomControls ~28px</text>
+
+  <!-- ToolPanel (w-84 = 336) -->
+  <rect x="604" y="224" width="336" height="360" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="772" y="384" class="area-name" font-size="13" text-anchor="middle" fill="#0f172a">ToolPanel</text>
+  <text x="772" y="402" class="lbl-sm" text-anchor="middle">w-84 = 336px</text>
+  <!-- 6 pestañas (336/6 = 56px cada una) -->
+  <g>
+    <rect x="604" y="424" width="336" height="30" fill="#f1f5f9" stroke="#e2e8f0"/>
+    <line x1="660" y1="424" x2="660" y2="454" stroke="#e2e8f0"/>
+    <line x1="716" y1="424" x2="716" y2="454" stroke="#e2e8f0"/>
+    <line x1="772" y1="424" x2="772" y2="454" stroke="#e2e8f0"/>
+    <line x1="828" y1="424" x2="828" y2="454" stroke="#e2e8f0"/>
+    <line x1="884" y1="424" x2="884" y2="454" stroke="#e2e8f0"/>
+    <text x="632" y="443" font-size="9" text-anchor="middle" fill="#475569">Texto</text>
+    <text x="688" y="443" font-size="9" text-anchor="middle" fill="#475569">Estilos</text>
+    <text x="744" y="443" font-size="9" text-anchor="middle" fill="#475569">Notas</text>
+    <text x="800" y="443" font-size="9" text-anchor="middle" fill="#475569">Iconos</text>
+    <text x="856" y="443" font-size="9" text-anchor="middle" fill="#475569">Nubes</text>
+    <text x="912" y="443" font-size="9" text-anchor="middle" fill="#475569">Mapa</text>
+  </g>
+  <text x="772" y="472" class="lbl-sm" text-anchor="middle">grid-cols-6 · celda 56px</text>
+
+  <!-- StatusBar (h-6 = 24) -->
+  <rect x="100" y="584" width="840" height="24" fill="#0f172a"/>
+  <text x="132" y="600" class="area-name" font-size="11" fill="#ffffff">StatusBar</text>
+  <text x="220" y="600" class="lbl-sm" fill="#94a3b8">nodos · selección · zoom · posición · modo</text>
+
+  <!-- COTAS VERTICALES (columna de alturas), x = 60 -->
+  <!-- MenuBar 40 -->
+  <line x1="72" y1="100" x2="72" y2="140" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="66" y="124" class="cota-txt" text-anchor="end">40</text>
+  <!-- ToolBar 44 -->
+  <line x1="72" y1="140" x2="72" y2="184" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="66" y="166" class="cota-txt" text-anchor="end">44</text>
+  <!-- FilterBar 40 -->
+  <line x1="72" y1="184" x2="72" y2="224" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="66" y="208" class="cota-txt" text-anchor="end">40</text>
+  <!-- Zona trabajo 360 -->
+  <line x1="72" y1="224" x2="72" y2="584" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="66" y="408" class="cota-txt" text-anchor="end">360</text>
+  <text x="66" y="422" font-size="9" text-anchor="end" fill="#b45309">flex-1</text>
+  <!-- StatusBar 24 -->
+  <line x1="72" y1="584" x2="72" y2="608" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="66" y="600" class="cota-txt" text-anchor="end">24</text>
+
+  <!-- COTA TOTAL VERTICAL (100vh), x = 40 -->
+  <line x1="44" y1="100" x2="44" y2="608" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="38" y="360" class="cota-txt" font-size="12" text-anchor="end" transform="rotate(-90 38 360)">100vh</text>
+
+  <!-- COTAS HORIZONTALES (anchos), y = 630 y 648 -->
+  <!-- Outline 320 -->
+  <line x1="100" y1="630" x2="420" y2="630" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="260" y="626" class="cota-txt" text-anchor="middle">320px</text>
+  <text x="260" y="644" font-size="9" text-anchor="middle" fill="#b45309">(352 en md)</text>
+  <!-- Canvas 184 -->
+  <line x1="420" y1="630" x2="604" y2="630" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="512" y="626" class="cota-txt" text-anchor="middle">flex-1</text>
+  <text x="512" y="644" font-size="9" text-anchor="middle" fill="#b45309">184*</text>
+  <!-- ToolPanel 336 -->
+  <line x1="604" y1="630" x2="940" y2="630" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="772" y="626" class="cota-txt" text-anchor="middle">336px</text>
+
+  <!-- COTA TOTAL HORIZONTAL (100vw), y = 664 -->
+  <line x1="100" y1="662" x2="940" y2="662" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="520" y="658" class="cota-txt" font-size="12" text-anchor="middle">100vw (ancho total del viewport)</text>
+
+  <!-- Nota de escalado del canvas -->
+  <text x="954" y="240" class="lbl" fill="#38bdf8">Canvas = flex-1</text>
+  <text x="954" y="256" class="lbl-sm">absorbe el ancho sobrante;</text>
+  <text x="954" y="270" class="lbl-sm">ejemplo con viewport</text>
+  <text x="954" y="284" class="lbl-sm">de 1440px → 480px.</text>
+  <text x="954" y="304" class="lbl-sm">*184px es la cota del</text>
+  <text x="954" y="318" class="lbl-sm">ejemplo dibujado (840).</text>
+  <text x="954" y="344" class="lbl" fill="#b45309">Alturas siempre fijas:</text>
+  <text x="954" y="360" class="lbl-sm">40+44+40+24 = 148px</text>
+  <text x="954" y="374" class="lbl-sm">de barras; el resto es</text>
+  <text x="954" y="388" class="lbl-sm">zona de trabajo.</text>
+</svg>

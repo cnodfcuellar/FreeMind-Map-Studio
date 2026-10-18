@@ -301,6 +301,8 @@ freemind-map-studio/
 │   ├── PROJECT_ARCHITECTURE.md        # Arquitectura v4.0 verificada contra código + cookbook + guía GitHub
 │   ├── DESIGN.md                      # Sistema de diseño verificado (tokens, componentes, reglas)
 │   ├── INTERFACE_SPEC.md              # Especificación de interfaz
+│   ├── FEATURE_TREE.md                # Árbol de características (funcional + por interfaz)
+│   ├── MEASURES.md                    # Hoja de medidas de la interfaz (áreas grandes)
 │   ├── CHANGELOG.md                   # Historial de cambios
 │   └── 📂 img/                        # Diagramas SVG (áreas, wireframe, layouts) y capturas
 ```
@@ -407,6 +409,8 @@ localStorage
 - [`doc/PROJECT_ARCHITECTURE.md`](doc/PROJECT_ARCHITECTURE.md): arquitectura v4.0 verificada contra el código, cookbook de extensión y guía de qué subir a GitHub.
 - [`doc/DESIGN.md`](doc/DESIGN.md): sistema de diseño verificado (tokens, componentes, reglas para futuras implementaciones).
 - [`doc/INTERFACE_SPEC.md`](doc/INTERFACE_SPEC.md): especificación de la interfaz.
+- [`doc/FEATURE_TREE.md`](doc/FEATURE_TREE.md): árbol de características del producto (uno funcional y otro por superficie de interfaz).
+- [`doc/MEASURES.md`](doc/MEASURES.md): hoja de medidas de la interfaz (áreas grandes: barras, paneles, lienzo, controles flotantes).
 - [`doc/CHANGELOG.md`](doc/CHANGELOG.md): historial de cambios.
 
 ---
