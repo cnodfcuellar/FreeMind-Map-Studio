@@ -1687,3 +1687,24 @@ El usuario aporto una captura real de la pestaña Formato con el tipo de fondo �
 - [x] Verificacion por DOM (browser.evaluate): 190 textos, 0 desbordes de columna, 0 fuera de lienzo.
 - [x] Render visual capturado (408 KB): sin solapes ni recortes; pestañas /@fs/ cerradas.
 - [x] Sin cambios de codigo.
+
+---
+
+## 📏 [Docs] — 2026-10-17: §6.6 Pestaña Mapa — SVG 1:1 rehecho contra el código real (ThemeTab)
+
+### 🎯 Motivo
+Completar §6.6 de doc/MEASURES.md. El SVG previo doc/img/medidas-theme-tab.svg era INVÁLIDO: dibujaba secciones fantasma («Fondos preestablecidos», «Conectores Personalizados») que no existen, fruto de lecturas corruptas de ThemeTab.tsx (el usuario lo detecto con capturas reales). Se rehizo entero contra el código real releído y se midio la barra en la app viva.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| doc/img/medidas-theme-tab.svg | Reescrito de 0 (viewBox 1400x2300, XML 14/14): pila real de la pestaña Mapa a 1:1 (304px) con barra + las 5 secciones REALES desplegadas — Barra «CONFIGURACIÓN GLOBAL DEL MAPA» 30px (medido en la app: titulo envuelto a 2 lineas, no 17px) · S1 Temas del Mapa 328px (8 tarjetas 134x58 con nombre+Check+dots, badge «Clásico Azul», «Plano Técnico Blu…» truncado) · S2 Diseño del Árbol 237px (9 layouts 88x51 con iconos lucide, «Estándar» activo) · S3 Fondo del Lienzo 505px (CP+Reset #F8FAFC, 6 patrones 88x55 con «Puntos» activo, CP trazo #94A3B8 sin Reset, sliders 24px/40%) · S4 Aristas Globales 540px (Curva+Cónica+Sólido activos, Multicolor/Randomizar, CP «AUTO», 8 dots Sugeridos, grosor 3.5px) · S5 Espaciado 140px (58px/14px). Pila total 1850px con cotas. 6 cajas de medidas (15+9+16+16+6+10 lineas) incluyendo nota ámbar de «props muertas» de conectores e imports sin uso. |
+| doc/MEASURES.md | Nueva sección **§6.6 Pestaña Mapa (ThemeTab)** (6.6.1-6.6.4) insertada entre §6.5 y §7: barra global (30px reales), estado por defecto (solo Temas abierto), tabla de las 5 secciones con alturas y contenido, tabla de estado dibujado con la procedencia de cada valor, y aviso del SVG previo inválido + imports lucide sin uso (Link, ToggleButtonGroup). |
+| D:\Temp\opencode\validate-svg.ps1 | Ya incluia medidas-theme-tab.svg (lista de 14 ficheros); sin cambios. |
+
+### 🔍 Verificación
+- [x] ThemeTab.tsx releido integro por trozos (623 lineas): barra 123-144, sectionsOpen 92-98, LAYOUT_OPTIONS 59-69, S1 147-197, S2 200-227, S3 230-373, S4 376-589, S5 592-620; atomos CollapsibleSection/ColorPicker/SliderInput; THEMES reales en `themes.ts:15-152`.
+- [x] Barra medida en la app viva (browser.evaluate): rowH=30, titleH=28 (span de 202px comprimido a ~173px, envuelve a 2 lineas) — corrige el dato previo de 17px y la pila (1837 → 1850).
+- [x] Validacion XML (.NET): OK (14/14 SVG) tras corregir `&&` sin escapar y el `</svg>` duplicado.
+- [x] Verificacion por DOM (browser.evaluate): 169 textos, 0 desbordes de lienzo; render visual capturado sin solapes; pestanas /@fs/ y de la app cerradas.
+- [x] Sin cambios de codigo.

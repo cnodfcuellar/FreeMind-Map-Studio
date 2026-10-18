@@ -545,6 +545,58 @@ Todos los cambios pasan por `updateCloudProps` → `onUpdateNode(cloud)` con `en
 
 ---
 
+### 6.6 Pestaña Mapa (ThemeTab)
+
+`src/components/organisms/toolpanel/ThemeTab.tsx:23-623` (623 líneas)
+
+![Medidas de la pestaña Mapa](img/medidas-theme-tab.svg)
+
+Raíz `space-y-3.5` (14px) · ancho útil 304px. **5 secciones colapsables** (Temas · Layout · Fondo · Aristas · Espaciado) + barra global. La pestaña **no tiene sección de conectores**: las props `onOpenConnectorModal`/`onDeleteConnector`/`onUpdateConnector` y el type `Connector` están declarados y sin uso; el import de `BACKGROUND_PRESET_THEMES`/`BackgroundPresetTheme` (línea 11) es código muerto — no existe ninguna UI de «Fondos preestablecidos» ni «Conectores Personalizados».
+
+#### 6.6.1 Barra global (alto 30px reales)
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| Fila | `flex items-center justify-between pb-0.5` (sin contenedor propio, va sobre el fondo del panel) | ThemeTab:123 |
+| Título | «Configuración Global del Mapa» `text-[10.5px] font-bold uppercase tracking-wider` — mide ~202px; en 304px útiles el span se comprime a ~173px y **envuelve a 2 líneas** (lh 14) → barra de **30px**, no 17 (medido en la app: `rowH 30 = 2×14 + pb-0.5`) | ThemeTab:124-126 |
+| Acciones | «Desplegar todo» `text-[10.5px] text-blue-600 font-semibold` · `|` `text-slate-300 text-[10px]` · «Plegar todo» `text-[10.5px] text-slate-500 font-medium`, `gap-1.5` (~145px en total) | ThemeTab:127-143 |
+
+`handleExpandAll(true|false)` reescribe las 5 claves de `sectionsOpen` de golpe (104-112).
+
+#### 6.6.2 Estado por defecto y plegado
+
+`sectionsOpen` inicial: **solo `{theme: true}`** — «Temas» abierto y las otras 4 plegadas al abrir la pestaña (92-98). Cada sección es un `CollapsibleSection` (medido en 6.5.3): cabecera **53px** (icono en caja `w-6 h-6 rounded-lg bg-blue-100` + título `text-xs` + subtítulo `text-[10px]` + badge/chevron `gap-1.5`), chevron `rotate-0` (▼) abierto / `-rotate-90` (▶) plegado, body condicional `{isOpen && …}`. **Solo «Temas del Mapa» lleva badge** (`{currentTheme.name}`); las otras 4 secciones no.
+
+#### 6.6.3 Secciones y alturas (todas desplegadas en el SVG)
+
+| # | Sección | Contenido | Alto | Origen |
+|---|---------|-----------|------|--------|
+| 1 | **Temas del Mapa** | badge «Clásico Azul» + `grid grid-cols-2 gap-2` con los **8 THEMES** (`Object.values`): tarjeta `p-2.5 rounded-xl` **134×58px** — fila 1 nombre `text-xs font-semibold truncate` + `Check w-3.5`; fila 2 root dot `w-3.5 h-3.5` (title «Nodo raíz») + 4 branch dots `w-2.5 gap-0.5` (`branchColors.slice(0,4)`); activa `border-blue-600 bg-blue-50/70 ring-1 ring-blue-500 shadow-2xs` | **328** | ThemeTab:147-197 |
+| 2 | **Diseño del Árbol** | `grid grid-cols-3 gap-1.5` con la constante `LAYOUT_OPTIONS` (59-69): **9 botones p-2 88×51px** (icono lucide `w-4 h-4` + label `text-[10px]`): Estándar · Balanceado · Derecha · Izquierda · Arriba · Abajo · Árbol ↓ · Radial ● · Circular ○ (izquierda/arriba/abajo = mismo LayoutGrid girado) | **237** | ThemeTab:200-227 |
+| 3 | **Fondo del Lienzo** | ColorPicker «Color de Fondo del Lienzo» **con Reset** + «Patrón de Cuadrícula» **6 botones 88×55px** (Liso · Puntos · Líneas · Cuadros · Triángulos · Panal; iconos propios `w-6 h-4`, no lucide) + CP «Color del Trazo del Patrón» **sin Reset** + SliderInput «Tamaño del Patrón» (`12..64` step 2 px) y «Opacidad del Patrón» (`5..100` %) — estos 3 últimos **solo se montan si patrón ≠ `none`** (338-371) | **505** ← 2.ª más alta | ThemeTab:230-373 |
+| 4 | **Aristas Globales** | «Forma de Conexión Global» `grid-cols-4` **64×51** con SVGs inline (Curva bezier · Recta · Escuadra · Horiz.) + «Perfil de Grosor (Ribbon)» `grid-cols-4` **64×49** con glyphs (Uniforme ═ · Cónica ◣ · Huso ◆ · Reloj ⧖) + bloque `pt-2 border-t`: botón [Multicolor] gradiente + botón [Randomizar] indigo + CP «Color Uniforme de Ramas» (muestra **AUTO** con Multicolor) + fila «Sugeridos:» con 8 dots `w-4.5` + «Estilo de Línea Global» 3 botones `grid-cols-3` (Sólido · Guiones · Puntos, preview `w-8 border-t-2`) + SliderInput «Grosor de Aristas Global» (`1..8` step 0.5 px) | **540** ← la más alta | ThemeTab:376-589 |
+| 5 | **Espaciado del Mapa** | 2 SliderInput **sin Reset** (~28px cada uno): «Separación Horizontal» (`20..150` step 2, default **54**) y «Separación Vertical» (`4..60` step 2, default **14**); los gaps alimentan `layoutEngine` (§1.3) | **140** ← la más baja | ThemeTab:592-620 |
+
+Pila total desplegada: barra 30 + 5 secciones + 5 gaps×14 = **1850px**. Plegadas: cada sección queda en su cabecera de 53px.
+
+#### 6.6.4 Color y selección (estado dibujado en el SVG)
+
+| Control | Valor dibujado | Origen del valor |
+|---------|----------------|------------------|
+| Tema activo | **Clásico Azul** (`background: #f8fafc`, patrón `dots #94a3b8` 24px/45 %, `edgeStyle: bezier`) | themes.ts:30-44 |
+| Layout | Estándar (`standard`) | `mindMap.layout` |
+| Fondo + trazo patrón | `#F8FAFC` (con Reset) + `#94A3B8` | tema activo |
+| Forma + perfil | Curva (bezier) + Cónica (tapered) | `mindMap.edgeStyle \|\| tema.edgeStyle` / `mindMap.edgeProfile` (default del código: `uniform`, 455) |
+| Línea + grosor | Sólido (`solid`) + `3.5px` | `mindMap.edgeDash \|\| 'solid'` / `mindMap.edgeWidth \|\| 2.5` |
+| Color de aristas | **Multicolor** (`edgeColor === undefined`) | default |
+| Espaciado | `58px` / `14px` | `mindMap.horizontalGap ?? 54` / `verticalGap ?? 14` (mapa activo; defaults 54/14) |
+
+Botones de color: **Multicolor** = gradiente `from-blue-500 via-purple-500 to-pink-500` + Sparkles `w-3` → `onClear(undefined)` (483-497); **Randomizar** = `bg-indigo-50 border-indigo-200` + Dices `w-3.5` → `onRandomizeEdgeColors()` (499-509). «Sugeridos»: `#3b82f6 #8b5cf6 #10b981 #f59e0b #ef4444 #ec4899 #475569 #0f172a` (521-544).
+
+> 🖼 El SVG previo de esta sección era inválido (dibujaba secciones fantasma «Fondos preestablecidos» y «Conectores Personalizados» por lecturas corruptas del archivo) y quedó sin commitear en `aff2835`; se rehízo entero contra el código real (2026-10-17) y la barra se midió en la app viva. Imports lucide sin uso en el archivo: `Link`, `ToggleButtonGroup` (15, 21); sí se usan `Compass`, `Sparkles`, `GitFork`, `CircleDot`, `Dices`, `Layers` (LAYOUT_OPTIONS y bloque de color).
+
+---
+
 ## 7. FilterBar (barra de filtros) — detallada
 
 `src/components/FilterBar.tsx:33-117`

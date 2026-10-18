@@ -1,0 +1,557 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="2300" viewBox="0 0 1400 2300" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <marker id="cap" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <circle cx="4" cy="4" r="2.5" fill="#fbbf24"/>
+    </marker>
+    <style>
+      .cota { stroke: #fbbf24; stroke-width: 1; }
+      .cota-txt { fill: #fbbf24; font-size: 10px; font-weight: 600; }
+      .lbl { fill: #e2e8f0; font-size: 12px; font-weight: 700; }
+      .body { fill: #475569; font-size: 9px; }
+    </style>
+    <linearGradient id="gMulti" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3b82f6"/><stop offset="0.5" stop-color="#a855f7"/><stop offset="1" stop-color="#ec4899"/>
+    </linearGradient>
+    <pattern id="pPuntos" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.9" fill="#64748b"/></pattern>
+    <pattern id="pVert" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0.5,0 V5" stroke="#64748b" stroke-width="1"/></pattern>
+    <pattern id="pGrid5" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0.5,0 V5 M0,0.5 H5" stroke="#64748b" stroke-width="1" fill="none"/></pattern>
+  </defs>
+
+  <rect width="1400" height="2300" rx="16" fill="#0f172a"/>
+
+  <text x="32" y="40" font-size="22" font-weight="800" fill="#f8fafc">§6.6 ToolPanel — Pestaña «Mapa» (ThemeTab.tsx, 623 líneas) — TODO DESPLEGADO a 1:1</text>
+  <text x="32" y="70" font-size="11" fill="#94a3b8">Barra global + 5 secciones REALES (Temas · Layout · Fondo · Aristas · Espaciado) · escala 1:1 px CSS:SVG = 1:1 · NO hay sección de «Conectores» ni «Fondos preestablecidos»</text>
+  <rect x="1240" y="24" width="128" height="26" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981"/>
+  <text x="1304" y="41" font-size="10" font-weight="700" text-anchor="middle" fill="#34d399">1:1 · px reales</text>
+
+  <!-- ============ COLUMNA IZQUIERDA: pila real de la pestaña ============ -->
+
+  <!-- ===== BARRA 96..113 (17) ===== -->
+  <!-- ===== BARRA 96..126 (30 REALES: título envuelto a 2 líneas, medido en la app) ===== -->
+  <text x="60" y="107" font-size="10.5" font-weight="700" letter-spacing="0.6" fill="#cbd5e1">CONFIGURACIÓN GLOBAL</text>
+  <text x="60" y="121" font-size="10.5" font-weight="700" letter-spacing="0.6" fill="#cbd5e1">DEL MAPA</text>
+  <text x="215" y="115" font-size="10.5" font-weight="600" fill="#60a5fa">Desplegar todo</text>
+  <text x="294" y="115" font-size="10" fill="#475569">|</text>
+  <text x="304" y="115" font-size="10.5" font-weight="500" fill="#94a3b8">Plegar todo</text>
+
+  <!-- offset +13: la barra real mide 30px (título envuelto), no 17 — secciones y cajas desplazadas -->
+  <g transform="translate(0,13)">
+  <!-- ===== S1 TEMAS DEL MAPA 127..455 (328) ===== -->
+  <rect x="60" y="127" width="304" height="328" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="139" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <g transform="translate(74,139) scale(0.5833)" fill="none" stroke="#1d40af" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.6-.4-1.1 0-.7.6-1.3 1.3-1.3H16c3.3 0 6-2.7 6-6C22 6 17.5 2 12 2z"/>
+    <circle cx="13.5" cy="6.5" r="0.6" fill="#1d40af"/><circle cx="17.5" cy="10.5" r="0.6" fill="#1d40af"/><circle cx="6.5" cy="12.5" r="0.6" fill="#1d40af"/><circle cx="8.5" cy="7.5" r="0.6" fill="#1d40af"/>
+  </g>
+  <text x="106" y="151" font-size="12" font-weight="600" fill="#1e293b">Temas del Mapa</text>
+  <text x="106" y="165" font-size="10" fill="#94a3b8">Paletas de color y estilos</text>
+  <rect x="240" y="145" width="80" height="17" rx="8.5" fill="#dbeafe"/>
+  <text x="280" y="157" font-size="10" font-weight="600" text-anchor="middle" fill="#1e40af">Clásico Azul</text>
+  <path d="M332,150 L340,158 L348,150" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="61" y1="180" x2="363" y2="180" stroke="#e2e8f0"/>
+
+  <!-- Card 1: Clásico Azul (ACTIVO) -->
+  <rect x="74" y="185" width="134" height="58" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="84" y="208" font-size="12" font-weight="600" fill="#1e293b">Clásico Azul</text>
+  <path d="M187,204 l3,3 l6,-7" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="91" cy="225" r="7" fill="#2563eb" stroke="#cbd5e1"/>
+  <circle cx="107" cy="225" r="5" fill="#3b82f6"/><circle cx="119" cy="225" r="5" fill="#10b981"/><circle cx="131" cy="225" r="5" fill="#8b5cf6"/><circle cx="143" cy="225" r="5" fill="#f59e0b"/>
+
+  <!-- Card 2: Arcoíris Vibrante -->
+  <rect x="216" y="185" width="134" height="58" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="226" y="208" font-size="12" font-weight="600" fill="#1e293b">Arcoíris Vibrante</text>
+  <circle cx="233" cy="225" r="7" fill="#0f172a" stroke="#cbd5e1"/>
+  <circle cx="249" cy="225" r="5" fill="#ef4444"/><circle cx="261" cy="225" r="5" fill="#f97316"/><circle cx="273" cy="225" r="5" fill="#f59e0b"/><circle cx="285" cy="225" r="5" fill="#10b981"/>
+
+  <!-- Card 3: Modo Oscuro -->
+  <rect x="74" y="251" width="134" height="58" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="84" y="274" font-size="12" font-weight="600" fill="#1e293b">Modo Oscuro</text>
+  <circle cx="91" cy="291" r="7" fill="#3b82f6" stroke="#cbd5e1"/>
+  <circle cx="107" cy="291" r="5" fill="#60a5fa"/><circle cx="119" cy="291" r="5" fill="#34d399"/><circle cx="131" cy="291" r="5" fill="#a78bfa"/><circle cx="143" cy="291" r="5" fill="#fbbf24"/>
+
+  <!-- Card 4: Bosque Esmeralda -->
+  <rect x="216" y="251" width="134" height="58" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="226" y="274" font-size="12" font-weight="600" fill="#1e293b">Bosque Esmeralda</text>
+  <circle cx="233" cy="291" r="7" fill="#047857" stroke="#cbd5e1"/>
+  <circle cx="249" cy="291" r="5" fill="#059669"/><circle cx="261" cy="291" r="5" fill="#10b981"/><circle cx="273" cy="291" r="5" fill="#34d399"/><circle cx="285" cy="291" r="5" fill="#0d9488"/>
+
+  <!-- Card 5: Atardecer Cálido -->
+  <rect x="74" y="317" width="134" height="58" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="84" y="340" font-size="12" font-weight="600" fill="#1e293b">Atardecer Cálido</text>
+  <circle cx="91" cy="357" r="7" fill="#ea580c" stroke="#cbd5e1"/>
+  <circle cx="107" cy="357" r="5" fill="#ea580c"/><circle cx="119" cy="357" r="5" fill="#f97316"/><circle cx="131" cy="357" r="5" fill="#fb923c"/><circle cx="143" cy="357" r="5" fill="#e11d48"/>
+
+  <!-- Card 6: Minimalista Mono -->
+  <rect x="216" y="317" width="134" height="58" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="226" y="340" font-size="12" font-weight="600" fill="#1e293b">Minimalista Mono</text>
+  <circle cx="233" cy="357" r="7" fill="#18181b" stroke="#cbd5e1"/>
+  <circle cx="249" cy="357" r="5" fill="#3f3f46"/><circle cx="261" cy="357" r="5" fill="#52525b"/><circle cx="273" cy="357" r="5" fill="#71717a"/><circle cx="285" cy="357" r="5" fill="#a1a1aa"/>
+
+  <!-- Card 7: Plano Técnico Blueprint (truncate) -->
+  <rect x="74" y="383" width="134" height="58" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="84" y="406" font-size="12" font-weight="600" fill="#1e293b">Plano Técnico Blu…</text>
+  <circle cx="91" cy="423" r="7" fill="#0284c7" stroke="#cbd5e1"/>
+  <circle cx="107" cy="423" r="5" fill="#38bdf8"/><circle cx="119" cy="423" r="5" fill="#7dd3fc"/><circle cx="131" cy="423" r="5" fill="#bae6fd"/><circle cx="143" cy="423" r="5" fill="#67e8f9"/>
+
+  <!-- Card 8: Panal Creativo -->
+  <rect x="216" y="383" width="134" height="58" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="226" y="406" font-size="12" font-weight="600" fill="#1e293b">Panal Creativo</text>
+  <circle cx="233" cy="423" r="7" fill="#d97706" stroke="#cbd5e1"/>
+  <circle cx="249" cy="423" r="5" fill="#d97706"/><circle cx="261" cy="423" r="5" fill="#f59e0b"/><circle cx="273" cy="423" r="5" fill="#b45309"/><circle cx="285" cy="423" r="5" fill="#e11d48"/>
+
+  <!-- ===== S2 DISEÑO DEL ÁRBOL 469..706 (237) ===== -->
+  <rect x="60" y="469" width="304" height="237" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="481" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <g transform="translate(74,481) scale(0.5833)" fill="none" stroke="#1d40af" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/>
+    <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>
+  </g>
+  <text x="106" y="493" font-size="12" font-weight="600" fill="#1e293b">Diseño del Árbol (Layout)</text>
+  <text x="106" y="507" font-size="10" fill="#94a3b8">Estructura y distribución del mapa</text>
+  <path d="M332,491 L340,499 L348,491" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="61" y1="522" x2="363" y2="522" stroke="#e2e8f0"/>
+
+  <!-- Fila 1 -->
+  <rect x="74" y="527" width="88" height="51" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <g transform="translate(110,536) scale(0.6667)" fill="none" stroke="#1d40af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/>
+    <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>
+  </g>
+  <text x="118" y="566" font-size="10" font-weight="600" text-anchor="middle" fill="#1d40af">Estándar</text>
+
+  <rect x="168" y="527" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(204,536) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 12h20"/><path d="m18 8 4 4-4 4"/><path d="m6 8-4 4 4 4"/>
+  </g>
+  <text x="212" y="566" font-size="10" text-anchor="middle" fill="#475569">Balanceado</text>
+
+  <rect x="262" y="527" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(298,536) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+  </g>
+  <text x="306" y="566" font-size="10" text-anchor="middle" fill="#475569">Derecha</text>
+
+  <!-- Fila 2 -->
+  <rect x="74" y="584" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(110,593) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+  </g>
+  <text x="118" y="623" font-size="10" text-anchor="middle" fill="#475569">Izquierda</text>
+
+  <rect x="168" y="584" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(204,593) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+  </g>
+  <text x="212" y="623" font-size="10" text-anchor="middle" fill="#475569">Arriba</text>
+
+  <rect x="262" y="584" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(298,593) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+  </g>
+  <text x="306" y="623" font-size="10" text-anchor="middle" fill="#475569">Abajo</text>
+
+  <!-- Fila 3 -->
+  <rect x="74" y="641" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(110,650) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/>
+    <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>
+  </g>
+  <text x="118" y="680" font-size="10" text-anchor="middle" fill="#475569">Árbol ↓</text>
+
+  <rect x="168" y="641" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(204,650) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1.5" fill="#64748b"/>
+  </g>
+  <text x="212" y="680" font-size="10" text-anchor="middle" fill="#475569">Radial ●</text>
+
+  <rect x="262" y="641" width="88" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(298,650) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88" fill="#64748b" stroke="none"/>
+  </g>
+  <text x="306" y="680" font-size="10" text-anchor="middle" fill="#475569">Circular ○</text>
+
+  <!-- ===== S3 FONDO DEL LIENZO 720..1225 (505) ===== -->
+  <rect x="60" y="720" width="304" height="505" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="732" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <g transform="translate(74,732) scale(0.5833)" fill="none" stroke="#1d40af" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/>
+    <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
+  </g>
+  <text x="106" y="744" font-size="12" font-weight="600" fill="#1e293b">Fondo del Lienzo</text>
+  <text x="106" y="758" font-size="10" fill="#94a3b8">Color de fondo y patrones de rejilla</text>
+  <path d="M332,742 L340,750 L348,742" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="61" y1="773" x2="363" y2="773" stroke="#e2e8f0"/>
+
+  <!-- CP «Color de Fondo del Lienzo» 778..874 (96) -->
+  <text x="74" y="793" font-size="12" fill="#334155">Color de Fondo del Lienzo</text>
+  <text x="268" y="793" font-size="10" text-anchor="end" fill="#94a3b8">Reset</text>
+  <rect x="274" y="778" width="76" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="281" y="781" width="16" height="16" rx="2" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="301" y="793" font-family="monospace" font-size="10" fill="#64748b">#F8FAFC</text>
+  <rect x="106" y="805" width="37" height="37" rx="8" fill="none" stroke="#60a5fa" stroke-width="2"/>
+  <rect x="74" y="808" width="31" height="31" rx="5" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="109" y="808" width="31" height="31" rx="5" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+  <rect x="144" y="808" width="31" height="31" rx="5" fill="#eff6ff" stroke="#e2e8f0"/>
+  <rect x="179" y="808" width="31" height="31" rx="5" fill="#f0fdf4" stroke="#e2e8f0"/>
+  <rect x="214" y="808" width="31" height="31" rx="5" fill="#fefce8" stroke="#e2e8f0"/>
+  <rect x="249" y="808" width="31" height="31" rx="5" fill="#fff7ed" stroke="#e2e8f0"/>
+  <rect x="284" y="808" width="31" height="31" rx="5" fill="#faf5ff" stroke="#e2e8f0"/>
+  <rect x="319" y="808" width="31" height="31" rx="5" fill="#ecfeff" stroke="#e2e8f0"/>
+  <rect x="74" y="843" width="31" height="31" rx="5" fill="#2563eb" stroke="#e2e8f0"/>
+  <rect x="109" y="843" width="31" height="31" rx="5" fill="#059669" stroke="#e2e8f0"/>
+  <rect x="144" y="843" width="31" height="31" rx="5" fill="#d97706" stroke="#e2e8f0"/>
+  <rect x="179" y="843" width="31" height="31" rx="5" fill="#dc2626" stroke="#e2e8f0"/>
+  <rect x="214" y="843" width="31" height="31" rx="5" fill="#7c3aed" stroke="#e2e8f0"/>
+  <rect x="249" y="843" width="31" height="31" rx="5" fill="#0891b2" stroke="#e2e8f0"/>
+  <rect x="284" y="843" width="31" height="31" rx="5" fill="#475569" stroke="#e2e8f0"/>
+  <rect x="319" y="843" width="31" height="31" rx="5" fill="#0f172a" stroke="#e2e8f0"/>
+
+  <!-- Patrón de Cuadrícula 886..1023 (137) -->
+  <text x="74" y="897" font-size="11" font-weight="600" fill="#334155">Patrón de Cuadrícula</text>
+  <rect x="74" y="907" width="88" height="55" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="106" y="918" width="24" height="16" rx="3" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="118" y="950" font-size="10" text-anchor="middle" fill="#475569">Liso</text>
+
+  <rect x="168" y="907" width="88" height="55" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <rect x="200" y="918" width="24" height="16" fill="#ffffff"/>
+  <rect x="200" y="918" width="24" height="16" fill="url(#pPuntos)"/>
+  <rect x="200" y="918" width="24" height="16" fill="none" stroke="#2563eb"/>
+  <text x="212" y="950" font-size="10" font-weight="600" text-anchor="middle" fill="#1d40af">Puntos</text>
+
+  <rect x="262" y="907" width="88" height="55" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="294" y="918" width="24" height="16" fill="#ffffff"/>
+  <rect x="294" y="918" width="24" height="16" fill="url(#pVert)"/>
+  <rect x="294" y="918" width="24" height="16" fill="none" stroke="#e2e8f0"/>
+  <text x="306" y="950" font-size="10" text-anchor="middle" fill="#475569">Líneas</text>
+
+  <rect x="74" y="968" width="88" height="55" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="106" y="979" width="24" height="16" fill="#ffffff"/>
+  <rect x="106" y="979" width="24" height="16" fill="url(#pGrid5)"/>
+  <rect x="106" y="979" width="24" height="16" fill="none" stroke="#e2e8f0"/>
+  <text x="118" y="1011" font-size="10" text-anchor="middle" fill="#475569">Cuadros</text>
+
+  <rect x="168" y="968" width="88" height="55" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g fill="none" stroke="#64748b" stroke-width="1.2" transform="translate(200,979)">
+    <polygon points="12,1 23,15 1,15"/><line x1="12" y1="1" x2="12" y2="15"/>
+  </g>
+  <text x="212" y="1011" font-size="10" text-anchor="middle" fill="#475569">Triángulos</text>
+
+  <rect x="262" y="968" width="88" height="55" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g fill="none" stroke="#64748b" stroke-width="1.2" transform="translate(294,979)">
+    <polygon points="6,2 18,2 23,8 18,14 6,14 1,8"/>
+  </g>
+  <text x="306" y="1011" font-size="10" text-anchor="middle" fill="#475569">Panal</text>
+
+  <!-- CP «Color del Trazo del Patrón» 1035..1131 (96, SIN Reset) -->
+  <text x="74" y="1050" font-size="12" fill="#334155">Color del Trazo del Patrón</text>
+  <rect x="274" y="1035" width="76" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="281" y="1038" width="16" height="16" rx="2" fill="#94a3b8" stroke="#cbd5e1"/>
+  <text x="301" y="1050" font-family="monospace" font-size="10" fill="#64748b">#94A3B8</text>
+  <rect x="74" y="1065" width="31" height="31" rx="5" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="109" y="1065" width="31" height="31" rx="5" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="144" y="1065" width="31" height="31" rx="5" fill="#eff6ff" stroke="#e2e8f0"/>
+  <rect x="179" y="1065" width="31" height="31" rx="5" fill="#f0fdf4" stroke="#e2e8f0"/>
+  <rect x="214" y="1065" width="31" height="31" rx="5" fill="#fefce8" stroke="#e2e8f0"/>
+  <rect x="249" y="1065" width="31" height="31" rx="5" fill="#fff7ed" stroke="#e2e8f0"/>
+  <rect x="284" y="1065" width="31" height="31" rx="5" fill="#faf5ff" stroke="#e2e8f0"/>
+  <rect x="319" y="1065" width="31" height="31" rx="5" fill="#ecfeff" stroke="#e2e8f0"/>
+  <rect x="74" y="1100" width="31" height="31" rx="5" fill="#2563eb" stroke="#e2e8f0"/>
+  <rect x="109" y="1100" width="31" height="31" rx="5" fill="#059669" stroke="#e2e8f0"/>
+  <rect x="144" y="1100" width="31" height="31" rx="5" fill="#d97706" stroke="#e2e8f0"/>
+  <rect x="179" y="1100" width="31" height="31" rx="5" fill="#dc2626" stroke="#e2e8f0"/>
+  <rect x="214" y="1100" width="31" height="31" rx="5" fill="#7c3aed" stroke="#e2e8f0"/>
+  <rect x="249" y="1100" width="31" height="31" rx="5" fill="#0891b2" stroke="#e2e8f0"/>
+  <rect x="284" y="1100" width="31" height="31" rx="5" fill="#475569" stroke="#e2e8f0"/>
+  <rect x="319" y="1100" width="31" height="31" rx="5" fill="#0f172a" stroke="#e2e8f0"/>
+
+  <!-- Slider Tamaño del Patrón 1143..1171 (28) -->
+  <text x="74" y="1155" font-size="12" fill="#334155">Tamaño del Patrón</text>
+  <rect x="312" y="1142" width="38" height="18" rx="4" fill="#eff6ff"/>
+  <text x="331" y="1154" font-size="11" font-weight="600" text-anchor="middle" fill="#2563eb">24px</text>
+  <rect x="74" y="1165" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="138" cy="1168" r="6" fill="#2563eb"/>
+
+  <!-- Slider Opacidad del Patrón 1183..1211 (28) -->
+  <text x="74" y="1195" font-size="12" fill="#334155">Opacidad del Patrón</text>
+  <rect x="314" y="1182" width="36" height="18" rx="4" fill="#eff6ff"/>
+  <text x="332" y="1194" font-size="11" font-weight="600" text-anchor="middle" fill="#2563eb">40%</text>
+  <rect x="74" y="1205" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="176" cy="1208" r="6" fill="#2563eb"/>
+
+  <!-- ===== S4 ARISTAS GLOBALES 1239..1779 (540 — LA MÁS ALTA) ===== -->
+  <rect x="60" y="1239" width="304" height="540" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="1251" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <g transform="translate(74,1251) scale(0.5833)" fill="none" stroke="#1d40af" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/>
+    <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>
+  </g>
+  <text x="106" y="1263" font-size="12" font-weight="600" fill="#1e293b">Aristas Globales</text>
+  <text x="106" y="1277" font-size="10" fill="#94a3b8">Estilo por defecto de las ramas</text>
+  <path d="M332,1261 L340,1269 L348,1261" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="61" y1="1292" x2="363" y2="1292" stroke="#e2e8f0"/>
+
+  <!-- Forma de Conexión Global 1297 + grid 1324..1375 (51) -->
+  <text x="74" y="1308" font-size="11" font-weight="600" fill="#475569">Forma de Conexión Global</text>
+  <rect x="74" y="1324" width="64" height="51" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <g transform="translate(98,1333) scale(0.6667)" fill="none" stroke="#1d40af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 18 C10 18, 14 6, 20 6"/>
+  </g>
+  <text x="106" y="1363" font-size="10" font-weight="600" text-anchor="middle" fill="#1d40af">Curva</text>
+
+  <rect x="144" y="1324" width="65" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(168,1333) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="18" x2="20" y2="6"/>
+  </g>
+  <text x="176" y="1363" font-size="10" text-anchor="middle" fill="#475569">Recta</text>
+
+  <rect x="215" y="1324" width="65" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(239,1333) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4,18 4,6 20,6"/>
+  </g>
+  <text x="247" y="1363" font-size="10" text-anchor="middle" fill="#475569">Escuadra</text>
+
+  <rect x="286" y="1324" width="64" height="51" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g transform="translate(310,1333) scale(0.6667)" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 18 H12 V6 H20"/>
+  </g>
+  <text x="318" y="1363" font-size="10" text-anchor="middle" fill="#475569">Horiz.</text>
+
+  <!-- Perfil de Grosor (Ribbon) 1387 + grid 1414..1463 (49) -->
+  <text x="74" y="1398" font-size="11" font-weight="600" fill="#475569">Perfil de Grosor (Ribbon)</text>
+  <rect x="74" y="1414" width="64" height="49" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="106" y="1435" font-size="16" font-weight="700" text-anchor="middle" fill="#64748b">═</text>
+  <text x="106" y="1451" font-size="10" text-anchor="middle" fill="#475569">Uniforme</text>
+
+  <rect x="144" y="1414" width="65" height="49" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="176" y="1435" font-size="16" font-weight="700" text-anchor="middle" fill="#1d40af">◣</text>
+  <text x="176" y="1451" font-size="10" font-weight="600" text-anchor="middle" fill="#1d40af">Cónica</text>
+
+  <rect x="215" y="1414" width="65" height="49" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="247" y="1435" font-size="16" font-weight="700" text-anchor="middle" fill="#64748b">◆</text>
+  <text x="247" y="1451" font-size="10" text-anchor="middle" fill="#475569">Huso</text>
+
+  <rect x="286" y="1414" width="64" height="49" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="318" y="1435" font-size="16" font-weight="700" text-anchor="middle" fill="#64748b">⧖</text>
+  <text x="318" y="1451" font-size="10" text-anchor="middle" fill="#475569">Reloj</text>
+
+  <!-- Bloque color 1475..1640 (165) -->
+  <line x1="61" y1="1475" x2="363" y2="1475" stroke="#e2e8f0"/>
+  <text x="74" y="1499" font-size="11" font-weight="600" fill="#334155">Color de Aristas</text>
+  <rect x="156" y="1484" width="90" height="24" rx="8" fill="url(#gMulti)"/>
+  <g transform="translate(164,1489) scale(0.5)" fill="#ffffff" stroke="none">
+    <path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/>
+  </g>
+  <text x="180" y="1500" font-size="10.5" font-weight="600" fill="#ffffff">Multicolor</text>
+  <rect x="252" y="1484" width="98" height="24" rx="8" fill="#eef2ff" stroke="#c7d2fe"/>
+  <g transform="translate(260,1489) scale(0.5833)" fill="none" stroke="#4f46e5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="M8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01"/>
+  </g>
+  <text x="280" y="1500" font-size="10.5" font-weight="600" fill="#4338ca">Randomizar</text>
+
+  <!-- CP «Color Uniforme de Ramas» 1516..1612 (96, value AUTO) -->
+  <text x="74" y="1531" font-size="12" fill="#334155">Color Uniforme de Ramas</text>
+  <rect x="274" y="1516" width="76" height="22" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="281" y="1519" width="16" height="16" rx="2" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="301" y="1531" font-size="10" font-weight="600" fill="#64748b">AUTO</text>
+  <rect x="74" y="1546" width="31" height="31" rx="5" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="109" y="1546" width="31" height="31" rx="5" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="144" y="1546" width="31" height="31" rx="5" fill="#eff6ff" stroke="#e2e8f0"/>
+  <rect x="179" y="1546" width="31" height="31" rx="5" fill="#f0fdf4" stroke="#e2e8f0"/>
+  <rect x="214" y="1546" width="31" height="31" rx="5" fill="#fefce8" stroke="#e2e8f0"/>
+  <rect x="249" y="1546" width="31" height="31" rx="5" fill="#fff7ed" stroke="#e2e8f0"/>
+  <rect x="284" y="1546" width="31" height="31" rx="5" fill="#faf5ff" stroke="#e2e8f0"/>
+  <rect x="319" y="1546" width="31" height="31" rx="5" fill="#ecfeff" stroke="#e2e8f0"/>
+  <rect x="74" y="1581" width="31" height="31" rx="5" fill="#2563eb" stroke="#e2e8f0"/>
+  <rect x="109" y="1581" width="31" height="31" rx="5" fill="#059669" stroke="#e2e8f0"/>
+  <rect x="144" y="1581" width="31" height="31" rx="5" fill="#d97706" stroke="#e2e8f0"/>
+  <rect x="179" y="1581" width="31" height="31" rx="5" fill="#dc2626" stroke="#e2e8f0"/>
+  <rect x="214" y="1581" width="31" height="31" rx="5" fill="#7c3aed" stroke="#e2e8f0"/>
+  <rect x="249" y="1581" width="31" height="31" rx="5" fill="#0891b2" stroke="#e2e8f0"/>
+  <rect x="284" y="1581" width="31" height="31" rx="5" fill="#475569" stroke="#e2e8f0"/>
+  <rect x="319" y="1581" width="31" height="31" rx="5" fill="#0f172a" stroke="#e2e8f0"/>
+
+  <!-- Sugeridos 1620..1640 (20) -->
+  <text x="74" y="1634" font-size="10" fill="#94a3b8">Sugeridos:</text>
+  <circle cx="141" cy="1629" r="9" fill="#3b82f6" stroke="#cbd5e1"/>
+  <circle cx="165" cy="1629" r="9" fill="#8b5cf6" stroke="#cbd5e1"/>
+  <circle cx="189" cy="1629" r="9" fill="#10b981" stroke="#cbd5e1"/>
+  <circle cx="213" cy="1629" r="9" fill="#f59e0b" stroke="#cbd5e1"/>
+  <circle cx="237" cy="1629" r="9" fill="#ef4444" stroke="#cbd5e1"/>
+  <circle cx="261" cy="1629" r="9" fill="#ec4899" stroke="#cbd5e1"/>
+  <circle cx="285" cy="1629" r="9" fill="#475569" stroke="#cbd5e1"/>
+  <circle cx="309" cy="1629" r="9" fill="#0f172a" stroke="#cbd5e1"/>
+
+  <!-- Bloque Estilo de Línea Global 1652..1725 (73) -->
+  <line x1="61" y1="1652" x2="363" y2="1652" stroke="#e2e8f0"/>
+  <text x="74" y="1672" font-size="11" font-weight="600" fill="#334155">Estilo de Línea Global</text>
+  <rect x="74" y="1682" width="88" height="43" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <rect x="102" y="1695" width="32" height="2" fill="#475569"/>
+  <text x="118" y="1713" font-size="10" font-weight="600" text-anchor="middle" fill="#1d40af">Sólido</text>
+
+  <rect x="168" y="1682" width="88" height="43" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g fill="#64748b">
+    <rect x="196" y="1695" width="8" height="2"/><rect x="208" y="1695" width="8" height="2"/><rect x="220" y="1695" width="8" height="2"/>
+  </g>
+  <text x="212" y="1713" font-size="10" text-anchor="middle" fill="#475569">Guiones</text>
+
+  <rect x="262" y="1682" width="88" height="43" rx="12" fill="#ffffff" stroke="#e2e8f0"/>
+  <g fill="#64748b">
+    <rect x="290" y="1695" width="2" height="2"/><rect x="295" y="1695" width="2" height="2"/><rect x="300" y="1695" width="2" height="2"/>
+    <rect x="305" y="1695" width="2" height="2"/><rect x="310" y="1695" width="2" height="2"/><rect x="315" y="1695" width="2" height="2"/><rect x="320" y="1695" width="2" height="2"/>
+  </g>
+  <text x="306" y="1713" font-size="10" text-anchor="middle" fill="#475569">Puntos</text>
+
+  <!-- Slider Grosor de Aristas Global 1737..1765 (28) -->
+  <text x="74" y="1753" font-size="12" fill="#334155">Grosor de Aristas Global</text>
+  <rect x="310" y="1742" width="40" height="18" rx="4" fill="#eff6ff"/>
+  <text x="330" y="1754" font-size="11" font-weight="600" text-anchor="middle" fill="#2563eb">3.5px</text>
+  <rect x="74" y="1759" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="173" cy="1762" r="6" fill="#2563eb"/>
+
+  <!-- ===== S5 ESPACIADO DEL MAPA 1793..1933 (140) ===== -->
+  <rect x="60" y="1793" width="304" height="140" rx="16" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="74" y="1805" width="24" height="24" rx="8" fill="#dbeafe"/>
+  <g transform="translate(74,1805) scale(0.5833)" fill="none" stroke="#1d40af" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M2 12h20"/><path d="m18 8 4 4-4 4"/><path d="m6 8-4 4 4 4"/>
+  </g>
+  <text x="106" y="1817" font-size="12" font-weight="600" fill="#1e293b">Espaciado del Mapa</text>
+  <text x="106" y="1831" font-size="10" fill="#94a3b8">Separación horizontal y vertical</text>
+  <path d="M332,1815 L340,1823 L348,1815" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="61" y1="1846" x2="363" y2="1846" stroke="#e2e8f0"/>
+
+  <text x="74" y="1867" font-size="12" fill="#334155">Separación Horizontal</text>
+  <rect x="310" y="1850" width="40" height="18" rx="4" fill="#eff6ff"/>
+  <text x="330" y="1862" font-size="11" font-weight="600" text-anchor="middle" fill="#2563eb">58px</text>
+  <rect x="74" y="1873" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="154" cy="1876" r="6" fill="#2563eb"/>
+
+  <text x="74" y="1907" font-size="12" fill="#334155">Separación Vertical</text>
+  <rect x="312" y="1890" width="38" height="18" rx="4" fill="#eff6ff"/>
+  <text x="331" y="1902" font-size="11" font-weight="600" text-anchor="middle" fill="#2563eb">14px</text>
+  <rect x="74" y="1913" width="276" height="6" rx="3" fill="#e2e8f0"/>
+  <circle cx="123" cy="1916" r="6" fill="#2563eb"/>
+
+  </g>
+
+  <!-- ===== COTAS (coords finales: barra 30 + pila 1850) ===== -->
+  <line x1="46" y1="96" x2="46" y2="1946" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="40" y="1025" class="cota-txt" text-anchor="end">1850</text>
+
+  <line x1="400" y1="96" x2="400" y2="126" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="404" y="115" class="cota-txt">30</text>
+  <line x1="400" y1="140" x2="400" y2="468" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="404" y="308" class="cota-txt">328</text>
+  <line x1="400" y1="482" x2="400" y2="719" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="404" y="605" class="cota-txt">237</text>
+  <line x1="400" y1="733" x2="400" y2="1238" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="404" y="990" class="cota-txt">505</text>
+  <line x1="400" y1="1252" x2="400" y2="1792" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="404" y="1526" class="cota-txt">540</text>
+  <line x1="400" y1="1806" x2="400" y2="1946" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="404" y="1880" class="cota-txt">140</text>
+
+  <line x1="60" y1="1964" x2="364" y2="1964" class="cota" marker-start="url(#cap)" marker-end="url(#cap)"/>
+  <text x="212" y="1980" class="cota-txt" text-anchor="middle">304px útiles · barra 30 + 5 secciones EXPANDIDAS</text>
+  <text x="212" y="1996" font-size="10" fill="#fbbf24" text-anchor="middle">Default real: solo «Temas» abierto · gaps 14px (space-y-3.5)</text>
+
+  <!-- ============ CAJAS DERECHAS: datos ============ -->
+
+  <g transform="translate(0,13)">
+  <!-- Caja 1: barra + S1 -->
+  <text x="440" y="96" class="lbl">Barra global + Sección 1 «Temas del Mapa» — ThemeTab:123-197</text>
+  <rect x="440" y="104" width="800" height="350" rx="12" fill="#0b1220" stroke="#334155"/>
+  <text x="456" y="130" class="body">1. Barra (123-144): «CONFIGURACIÓN GLOBAL DEL MAPA» text-[10.5px] bold uppercase tracking-wider + «Desplegar todo» azul | «Plegar todo» gris</text>
+  <text x="456" y="152" class="body">2. handleExpandAll(true|false) reescribe las 5 claves de sectionsOpen de golpe (104-112); la barra NO es un box, va sobre el fondo del panel</text>
+  <text x="456" y="174" class="body">3. sectionsOpen por defecto: theme=true y background/layout/edges/gaps=false → SOLO «Temas» abierto al abrir la pestaña (92-98)</text>
+  <text x="456" y="196" class="body">4. S1 «Temas del Mapa» / «Paletas de color y estilos» icon Palette + badge pill «{currentTheme.name}» → «Clásico Azul» (147-158)</text>
+  <text x="456" y="218" class="body">5. Body: grid grid-cols-2 gap-2 con los 8 THEMES (Object.values = orden de declaration) — tarjetas p-2.5 rounded-xl de 134×58px (159-196)</text>
+  <text x="456" y="240" class="body">6. Fila 1 (mb-1.5): nombre text-xs font-semibold truncate + Check w-3.5 text-blue-600 solo en la activa (173-176)</text>
+  <text x="456" y="262" class="body">7. Fila 2: root dot w-3.5 h-3.5 border-slate-300 (thm.rootBg, title «Nodo raíz») + 4 dots w-2.5 gap-0.5 = branchColors.slice(0,4) (177-192)</text>
+  <text x="456" y="284" class="body">8. Seleccionada: border-blue-600 bg-blue-50/70 ring-1 ring-blue-500 shadow-2xs · resto: border-slate-200 bg-white (167-171)</text>
+  <text x="456" y="306" class="body">9. onUpdateMapTheme(id) reescribe el tema COMPLETO: nodos, aristas, texto y fondo (efecto §1.3)</text>
+  <text x="456" y="328" class="body">10. 8 temas reales (utils/themes:15-152): Clásico Azul · Arcoíris Vibrante · Modo Oscuro · Bosque Esmeralda · Atardecer Cálido</text>
+  <text x="456" y="350" class="body">11. · Minimalista Mono · Plano Técnico Blueprint · Panal Creativo — SIN swatches de degradado: aquí solo nombre + dots</text>
+  <text x="456" y="372" class="body">12. Cada tema aporta rootBg, 4-8 branchColors y edgeStyle propio (minimal=linear, blueprint=sharp, resto bezier) (30,46,63…)</text>
+  <text x="456" y="394" class="body">13. Alto: barra 30 + S1 [53 header + 1 border-t + 4 + grid 256 (4×58+3×8) + 14] = 328px · pila total 30+14+328+14+237+14+505+14+540+14+140 = 1850px (gaps space-y-3.5 = 14px, 121)</text>
+  <text x="456" y="416" class="body">14. Plegada (isOpen=false): solo el header de 53px — el body es condicional {isOpen &amp;&amp; ...} (CollapsibleSection:69-73)</text>
+  <text x="456" y="438" class="body">15. Medido en la app: el título (202px) se comprime a ~173px y ENVUELVE a 2 líneas (lh 14) → la barra mide 30px, no 17 (rowH 30 = 2×14 + pb-0.5)</text>
+
+  <!-- Caja 2: S2 -->
+  <text x="440" y="469" class="lbl">Sección 2 «Diseño del Árbol» — 9 layouts — ThemeTab:200-227</text>
+  <rect x="440" y="477" width="800" height="218" rx="12" fill="#0b1220" stroke="#334155"/>
+  <text x="456" y="503" class="body">1. subtitle «Estructura y distribución del mapa» + icon Network, SIN badge (200-206)</text>
+  <text x="456" y="525" class="body">2. Body: grid grid-cols-3 gap-1.5 con la constante LAYOUT_OPTIONS (59-69): 9 botones p-2 rounded-xl de 88×51px (207-226)</text>
+  <text x="456" y="547" class="body">3. Cada botón: icono lucide w-4 h-4 + label text-[10px] mt-1 text-center truncate — iconos: GitFork, MoveHorizontal, LayoutGrid, Network, CircleDot, Compass</text>
+  <text x="456" y="569" class="body">4. Valores: standard · balanced-horizontal · right · left · top · bottom · tree-down · radial · circular</text>
+  <text x="456" y="591" class="body">5. Etiquetas: Estándar · Balanceado · Derecha · Izquierda · Arriba · Abajo · Árbol ↓ · Radial ● · Circular ○ (los glyphs van en el label)</text>
+  <text x="456" y="613" class="body">6. left/top/bottom = MISMO LayoutGrid con scale-x-[-1] / -rotate-90 / rotate-90 (63-65) — el icono dibujado es idéntico (simétrico)</text>
+  <text x="456" y="635" class="body">7. Seleccionado: border-blue-600 bg-blue-50 text-blue-700 font-semibold shadow-2xs (216-218) — dibujado «Estándar»</text>
+  <text x="456" y="657" class="body">8. onUpdateMapLayout(id) reordena TODO el mapa (§1.3); los freeFloating conservan freePosition</text>
+  <text x="456" y="679" class="body">9. Alto: 53 + 1 + [4 + 3×51 + 2×6 = 165 + 14] = 237px</text>
+
+  <!-- Caja 3: S3 -->
+  <text x="440" y="720" class="lbl">Sección 3 «Fondo del Lienzo» — ColorPicker + 6 patrones + 2 sliders — ThemeTab:230-373</text>
+  <rect x="440" y="728" width="800" height="372" rx="12" fill="#0b1220" stroke="#334155"/>
+  <text x="456" y="754" class="body">1. subtitle «Color de fondo y patrones de rejilla» + icon Layers, SIN badge (230-236)</text>
+  <text x="456" y="776" class="body">2. Body space-y-3 (12px): CP «Color de Fondo del Lienzo» con onClear=onResetMapBackground → botón «Reset» visible (238-243)</text>
+  <text x="456" y="798" class="body">3. CP ancho completo (276px) = 96px: fila label+value-box 22 + gap 6 + pt-0.5 2 + grid de 2×8 swatches de 31px (§6.5.3)</text>
+  <text x="456" y="820" class="body">4. Value box: input color w-4 h-4 + hex mono uppercase text-[10px]; si value es undefined muestra «Auto» (ColorPicker:41-43)</text>
+  <text x="456" y="842" class="body">5. Presets: 16 colores DEFAULT_PRESETS (2 claras + 6 fuertes); ring solo si value === preset (f8fafc del tema Clásico Azul)</text>
+  <text x="456" y="864" class="body">6. Bloque «Patrón de Cuadrícula»: label text-[11px] + grid grid-cols-3 gap-1.5 → 6 botones de 88×55px (245-336)</text>
+  <text x="456" y="886" class="body">7. Patrones: Liso · Puntos · Líneas · Cuadros · Triángulos · Panal = BackgroundPatternStyle none|dots|lines|squares|triangles|hexagons</text>
+  <text x="456" y="908" class="body">8. Iconos propios w-6 h-4 (divs con radial/linear-gradient o SVG inline polygon), NO lucide (248-314)</text>
+  <text x="456" y="930" class="body">9. Seleccionado: border-blue-600 bg-blue-50/80 text-blue-700 — dibujado «Puntos» = backgroundPattern del tema activo (dots)</text>
+  <text x="456" y="952" class="body">10. (currentBgPattern !== 'none') renderiza los 3 controles siguientes; con «Liso» DESAPARECEN del panel (338-371)</text>
+  <text x="456" y="974" class="body">11. CP «Color del Trazo del Patrón» SIN onClear → SIN Reset (340-346); valor del tema = #94a3b8</text>
+  <text x="456" y="996" class="body">12. Slider «Tamaño del Patrón» 12..64 step 2 unit px (348-358) · Slider «Opacidad del Patrón» 5..100 unit % (360-369)</text>
+  <text x="456" y="1018" class="body">13. onUpdateMapBackground({backgroundColor|backgroundPattern|backgroundPatternColor|Size|Opacity}) acepta parcial (49-55)</text>
+  <text x="456" y="1040" class="body">14. Los sliders NO llevan onReset → sin «Reset»; badge = valor actual («24px» / «40%» según mapa activo)</text>
+  <text x="456" y="1062" class="body">15. Alto: 53 + 1 + [4 + 96+12+137+12+96+12+28+12+28 = 433 + 14] = 505px — 2.ª sección más alta</text>
+  <text x="456" y="1084" class="body">16. backgroundPatternSize/Opacity del tema se usan si el mapa no define (114-118: mindMap || currentTheme || fallback)</text>
+
+  <!-- Caja 4: S4 -->
+  <text x="440" y="1239" class="lbl">Sección 4 «Aristas Globales» — forma, perfil, color, trazo y grosor — ThemeTab:376-589</text>
+  <rect x="440" y="1247" width="800" height="394" rx="12" fill="#0b1220" stroke="#334155"/>
+  <text x="456" y="1273" class="body">1. subtitle «Estilo por defecto de las ramas» + icon GitFork, SIN badge (376-382) — LA MÁS ALTA de la pestaña</text>
+  <text x="456" y="1295" class="body">2. Body space-y-3: label «Forma de Conexión Global» text-[11px] (1297) + grid grid-cols-4 → 4 botones de 64×51 (385-445)</text>
+  <text x="456" y="1317" class="body">3. SVGs inline w-4 (NO lucide): bezier «Curva» C-path · linear «Recta» · sharp «Escuadra» polyline · horizontal «Horiz.» (387-422)</text>
+  <text x="456" y="1339" class="body">4. Dibuja «Curva» activo: currentVal = mindMap.edgeStyle || currentTheme.edgeStyle → 'bezier' en Clásico Azul (424)</text>
+  <text x="456" y="1361" class="body">5. «Perfil de Grosor (Ribbon)»: label + grid-cols-4 de 4 botones de 64×49: glyph text-xs font-bold + label (447-476)</text>
+  <text x="456" y="1383" class="body">6. Valores y glyphs: uniform «Uniforme» ═ · tapered «Cónica» ◣ · spindle «Huso» ◆ · hourglass «Reloj» ⧖ (450-453)</text>
+  <text x="456" y="1405" class="body">7. Handler: onApplyEdgeProfileToAllNodes si existe, si no onUpdateMapEdgeProfile (462-464); dibujado «Cónica» (mapa activo; default = uniform, 455)</text>
+  <text x="456" y="1427" class="body">8. Bloque pt-2 border-t space-y-2 «Color de Aristas» (479-545): fila label + botón [Multicolor] + botón [Randomizar]</text>
+  <text x="456" y="1449" class="body">9. Multicolor (edgeColor === undefined): gradiente from-blue-500 via-purple-500 to-pink-500 + Sparkles w-3 + onClear(undefined) (483-497)</text>
+  <text x="456" y="1471" class="body">10. Randomizar: bg-indigo-50 border-indigo-200 + Dices w-3.5 + onRandomizeEdgeColors() (499-509) — solo si el prop existe</text>
+  <text x="456" y="1493" class="body">11. CP «Color Uniforme de Ramas» value=mindMap.edgeColor + onClear → Reset; con Multicolor el value box muestra «AUTO» (513-518)</text>
+  <text x="456" y="1515" class="body">12. «Sugeridos:» fila pb-0.5 con 8 dots w-4.5: #3b82f6 #8b5cf6 #10b981 #f59e0b #ef4444 #ec4899 #475569 #0f172a (521-544)</text>
+  <text x="456" y="1537" class="body">13. Bloque pt-2 border-t «Estilo de Línea Global»: grid-cols-3 con preview w-8 border-t-2 (solid|dashed|dotted slate-600) (548-577)</text>
+  <text x="456" y="1559" class="body">14. onUpdateMapEdgeDash(solid|dashed|dotted) — dibujado «Sólido» = default (mindMap.edgeDash || 'solid', 556)</text>
+  <text x="456" y="1581" class="body">15. Slider «Grosor de Aristas Global» 1..8 step 0.5 unit px → value mindMap.edgeWidth || 2.5 (579-587)</text>
+  <text x="456" y="1603" class="body">16. Alto: 53 + 1 + [4 + (15+12+51+12+15+12+49+12+165+12+73+12+28 = 468) + 14] = 540px ← SECCIÓN MÁS ALTA</text>
+
+  <!-- Caja 5: S5 -->
+  <text x="440" y="1793" class="lbl">Sección 5 «Espaciado del Mapa» — 2 sliders de gaps — ThemeTab:592-620</text>
+  <rect x="440" y="1801" width="800" height="152" rx="12" fill="#0b1220" stroke="#334155"/>
+  <text x="456" y="1827" class="body">1. subtitle «Separación horizontal y vertical» + icon MoveHorizontal, SIN badge — única sección con solo 2 controles (592-598)</text>
+  <text x="456" y="1849" class="body">2. Body space-y-3 con 2 SliderInput SIN onReset → NINGÚN slider de la pestaña tiene «Reset» (600-618)</text>
+  <text x="456" y="1871" class="body">3. «Separación Horizontal»: min 20 max 150 step 2 unit px → value = mindMap.horizontalGap ?? 54 (601-607)</text>
+  <text x="456" y="1893" class="body">4. «Separación Vertical»: min 4 max 60 step 2 unit px → value = mindMap.verticalGap ?? 14 (610-617); dibujados 58px/14px (mapa activo)</text>
+  <text x="456" y="1915" class="body">5. Alto: 53 + 1 + [4 + 28 + 12 + 28 + 14] = 140px — sección más BAJA; plegada = 54px</text>
+  <text x="456" y="1937" class="body">6. Los gaps alimentan layoutEngine (§1.3): horizontal = entre ramas, vertical = entre hermanos</text>
+
+  <!-- Caja 6: notas -->
+  <text x="440" y="1990" class="lbl">Notas y avisos — ThemeTab.tsx (623 líneas) + CollapsibleSection.tsx</text>
+  <rect x="440" y="1998" width="800" height="240" rx="12" fill="#3b1d0f" stroke="#b45309"/>
+  <text x="456" y="2024" font-size="9" fill="#fde68a">1. 5 secciones reales: Temas · Layout · Fondo · Aristas · Espaciado — NO existe «Fondos preestablecidos» ni «Conectores Personalizados»</text>
+  <text x="456" y="2046" font-size="9" fill="#fde68a">2. BACKGROUND_PRESET_THEMES y BackgroundPresetTheme se importan (11) pero NO se usan en el JSX → import muerto (era el origen del error)</text>
+  <text x="456" y="2068" font-size="9" fill="#fde68a">3. Props de conectores declaradas y SIN uso: onOpenConnectorModal · onDeleteConnector · onUpdateConnector + type Connector (9,46-48) — restos</text>
+  <text x="456" y="2090" font-size="9" fill="#fde68a">4. Imports lucide SIN uso: Link · ToggleButtonGroup (15,21); SÍ se usan Compass/Sparkles/GitFork/CircleDot/Dices/Layers (LAYOUT_OPTIONS y colores)</text>
+  <text x="456" y="2112" font-size="9" fill="#fde68a">5. Chevron de CollapsibleSection: ABIERTO = rotate-0 (▼), PLEGADO = -rotate-90 (▶); body condicional {isOpen &amp;&amp; ...} (60-73)</text>
+  <text x="456" y="2134" font-size="9" fill="#fde68a">6. Cabecera: icono en caja w-6 h-6 rounded-lg bg-blue-100 + título text-xs + subtitle text-[10px] + badge · chevron (gap-1.5) → 53px (29-67)</text>
+  <text x="456" y="2156" font-size="9" fill="#fde68a">7. Badges: SOLO «Temas del Mapa» lleva badge ({currentTheme.name}); las otras 4 secciones no tienen</text>
+  <text x="456" y="2178" font-size="9" fill="#fde68a">8. ToolPanel real = 6 pestañas: Contenido · Formato · Notas · Iconos · Nubes · Mapa (ToolPanel.tsx:200-235) — sin pestaña de conectores</text>
+  <text x="456" y="2200" font-size="9" fill="#fde68a">9. Composición del SVG: barra 30 (título envuelto) + 5 secciones + 5 gaps×14 = 1850px de pila + 6 cajas; viewBox 1400×2300 a 1:1</text>
+  <text x="456" y="2222" font-size="9" fill="#fde68a">10. Esta pestaña completa §6.6 de doc/MEASURES.md (fase 2: secciones §6.x con SVG propio cada área)</text>
+  </g>
+</svg>
