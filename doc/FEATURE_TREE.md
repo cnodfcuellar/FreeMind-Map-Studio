@@ -190,94 +190,164 @@ Interfaz de FreeMind Map Studio
 ├── 🧭 ToolPanel (panel derecho; Alt+P) — 6 pestañas (clic en la pestaña; secciones con Desplegar/Plegar todo)
 │   │
 │   ├── 📝 Texto
-│   │   ├── Título — [textarea] edita el título · [FontFormatToolbar: negrita/cursiva/3 alineaciones] ·
-│   │   │     [ColorPicker color del texto con Reset] · [Slider tamaño de fuente 10-36px]
-│   │   ├── Cuerpo — [ojo] oculta/muestra el cuerpo en el lienzo · [textarea] · formato cuerpo · color · tamaño 9-24px
-│   │   ├── Imagen — [input URL] · [Upload] subir archivo local (dataURL) · [Trash2] eliminar ·
-│   │   │     [6 posiciones: Arriba/Entre texto/Abajo/Izquierda/Derecha/Ajustar] · [Slider ancho 60-500px]
-│   │   └── Metadatos — [TagManager: input + Enter/Plus para añadir, X de chip para quitar] · [input enlace web] ·
-│   │         [Slider progreso 0-100 (step 5) con Reset] · [ojo de tags/enlace/progreso/iconos según exista]
+│   │   ├── Título — [textarea] → `updateNode({ text })` en tiempo real · [FontFormatToolbar] → `updateNode({ bold, italic, textAlign })` ·
+│   │   │     [ColorPicker con Reset] → `updateNode({ textColor: color | undefined })` · [Slider fuente 10-36px] → `updateNode({ fontSize })`
+│   │   ├── Cuerpo — [ojo] alterna visibilidad en lienzo `updateNode({ hideBody: !hideBody })` · [textarea] → `updateNode({ body })` ·
+│   │   │     [FontFormatToolbar cuerpo] → `updateNode({ bodyBold, bodyItalic, bodyAlign })` · [ColorPicker cuerpo] → `updateNode({ bodyColor })` ·
+│   │   │     [Slider tamaño cuerpo 9-24px] → `updateNode({ bodyFontSize })`
+│   │   ├── Imagen adjunta —
+│   │   │     ├── [input URL] → `updateNode({ imageUrl: url })`
+│   │   │     ├── [Upload botón] → abre file picker nativo (`accept="image/*"`), lee con `FileReader` como DataURL y guarda `updateNode({ imageUrl: dataUrl })`
+│   │   │     ├── [Trash2] → limpia `updateNode({ imageUrl: undefined, imagePosition: undefined, imageWidth: undefined })`
+│   │   │     └── [Si imageUrl existe]:
+│   │   │           ├── [6 botones de posición] → `updateNode({ imagePosition: 'top'|'above-text'|'below'|'left'|'right'|'fit' })`
+│   │   │           └── [Slider ancho 60-500px, step 10] → `updateNode({ imageWidth })` (Reset = 200px)
+│   │   └── Metadatos —
+│   │         ├── [TagManager] → input texto + Enter/botón Plus añade tag a array; clic en [X] de chip lo remueve → `updateNode({ tags })`
+│   │         ├── [input enlace web] → valida y actualiza `updateNode({ link: url })` (muestra icono ExternalLink en nodo)
+│   │         ├── [Slider progreso 0-100, step 5] → `updateNode({ progress: val })` (Reset = undefined, oculta barra)
+│   │         └── [Botones ojo de visibilidad local] → alternan flags por nodo (`hideTags`, `hideLink`, `hideProgress`, `hideIcons`)
 │   │
 │   ├── 🎨 Estilos
-│   │   ├── Forma — [ShapeSelector: 10 botones de forma] · [Slider Ancho personalizado 0-500 (0=auto)] · [Slider Alto 0-300]
-│   │   ├── Fondo — [selector de tipo: Sólido/Degradado/Trama/Imagen/Transparente] + controles según tipo:
-│   │   │     Sólido [ColorPicker con Reset] · Degradado [2 ColorPicker + dirección en 4] ·
-│   │   │     Trama [7 estilos + color base + color trazo + tamaño 8-40 + opacidad] ·
-│   │   │     Imagen [URL + subir + ajuste Expandir/Completa/Repetir + preview] · Transp. (sin controles)
-│   │   ├── Borde — [ColorPicker color con Reset] · [Slider grosor 0-8px] · [3 estilos de línea con preview]
-│   │   └── Arista — [4 formas de conexión con SVG] · [ColorPicker color de arista con Reset] ·
-│   │         [Aplicar a Hijos] [azul] · [Aplicar a Hermanos] [gris] (solo si existen hermanos)
+│   │   ├── Forma — [ShapeSelector: grid 2×5 con 10 formas geométricas] → `updateNode({ shape: id })` ·
+│   │   │     [Slider Ancho 0-500px (0 = auto)] → `updateNode({ customWidth })` · [Slider Alto 0-300px] → `updateNode({ customHeight })`
+│   │   ├── Fondo del Nodo — [Selector de tipo: 5 botones mutuamente exclusivos]:
+│   │   │     ├── 1. Tipo Sólido (`bgType === 'color'`) →
+│   │   │     │     [ColorPicker + 16 presets] → `updateNode({ color, bgType: 'color' })` · [Reset] → restaura a undefined (hereda del tema)
+│   │   │     ├── 2. Tipo Degradado (`bgType === 'gradient'`) →
+│   │   │     │     [ColorPicker Inicial] → `updateNode({ gradientColor1 })` · [ColorPicker Final] → `updateNode({ gradientColor2 })` ·
+│   │   │     │     [Dirección: 4 botones] Horizontal (`to-r`) / Vertical (`to-b`) / Diagonal (`to-br`) / Radial (`radial`) → `updateNode({ gradientDirection })`
+│   │   │     ├── 3. Tipo Trama (`bgType === 'pattern'`) →
+│   │   │     │     [7 estilos de trama: puntos, líneas, rayas, cuadros, triángulos, hexágonos, cruces] → `updateNode({ nodePattern: id })` ·
+│   │   │     │     [ColorPicker Fondo Base] → `updateNode({ color })` · [ColorPicker Trazo de Trama] → `updateNode({ nodePatternColor })` ·
+│   │   │     │     [Slider tamaño patrón 8-40px] → `updateNode({ nodePatternSize })` · [Slider opacidad trazo 10-100%] → `updateNode({ nodePatternOpacity: val/100 })`
+│   │   │     ├── 4. Tipo Imagen de Fondo (`bgType === 'image'`) →
+│   │   │     │     [input URL / Upload DataURL] → `updateNode({ bgImageUrl })` ·
+│   │   │     │     [Ajuste de imagen: 3 botones] Expandir (`cover`) / Completa (`contain`) / Repetir (`repeat`) → `updateNode({ bgImageMode })`
+│   │   │     └── 5. Tipo Transparente (`bgType === 'transparent'`) → `updateNode({ bgType: 'transparent', color: 'transparent' })` (sin controles secundarios)
+│   │   ├── Borde y Contorno — [ColorPicker color con Reset] → `updateNode({ borderColor })` ·
+│   │   │     [Slider grosor 0-8px] → `updateNode({ borderWidth })` (0 = sin borde) ·
+│   │   │     [3 botones de estilo de línea] Sólido (`solid`) / Guiones (`dashed`) / Puntos (`dotted`) → `updateNode({ borderDash })`
+│   │   └── Arista y Propagación —
+│   │         ├── [4 formas de conexión] Curva orgánica / Bézier / Línea Recta / Ortogonal → `updateNode({ edgeShape })`
+│   │         ├── [ColorPicker color de arista] → `updateNode({ edgeColor })` (Reset = auto, hereda de rama)
+│   │         ├── [Aplicar a Hijos (azul)] → propaga en cascada recursiva (DFS) forma, color, bordes y aristas a todos los descendientes en 1 paso de historial
+│   │         └── [Aplicar a Hermanos (gris)] → propaga los mismos estilos a todos los nodos del mismo padre (deshabilitado si no hay hermanos)
 │   │
 │   ├── 📒 Notas
-│   │   ├── [toggle "Mostrar en Nodo"] → la nota se renderiza bajo el cuerpo en el lienzo (desactiva tooltips)
-│   │   ├── [vistas Edit3/Columns/Eye] → editor / dividida / preview (default preview; se reinicia al salir de la pestaña)
-│   │   ├── [toolbar Markdown: 9 botones] negrita · cursiva · H1 · H2 · lista · numerada · checklist · código · cita
-│   │   └── [textarea #node-note-textarea] + [preview Markdown] en vivo
+│   │   ├── [toggle "Mostrar en Nodo"] → alterna `updateNode({ showNoteInline: !showNoteInline })` (renderiza Markdown debajo del cuerpo en el lienzo)
+│   │   ├── [vistas Edit3 / Columns / Eye] → cambia estado local entre Solo Editor / Vista Dividida / Solo Vista Previa (default: preview)
+│   │   ├── [toolbar Markdown con 9 botones] → inserta sintaxis en la posición del cursor de `#node-note-textarea`:
+│   │   │     Bold (`**texto**`), Italic (`*texto*`), H1 (`# `), H2 (`## `), Lista (`- `), Numerada (`1. `), Checkbox (`- [ ] `), Code (```), Cita (`> `)
+│   │   └── [textarea] → onChange actualiza `updateNode({ note: text })` con sincronización instantánea al renderizador `MarkdownView`
 │   │
 │   ├── 😊 Iconos
-│   │   ├── Tinte — [ColorPicker con Reset] · [7 dots sugeridos] · [enlace "Original"] → iconColor del nodo
-│   │   ├── [Slider tamaño 10-36px] → iconSize (Reset = 14 estándar)
-│   │   ├── [Copiar a Hijos] / [Copiar a Hermanos] → propagan iconos + color + tamaño + posición
-│   │   ├── Iconos Asignados — chips con [X] · [Quitar todos] → vacía el array de iconos
-│   │   ├── [input Buscar] entre los 520+ iconos · [chips de categoría] · [8 quick tags]
-│   │   ├── grid de hasta 120 iconos — [clic] añade/quita del nodo (activo = azul)
-│   │   └── [Ver Galería Completa de Iconos] → abre el modal Pack de Iconos
+│   │   ├── Tinte — [ColorPicker con Reset] + [7 presets] → `updateNode({ iconColor: hex | undefined })` (Original = undefined)
+│   │   ├── [Slider tamaño 10-36px] → `updateNode({ iconSize: px })` (Reset = 14px estándar)
+│   │   ├── [Copiar a Hijos] / [Copiar a Hermanos] → propaga array `icons`, `iconColor` e `iconSize` a descendientes / hermanos
+│   │   ├── Asignados — chips con botón [X] remueve ese icono; botón [Quitar todos] → `updateNode({ icons: [] })`
+│   │   ├── [input Buscar] filtra en tiempo real sobre 520+ iconos vectoriales · [chips de categoría] · [8 quick tags]
+│   │   ├── Grid de catálogo (máx 120 renderizados) — [clic en icono]: si ya está en `icons` lo elimina; si no, lo añade al final del array
+│   │   └── [Ver Galería Completa de Iconos] → abre el modal `IconPackModal`
 │   │
-│   ├── ☁️ Nubes (solo con la nube activa)
-│   │   ├── [interruptor maestro] → ON = nube por defecto / OFF = borra la nube y su estilo
-│   │   ├── Forma y Márgenes — [8 formas] · [Slider margen horizontal -50..200] · [Slider margen vertical -50..200]
-│   │   ├── Relleno — [ColorPicker color de nube] · [Slider opacidad 0-100%]
-│   │   └── Borde — [ColorPicker color] · [Slider grosor 0-6] · [3 estilos de línea] (el título promete "Sombra" pero no hay control)
+│   ├── ☁️ Nubes de Agrupación
+│   │   ├── [interruptor maestro] →
+│   │   │     ├── Si está apagada (OFF) → clic crea objeto `cloud` con valores por defecto (scallop, #3b82f6, 8% opacidad, borde dashed) en `updateNode({ cloud: {...} })`
+│   │   │     └── Si está encendida (ON) → clic elimina completamente la nube con `updateNode({ cloud: undefined })`
+│   │   └── [Si la nube está activa (ON)]:
+│   │         ├── Forma — [8 botones de forma] (cloud-scallop, cloud-bubble, cloud-wave, cloud-rect, oval, rounded, star, comic) → `updateCloudProps({ shape })`
+│   │         ├── Márgenes — [Slider horizontal -50..200px] → `updateCloudProps({ paddingX })` · [Slider vertical -50..200px] → `updateCloudProps({ paddingY })`
+│   │         ├── Relleno — [ColorPicker color de nube] → `updateCloudProps({ color })` · [Slider opacidad 0-100%] → `updateCloudProps({ opacity: val/100 })`
+│   │         └── Borde — [ColorPicker borde] → `updateCloudProps({ borderColor })` · [Slider grosor 0-6px] → `updateCloudProps({ borderWidth })` ·
+│   │               [3 estilos de trazo] Sólido / Guiones / Puntos → `updateCloudProps({ borderDash })`
 │   │
-│   └── 🗺 Mapa (única pestaña que no requiere nodo seleccionado)
-│       ├── Temas del Mapa — [8 tarjetas] con dots de la paleta → restyle del mapa completo
-│       ├── Diseño del Árbol — [9 botones de layout] Estándar/Balanceado/Derecha/Izquierda/Arriba/Abajo/Árbol/Radial/Circular
-│       ├── Fondo del Lienzo — [ColorPicker con Reset] · [6 patrones de cuadrícula] · [Color del trazo] ·
-│       │     [Slider tamaño 12-64px] · [Slider opacidad 5-100%]
-│       ├── Aristas Globales — [4 formas de conexión] · [4 perfiles de grosor] · [Multicolor] (activo = sin color fijo) ·
-│       │     [Randomizar] [Dices] · [ColorPicker uniforme + 8 sugeridos] · [3 estilos de línea] · [Slider grosor 1-8px]
-│       └── Espaciado — [Slider Separación Horizontal 20-150] · [Slider Separación Vertical 4-60]
+│   └── 🗺 Mapa (Configuración global sin necesidad de nodo seleccionado)
+│       ├── Temas del Mapa — [8 tarjetas de tema] → `setMindMap({ themeId })` + restyle completo del mapa
+│       ├── Diseño del Árbol — [9 botones de layout] (estándar, balanceado, derecha, izquierda, arriba, abajo, árbol, radial, circular) → `setMindMap({ layout: id })`
+│       ├── Fondo del Lienzo — [ColorPicker color base con Reset] → `setMindMap({ backgroundColor })` ·
+│       │     [6 patrones de cuadrícula: ninguno, puntos, cuadrícula, cruz, líneas, isométrico] → `setMindMap({ backgroundPattern: id })` ·
+│       │     [ColorPicker trazo de patrón] → `setMindMap({ backgroundPatternColor })` ·
+│       │     [Slider tamaño patrón 12-64px] → `setMindMap({ backgroundPatternSize })` · [Slider opacidad 5-100%] → `setMindMap({ backgroundPatternOpacity })`
+│       ├── Aristas Globales — [4 formas de conexión] → `setMindMap({ globalEdgeShape })` ·
+│       │     [4 perfiles de grosor: cónica, ribbon, uniforme, fina] → `setMindMap({ globalEdgeProfile })` ·
+│       │     [Multicolor toggle] → alterna `setMindMap({ globalEdgeMulticolor: !val })` (asigna paleta por rama) ·
+│       │     [Randomizar (Dices)] → genera colores aleatorios por rama · [ColorPicker uniforme] → `setMindMap({ globalEdgeColor })` ·
+│       │     [3 estilos de trazo: sólido/guiones/puntos] → `setMindMap({ globalEdgeDash })` · [Slider grosor 1-8px] → `setMindMap({ globalEdgeWidth })`
+│       └── Espaciado del Árbol — [Slider separación horizontal 20-150px] → `setMindMap({ horizontalSpacing })` · [Slider separación vertical 4-60px] → `setMindMap({ verticalSpacing })`
 │
 ├── ⌨️ StatusBar (pie de pantalla)
 │   └── Nodos totales · Seleccionado ("texto" + ID) · Zoom % (real, desde el viewport) ·
 │         Posición (X, Y) (real) · Modo ("Editando"/"Listo")
 │
-├── 🪟 Modales (6; siempre montados, se abren/cierran por isOpen y su estado interno persiste)
-│   ├── 📤 Exportar / Importar — pestañas [Exportar]/[Importar]
-│   │     Exportar: [tarjeta Freeplane .mm] · [HTML Portable] · [Markdown] · [JSON] → descarga el archivo
-│   │     Importar: [seleccionar archivo .mm/.json] → valida y reemplaza el mapa; error = banner (no se auto-limpia)
-│   ├── ⌨️ Atajos de Teclado — lista estática de 16 filas kbd en 6 grupos (solo lectura)
-│   ├── 🧩 Plantillas — [buscador] · [7 categorías] · [chips de tag con "Limpiar"] ·
-│   │     cards ([clic] carga la plantilla; la primera es "Mapa en Blanco") · [Restablecer Filtros] · [Cerrar]
-│   ├── 💾 Mapas Guardados — [Crear Nuevo] · filas de mapas ([clic] carga ese mapa; "(Actual)" marca el activo;
-│   │     [Eliminar] con confirm() nativo, oculto en la fila actual) · estado vacío amable
-│   ├── 🔗 Crear Conector — [select Destino (obligatorio)] · [input Etiqueta] · [Forma: Curva/Bézier/Recta/Ortogonal] ·
-│   │     [Capa: Encima/Debajo] · [Slider Curvatura -200..200 (oculto si Recta)] · [Slider Opacidad] ·
-│   │     [Estilo: Sólido/Guiones/Puntos] · [Color] · [Crear Conector]/[Cancelar]
-│   └── 🖼 Pack de Iconos — sidebar [12 categorías con conteo] · [buscador] · [8 quick tags] · grid completo ·
-│         [clic en tile] añade/quita del nodo (o solo previsualiza sin nodo) · inspector con preview · [Copiar ID] · [Listo]
+├── 🪟 Modales (6 modales montados; controlados por flag booleano con memoria interna)
+│   ├── 📤 Exportar / Importar (`ExportImportModal`) —
+│   │     ├── Pestaña Exportar:
+│   │     │     ├── [Tarjeta Freeplane .mm] → `exportToFreeplaneXML(mindMap)` genera XML Freeplane, descarga `.mm`
+│   │     │     ├── [Tarjeta HTML Portable] → genera HTML standalone con visor interactivo y CSS inline, descarga `.html`
+│   │     │     ├── [Tarjeta Markdown] → serializa jerarquía con indentación `#` y listas `- `, descarga `.md`
+│   │     │     └── [Tarjeta JSON] → `JSON.stringify(mindMap, null, 2)`, descarga `.json`
+│   │     └── Pestaña Importar:
+│   │           └── [input file accept=".mm,.json"] → lee archivo con `FileReader`:
+│   │                 - Si es `.mm`: parsea XML con DOMParser, valida nodo raíz y estructura, reemplaza `mindMap` y selecciona raíz
+│   │                 - Si es `.json`: valida esquema `MindMap` con guardas de integridad, reemplaza `mindMap`
+│   │                 - Si falla: muestra banner de error rojo con descripción técnica (no rompe la app)
+│   ├── ⌨️ Atajos de Teclado (`ShortcutsModal`) — tabla de 16 combinaciones de teclas clasificadas en 6 secciones (solo lectura)
+│   ├── 🧩 Plantillas (`TemplatesModal`) —
+│   │     ├── [Buscador] filtra por título y descripción · [7 chips de categoría] · [chips de tags con botón Limpiar]
+│   │     └── Grid de tarjetas: [clic en tarjeta] pide confirmación o reemplaza directamente el mapa con la plantilla seleccionada (`pushHistory` + `setMindMap(templateMap)`)
+│   ├── 💾 Mapas Guardados (`SavedMapsModal`) —
+│   │     ├── [Crear Nuevo Mapa] → crea mapa en blanco con ID `map_${Date.now()}` y lo activa en el store
+│   │     ├── Filas de mapas: [clic en fila] serializa el mapa actual en `localStorage`, carga el mapa seleccionado y cierra el modal
+│   │     └── [Botón Eliminar (Trash2)] → `confirm()` nativo; si confirma, borra la clave `freemind_map_{id}` y actualiza el índice (oculto en el mapa activo)
+│   ├── 🔗 Crear Conector (`ConnectorModal`) —
+│   │     ├── [select Destino] (requerido, excluye el nodo de origen) · [input Etiqueta] (opcional)
+│   │     ├── [select Forma: curved | bezier | straight | step]
+│   │     │     ├── Si es 'straight': el slider de curvatura se **oculta completamente**
+│   │     │     └── Si es 'curved' o 'bezier': muestra [Slider Curvatura -200..200]
+│   │     ├── [select Capa: above (frente) | below (fondo)] · [Slider Opacidad 10-100%]
+│   │     ├── [Estilo: sólido | guiones | puntos] · [ColorPicker color con Reset]
+│   │     └── [Crear Conector (Submit)] → crea objeto en `mindMap.connectors`, añade a historial y cierra modal
+│   └── 🖼 Pack de Iconos (`IconPackModal`) —
+│         ├── Barra lateral: [12 categorías con conteo dinámico] · [buscador de texto] · [8 quick search tags]
+│         ├── Grid interactivo: [clic en icono] alterna su presencia en `selectedNode.icons` en vivo
+│         └── Inspector derecho: preview a 64px, nombre oficial, categoría, tags y botón [Copiar ID] al portapapeles
 │
-├── 🎬 Presentación Clásica (overlay a pantalla completa; slide actual en el centro)
-│   ├── Header — badge "Modo Presentación Clásica" · badge de fase con "(Parte X/Y)" ·
-│   │     [Volver] (solo con historial de saltos; Backspace) · [Editar] [E] abre el modal de opciones ·
-│   │     contador "i / N" · [X] salir (Esc)
-│   ├── Slide — breadcrumb del padre ([clic] salta) · imagen · cuerpo (progreso/tags como chips);
-│   │     en fase notas: Markdown; en fase hijos: tarjetas de subtema [clic] = saltar + conectores relacionales (máx 3)
-│   ├── Footer — [Anterior] · [Inicio: padre] · dots clicables por slide · [Siguiente Tema] · [Siguiente]
-│   └── Modal de opciones [E] — tema (8) · notas ON/OFF · tamaño de imagen (4) · tarjetas de hijos ·
-│         conectores cruzados · radar minimapa · alineación · escala de título · [Editar en Lienzo] / [Aplicar y Ver Diapositiva]
+├── 🎬 Presentación Clásica (`PresentationMode`, overlay a pantalla completa)
+│   ├── Header — badge de modo Sparkles · badge de fase dinámica:
+│   │     - Fase 1 Tema Principal (azul) · Fase 2 Notas del Tema (ámbar) · Fase 3 Subtemas (cian)
+│   │     [Volver (Return Jump)] → solo visible tras saltar a subtema/conector; desapila `jumpHistory` y regresa al nodo anterior (Backspace)
+│   │     [Editar (E)] → abre modal de configuración de la presentación
+│   │     Contador `{idx + 1} / {total}` · [X] Salir (Esc)
+│   │   ├── Radar MiniMapa superior flotante (`top-2`, w-52..w-80) — SVG translúcido con doble halo pulsante (`ping` + `pulse`) y pin rojo en el nodo activo
+│   │   ├── Slide central (`main max-w-6xl`) —
+│   │   │     ├── Si Fase 'body': breadcrumb de ancestros (clic salta al padre), imagen fija (S:144, M:240, L:320px), título adaptativo (3xl..7xl), cuerpo paginado sin scroll, tags y progreso
+│   │   │     ├── Si Fase 'notes': tarjeta `max-w-4xl rounded-2xl p-8` con render Markdown completo auto-paginado cada ~550 caracteres
+│   │   │     └── Si Fase 'children': grid responsivo de 1 a 3 columnas con hasta 6 subtemas (clic en tarjeta salta a ese nodo registrando salto) + conectores cruzados
+│   │   ├── Footer (`h-12`) — [Anterior] · [Inicio: Padre] (salta al padre directo) · dots clicables de diapositivas · [Siguiente Tema] (salta a la siguiente rama hermana) · [Siguiente]
+│   │   └── Modal de opciones (Tecla E) — selector de 8 temas, switch de notas ON/OFF, selector tamaño de imagen (4), switch de tarjetas de hijos, conectores y minimapa, alineación y escala de fuente
+│   │
+│   ├── 🎬 Presentación Elaborada (`ElaboratePresentationSystem`, Prezi Espacial 2.5D)
+│   │   ├── Top HUD Bar (`h-14`) — conmutador [Editor del Lienzo] ↔ [Presentar (F5)] ·
+│   │   │     [Acomodar:] 5 botones de algoritmo (Espiral, Constelación, Matriz, Randómico, En Pila) → regenera coordenadas espaciales `(x, y, rot, scale)` de todas las tarjetas
+│   │   │     [Nueva Tarjeta] → añade `SpatialSlideCard` personalizada de 720×440px y abre editor · [X] Salir (Esc)
+│   │   ├── Lienzo Espacial Infinito — cámara cinemática Prezi con matriz inversa `translate3d + scale + rotate` (vuelo suave de 750ms `cubic-bezier(0.25, 1, 0.5, 1)`):
+│   │   │     - Trayectoria de vuelo continua en arco SVG degradado púrpura/azul/rosa con patrón discontinuo
+│   │   │     - Tarjetas espaciales 720×440px con spotlight (opacidad 1 en activa, 0.2 en inactivas)
+│   │   │     - En modo Editor: manilla de rotación superior (`w-8 h-8` a `-top-10`), cápsula mover (`-bottom-4`) y 4 tiradores de redimensionamiento de esquinas
+│   │   ├── Controles Flotantes (`bottom-20 left-4`) — [ZoomIn], [ZoomOut] y [Vista Panorámica (Compass / Tecla O)] (centra todo el tablero)
+│   │   ├── Filmstrip & HUD Inferior — línea de progreso superior de 4px, tira horizontal de tarjetas con miniaturas y badge `#order`, y barra `h-12` con botones de vuelo cinemático
+│   │   └── Modal de Detalle (`SlideDetailModal`, 768px) — doble clic en cualquier tarjeta abre diseñador completo con campos de título, subtítulo, notas Markdown, imagen y sliders de escala/rotación
+│   │
+│   ├── 🎬 Presentación Dinámica (`CanvasPresentationHUD` + `CanvasDrawingOverlay`)
+│   │   ├── Top Presentation Bar (`h-14`) — conmutador [Editor de Marcos] ↔ [Presentar (F5)], historial [Deshacer]/[Rehacer] de marcos, botón [Empezar de Cero] y [Auto-generar] marcos por jerarquía
+│   │   ├── Píldora Flotante de Herramientas (`top-16`, 510×34px) —
+│   │   │     ├── [1. Seleccionar Nodos] → activa `editorTool = 'pick_nodes'`: clic en nodo lo añade a selección múltiple `stagedNodeIds`; botón [Crear Marco] agrupa los nodos seleccionados en un `SlideFrame`
+│   │   │     ├── [2. Dibujar Recuadro] → activa `editorTool = 'draw_frame'`: arrastrar sobre el lienzo genera recuadro con dimensiones en tiempo real
+│   │   │     └── [Navegar / Mover] → interacción normal de paneo del mapa
+│   │   ├── Capa de Marcos (`SlideFrame` en lienzo real) — marcos rectangulares con bordes redondeados y badges superiores interactivos (clic enfoca la cámara sobre ese marco con zoom automático)
+│   │   ├── Cajón de Notas del Orador (Drawer en `top-20 right-6`) — botón [FileText / Tecla N] despliega panel con render Markdown de la nota del nodo enfocado
+│   │   └── HUD Inferior (`h-12`) — barra de progreso de 4px, tira filmstrip de marcos con botón de borrado en hover, contador y controles de foco cinemático (Anterior, Overview Tecla O, Siguiente)
 │
-├── 🎬 Presentación Elaborada (overlay espacial tipo Prezi)
-│   ├── Top bar — badge gradiente + título · [Editor del Lienzo] ↔ [Presentar (F5)] ·
-│   │     [Acomodar:] Espiral/Constelación/Matriz/Randómico/En Pila (regenera el tablero) · [Nueva Tarjeta] · [X] salir (Esc)
-│   ├── Cámara — [rueda del ratón] zoom · [ZoomIn]/[ZoomOut] flotantes (solo editor) · [Compass] "Ver todo el tablero (O)"
-│   ├── Tarjeta hover — [Editar] (doble clic también) · [Duplicar] (+80,+80) · [Eliminar]
-│   ├── Transformar tarjeta — [knob superior] rotar · [pill inferior] mover · [4 esquinas] escalar (0.4-3.0)
-│   ├── HUD inferior — barra de progreso · filmstrip ([clic] vuela a la tarjeta) · [Anterior]/[Siguiente] (con wrap) ·
-│   │     [Layers] oculta/muestra el filmstrip
-│   ├── Presentador — spotlight sobre la tarjeta activa + trayectoria de vuelo SVG entre tarjetas
-│   └── Editor de tarjeta (modal) — título · cuerpo · notas con preview en vivo · imagen · alineación ·
-│         tema (8) · [Slider rotación -180..180] · [Slider escala 0.5-2.5] · [Guardar Cambios]/[Cancelar]
 │
 └── ⌨️ Capa global de atajos (inactivos mientras escribes o con modal abierto; lista canónica en INTERFACE_SPEC §3.6)
       Ctrl+Z/Y deshacer/rehacer · Ctrl+C/X/V copiar/cortar/pegar rama · F2 editar · Tab/Insert hijo ·

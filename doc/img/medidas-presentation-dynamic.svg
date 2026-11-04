@@ -1,0 +1,299 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="960" viewBox="0 0 1380 960" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <marker id="cap" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,4 L1,7" fill="none" stroke="#f59e0b" stroke-width="1.4"/>
+    </marker>
+    <style>
+      .cota { stroke:#f59e0b; stroke-width:1; }
+      .cota-txt { font-size:11px; fill:#b45309; font-weight:700; }
+      .lbl { font-size:12px; fill:#334155; font-weight:600; }
+      .lbl-sm { font-size:10.5px; fill:#64748b; }
+      .area-name { font-size:13px; font-weight:800; }
+      .badge-txt { font-size:10.5px; font-weight:700; }
+    </style>
+  </defs>
+
+  <!-- Fondo General de la Lámina -->
+  <rect width="1380" height="960" rx="16" fill="#0f172a"/>
+  <text x="36" y="44" font-size="22" font-weight="700" fill="#ffffff">MindMapCanvas §12 — Modo Presentación Dinámica (Canvas HUD &amp; Slide Frames)</text>
+  <text x="36" y="68" font-size="12.5" fill="#93c5fd">Escala 1:1 · CanvasPresentationHUD.tsx &amp; CanvasDrawingOverlay.tsx · Foco directo sobre el lienzo SVG real + marcos SlideFrame</text>
+
+  <!-- ========================================================================= -->
+  <!-- VISTA WIREFRAME DE LA PANTALLA COMPLETA A ESCALA (880 × 580 px, y: 110)   -->
+  <!-- ========================================================================= -->
+  <g id="screen-wireframe">
+    <!-- Marco de Pantalla Completa (100vw × 100vh) -->
+    <rect x="50" y="110" width="880" height="580" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+
+    <!-- 1. LIENZO DEL MAPA MENTAL REAL (Fondo con nodos) -->
+    <g id="canvas-nodes" opacity="0.85">
+      <!-- Aristas Bézier -->
+      <path d="M 240,360 C 320,360 360,260 440,260" fill="none" stroke="#3b82f6" stroke-width="3"/>
+      <path d="M 240,360 C 320,360 360,460 440,460" fill="none" stroke="#10b981" stroke-width="3"/>
+      <path d="M 440,260 C 520,260 560,210 640,210" fill="none" stroke="#6366f1" stroke-width="2"/>
+      <path d="M 440,260 C 520,260 560,310 640,310" fill="none" stroke="#6366f1" stroke-width="2"/>
+
+      <!-- Nodo Raíz -->
+      <rect x="120" y="336" width="120" height="48" rx="12" fill="#2563eb"/>
+      <text x="180" y="365" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">Mapa Central</text>
+
+      <!-- Nodo Rama 1 (Enfocado) -->
+      <rect x="440" y="236" width="130" height="46" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+      <text x="505" y="264" font-size="11" font-weight="700" fill="#0f172a" text-anchor="middle">1. Plan Estratégico</text>
+
+      <!-- Subnodos -->
+      <rect x="640" y="194" width="100" height="32" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="690" y="214" font-size="10" font-weight="600" fill="#334155" text-anchor="middle">Fase Q1</text>
+      <rect x="640" y="294" width="100" height="32" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+      <text x="690" y="314" font-size="10" font-weight="600" fill="#334155" text-anchor="middle">Fase Q2</text>
+
+      <!-- Nodo Rama 2 (Atenuado) -->
+      <g opacity="0.35">
+        <rect x="440" y="436" width="130" height="46" rx="10" fill="#ffffff" stroke="#94a3b8"/>
+        <text x="505" y="464" font-size="11" font-weight="700" fill="#64748b" text-anchor="middle">2. Operaciones</text>
+      </g>
+    </g>
+
+    <!-- 2. MARCOS DE DIAPOSITIVA (CanvasDrawingOverlay.tsx) -->
+    <!-- Marco 1: Inactivo (dashed border) -->
+    <rect x="100" y="316" width="160" height="88" rx="16" fill="#1e293b" fill-opacity="0.05" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6 6"/>
+    <rect x="116" y="304" width="80" height="20" rx="10" fill="#1e293b" stroke="#334155"/>
+    <text x="156" y="318" font-size="9" font-weight="700" fill="#cbd5e1" text-anchor="middle">Slide 1 • Raíz</text>
+
+    <!-- Marco 2: ACTIVO Y ENFOCADO (glow azul + badge sólido) -->
+    <rect x="410" y="180" width="360" height="170" rx="20" fill="#3b82f6" fill-opacity="0.1" stroke="#3b82f6" stroke-width="2.5" filter="drop-shadow(0 0 20px rgba(59,130,246,0.3))"/>
+    <rect x="426" y="166" width="150" height="22" rx="11" fill="#2563eb" stroke="#ffffff" stroke-width="1.5" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.15))"/>
+    <text x="501" y="181" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">Slide 2 • Plan Estratégico</text>
+
+    <!-- 3. TOP PRESENTATION BAR (h-14 = 56px, y: 110) -->
+    <rect x="50" y="110" width="880" height="56" rx="14" fill="#0f172a" fill-opacity="0.95" stroke="#1e293b"/>
+    <!-- Izquierda: Badge + Título Mapa -->
+    <rect x="66" y="123" width="180" height="30" rx="10" fill="#1e3a8a" stroke="#3b82f6" stroke-opacity="0.4"/>
+    <text x="76" y="142" class="badge-txt" fill="#93c5fd">✦ Presentación Dinámica</text>
+    <text x="258" y="143" font-size="12.5" font-weight="600" fill="#94a3b8">Mapa Estratégico</text>
+
+    <!-- Centro: Conmutador Editor de Marcos / Presentar (F5) -->
+    <rect x="490" y="122" width="220" height="32" rx="10" fill="#1e293b" stroke="#334155"/>
+    <rect x="493" y="125" width="105" height="26" rx="8" fill="#2563eb"/>
+    <text x="502" y="142" font-size="10.5" font-weight="700" fill="#ffffff">🎛 Editor Marcos</text>
+    <text x="612" y="142" font-size="10.5" font-weight="700" fill="#94a3b8">▶ Presentar (F5)</text>
+
+    <!-- Derecha: Deshacer/Rehacer + Auto-generar + Cerrar -->
+    <rect x="722" y="124" width="54" height="28" rx="8" fill="#1e293b" stroke="#334155"/>
+    <text x="731" y="142" font-size="11" font-weight="700" fill="#cbd5e1">↶ ↷</text>
+
+    <rect x="784" y="124" width="94" height="28" rx="8" fill="#1e293b" stroke="#334155"/>
+    <text x="794" y="142" font-size="10.5" font-weight="600" fill="#38bdf8">↻ Auto-generar</text>
+
+    <rect x="888" y="124" width="26" height="28" rx="6" fill="#1e293b"/>
+    <text x="897" y="142" font-size="12" font-weight="700" fill="#94a3b8">✕</text>
+
+    <!-- 4. PÍLDORA FLOTANTE DE HERRAMIENTAS DEL EDITOR (top-16 = y: 174, centrado en x: 490) -->
+    <rect x="235" y="174" width="510" height="34" rx="17" fill="#0f172a" fill-opacity="0.95" stroke="#334155" filter="drop-shadow(0 4px 12px rgba(0,0,0,0.25))"/>
+    <text x="248" y="195" font-size="10.5" font-weight="600" fill="#94a3b8">Crear marco:</text>
+    <!-- Tool 1: Pick Nodes (Activo) -->
+    <rect x="325" y="178" width="135" height="26" rx="8" fill="#2563eb"/>
+    <text x="333" y="195" font-size="9.5" font-weight="700" fill="#ffffff">☑ 1. Seleccionar Nodos</text>
+    <!-- Tool 2: Draw Frame -->
+    <rect x="466" y="178" width="125" height="26" rx="8" fill="#1e293b"/>
+    <text x="474" y="195" font-size="9.5" font-weight="700" fill="#cbd5e1">⛶ 2. Dibujar Recuadro</text>
+    <!-- Tool 3: Navigate -->
+    <rect x="597" y="178" width="138" height="26" rx="8" fill="#1e293b"/>
+    <text x="605" y="195" font-size="9.5" font-weight="700" fill="#cbd5e1">↗ Navegar / Mover</text>
+
+    <!-- 5. CAJÓN FLOTANTE DE NOTAS DEL ORADOR (top-20 right-6, x: 670, y: 220, w: 240, h: 180) -->
+    <rect x="670" y="220" width="240" height="180" rx="14" fill="#0f172a" fill-opacity="0.98" stroke="#d97706" stroke-width="1.8" filter="drop-shadow(0 8px 24px rgba(217,119,6,0.25))"/>
+    <rect x="682" y="230" width="94" height="20" rx="6" fill="#78350f"/>
+    <text x="688" y="244" font-size="9" font-weight="800" fill="#fde68a">📝 NOTA DETALLADA</text>
+    <text x="782" y="244" font-size="9" fill="#94a3b8">(Plan Estratégico)</text>
+    <text x="896" y="244" font-size="11" font-weight="700" fill="#94a3b8">✕</text>
+    <line x1="682" y1="258" x2="898" y2="258" stroke="#334155" stroke-width="1"/>
+    <text x="684" y="276" font-size="10" font-weight="700" fill="#ffffff">Puntos clave a exponer:</text>
+    <text x="684" y="294" font-size="9.5" fill="#cbd5e1">• Objetivos de adopción Q1</text>
+    <text x="684" y="310" font-size="9.5" fill="#cbd5e1">• Retención sin dependencias nube</text>
+    <text x="684" y="326" font-size="9.5" fill="#cbd5e1">• Hitos de rendimiento (60 FPS)</text>
+    <rect x="682" y="348" width="216" height="38" rx="6" fill="#1e293b"/>
+    <text x="690" y="364" font-size="8.5" fill="#94a3b8">Sintaxis Markdown soportada con</text>
+    <text x="690" y="377" font-size="8.5" fill="#38bdf8">listas, enlaces y formato enriquecido.</text>
+
+    <!-- 6. BOTTOM FILMSTRIP & CONTROLS HUD (y: 620 a 690, alto ~70px) -->
+    <!-- Barra de progreso superior de 4px -->
+    <rect x="50" y="620" width="880" height="4" fill="#1e293b"/>
+    <rect x="50" y="620" width="380" height="4" fill="#3b82f6" filter="drop-shadow(0 0 6px #3b82f6)"/>
+
+    <!-- Tira Filmstrip de Diapositivas (miniaturas horizontales) -->
+    <rect x="50" y="624" width="880" height="34" fill="#0f172a" fill-opacity="0.95" stroke="#1e293b"/>
+    <!-- Thumb 1 -->
+    <rect x="66" y="629" width="110" height="24" rx="7" fill="#1e293b" stroke="#334155"/>
+    <circle cx="78" cy="641" r="5" fill="#334155"/>
+    <text x="78" y="644" font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">1</text>
+    <text x="90" y="645" font-size="9" font-weight="600" fill="#94a3b8">Mapa Central</text>
+    <!-- Thumb 2 (Activo) -->
+    <rect x="184" y="629" width="135" height="24" rx="7" fill="#2563eb" fill-opacity="0.3" stroke="#3b82f6"/>
+    <circle cx="198" cy="641" r="5" fill="#2563eb"/>
+    <text x="198" y="644" font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">2</text>
+    <text x="210" y="645" font-size="9" font-weight="700" fill="#ffffff">Plan Estratégico</text>
+    <!-- Thumb 3 -->
+    <rect x="328" y="629" width="115" height="24" rx="7" fill="#1e293b" stroke="#334155"/>
+    <circle cx="340" cy="641" r="5" fill="#334155"/>
+    <text x="340" y="644" font-size="7.5" font-weight="800" fill="#ffffff" text-anchor="middle">3</text>
+    <text x="352" y="645" font-size="9" font-weight="600" fill="#94a3b8">Operaciones</text>
+
+    <!-- Barra de Acciones Inferior (h-12 = 48px en y: 658) -->
+    <rect x="50" y="658" width="880" height="32" fill="#0f172a" fill-opacity="0.95"/>
+    <text x="70" y="678" font-size="11" font-weight="700" font-family="monospace" fill="#ffffff">2 / 6</text>
+    <text x="105" y="678" font-size="11" fill="#64748b">| Marco: Plan Estratégico</text>
+
+    <!-- Botones Centrales de Control: Anterior, Vista General, Siguiente -->
+    <rect x="420" y="662" width="28" height="24" rx="6" fill="#1e293b"/>
+    <text x="430" y="678" font-size="12" font-weight="700" fill="#cbd5e1">◀</text>
+
+    <rect x="456" y="662" width="34" height="24" rx="6" fill="#1e293b" stroke="#334155"/>
+    <text x="466" y="678" font-size="12" font-weight="700" fill="#38bdf8">🧭</text>
+
+    <rect x="498" y="662" width="84" height="24" rx="6" fill="#2563eb"/>
+    <text x="508" y="678" font-size="10.5" font-weight="700" fill="#ffffff">Siguiente ▶</text>
+
+    <!-- Botones Notas y Filmstrip Derecha -->
+    <rect x="856" y="662" width="28" height="24" rx="6" fill="#1e293b"/>
+    <text x="864" y="678" font-size="11" fill="#f59e0b">📄</text>
+    <rect x="892" y="662" width="28" height="24" rx="6" fill="#1e293b"/>
+    <text x="900" y="678" font-size="11" fill="#94a3b8">☰</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COTAS Y GUÍAS VERTICALES DE LA PANTALLA PRINCIPAL                        -->
+  <!-- ========================================================================= -->
+  <!-- Cota Alto Pantalla 100vh = 580px (x=30) -->
+  <line x1="30" y1="110" x2="30" y2="690" class="cota"/>
+  <line x1="24" y1="110" x2="36" y2="110" class="cota"/>
+  <line x1="24" y1="690" x2="36" y2="690" class="cota"/>
+  <text x="18" y="405" class="cota-txt" text-anchor="middle" transform="rotate(-90 18 405)">100vh (h-screen)</text>
+
+  <!-- Cota Top HUD h-14 = 56px (x=942) -->
+  <line x1="942" y1="110" x2="942" y2="166" class="cota"/>
+  <line x1="936" y1="110" x2="948" y2="110" class="cota"/>
+  <line x1="936" y1="166" x2="948" y2="166" class="cota"/>
+  <text x="955" y="142" class="cota-txt">56px (h-14) Top Bar</text>
+
+  <!-- Cota Canvas flex-1 (x=942) -->
+  <line x1="942" y1="166" x2="942" y2="620" class="cota"/>
+  <line x1="936" y1="166" x2="948" y2="166" class="cota"/>
+  <line x1="936" y1="620" x2="948" y2="620" class="cota"/>
+  <text x="955" y="390" class="cota-txt">flex-1 (Lienzo SVG Real)</text>
+
+  <!-- Cota Bottom HUD (x=942) -->
+  <line x1="942" y1="620" x2="942" y2="690" class="cota"/>
+  <line x1="936" y1="620" x2="948" y2="620" class="cota"/>
+  <line x1="936" y1="690" x2="948" y2="690" class="cota"/>
+  <text x="955" y="658" class="cota-txt">~70px (Progreso + Tira + Footer h-12)</text>
+
+  <!-- ========================================================================= -->
+  <!-- FILA INFERIOR: DETALLE DE MODOS Y ESTRUCTURA DE MARCOS (y: 720 a 920)     -->
+  <!-- ========================================================================= -->
+  <text x="50" y="728" font-size="14" font-weight="800" fill="#38bdf8">Arquitectura de la Presentación Dinámica (CanvasPresentationHUD + CanvasDrawingOverlay):</text>
+
+  <!-- 1. Modo Reproducción (Play) -->
+  <g transform="translate(50, 742)">
+    <rect width="280" height="185" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="12" y="12" width="130" height="20" rx="6" fill="#065f46"/>
+    <text x="18" y="26" font-size="10" font-weight="700" fill="#6ee7b7">Modo Play (Presentar)</text>
+    <text x="12" y="52" font-size="12" font-weight="700" fill="#ffffff">Foco Cinemático &amp; Paneo</text>
+    <text x="12" y="72" font-size="10.5" fill="#94a3b8">· Transición cámara: 750ms suave</text>
+    <text x="12" y="88" font-size="10.5" fill="#94a3b8">· Atenúa nodos ajenos (opacity: 0.25)</text>
+    <text x="12" y="104" font-size="10.5" fill="#94a3b8">· Ajusta zoom automático al marco</text>
+    <text x="12" y="120" font-size="10.5" fill="#94a3b8">· Vista General con Tecla O / Home</text>
+    <rect x="12" y="142" width="256" height="30" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="20" y="161" font-size="10" font-weight="600" fill="#10b981">El lienzo nunca se clona: es el real</text>
+  </g>
+
+  <!-- 2. Modo Editor de Marcos -->
+  <g transform="translate(350, 742)">
+    <rect width="280" height="185" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="12" y="12" width="125" height="20" rx="6" fill="#1e40af"/>
+    <text x="18" y="26" font-size="10" font-weight="700" fill="#93c5fd">Modo Editor (Marcos)</text>
+    <text x="12" y="52" font-size="12" font-weight="700" fill="#ffffff">Creación Interactiva</text>
+    <text x="12" y="72" font-size="10.5" fill="#94a3b8">· Herramienta 1: Seleccionar Nodos</text>
+    <text x="12" y="88" font-size="10.5" fill="#94a3b8">· Herramienta 2: Dibujar Recuadro</text>
+    <text x="12" y="104" font-size="10.5" fill="#94a3b8">· Herramienta 3: Navegar / Mover</text>
+    <text x="12" y="120" font-size="10.5" fill="#94a3b8">· Auto-generar según jerarquía</text>
+    <rect x="12" y="142" width="256" height="30" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="20" y="161" font-size="10" font-weight="600" fill="#3b82f6">Pila de Deshacer/Rehacer (Ctrl+Z/Y)</text>
+  </g>
+
+  <!-- 3. Cajón de Notas del Orador -->
+  <g transform="translate(650, 742)">
+    <rect width="280" height="185" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="12" y="12" width="120" height="20" rx="6" fill="#78350f"/>
+    <text x="18" y="26" font-size="10" font-weight="700" fill="#fde68a">Notas del Orador</text>
+    <text x="12" y="52" font-size="12" font-weight="700" fill="#ffffff">Drawer Flotante (Tecla N)</text>
+    <text x="12" y="72" font-size="10.5" fill="#94a3b8">· Ancho: w-84 (336) sm:w-96 (384px)</text>
+    <text x="12" y="88" font-size="10.5" fill="#94a3b8">· Altura máxima: max-h-[70vh]</text>
+    <text x="12" y="104" font-size="10.5" fill="#94a3b8">· Renderizado MarkdownView activo</text>
+    <text x="12" y="120" font-size="10.5" fill="#94a3b8">· Lee notas del nodo activo o marco</text>
+    <rect x="12" y="142" width="256" height="30" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="20" y="161" font-size="10" font-weight="600" fill="#f59e0b">Borde ámbar 2px + shadow 40px</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA DERECHA: CAJA RESUMEN DE MEDIDAS (x: 950 a 1340, y: 110)          -->
+  <!-- ========================================================================= -->
+  <g transform="translate(950, 110)">
+    <rect width="390" height="818" rx="14" fill="#1e293b" stroke="#334155"/>
+    <text x="20" y="32" font-size="15" font-weight="800" fill="#ffffff">Tabla Resumen de Medidas</text>
+    <text x="20" y="52" font-size="11" fill="#94a3b8">Valores de MindMapCanvas y CanvasPresentationHUD</text>
+
+    <!-- Fila 1 -->
+    <rect x="16" y="68" width="358" height="58" rx="8" fill="#0f172a"/>
+    <text x="26" y="88" font-size="11.5" font-weight="700" fill="#38bdf8">Contenedor HUD (Raíz)</text>
+    <text x="26" y="106" font-size="10.5" fill="#cbd5e1">absolute inset-0 · z-50 pointer-events-none</text>
+    <text x="26" y="120" font-size="9.5" fill="#64748b">flex flex-col justify-between · Hijos con pointer-events-auto</text>
+
+    <!-- Fila 2 -->
+    <rect x="16" y="134" width="358" height="66" rx="8" fill="#0f172a"/>
+    <text x="26" y="154" font-size="11.5" font-weight="700" fill="#38bdf8">Top Presentation Bar</text>
+    <text x="26" y="172" font-size="10.5" fill="#cbd5e1">Alto 56px (h-14) · px-4 · bg-slate-900/90 backdrop-blur</text>
+    <text x="26" y="188" font-size="9.5" fill="#64748b">Conmutador Editor/Play · Deshacer/Rehacer · Auto-generar</text>
+
+    <!-- Fila 3 -->
+    <rect x="16" y="208" width="358" height="86" rx="8" fill="#0f172a"/>
+    <text x="26" y="228" font-size="11.5" font-weight="700" fill="#38bdf8">Píldora Flotante de Herramientas</text>
+    <text x="26" y="246" font-size="10.5" fill="#cbd5e1">Posición: absolute top-16 left-1/2 -translate-x-1/2 z-40</text>
+    <text x="26" y="262" font-size="10" fill="#cbd5e1">Padding: px-3 py-1.5 rounded-2xl border slate-700/80</text>
+    <text x="26" y="278" font-size="9.5" fill="#64748b">3 herramientas: Seleccionar Nodos · Dibujar · Navegar</text>
+
+    <!-- Fila 4 -->
+    <rect x="16" y="302" width="358" height="96" rx="8" fill="#0f172a"/>
+    <text x="26" y="322" font-size="11.5" font-weight="700" fill="#38bdf8">Marcos de Diapositiva (SlideFrame)</text>
+    <text x="26" y="340" font-size="10.5" fill="#cbd5e1">Capas: CanvasDrawingOverlay (pointer-events-none)</text>
+    <text x="26" y="356" font-size="10" fill="#cbd5e1">Inactivo: border-dashed border-slate-500/40 rounded-3xl</text>
+    <text x="26" y="372" font-size="10" fill="#cbd5e1">Activo: border-blue-400 bg-blue-500/10 shadow-35px ring-2</text>
+    <text x="26" y="386" font-size="9.5" fill="#64748b">Badge superior: -top-3.5 px-2.5 py-0.5 clickable</text>
+
+    <!-- Fila 5 -->
+    <rect x="16" y="406" width="358" height="84" rx="8" fill="#0f172a"/>
+    <text x="26" y="426" font-size="11.5" font-weight="700" fill="#38bdf8">Cajón de Notas del Orador (Drawer)</text>
+    <text x="26" y="444" font-size="10.5" fill="#cbd5e1">Posición: absolute top-20 right-6 sm:right-10 z-50</text>
+    <text x="26" y="460" font-size="10" fill="#cbd5e1">Ancho: w-84 (336px) sm:w-96 (384px) · max-h-[70vh]</text>
+    <text x="26" y="476" font-size="9.5" fill="#64748b">Borde ámbar 2px · shadow-40px · MarkdownView con scroll</text>
+
+    <!-- Fila 6 -->
+    <rect x="16" y="498" width="358" height="78" rx="8" fill="#0f172a"/>
+    <text x="26" y="518" font-size="11.5" font-weight="700" fill="#38bdf8">Bottom Filmstrip &amp; HUD</text>
+    <text x="26" y="536" font-size="10.5" fill="#cbd5e1">Línea de progreso: h-1 azul (100% de la barra)</text>
+    <text x="26" y="552" font-size="10" fill="#cbd5e1">Tira horizontal: py-2 gap-2 con botón trash en hover</text>
+    <text x="26" y="566" font-size="9.5" fill="#64748b">Barra inferior de navegación: h-12 (48px) px-4</text>
+
+    <!-- Fila 7: Atajos de Teclado -->
+    <rect x="16" y="584" width="358" height="216" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+    <text x="26" y="604" font-size="11.5" font-weight="700" fill="#f59e0b">Atajos de Teclado (Modo Dinámico)</text>
+    <text x="26" y="624" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Espacio / Flecha Derecha:</tspan> Siguiente diapositiva</text>
+    <text x="26" y="642" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Flecha Izquierda / Backspace:</tspan> Diapositiva anterior</text>
+    <text x="26" y="660" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Tecla O / Home:</tspan> Conmutar vista general (Overview)</text>
+    <text x="26" y="678" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">F5:</tspan> Alternar entre Editor de Marcos y Play</text>
+    <text x="26" y="696" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Tecla N:</tspan> Abrir / cerrar cajón de notas del orador</text>
+    <text x="26" y="714" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Ctrl+Z / Ctrl+Y:</tspan> Deshacer y rehacer marcos</text>
+    <text x="26" y="732" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Escape:</tspan> Salir del modo presentación</text>
+    <text x="26" y="750" font-size="9" fill="#94a3b8">MindMapCanvas.tsx:353-394</text>
+  </g>
+</svg>

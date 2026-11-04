@@ -758,6 +758,344 @@ Solo se monta si `showMiniMap && layoutMap.size > 0` (MiniMap:212).
 
 ---
 
+## 10. Modo Presentación Clásica (`PresentationMode`) — detallada
+
+`src/components/PresentationMode.tsx:604-1606`
+
+![Medidas del Modo Presentación Clásica](img/medidas-presentation-classic.svg)
+
+### 10.1 Contenedor raíz y visualización (Overlay de pantalla completa)
+
+| Propiedad | Medida | Origen |
+|-----------|--------|--------|
+| **Posicionamiento** | `fixed inset-0 h-screen w-screen overflow-hidden z-50` | PresentationMode:610 |
+| **Padding exterior** | `p-4` (**16px**), en pantallas medianas `sm:p-6` (**24px**) | PresentationMode:610 |
+| **Disposición interna** | `flex flex-col justify-between select-none` | PresentationMode:610 |
+| **Fondo y color** | Sincronizado con el tema activo de la presentación (`currentTheme.backgroundColor` / `currentTheme.textColor`) | PresentationMode:606-609 |
+
+---
+
+### 10.2 Barra de cabecera superior (Header, alto 40px)
+
+`src/components/PresentationMode.tsx:613-709`
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| **Contenedor cabecera** | `flex items-center justify-between gap-3 w-full shrink-0 h-10` (**40px**) | PresentationMode:613 |
+| **Badge Modo Clásico** | `px-3 py-1 rounded-full text-xs font-semibold shadow-2xs border` · Icono Sparkles `w-3.5 h-3.5` (14px) | PresentationMode:615-619 |
+| **Badge Fase de Diapositiva** | `px-2.5 py-0.5 rounded-lg border text-xs font-bold flex items-center gap-1.5` · Icono `w-3.5 h-3.5` (14px) | PresentationMode:622-653 |
+| · Variante Tema Principal (Fase 1) | `bg-blue-50 border-blue-200 text-blue-700` (oscuro `bg-blue-950/80 border-blue-800 text-blue-300`) | PresentationMode:624 |
+| · Variante Notas (Fase 2) | `bg-amber-50 border-amber-200 text-amber-800` (oscuro `bg-amber-950/80 border-amber-800 text-amber-300`) | PresentationMode:635 |
+| · Variante Subtemas (Fase 3) | `bg-cyan-50 border-cyan-200 text-cyan-800` (oscuro `bg-cyan-950/80 border-cyan-800 text-cyan-300`) | PresentationMode:646 |
+| **Botón Volver (Return Jump)** | `px-3 py-1.5 rounded-xl text-xs font-bold shadow-md` · visible solo tras saltar a subtema/conector | PresentationMode:658-671 |
+| **Botón Editar / Ajustes** | `px-3 py-1.5 rounded-xl text-xs font-semibold shadow-2xs` · icono SlidersHorizontal `w-3.5 h-3.5` | PresentationMode:674-687 |
+| **Contador de diapositivas** | `px-3 py-1.5 rounded-xl border text-xs font-mono` (`{currentIndex + 1} / {slides.length}`) | PresentationMode:690-696 |
+| **Botón Salir (Cerrar)** | `p-2 rounded-xl` · icono X `w-5 h-5` (20px) | PresentationMode:699-707 |
+
+---
+
+### 10.3 Radar MiniMapa (Flotante superior central)
+
+`src/components/PresentationMode.tsx:1430-1604`
+
+| Propiedad / Elemento | Medida | Origen |
+|----------------------|--------|--------|
+| **Posicionamiento** | `fixed top-2 left-1/2 -translate-x-1/2 z-40` | PresentationMode:1432 |
+| **Contenedor cápsula** | `px-3 py-2 rounded-2xl border shadow-2xl backdrop-blur-md` (`bg-white/50` claro / `bg-black/45` oscuro) | PresentationMode:1433-1438 |
+| **Lienzo SVG MiniMapa** | Ancho: `w-52` (**208px**) · `sm:w-68` (**272px**) · `md:w-80` (**320px**)<br>Alto: `h-14` (**56px**) · `sm:h-16` (**64px**) · `md:h-18` (**72px**) | PresentationMode:1442 |
+| **Aristas de árbol** | Curvas Bézier cúbicas `stroke-width=1.5` con opacidad tenue (0.35) | PresentationMode:1463-1473 |
+| **Nodos en minimapa** | Rectángulos `rx=4` (raíz `rx=6`) con ancho proporcional; inactivos opacidad 0.6 | PresentationMode:1563-1574 |
+| **Resalte nodo activo** | Doble halo concéntrico (`animate-ping` de radio +24px / `animate-pulse` de +12px) + Pin rojo `r=3.5` con borde blanco | PresentationMode:1537-1586 |
+| **Etiqueta activa lateral** | Separador `border-l` + punto rojo pulsante `w-1.5 h-1.5` + texto `text-[10px] font-bold max-w-[120px]` | PresentationMode:1595-1600 |
+
+---
+
+### 10.4 Zona Central de Diapositiva (`main`)
+
+`src/components/PresentationMode.tsx:1004-1346`
+
+| Propiedad | Medida | Origen |
+|-----------|--------|--------|
+| **Contenedor principal** | `flex-1 min-h-0 w-full max-w-6xl mx-auto overflow-hidden flex items-center justify-center p-2 sm:p-4` | PresentationMode:1005 |
+| **Ancho máximo útil** | **1152px** (`max-w-6xl`) · tarjetas centradas `max-w-5xl` (1024px) o `max-w-4xl` (896px) | PresentationMode:1005, 1012, 1169 |
+
+#### 10.4.1 Las 3 Fases Automáticas de Diapositiva por Nodo:
+
+1. **Fase 1: Título y Cuerpo (`phase === 'body'`)**:
+   - **Breadcrumb padre**: `text-xs sm:text-sm font-medium mb-3` (clic salta al padre).
+   - **Encabezado principal (Título)**: Adaptativo según escala: `text-3xl sm:text-5xl md:text-6xl` (normal), `text-4xl sm:text-6xl md:text-7xl` (large), `text-2xl sm:text-4xl` (compact).
+   - **Cuerpo / Subtítulo**: `text-lg sm:text-xl md:text-2xl max-w-3xl mb-6 font-normal whitespace-pre-wrap leading-relaxed`. Paginado automáticamente si excede ~450 caracteres (o ~280 con imagen).
+   - **Imagen adjunta**:
+     - Con cuerpo extenso: Columna en Grid 12 (col-span-5 imagen, col-span-7 texto).
+     - Sin cuerpo extenso: Bloque centrado encima del título.
+     - Dimensiones: Small (`max-h-36 max-w-[180px]`), Medium (`max-h-60 max-w-[420px]`), Large (`max-h-80 max-w-[560px]`).
+   - **Badges inferiores**: Progreso (`px-3.5 py-1 rounded-full text-xs font-bold`) y tags (`px-3 py-1 rounded-full text-xs`).
+
+2. **Fase 2: Notas del Presentador (`phase === 'notes'`)**:
+   - Diapositiva dedicada si el nodo posee nota Markdown.
+   - **Barra de contexto**: Thumbnail de imagen (si existe, `w-9 h-9 rounded-lg`), icono de nodo, título truncado (`text-lg sm:text-xl`) y badge `Notas (X de Y)`.
+   - **Tarjeta de notas**: `w-full max-w-4xl rounded-2xl p-6 sm:p-8 shadow-2xl border` con render Markdown completo sin barras de desplazamiento (paginado automático cada ~550 caracteres o 9 líneas).
+
+3. **Fase 3: Subtemas y Conectores (`phase === 'children'`)**:
+   - Diapositiva dedicada si el nodo tiene subnodos hijos.
+   - **Grid de subtemas**: `grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 mb-4` (máximo 6 subtemas por diapositiva; si hay más se pagina `Subtemas 1-6 de N`, etc.).
+   - **Tarjetas de subtema**: `p-4 rounded-2xl border transition-all cursor-pointer hover:scale-102 hover:shadow-xl hover:border-blue-500`. Clic salta directamente a la diapositiva del subtema.
+   - **Fila de Enlaces / Conectores cruzados**: Grid de tarjetas compactas `p-2.5 rounded-xl border flex items-center justify-between gap-2 hover:border-pink-500` con icono `ExternalLink`.
+
+---
+
+### 10.5 Barra de navegación inferior (Footer, alto 48px)
+
+`src/components/PresentationMode.tsx:1348-1428`
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| **Contenedor footer** | `flex items-center justify-between max-w-4xl mx-auto w-full shrink-0 h-12 gap-2 sm:gap-4 px-2` | PresentationMode:1349 |
+| **Botón Anterior** | `px-3 sm:px-4 py-2 rounded-xl border text-xs font-semibold shadow-2xs` · icono ChevronLeft `w-4 h-4` | PresentationMode:1352-1364 |
+| **Botón Inicio Tema (Padre)** | `px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-semibold` · texto truncado `max-w-[120px] sm:max-w-[160px]` | PresentationMode:1367-1380 |
+| **Paginador de Diapositivas (Dots)** | Contenedor `max-w-xs overflow-hidden gap-1` · Diapositiva activa: cápsula `w-6 h-2 rounded-full bg-blue-500` · Inactivas: punto `w-2 h-2 rounded-full` | PresentationMode:1384-1400 |
+| **Botón Siguiente Tema** | `px-2.5 sm:px-3 py-2 rounded-xl border text-xs font-semibold` · salta directo a la siguiente rama hermana | PresentationMode:1404-1416 |
+| **Botón Siguiente** | `px-3 sm:px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-semibold shadow-md` · icono ChevronRight `w-4 h-4` | PresentationMode:1418-1426 |
+
+---
+
+### 10.6 Modal de configuración de presentación (Tecla E)
+
+`src/components/PresentationMode.tsx:712-1002`
+
+| Propiedad / Sección | Medida | Origen |
+|---------------------|--------|--------|
+| **Backdrop** | `fixed inset-0 z-60 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4` | PresentationMode:713 |
+| **Tarjeta modal** | `w-full max-w-xl rounded-2xl border p-6 shadow-2xl max-h-[85vh] overflow-y-auto space-y-4` (ancho **576px**) | PresentationMode:714-718 |
+| **Cabecera modal** | Icono SlidersHorizontal en caja `w-8 h-8 rounded-xl` + título `text-sm font-bold` + botón cerrar `w-4 h-4` | PresentationMode:720-740 |
+| **Selector de Temas** | Grid `grid-cols-2 sm:grid-cols-4 gap-2` con los 8 temas sincronizados · tarjetas `p-2.5 rounded-xl border` | PresentationMode:748-775 |
+| **Tamaño de Imágenes** | Grupo de 4 botones toggle: Pequeña / Mediana / Grande / Ocultar (`grid-cols-4 gap-1 p-1 rounded-xl`) | PresentationMode:785-842 |
+| **Switches de visualización** | Switches de toggle píldora `w-9 h-5 rounded-full`: Notas (`showNotes`), Subtemas (`showChildrenCards`), Conectores (`showConnectorsCards`), MiniMapa radar (`showMiniMap`) | PresentationMode:844-922 |
+| **Alineación y Escala** | Alineación Centro / Izquierda + Escala Compacto / Normal / Grande | PresentationMode:924-978 |
+| **Pie del modal** | Botón enlace «Editar en Lienzo» + Botón primario «Aplicar y Ver Diapositiva» (`px-5 py-2 bg-blue-600 rounded-xl text-xs font-bold`) | PresentationMode:980-999 |
+
+---
+
+### 10.7 Atajos de teclado soportados
+
+`src/components/PresentationMode.tsx:505-548`
+
+- `Espacio` / `Flecha Derecha`: Siguiente diapositiva.
+- `Flecha Izquierda`: Diapositiva anterior.
+- `Flecha Arriba`: Ir al inicio del tema (nodo padre).
+- `Flecha Abajo`: Saltar al siguiente tema (rama hermana).
+- `Backspace`: Volver de un salto interactivo (Return Jump a la tarjeta previa).
+- `Tecla E`: Abrir / cerrar modal de configuración.
+- `Tecla M`: Conmutar visibilidad del radar MiniMapa.
+- `Escape`: Salir inmediatamente del modo presentación.
+
+---
+
+## 11. Modo Presentación Elaborada (Prezi Espacial) — detallada
+
+`src/components/Presentation/ElaboratePresentationSystem.tsx:382-785`
+
+![Medidas del Modo Presentación Elaborada](img/medidas-presentation-elaborate.svg)
+
+### 11.1 Contenedor raíz y lienzo infinito 2.5D
+
+| Propiedad | Medida | Origen |
+|-----------|--------|--------|
+| **Posicionamiento** | `fixed inset-0 z-50 bg-slate-950 text-slate-100 flex flex-col overflow-hidden` | ElaboratePresentationSystem:382 |
+| **Viewport espacial** | Ocupa el 100% del espacio central (`flex-1 w-full h-full relative cursor-grab`) con fondo radial degradado `from-slate-900 via-slate-950 to-black` | ElaboratePresentationSystem:507-512 |
+| **Cámara cinemática** | Matriz de transformación inversa Prezi: `translate3d(x, y, 0) scale(zoom) rotate(deg)` con transición de vuelo de **750ms** (`cubic-bezier(0.25, 1, 0.5, 1)`) | ElaboratePresentationSystem:516-519 |
+| **Línea de vuelo (Trayectoria)** | Trazo SVG continuo `strokeWidth=4` con gradiente (`#8b5cf6` → `#3b82f6` → `#ec4899`), patrón `strokeDasharray="8 8"` y resalte glow `drop-shadow` | ElaboratePresentationSystem:523-542 |
+
+---
+
+### 11.2 Barra de control superior (Top HUD, alto 56px)
+
+`src/components/Presentation/ElaboratePresentationSystem.tsx:384-504`
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| **Contenedor superior** | `h-14` (**56px**) · `px-4` · `bg-slate-900/90 backdrop-blur-md border-b border-slate-800` | ElaboratePresentationSystem:384 |
+| **Badge de modo** | `px-3 py-1 rounded-xl shadow-md text-xs font-bold` con gradiente `from-purple-600 to-indigo-600` | ElaboratePresentationSystem:386-389 |
+| **Título del mapa** | `text-sm font-semibold text-slate-300 truncate max-w-xs sm:max-w-md` | ElaboratePresentationSystem:390-392 |
+| **Conmutador de modo (Centro)** | Caja `p-1 rounded-xl border border-slate-700/60 text-xs font-bold`: botón «Editor del Lienzo» (`bg-indigo-600`) y botón «Presentar (F5)» (`bg-emerald-600`) | ElaboratePresentationSystem:396-421 |
+| **Selector de acomodo espacial** | Grupo `bg-slate-800/80 p-1 rounded-xl` con 5 algoritmos cinemáticos: Espiral, Constelación, Matriz, Randómico y En Pila (Mazo) | ElaboratePresentationSystem:428-462 |
+| **Botón «Nueva Tarjeta»** | `px-3 py-1.5 bg-blue-600 rounded-xl text-xs font-bold shadow` · inserta tarjeta de 720×440px | ElaboratePresentationSystem:465-492 |
+| **Botón Cerrar (Salir)** | `p-2 rounded-xl text-slate-400 hover:text-white` · icono X `w-5 h-5` (20px) | ElaboratePresentationSystem:496-502 |
+
+---
+
+### 11.3 Tarjetas Espaciales (`SpatialSlideCardComponent`, 720×440px)
+
+`src/components/Presentation/SpatialSlideCardComponent.tsx:156-372`
+
+| Propiedad / Elemento | Medida | Origen |
+|----------------------|--------|--------|
+| **Dimensiones base** | Ancho fijo **720px** · Alto mínimo **440px** (`width: 720px, minHeight: 440px`) | spatialPresentationGenerator:88-89 |
+| **Bordes y esquinas** | `rounded-3xl` (**24px**) · borde de 2px a 3px (raíz) con sombra de selección de radio 50px a 80px | SpatialSlideCardComponent:170-185 |
+| **Padding interno** | `p-6` (**24px**) con disposición vertical `flex flex-col justify-between` | SpatialSlideCardComponent:179 |
+| **Cabecera de tarjeta** | Badge orden `px-2.5 py-0.5 rounded-full text-xs font-extrabold` (`#1`, `#2`...) + tags `px-2 py-0.5 rounded-md text-[11px]` | SpatialSlideCardComponent:188-206 |
+| **Barra de acción rápida (Hover)** | Botón Editar (`text-xs`), Duplicar (desplaza +80px en X e Y) y Eliminar | SpatialSlideCardComponent:209-243 |
+| **Cuerpo de contenido** | Título `text-2xl sm:text-3xl font-bold` + cuerpo `text-base sm:text-lg` + cuadrícula de subtemas en cápsulas `px-3 py-1.5 rounded-xl text-xs` | SpatialSlideCardComponent:268-309 |
+
+#### 11.3.1 Manillas de transformación en modo Editor:
+- **Rotación (Superior)**: Manilla circular `w-8 h-8 rounded-full bg-blue-600 border-2 border-white` situada a `-top-10` (-40px) del centro con línea conectora vertical.
+- **Desplazamiento (Inferior)**: Cápsula indicadora `-bottom-4` con coordenadas en tiempo real: `Mover (X, Y) • Rot°`.
+- **Escala / Redimensionamiento**: 4 tiradores circulares de esquina `w-5 h-5 rounded-full bg-blue-600 border-2 border-white`.
+
+---
+
+### 11.4 Controles flotantes y Tira de miniaturas (Filmstrip HUD)
+
+`src/components/Presentation/ElaboratePresentationSystem.tsx:640-770`
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| **Zoom y Navegación rápida (Flotante)** | Caja vertical `absolute bottom-20 left-4 z-40 bg-slate-900/90 backdrop-blur-md p-1 rounded-2xl border`: botones ZoomIn, ZoomOut y Vista Panorámica (Compass) | ElaboratePresentationSystem:641-664 |
+| **Línea de progreso general** | Franja superior de `h-1` (**4px**) con gradiente púrpura/azul y efecto resplandor | ElaboratePresentationSystem:670-677 |
+| **Tira Filmstrip de Diapositivas** | Contenedor horizontal con scroll `px-4 py-2 flex items-center gap-2 border-b border-slate-800/80` · miniaturas individuales con badge numérico circular `w-4 h-4` y título truncado a `max-w-[130px]` | ElaboratePresentationSystem:680-706 |
+| **Barra inferior de navegación** | Altura fija `h-12` (**48px**) · `px-4 flex items-center justify-between` | ElaboratePresentationSystem:710 |
+| · Contador de diapositivas | `text-xs font-bold font-mono` (`{currentSlideIndex + 1} / {slides.length}`) + título activo | ElaboratePresentationSystem:711-716 |
+| · Botones de vuelo cinemático | Anterior (ChevronLeft `w-5 h-5`), Vista Panorámica (Compass `w-5 h-5`) y Siguiente (`px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl text-xs font-bold`) | ElaboratePresentationSystem:718-758 |
+| · Alternador de Filmstrip | Botón Layers `p-1.5 rounded-lg` para ocultar o desplegar la tira | ElaboratePresentationSystem:761-768 |
+
+---
+
+### 11.5 Modal de Edición de Diapositiva (`SlideDetailModal`)
+
+`src/components/Presentation/SlideDetailModal.tsx:67-278`
+
+| Propiedad | Medida | Origen |
+|-----------|--------|--------|
+| **Backdrop** | `fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4` | SlideDetailModal:67 |
+| **Tarjeta modal** | `w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl bg-slate-900 border border-slate-700/80` (ancho **768px**) | SlideDetailModal:68-71 |
+| **Cabecera modal** | `px-6 py-4 border-b border-slate-800 flex items-center justify-between` con badge `#order` y botón cerrar | SlideDetailModal:73-86 |
+| **Cuerpo con scroll** | `p-6 overflow-y-auto space-y-5 flex-1` con campos para Título, Subtítulo, Imagen URL, Notas Markdown con vista previa, selector de Tema, Alineación y sliders de Escala (0.5 a 2.5) y Rotación (-180° a 180°) | SlideDetailModal:89-250 |
+| **Pie de acciones** | `px-6 py-4 border-t border-slate-800 flex items-center justify-end gap-3`: botón Cancelar y botón «Guardar Diapositiva» (`px-5 py-2 rounded-xl text-xs font-bold bg-blue-600`) | SlideDetailModal:252-272 |
+
+---
+
+### 11.6 Atajos de teclado soportados
+
+`src/components/Presentation/ElaboratePresentationSystem.tsx:340-378`
+
+- `Espacio` / `Flecha Derecha`: Vuelo cinemático a la siguiente diapositiva.
+- `Flecha Izquierda`: Diapositiva anterior.
+- `Tecla O` / `Compass`: Conmutar vista panorámica completa del tablero (Overview).
+- `F5`: Conmutar entre modo Editor y modo Presentar.
+- `Doble Clic` en tarjeta: Abrir diseñador de diapositiva (`SlideDetailModal`).
+- `Arrastrar tablero`: Desplazamiento panorámico (Pan infinito).
+- `Rueda del ratón`: Zoom continuo (rango 0.15 a 3.0).
+- `Escape`: Salir inmediatamente de la presentación elaborada y volver al editor general.
+
+---
+
+## 12. Modo Presentación Dinámica (Canvas HUD & SlideFrames) — detallada
+
+`src/components/organisms/canvas/CanvasPresentationHUD.tsx:58-489`  
+`src/components/organisms/canvas/CanvasDrawingOverlay.tsx:15-94`  
+`src/components/MindMapCanvas.tsx:288-400, 1493-1540`
+
+![Medidas del Modo Presentación Dinámica](img/medidas-presentation-dynamic.svg)
+
+### 12.1 Contenedor raíz y visualización sobre el lienzo real
+
+| Propiedad | Medida | Origen |
+|-----------|--------|--------|
+| **Capa de overlay HUD** | `absolute inset-0 pointer-events-none flex flex-col justify-between z-50` | CanvasPresentationHUD:91 |
+| **Naturaleza del lienzo** | No se clona ni se recrea: **opera directamente sobre el lienzo SVG/DOM real de `MindMapCanvas`** | MindMapCanvas:1506-1540 |
+| **Cámara cinemática** | Transición de paneo y zoom: `transform 750ms cubic-bezier(0.25, 1, 0.5, 1)` | MindMapCanvas:885 |
+| **Atenuación de contexto** | Los nodos ajenos al marco activo reducen su opacidad a `0.25` (`!isHighlighted` → opacidad atenuada) | MindMapCanvas:1373 |
+
+---
+
+### 12.2 Barra de control superior (Top Presentation Bar, alto 56px)
+
+`src/components/organisms/canvas/CanvasPresentationHUD.tsx:93-195`
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| **Contenedor superior** | `h-14` (**56px**) · `px-4` · `bg-slate-900/90 backdrop-blur-md border-b border-slate-800 pointer-events-auto` | CanvasPresentationHUD:93 |
+| **Badge de modo** | `px-3 py-1 rounded-xl text-xs font-bold bg-blue-600/20 text-blue-400 border border-blue-500/30` | CanvasPresentationHUD:95-98 |
+| **Título del mapa** | `text-sm font-semibold text-slate-300 truncate max-w-[260px] sm:max-w-md` | CanvasPresentationHUD:99-101 |
+| **Conmutador de modo (Centro)** | Caja `p-1 rounded-xl border border-slate-700/60 text-xs font-bold`: botón «Editor de Marcos» (`bg-blue-600`) y botón «Presentar (F5)» (`bg-emerald-600`) | CanvasPresentationHUD:105-126 |
+| **Historial Deshacer/Rehacer** | Grupo `bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60`: botones Undo / Redo (`w-4 h-4`) | CanvasPresentationHUD:132-151 |
+| **Acciones del editor** | Botón «Empezar de Cero» (Trash2, `bg-red-950/40 text-red-300`) y botón «Auto-generar» (RotateCcw, `bg-slate-800 text-slate-300`) | CanvasPresentationHUD:153-181 |
+| **Botón Salir (Cerrar)** | `p-1.5 rounded-lg text-slate-400 hover:text-white` · icono X `w-5 h-5` (20px) | CanvasPresentationHUD:184-193 |
+
+---
+
+### 12.3 Píldora flotante de herramientas del Editor
+
+`src/components/organisms/canvas/CanvasPresentationHUD.tsx:198-304`
+
+| Propiedad / Herramienta | Medida | Origen |
+|-------------------------|--------|--------|
+| **Posicionamiento** | `absolute top-16 left-1/2 -translate-x-1/2 z-40 pointer-events-auto` | CanvasPresentationHUD:199 |
+| **Contenedor píldora** | `bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-700/80 shadow-2xl flex items-center gap-2 text-xs` | CanvasPresentationHUD:199 |
+| **Herramienta 1: Seleccionar Nodo** | Botón `px-3 py-1 rounded-xl font-bold` (CheckSquare `w-3.5 h-3.5`) · activo `bg-blue-600 text-white` | CanvasPresentationHUD:201-210 |
+| **Herramienta 2: Dibujar Recuadro** | Botón `px-3 py-1 rounded-xl font-bold` (Crop `w-3.5 h-3.5`) · activo `bg-indigo-600 text-white` | CanvasPresentationHUD:212-221 |
+| **Herramienta 3: Navegar / Mover** | Botón `px-3 py-1 rounded-xl font-bold` (MousePointer `w-3.5 h-3.5`) · activo `bg-emerald-600 text-white` | CanvasPresentationHUD:223-232 |
+| **Botón Crear Marco con Selección** | Visible al seleccionar ≥1 nodo: `px-3 py-1 bg-blue-600 rounded-lg text-xs font-bold shadow-md` con contador `{stagedNodeIds.size}` | CanvasPresentationHUD:241-301 |
+
+---
+
+### 12.4 Capa de Marcos de Diapositiva (`CanvasDrawingOverlay`, `SlideFrame`)
+
+`src/components/organisms/canvas/CanvasDrawingOverlay.tsx:25-94`
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| **Plano de marcos** | `absolute inset-0 pointer-events-none` sobre las coordenadas reales del mapa | CanvasDrawingOverlay:25 |
+| **Marco inactivo** | `rounded-3xl border-2 border-dashed border-slate-500/40 bg-slate-800/5` | CanvasDrawingOverlay:41-45 |
+| **Marco activo (Enfocado)** | `rounded-3xl border-2 border-blue-400 bg-blue-500/10 shadow-[0_0_35px_rgba(59,130,246,0.3)] ring-2 ring-blue-400/50` | CanvasDrawingOverlay:41-44 |
+| **Badge de orden interactivo** | Situado a `-top-3.5` (-14px) del borde superior del marco con offset horizontal escalonado `16 + (order % 4) * 32px` · clic enfoca directamente ese marco | CanvasDrawingOverlay:48-69 |
+| **Recuadro de dibujo en curso** | `rounded-2xl border-2 border-dashed border-blue-400 bg-blue-500/20 shadow-25px` con badge de medidas en vivo `({ancho} × {alto})` | CanvasDrawingOverlay:76-91 |
+
+---
+
+### 12.5 Cajón flotante de Notas del Orador (Drawer)
+
+`src/components/organisms/canvas/CanvasPresentationHUD.tsx:323-365`
+
+| Propiedad | Medida | Origen |
+|-----------|--------|--------|
+| **Posicionamiento** | `absolute top-20 right-6 sm:right-10 z-50 pointer-events-auto` | CanvasPresentationHUD:343 |
+| **Dimensiones** | Ancho: `w-84` (**336px**), en pantallas grandes `sm:w-96` (**384px**) · Altura máxima: `max-h-[70vh]` | CanvasPresentationHUD:343 |
+| **Estilo de tarjeta** | `bg-slate-900/98 backdrop-blur-xl rounded-2xl border-2 border-amber-500/60 shadow-[0_0_40px_rgba(245,158,11,0.25)] p-4` | CanvasPresentationHUD:343 |
+| **Cabecera** | Badge ámbar `#Nota Detallada` + nombre del nodo truncate `max-w-[160px]` + botón cerrar | CanvasPresentationHUD:344-359 |
+| **Cuerpo con scroll** | `overflow-y-auto pr-1 text-xs space-y-2 text-slate-200` con renderizador Markdown completo | CanvasPresentationHUD:360-363 |
+
+---
+
+### 12.6 Barra inferior y Filmstrip (HUD)
+
+`src/components/organisms/canvas/CanvasPresentationHUD.tsx:368-486`
+
+| Elemento | Medida | Origen |
+|----------|--------|--------|
+| **Línea de progreso** | Franja superior de `h-1` (**4px**) con barra azul rellena según `((idx + 1) / total) * 100%` | CanvasPresentationHUD:370-377 |
+| **Tira Filmstrip horizontal** | `px-4 py-2 overflow-x-auto flex items-center gap-2 border-b border-slate-800/80` · miniaturas individuales con badge circular `w-4 h-4` y botón eliminar en hover (modo editor) | CanvasPresentationHUD:380-418 |
+| **Barra de acciones inferior** | Altura fija `h-12` (**48px**) · `px-4 flex items-center justify-between` | CanvasPresentationHUD:421 |
+| · Contador | `font-mono font-bold text-white` (`{currentSlideIndex + 1} / {slides.length}`) + título de marco truncate | CanvasPresentationHUD:422-429 |
+| · Botones de navegación | Anterior (ChevronLeft `w-5 h-5`), Vista General (Compass `w-5 h-5`) y Siguiente (`px-4 py-2 bg-blue-600 rounded-xl font-bold text-xs`) | CanvasPresentationHUD:431-461 |
+| · Botones laterales | Botón de Notas (FileText `w-4 h-4`, activo `bg-blue-500/20`) y botón Filmstrip (Layers `w-4 h-4`) | CanvasPresentationHUD:463-484 |
+
+---
+
+### 12.7 Atajos de teclado soportados
+
+`src/components/MindMapCanvas.tsx:353-394`
+
+- `Espacio` / `Flecha Derecha`: Siguiente diapositiva (enfoca y panea la cámara automáticamente al marco).
+- `Flecha Izquierda` / `Backspace`: Diapositiva anterior.
+- `Tecla O` / `Home`: Conmutar vista general del mapa (Overview).
+- `F5`: Conmutar entre Editor de Marcos y Modo Presentar.
+- `Tecla N`: Abrir / cerrar cajón de notas del orador.
+- `Ctrl+Z` / `Ctrl+Y`: Deshacer y rehacer cambios de marcos en modo editor.
+- `Escape`: Salir inmediatamente del modo presentación y restaurar las barras del editor.
+
+---
+
 ## Resumen de alturas (columna vertical)
 
 | Barra | Alto | px |

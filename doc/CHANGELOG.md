@@ -1708,3 +1708,74 @@ Completar §6.6 de doc/MEASURES.md. El SVG previo doc/img/medidas-theme-tab.svg 
 - [x] Validacion XML (.NET): OK (14/14 SVG) tras corregir `&&` sin escapar y el `</svg>` duplicado.
 - [x] Verificacion por DOM (browser.evaluate): 169 textos, 0 desbordes de lienzo; render visual capturado sin solapes; pestanas /@fs/ y de la app cerradas.
 - [x] Sin cambios de codigo.
+
+---
+
+## 📏 [Docs] — 2026-10-19: §10 Modo Presentación Clásica — Medidas detalladas y diagrama SVG 1:1
+
+### 🎯 Motivo
+Documentar exhaustivamente las dimensiones, disposición y anatomía del Modo Presentación Clásica (`PresentationMode.tsx`), que no contaba con hoja de medidas ni diagrama arquitectónico.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-presentation-classic.svg` | Nuevo (viewBox 1380×960, XML validado): wireframe a escala 1:1 de pantalla completa (100vw × 100vh) mostrando Header h-10 (40px) con badges y controles · Radar MiniMapa superior translúcido (w-52..w-80 × h-14..h-18) con resalte pulsante del nodo activo · Canvas central max-w-6xl (1152px) · Footer h-12 (48px) con paginador de dots y navegación de temas · Fila inferior con el detalle de las 3 Fases Automáticas de cada nodo (Fase 1 Spotlight con imagen fija, Fase 2 Notas Markdown paginadas, Fase 3 Subtemas y conectores) · Columna derecha con resumen exhaustivo de cotas, modal de configuración (Tecla E) y tabla de atajos de teclado. |
+| `doc/MEASURES.md` | Nueva sección **§10. Modo Presentación Clásica (`PresentationMode`)** insertada antes del resumen general: §10.1 Contenedor raíz y overlay de pantalla completa · §10.2 Header superior · §10.3 Radar MiniMapa superior · §10.4 Zona central de diapositiva y desglose de las 3 Fases automáticas sin scrollbars · §10.5 Footer de navegación · §10.6 Modal de configuración (Tecla E) · §10.7 Atajos de teclado soportados. |
+
+### 🔍 Verificación
+- [x] Líneas de código contrastadas directamente con `src/components/PresentationMode.tsx` (overlay 610, header 613-709, radar minimap 1430-1604, layout central 1004-1346, footer 1348-1428, config modal 712-1002, shortcuts 505-548).
+- [x] Validación XML (.NET): Exitosa (`XML OK`).
+
+---
+
+## 📏 [Docs] — 2026-10-19: §11 Modo Presentación Elaborada (Prezi Espacial) — Medidas detalladas y diagrama SVG 1:1
+
+### 🎯 Motivo
+Documentar exhaustivamente las dimensiones, disposición espacial y anatomía del sistema de Presentación Elaborada (`ElaboratePresentationSystem.tsx`, `SpatialSlideCardComponent.tsx`, `SlideDetailModal.tsx` y `spatialPresentationGenerator.ts`), que no contaba con hoja de medidas ni diagrama arquitectónico.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-presentation-elaborate.svg` | Nuevo (viewBox 1380×960, XML validado): wireframe a escala 1:1 de pantalla completa mostrando Top HUD Bar h-14 (56px) con selector de modo Editor/Presentar y acomodo · Lienzo infinito 2.5D con trayectoria Prezi en gradiente púrpura/azul/rosa · Tarjetas Espaciales base 720×440px con manillas interactivas (rotación superior -top-10 con tirador 32×32, botón mover inferior -bottom-4, y tiradores de esquina 20×20) · Controles flotantes de navegación rápida (zoom y vista panorámica) · Filmstrip inferior con barra de progreso h-1, tira de miniaturas con badges y footer h-12 con botones de vuelo cinemático · Fila inferior con el desglose de los 5 patrones de acomodo espacial (Espiral, Constelación, Matriz, Randómico y Mazo de cartas) · Columna derecha con resumen exhaustivo de cotas, modal de diseño de diapositiva (`SlideDetailModal`, 768px) y tabla de atajos de teclado. |
+| `doc/MEASURES.md` | Nueva sección **§11. Modo Presentación Elaborada (Prezi Espacial)** insertada antes del resumen general: §11.1 Contenedor raíz y lienzo infinito 2.5D · §11.2 Top HUD bar (56px) · §11.3 Tarjetas espaciales (720×440px) y manillas de transformación · §11.4 Controles flotantes y Tira de miniaturas (Filmstrip HUD) · §11.5 Modal de edición de diapositiva (`SlideDetailModal`) · §11.6 Atajos de teclado soportados. |
+
+### 🔍 Verificación
+- [x] Líneas de código contrastadas directamente con `src/components/Presentation/ElaboratePresentationSystem.tsx`, `SpatialSlideCardComponent.tsx`, `SlideDetailModal.tsx` y `spatialPresentationGenerator.ts`.
+- [x] Validación XML (.NET): Exitosa (`XML OK`).
+
+---
+
+## 📏 [Docs] — 2026-10-19: §12 Modo Presentación Dinámica (Canvas HUD & SlideFrames) — Medidas detalladas y diagrama SVG 1:1
+
+### 🎯 Motivo
+Completar la trilogía de modos de presentación en `doc/MEASURES.md`. Documentar las dimensiones, comportamiento y arquitectura visual del Modo Dinámico (`CanvasPresentationHUD.tsx`, `CanvasDrawingOverlay.tsx` y la lógica de foco/paneo en `MindMapCanvas.tsx`), que no contaba con hoja de medidas ni diagrama arquitectónico.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/img/medidas-presentation-dynamic.svg` | Nuevo (viewBox 1380×960, XML validado): wireframe a escala 1:1 de pantalla completa mostrando Top Presentation Bar h-14 (56px) con conmutador Editor de Marcos / Presentar (F5), historial Undo/Redo y auto-generador · Píldora flotante de herramientas del editor (top-16, 510×34px) con botones de selección de nodos, recuadro y navegación · Lienzo mental real con atenuación dinámica (opacity 0.25) · Marcos de diapositiva (`SlideFrame`) con badges interactivos flotantes (-top-3.5) · Cajón flotante de notas del orador (`w-84..w-96`, top-20 right-6, borde ámbar) · Barra inferior de navegación h-12 con línea de progreso h-1 y filmstrip de miniaturas · Fila inferior con el desglose de los 2 modos (Play cinemático vs Editor de marcos) y el drawer de notas Markdown · Columna derecha con resumen exhaustivo de cotas y tabla de atajos de teclado. |
+| `doc/MEASURES.md` | Nueva sección **§12. Modo Presentación Dinámica (Canvas HUD & SlideFrames)** insertada antes del resumen general: §12.1 Contenedor raíz y visualización sobre el lienzo real · §12.2 Top Presentation Bar (56px) · §12.3 Píldora flotante de herramientas · §12.4 Capa de marcos de diapositiva (`SlideFrame`) · §12.5 Cajón flotante de notas del orador · §12.6 Barra inferior y Filmstrip (HUD) · §12.7 Atajos de teclado soportados. |
+
+### 🔍 Verificación
+- [x] Líneas de código contrastadas directamente con `src/components/organisms/canvas/CanvasPresentationHUD.tsx`, `src/components/organisms/canvas/CanvasDrawingOverlay.tsx` y `src/components/MindMapCanvas.tsx`.
+- [x] Validación XML (.NET): Exitosa (`XML OK`).
+
+---
+
+## 🌳 [Docs] — 2026-10-19: Actualización exhaustiva de `doc/FEATURE_TREE.md` (§2 Árbol por interfaz)
+
+### 🎯 Motivo
+Hacer justicia al objetivo del *Feature Tree*: documentar la acción técnica exacta que dispara cada control, detallando las dependencias y bifurcaciones de estado contextuales (los controles cambian según la opción activa: e.g. fondo sólido vs degradado vs trama vs imagen, recta vs curva en conectores, nube activa vs inactiva, herramientas de marcos).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/FEATURE_TREE.md` | Actualizado §2 con las mutaciones de store y bifurcaciones de estado exactas en: **ToolPanel** (Texto con subida de imagen y tags, Estilos con desglose exhaustivo de los 5 tipos de `bgType`, bordes y propagación recursiva a hijos/hermanos, Notas Markdown, Iconos, Nubes con condicional `cloud.enabled` y Mapa global), **Modales** (Exportar e Importar con validaciones y DOMParser, Conector con condicional de curvatura para rectas vs curvas, Plantillas, Mapas Guardados y Pack de Iconos) y **Presentaciones** (Clásica con `jumpHistory` y fases, Elaborada Prezi con matriz inversa y generadores espaciales, y Dinámica con `editorTool` y `SlideFrame`). |
+
+### 🔍 Verificación
+- [x] Controles y llamadas a `updateNode` / `setMindMap` / `pushHistory` contrastados directamente con el código fuente en `src/components/organisms/toolpanel/`, `src/components/Modals/` y `src/components/Presentation/`.
+- [x] Sin cambios de código.
+
+
+
+

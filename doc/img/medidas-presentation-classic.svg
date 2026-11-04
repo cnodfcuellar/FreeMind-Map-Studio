@@ -1,0 +1,257 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="960" viewBox="0 0 1380 960" font-family="'Plus Jakarta Sans', system-ui, sans-serif">
+  <defs>
+    <marker id="cap" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,4 L1,7" fill="none" stroke="#f59e0b" stroke-width="1.4"/>
+    </marker>
+    <style>
+      .cota { stroke:#f59e0b; stroke-width:1; }
+      .cota-txt { font-size:11px; fill:#b45309; font-weight:700; }
+      .lbl { font-size:12px; fill:#334155; font-weight:600; }
+      .lbl-sm { font-size:10.5px; fill:#64748b; }
+      .area-name { font-size:13px; font-weight:800; }
+      .badge-txt { font-size:10.5px; font-weight:700; }
+    </style>
+  </defs>
+
+  <!-- Fondo General de la Lámina -->
+  <rect width="1380" height="960" rx="16" fill="#0f172a"/>
+  <text x="36" y="44" font-size="22" font-weight="700" fill="#ffffff">PresentationMode §10 — Modo Presentación Clásica — Medidas detalladas</text>
+  <text x="36" y="68" font-size="12.5" fill="#93c5fd">Escala 1:1 · PresentationMode.tsx:604-1606 · Overlay pantalla completa (100vw × 100vh) · Pila flex col + HUD flotante</text>
+
+  <!-- ========================================================================= -->
+  <!-- VISTA WIREFRAME DE LA PANTALLA COMPLETA A ESCALA (880 × 580 px, y: 110)   -->
+  <!-- ========================================================================= -->
+  <g id="screen-wireframe">
+    <!-- Marco de pantalla (100vw × 100vh simulado) -->
+    <rect x="50" y="110" width="880" height="580" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+
+    <!-- 1. HEADER (Top Bar) alto 40px -->
+    <rect x="50" y="110" width="880" height="40" fill="#ffffff" stroke="#e2e8f0"/>
+    <!-- Badges Izquierda -->
+    <rect x="66" y="117" width="168" height="26" rx="13" fill="#dbeafe" stroke="#93c5fd"/>
+    <text x="76" y="134" class="badge-txt" fill="#1d4ed8">✦ Modo Presentación Clásica</text>
+
+    <rect x="242" y="118" width="118" height="24" rx="6" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="250" y="134" font-size="10" font-weight="700" fill="#1d4ed8">📖 Tema Principal (1/1)</text>
+
+    <!-- Acciones Derecha -->
+    <rect x="686" y="116" width="70" height="28" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="696" y="134" font-size="11" font-weight="600" fill="#334155">⚙ Editar</text>
+
+    <rect x="764" y="116" width="56" height="28" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="778" y="134" font-size="11" font-family="monospace" font-weight="700" fill="#475569">1 / 14</text>
+
+    <rect x="828" y="116" width="30" height="28" rx="8" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="838" y="134" font-size="13" font-weight="700" fill="#475569">✕</text>
+
+    <!-- 2. RADAR MINIMAP FLOTANTE (Top Center, y: 118, centrado en x: 490) -->
+    <!-- Contenedor translúcido 260 × 48 -->
+    <rect x="360" y="116" width="260" height="48" rx="14" fill="#ffffff" fill-opacity="0.85" stroke="#cbd5e1" stroke-width="1.2" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.08))"/>
+    <!-- Lienzo Mini SVG -->
+    <rect x="370" y="122" width="170" height="36" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+    <!-- Nodos del minimap -->
+    <circle cx="430" cy="140" r="4" fill="#3b82f6"/>
+    <circle cx="470" cy="132" r="3" fill="#64748b"/>
+    <circle cx="470" cy="148" r="3" fill="#64748b"/>
+    <path d="M434,140 L467,132 M434,140 L467,148" stroke="#94a3b8" stroke-width="1.2"/>
+    <!-- Nodo activo con halo pulse -->
+    <circle cx="430" cy="140" r="7" fill="none" stroke="#38bdf8" stroke-width="2"/>
+    <circle cx="430" cy="140" r="2" fill="#ef4444"/>
+    <!-- Etiqueta activa -->
+    <line x1="548" y1="124" x2="548" y2="156" stroke="#e2e8f0" stroke-width="1"/>
+    <circle cx="558" cy="140" r="3" fill="#ef4444"/>
+    <text x="566" y="143" font-size="9" font-weight="700" fill="#0f172a">Nodo Raíz</text>
+
+    <!-- 3. ZONA CENTRAL DE DIAPOSITIVA (max-w-5xl = 760px simulado) -->
+    <rect x="110" y="190" width="760" height="350" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-dasharray="6 4"/>
+    
+    <!-- Breadcrumb -->
+    <text x="490" y="235" font-size="12" fill="#64748b" text-anchor="middle">Mapa Central → Estrategia 2026</text>
+
+    <!-- Título Principal -->
+    <text x="490" y="280" font-size="32" font-weight="800" fill="#0f172a" text-anchor="middle">Estrategia de Crecimiento Q1-Q4</text>
+
+    <!-- Cuerpo del Nodo -->
+    <text x="490" y="325" font-size="15" fill="#475569" text-anchor="middle">Plan detallado de expansión operativa y consolidación de mercado.</text>
+    <text x="490" y="348" font-size="15" fill="#475569" text-anchor="middle">Metas clave de producto con enfoque offline y máxima estabilidad.</text>
+
+    <!-- Badges Tags y Progreso -->
+    <rect x="360" y="380" width="110" height="26" rx="13" fill="#eff6ff" stroke="#93c5fd"/>
+    <text x="415" y="397" font-size="11" font-weight="700" fill="#2563eb" text-anchor="middle">Progreso: 85%</text>
+
+    <rect x="480" y="380" width="75" height="26" rx="13" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="517" y="397" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">#roadmap</text>
+
+    <rect x="565" y="380" width="60" height="26" rx="13" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="595" y="397" font-size="11" font-weight="600" fill="#475569" text-anchor="middle">#core</text>
+
+    <!-- 4. FOOTER (Bottom Navigation Bar) h-12 = 48px en y: 642 -->
+    <rect x="50" y="642" width="880" height="48" fill="#ffffff" stroke="#e2e8f0"/>
+    
+    <!-- Botones Izquierda: Anterior + Inicio de Tema -->
+    <rect x="70" y="650" width="82" height="32" rx="10" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="82" y="670" font-size="11" font-weight="700" fill="#475569">◀ Anterior</text>
+
+    <rect x="160" y="650" width="128" height="32" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+    <text x="172" y="670" font-size="11" font-weight="700" fill="#1d4ed8">⮤ Inicio: Raíz</text>
+
+    <!-- Paginador Central (Dots de diapositivas) -->
+    <circle cx="465" cy="666" r="3.5" fill="#94a3b8"/>
+    <rect x="476" y="663" width="22" height="7" rx="3.5" fill="#2563eb"/>
+    <circle cx="507" cy="666" r="3.5" fill="#94a3b8"/>
+    <circle cx="519" cy="666" r="3.5" fill="#94a3b8"/>
+    <circle cx="531" cy="666" r="3.5" fill="#94a3b8"/>
+
+    <!-- Botones Derecha: Siguiente Tema + Siguiente -->
+    <rect x="670" y="650" width="120" height="32" rx="10" fill="#faf5ff" stroke="#e9d5ff"/>
+    <text x="682" y="670" font-size="11" font-weight="700" fill="#7e22ce">Siguiente Tema ⏭</text>
+
+    <rect x="800" y="650" width="94" height="32" rx="10" fill="#2563eb"/>
+    <text x="814" y="670" font-size="11" font-weight="700" fill="#ffffff">Siguiente ▶</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COTAS Y GUÍAS VERTICALES DE LA PANTALLA PRINCIPAL                        -->
+  <!-- ========================================================================= -->
+  <!-- Cota Alto Pantalla 100vh = 580px (x=30) -->
+  <line x1="30" y1="110" x2="30" y2="690" class="cota"/>
+  <line x1="24" y1="110" x2="36" y2="110" class="cota"/>
+  <line x1="24" y1="690" x2="36" y2="690" class="cota"/>
+  <text x="18" y="405" class="cota-txt" text-anchor="middle" transform="rotate(-90 18 405)">100vh (h-screen)</text>
+
+  <!-- Cota Header h-10 = 40px (x=942) -->
+  <line x1="942" y1="110" x2="942" y2="150" class="cota"/>
+  <line x1="936" y1="110" x2="948" y2="110" class="cota"/>
+  <line x1="936" y1="150" x2="948" y2="150" class="cota"/>
+  <text x="955" y="134" class="cota-txt">40px (h-10)</text>
+
+  <!-- Cota Canvas Central flex-1 (x=942) -->
+  <line x1="942" y1="150" x2="942" y2="642" class="cota"/>
+  <line x1="936" y1="150" x2="948" y2="150" class="cota"/>
+  <line x1="936" y1="642" x2="948" y2="642" class="cota"/>
+  <text x="955" y="400" class="cota-txt">flex-1 (max-w-6xl = 1152px)</text>
+
+  <!-- Cota Footer h-12 = 48px (x=942) -->
+  <line x1="942" y1="642" x2="942" y2="690" class="cota"/>
+  <line x1="936" y1="642" x2="948" y2="642" class="cota"/>
+  <line x1="936" y1="690" x2="948" y2="690" class="cota"/>
+  <text x="955" y="670" class="cota-txt">48px (h-12)</text>
+
+  <!-- Cota Radar MiniMapa (x=490, arriba) -->
+  <line x1="360" y1="98" x2="620" y2="98" class="cota"/>
+  <line x1="360" y1="92" x2="360" y2="104" class="cota"/>
+  <line x1="620" y1="92" x2="620" y2="104" class="cota"/>
+  <text x="490" y="93" class="cota-txt" text-anchor="middle">MiniMapa Radar: w-52..w-80 (208..320px) × h-14..h-18 (56..72px)</text>
+
+  <!-- ========================================================================= -->
+  <!-- FILA INFERIOR: DETALLE DE LAS 3 FASES DE CONTENIDO (y: 720 a 920)        -->
+  <!-- ========================================================================= -->
+  <text x="50" y="728" font-size="14" font-weight="800" fill="#38bdf8">Estructura Modular de Diapositivas — Las 3 Fases Automáticas de Cada Nodo:</text>
+
+  <!-- FASE 1: Spotlight (Título, Cuerpo, Imagen) -->
+  <g transform="translate(50, 742)">
+    <rect width="280" height="185" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="12" y="12" width="105" height="20" rx="6" fill="#1e40af"/>
+    <text x="18" y="26" font-size="10" font-weight="700" fill="#93c5fd">Fase 1: Spotlight</text>
+    <text x="12" y="52" font-size="12" font-weight="700" fill="#ffffff">Título + Cuerpo (+ Imagen)</text>
+    <text x="12" y="72" font-size="10.5" fill="#94a3b8">· Encabezado adaptativo (3xl..7xl)</text>
+    <text x="12" y="88" font-size="10.5" fill="#94a3b8">· Paginación automática si &gt;450 car.</text>
+    <text x="12" y="104" font-size="10.5" fill="#94a3b8">· Imagen fija (S:144, M:240, L:320px)</text>
+    <text x="12" y="120" font-size="10.5" fill="#94a3b8">· Badges de etiquetas y % progreso</text>
+    <rect x="12" y="142" width="256" height="30" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="20" y="161" font-size="10" font-weight="600" fill="#38bdf8">Layout: Grid 12 cols (img:5 / txt:7)</text>
+  </g>
+
+  <!-- FASE 2: Notas Markdown -->
+  <g transform="translate(350, 742)">
+    <rect width="280" height="185" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="12" y="12" width="100" height="20" rx="6" fill="#78350f"/>
+    <text x="18" y="26" font-size="10" font-weight="700" fill="#fde68a">Fase 2: Notas</text>
+    <text x="12" y="52" font-size="12" font-weight="700" fill="#ffffff">Notas del Presentador</text>
+    <text x="12" y="72" font-size="10.5" fill="#94a3b8">· Barra de contexto con thumbnail</text>
+    <text x="12" y="88" font-size="10.5" fill="#94a3b8">· Tarjeta central max-w-4xl (896px)</text>
+    <text x="12" y="104" font-size="10.5" fill="#94a3b8">· MarkdownView completo formateado</text>
+    <text x="12" y="120" font-size="10.5" fill="#94a3b8">· Auto-división en partes (~550 car.)</text>
+    <rect x="12" y="142" width="256" height="30" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="20" y="161" font-size="10" font-weight="600" fill="#f59e0b">Sin scrollbar: diapositivas paginadas</text>
+  </g>
+
+  <!-- FASE 3: Subtemas / Tarjetas de Hijos -->
+  <g transform="translate(650, 742)">
+    <rect width="280" height="185" rx="12" fill="#1e293b" stroke="#334155"/>
+    <rect x="12" y="12" width="112" height="20" rx="6" fill="#155e75"/>
+    <text x="18" y="26" font-size="10" font-weight="700" fill="#a5f3fc">Fase 3: Subtemas</text>
+    <text x="12" y="52" font-size="12" font-weight="700" fill="#ffffff">Tarjetas de Hijos y Conexiones</text>
+    <text x="12" y="72" font-size="10.5" fill="#94a3b8">· Grid responsivo (1 a 3 columnas)</text>
+    <text x="12" y="88" font-size="10.5" fill="#94a3b8">· Límite de 6 tarjetas por diapositiva</text>
+    <text x="12" y="104" font-size="10.5" fill="#94a3b8">· Clic salta directo al nodo (Jump)</text>
+    <text x="12" y="120" font-size="10.5" fill="#94a3b8">· Sección inferior de conectores cruzados</text>
+    <rect x="12" y="142" width="256" height="30" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="20" y="161" font-size="10" font-weight="600" fill="#06b6d4">Botón «Volver» (Backspace) dinámico</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA DERECHA: CAJA RESUMEN DE MEDIDAS (x: 950 a 1340, y: 110)          -->
+  <!-- ========================================================================= -->
+  <g transform="translate(950, 110)">
+    <rect width="390" height="818" rx="14" fill="#1e293b" stroke="#334155"/>
+    <text x="20" y="32" font-size="15" font-weight="800" fill="#ffffff">Tabla Resumen de Medidas</text>
+    <text x="20" y="52" font-size="11" fill="#94a3b8">Valores extraídos de PresentationMode.tsx</text>
+
+    <!-- Fila 1 -->
+    <rect x="16" y="68" width="358" height="58" rx="8" fill="#0f172a"/>
+    <text x="26" y="88" font-size="11.5" font-weight="700" fill="#38bdf8">Layout General (Raíz)</text>
+    <text x="26" y="106" font-size="10.5" fill="#cbd5e1">fixed inset-0 · 100vw × 100vh · p-4 (sm:p-6)</text>
+    <text x="26" y="120" font-size="9.5" fill="#64748b">flex flex-col justify-between · z-50 overflow-hidden</text>
+
+    <!-- Fila 2 -->
+    <rect x="16" y="134" width="358" height="66" rx="8" fill="#0f172a"/>
+    <text x="26" y="154" font-size="11.5" font-weight="700" fill="#38bdf8">Cabecera Superior (Header)</text>
+    <text x="26" y="172" font-size="10.5" fill="#cbd5e1">Alto 40px (h-10) · flex items-center justify-between</text>
+    <text x="26" y="188" font-size="9.5" fill="#64748b">Badge modo (Sparkles) · Badge fase · Botón Editar · X (Esc)</text>
+
+    <!-- Fila 3 -->
+    <rect x="16" y="208" width="358" height="76" rx="8" fill="#0f172a"/>
+    <text x="26" y="228" font-size="11.5" font-weight="700" fill="#38bdf8">Radar MiniMapa (Flotante Superior)</text>
+    <text x="26" y="246" font-size="10.5" fill="#cbd5e1">Posición: fixed top-2 left-1/2 -translate-x-1/2 · z-40</text>
+    <text x="26" y="262" font-size="10" fill="#cbd5e1">Lienzo: w-52 (208) sm:w-68 (272) md:w-80 (320px)</text>
+    <text x="26" y="276" font-size="9.5" fill="#64748b">Alto: h-14 (56) sm:h-16 (64) md:h-18 (72px) · halo pulsante</text>
+
+    <!-- Fila 4 -->
+    <rect x="16" y="292" width="358" height="98" rx="8" fill="#0f172a"/>
+    <text x="26" y="312" font-size="11.5" font-weight="700" fill="#38bdf8">Zona Central Diapositiva (Main)</text>
+    <text x="26" y="330" font-size="10.5" fill="#cbd5e1">flex-1 · max-w-6xl (1152px) · mx-auto p-2 (sm:p-4)</text>
+    <text x="26" y="346" font-size="10" fill="#cbd5e1">Spotlight: max-w-5xl · Imagen S:144, M:240, L:320px</text>
+    <text x="26" y="362" font-size="10" fill="#cbd5e1">Notas: max-w-4xl (896px) · p-6 (sm:p-8) · Markdown</text>
+    <text x="26" y="378" font-size="9.5" fill="#64748b">Subtemas: max-w-5xl · Grid 3 cols · cards p-4 rounded-2xl</text>
+
+    <!-- Fila 5 -->
+    <rect x="16" y="398" width="358" height="74" rx="8" fill="#0f172a"/>
+    <text x="26" y="418" font-size="11.5" font-weight="700" fill="#38bdf8">Barra Inferior (Footer)</text>
+    <text x="26" y="436" font-size="10.5" fill="#cbd5e1">Alto 48px (h-12) · max-w-4xl (896px) mx-auto</text>
+    <text x="26" y="452" font-size="10" fill="#cbd5e1">Botones 32px alto · Anterior/Siguiente (flechas/espacio)</text>
+    <text x="26" y="466" font-size="9.5" fill="#64748b">Inicio Tema (Padre) · Siguiente Tema · Dots centrales</text>
+
+    <!-- Fila 6 -->
+    <rect x="16" y="480" width="358" height="114" rx="8" fill="#0f172a"/>
+    <text x="26" y="500" font-size="11.5" font-weight="700" fill="#38bdf8">Modal de Opciones / Edición (Tecla E)</text>
+    <text x="26" y="518" font-size="10.5" fill="#cbd5e1">fixed inset-0 · z-60 · bg-black/60 backdrop-blur-sm</text>
+    <text x="26" y="534" font-size="10" fill="#cbd5e1">Contenedor: max-w-xl (576px) · rounded-2xl p-6</text>
+    <text x="26" y="550" font-size="10" fill="#cbd5e1">Max-height: max-h-[85vh] overflow-y-auto</text>
+    <text x="26" y="566" font-size="9.5" fill="#94a3b8">Grid 4 cols para 8 temas · Switches para notas/subtemas</text>
+    <text x="26" y="580" font-size="9.5" fill="#64748b">Selector tamaño imagen · Alineación (Centro/Izq) · Escala texto</text>
+
+    <!-- Fila 7: Atajos de Teclado -->
+    <rect x="16" y="602" width="358" height="198" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+    <text x="26" y="622" font-size="11.5" font-weight="700" fill="#f59e0b">Atajos de Teclado en Modo Clásico</text>
+    <text x="26" y="642" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Espacio / Flecha Derecha:</tspan> Siguiente diapositiva</text>
+    <text x="26" y="660" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Flecha Izquierda:</tspan> Diapositiva anterior</text>
+    <text x="26" y="678" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Flecha Arriba:</tspan> Ir al inicio del tema (Padre)</text>
+    <text x="26" y="696" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Flecha Abajo:</tspan> Saltar al siguiente tema/rama</text>
+    <text x="26" y="714" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Backspace:</tspan> Volver del salto (Return Jump)</text>
+    <text x="26" y="732" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Tecla E:</tspan> Abrir modal de configuración</text>
+    <text x="26" y="750" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Tecla M:</tspan> Conmutar visibilidad del radar MiniMapa</text>
+    <text x="26" y="768" font-size="10" fill="#cbd5e1"><tspan font-weight="700" fill="#ffffff">Escape:</tspan> Salir de la presentación</text>
+    <text x="26" y="786" font-size="9" fill="#94a3b8">PresentationMode.tsx:505-548</text>
+  </g>
+</svg>
