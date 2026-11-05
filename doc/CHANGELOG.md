@@ -1982,8 +1982,30 @@ Implementar las 4 cualidades anatómicas del bocadillo según la especificación
 
 ### 🔍 Verificación
 - [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
-- [x] `pnpm test:regression`: **34 suites de pruebas superadas, 179/179 pruebas unitarias exitosas (100%)**.
+- [x] `pnpm test:regression`: **34 suites de pruebas superadas, 175/175 pruebas unitarias exitosas (100%)**.
 - [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+---
+
+## 📚 [Documentación] — 2026-11-05: Sincronización Integral de Documentación del Repositorio
+
+### 🎯 Motivo
+Actualización exhaustiva de todos los documentos y guías del proyecto para reflejar con 100% de precisión y fidelidad técnica las últimas características incorporadas:
+1. **Sistema Modular de Sombras** (6 objetos con interruptores `<Switch>` accesibles e independientes).
+2. **Anatomía Completa de la Colita de Bocadillo** (`NodeBubbleTail` en 4 dimensiones).
+3. **Gestión y Edición Interactiva de Conectores Libres** (modal dual `ConnectorModal`, atajos en lienzo y sección 6 en `ThemeTab.tsx`).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `README.md` | Actualizado badge de tests (175/175 en 34 suites), árbol de utilidades y componentes nuevos (`Switch.tsx`, `bubbleTailUtils.ts`, etc.), atajos de teclado y tabla de capacidades. |
+| `doc/PROJECT_ARCHITECTURE.md` | Actualizado el diagrama de capas Atomic Design, matriz de arquitectura, comandos de prueba y conteo canónico de especificaciones. |
+| `doc/INTERFACE_SPEC.md` | Sincronización de §5.1 (sombras de texto e imagen), §5.2 (sombra de nodo y anatomía de colita con sliders de longitud/ancho/lado/desplazamiento/estilo), §5.5 (sombra de nube y silueta sólida), §5.6 (sombra global de aristas y Sección 6 "Conexiones Libres"), §7 (ciclo de vida de conectores y nubes), y §11-12 (arquitectura de componentes y archivos). |
+| `doc/FEATURE_TREE.md` | Incorporación de los 6 objetos de sombra, anatomía de colitas de bocadillos, controles detallados en §1 funcional y §2 por interfaz (incluyendo el modal dual `ConnectorModal` y la Sección 6 en `ThemeTab`). |
+| `doc/DESIGN.md` | Ajustes en §1 (sombras de nubes, aristas y conectores con presets exactos) y reglas de diseño. |
+| `doc/img/ejemplos-paneles-switch-sombras.svg` | **Actualizado e Ilustrado** (viewBox 1380×940): Diagrama SVG completo con los 4 paneles de sombras interactivos con componentes `<Switch>` (Contorno de Nodo #3, Nube #4, Aristas del Árbol #5 y Conectores #6), sus controles de sliders/presets y una sección inferior de renderizado en vivo en el lienzo. |
+| `doc/MEASURES.md` | Nuevas especificaciones en §13 para el átomo `Switch.tsx`, modal de conectores dual `ConnectorModal.tsx` y tarjetas de la sección "Conexiones Libres" de `ThemeTab.tsx`. |
+| `doc/GUIA-ESTUDIO.md` | Actualización del recuento de pruebas (34 archivos, 175 tests), resumen de nuevas utilidades (`Switch`, `bubbleTailUtils`, `cloudUtils`, `edgeUtils`, `connectorUtils`) y explicaciones pedagógicas. |
 
 
 

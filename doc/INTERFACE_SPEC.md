@@ -194,20 +194,31 @@ Titulo y texto principal:
 - Input de titulo con tipografia configurable
 - FontFormatToolbar (molecula): Bold / Italic / Fuente / Tamano / Color
 - Alineacion: izquierda / centro / derecha
+- **Sombra de Texto (Objeto #1)**: Switch accesible `[ OFF / ON ]`, 4 presets (`Suave`, `Media`, `Fuerte`, `Glow`), slider de Desenfoque (1-16px), ColorPicker y sub-switch para propagar la sombra al cuerpo del nodo.
 
 Cuerpo / Subtexto:
 - Textarea para el body
 - FontFormatToolbar independiente para cuerpo
 - Alineacion independiente
 
+Imagen de Contenido (imageUrl):
+- URL + Upload dataURL + 6 posiciones (top/between/bottom/left/right/fit) + SliderInput ancho 60-500px def 140 + Eliminar
+- **Sombra en Imagen Adjunta (Objeto #2)**: Switch accesible `[ OFF / ON ]`, 4 presets (`Suave`, `Media`, `3D`, `Glow`), slider de Desenfoque (2-24px), ColorPicker; utiliza `filter: drop-shadow(...)` contorneando siluetas transparentes PNG.
+
 ### 5.2. Tab "Formato" (FormatTab)
-Fuente de verdad: `doc/DESIGN.md` §8 (contrato funcional). Resumen verificado 2026-10-17:
+Fuente de verdad: `doc/DESIGN.md` §8 (contrato funcional). Resumen verificado 2026-11-05:
 
 Forma y Geometria:
 - ShapeSelector (molecula): grid-cols-5 de 10 formas con preview visual (nombre en espanol, tooltip)
 - SliderInput (atomo): 'Ancho personalizado' customWidth 0-500px step 10, badge 'Automático' cuando 0/undefined (0 borra el valor)
 - SliderInput (atomo): 'Alto personalizado' customHeight 0-300px step 5, mismo patron
 - Dos sliders SIEMPRE independientes (no hay slider doble para square/circle)
+- **Anatomía de la Colita de Bocadillo (`NodeBubbleTail`)**: Visible cuando la forma es `bubble`.
+  - Slider de Longitud: 0 a 32px (0 = sin colita / tarjeta redondeada limpia) con presets (`Ninguna`, `Corta 6px`, `Media 12px`, `Larga 20px`).
+  - Slider de Ancho de la Base: 6 a 30px (amplitud en la unión con el nodo).
+  - Lado de Salida (Orientación Cardinal): 5 botones (`Auto (Padre)`, `↓ Abajo`, `↑ Arriba`, `← Izq`, `→ Der`).
+  - Desplazamiento en el Borde: 15% a 85% con presets (`Inicio 20%`, `Centro 50%`, `Fin 80%`).
+  - Estilo Anatómico: 3 geometrías vectoriales (`▲ Recta` clásica, `~ Curva` dinámica, `○ Nube` pensamiento).
 
 Fondo del Nodo (5 tipos via grid-cols-5, escribe bgType):
 - COLOR SOLIDO: ColorPicker 'Color de Fondo' (16 presets + Reset; onClear borra color y bgType)
@@ -220,15 +231,16 @@ Contornos y Bordes:
 - ColorPicker 'Color del Borde' (con Reset -> hereda rama/tema)
 - SliderInput grosor 0-8px def 1 (sin presets fijos, sin checkbox 'Auto')
 - 3 botones de estilo con preview de linea: solid / dashed / dotted (escribe borderDash y borderStyle)
+- **Sombra del Contorno del Nodo (Objeto #3)**: Switch `[ OFF / ON ]`, 4 presets (`Suave`, `Media`, `3D`, `Glow`), slider de Desenfoque (1-40px), slider de Desplazamiento Y (0-30px), ColorPicker. Doble motor inteligente: `box-shadow` en formas estándar y `filter: drop-shadow` en polígonos SVG (hexágono, flecha, estrella).
 
-Imagenes (en ContentTab, no en FormatTab):
-- Imagen de Contenido (imageUrl): URL + Upload dataURL + 6 posiciones (top/between/bottom/left/right/fit; 'background' existe en el tipo pero el panel NO lo ofrece) + SliderInput ancho 60-500px def 140 + Eliminar
+Imagenes de Fondo:
 - Imagen de Fondo (bgImageUrl): vive en FormatTab; URL + Upload + 3 modos (cover/contain/tile; el tipo admite ademas 'fit' ≡ contain) + Eliminar. Sin slider de opacidad.
 
 Aristas del Nodo (override individual, seccion 'Aristas y Propagacion'):
 - 4 botones de forma: bezier Curva / linear Recta / sharp Escuadra / horizontal Horiz. ('hidden' existe en el tipo EdgeStyle pero NO en el panel)
 - ColorPicker 'Color de la Arista' (con Reset)
-- Propagacion: boton 'Aplicar a Hijos' (recursivo en subarbol) + boton 'Aplicar a Hermanos' (solo directos; no-op en raiz o padre con <=1 hijo). Copia 26 campos via extractNodeStyleBundle (forma, fondo, bordes, texto, aristas, customWidth/Height); NO copia body/imagen/tags/link/progreso.
+- **Sombra de la Rama (Objeto #5 Local)**: Switch `[ OFF / ON ]`, 3 presets (`Suave`, `3D`, `Glow` neón adaptativo), slider de Desenfoque (1-20px), slider de Desplazamiento Y (0-16px), ColorPicker.
+- Propagacion: boton 'Aplicar a Hijos' (recursivo en subarbol) + boton 'Aplicar a Hermanos' (solo directos; no-op en raiz o padre con <=1 hijo). Copia forma, fondo, bordes, texto, aristas, customWidth/Height, sombras de contorno/arista y configuración anatómica de colita.
 - NOTA: perfiles (uniform/tapered/spindle/hourglass) y grosor de arista NO estan aqui: son nivel de MAPA en ThemeTab. Cadena de render: node -> map -> theme ('bezier'/'uniform'/defaultWidth).
 
 ### 5.3. Tab "Notas" (NotesTab)
@@ -251,20 +263,31 @@ Actualizado 2026-10-17 (fuente: IconsTab.tsx 314 lineas):
 - Boton 'Ver Galeria Completa de Iconos' -> IconPackModal
 
 ### 5.5. Tab "Nubes" (CloudsTab)
-Actualizado 2026-10-17 (fuente: CloudsTab.tsx 288 lineas; solo escribe node.cloud):
+Actualizado 2026-11-05 (fuente: CloudsTab.tsx, cloudUtils.ts; escribe node.cloud):
 - Switch maestro ON/OFF (apagar borra cloud entero -> pierde estilo al reactivar; encender crea defaults #3b82f6/scallop/0.08/dashed)
 - 8 formas (cloud-scallop arc round-rectangle rectangle bubble oval hexagon star) + 2 sliders de margen -50..200 step 5 (Reset)
 - Relleno: ColorPicker color de nube (sin Reset) + Opacidad 0-100% def 8 (guardada en decimal)
 - Borde: ColorPicker (sin Reset) + Grosor 0-6px step 0.5 def 1.5 + Estilo solid/dashed/dotted def 'dashed' (solo borderDash)
-- Gotchas: seccion 'Borde y Sombra' sin control de shadow; bgType gradient/pattern/image se renderizan en lienzo pero el panel solo escribe 'color'
+- **Sombra de la Nube (Objeto #4)**: Switch `[ OFF / ON ]`, 4 presets temáticos (`Suave` soft, `Isla` island, `Profunda` deep, `Resplandor` glow neón), slider de Intensidad/Opacidad (5-100%), slider de Desenfoque (2-30px), slider de Desplazamiento Y (0-20px), y ColorPicker personalizado. Renderizado con silueta sólida `<path>` subyacente para soporte perfecto de rellenos transparentes sin filtrado interior.
 
 ### 5.6. Tab "Tema" (ThemeTab — Config del Mapa)
-Actualizado 2026-10-17 (unico tab sin nodo seleccionado; fuente: ThemeTab.tsx 623 lineas):
+Actualizado 2026-11-05 (unico tab sin nodo seleccionado; fuente: ThemeTab.tsx):
 - Tema visual: 8 tarjetas (THEMES) con dot de raiz + 4 colores de rama; badge con nombre del tema
 - Layout: 9 algoritmos (standard/balanceado/right/left/top/bottom/tree-down/radial/circular) con iconos
 - Fondo del lienzo: ColorPicker + 6 patrones de cuadricula (none/dots/lines/squares/triangles/hexagons); si patron != none: color de trazo (sin reset) + tamano 12-64px step 2 + opacidad 5-100% (guardada como decimal). NO existe selector de '12 presets' (import BACKGROUND_PRESET_THEMES muerto)
-- Aristas globales: 4 formas (mismos SVG que por nodo) + 4 perfiles (═◣◆⧖) + Multicolor/Randomizar + ColorPicker 'Color Uniforme' + 8 colores Sugeridos + Estilo de Linea (3) + Grosor 1-8px step 0.5 def 2.5. Gotcha: 'Aplicar a todos' (onApplyEdge*) NO esta cableado por App -> solo efecto mapa
-- Espaciado: sliders Horizontal 20-150 def 54 / Vertical 4-60 def 14. Cableado 2026-10-17: ToolPanel adapta onUpdateMapGaps -> onUpdateMapSpacing(h,v) (gap faltante = valor del mapa); tests ToolPanel.test.tsx
+- Aristas globales: 4 formas (mismos SVG que por nodo) + 4 perfiles (═◣◆⧖) + Multicolor/Randomizar + ColorPicker 'Color Uniforme' + 8 colores Sugeridos + Estilo de Linea (3) + Grosor 1-8px step 0.5 def 2.5.
+- **Sombra de Aristas Global (Objeto #5 Global)**: Switch `[ OFF / ON ]`, 3 presets (`Suave`, `3D`, `Glow` neón adaptativo), slider de Desenfoque (1-20px), slider de Desplazamiento Y (0-16px), ColorPicker de sombra. Aplica a todas las conexiones del mapa que no tengan sombra individual sobrescrita.
+- Espaciado: sliders Horizontal 20-150 def 54 / Vertical 4-60 def 14. Cableado: ToolPanel adapta onUpdateMapGaps -> onUpdateMapSpacing(h,v) (gap faltante = valor del mapa).
+- **Sección 6: Conexiones Libres (`Free Connectors`)**:
+  - Encabezado con contador interactivo de conectores existentes en el mapa (badge `N`).
+  - Botón de acción rápida `+ Nueva Conexión` para abrir el modal de creación.
+  - Lista de tarjetas con resumen visual de cada conector:
+    - Indicador de color y tipo de flecha (`start`, `end`, `both`, `none`).
+    - Nombres legibles de nodo origen y destino (`Nodo A ➔ Nodo B`).
+    - Badge con etiqueta descriptiva del conector (si existe).
+    - Chips/píldoras con propiedades clave: estilo de trazo (`curved`, `bezier`, etc.), capa (`above`/`below`), y sombra (`Sombra ON/OFF`).
+    - Botones de acción directa: Editar (abre `ConnectorModal` precargado) y Eliminar con confirmación visual.
+  - Estado vacío descriptivo e ilustrado cuando el mapa aún no contiene conectores.
 
 ---
 
@@ -376,18 +399,25 @@ Sin wrap: al final/inicio la navegacion se detiene.
 
 ## 7. Conectores Flotantes y Nubes
 
-Conector (tipo Connector):
-- Estilos de flecha: none, start, end, both
-- Forma de trazo: curved, bezier, straight, step
-- Patron de linea: solid, dashed, dotted
-- Capas: above / below de los nodos
-- Propiedades: opacidad, color, grosor, etiqueta de texto flotante
-- Punto de control Bezier ajustable manualmente
+### 7.1. Conector (tipo Connector)
+- **Ciclo de vida completo**:
+  - Creación mediante barra de herramientas o panel de Mapa (ThemeTab Sección 6).
+  - Selección en lienzo haciendo clic en la línea, etiqueta o flechas (resaltado cian / glow visual).
+  - **Edición interactiva**: Doble clic directo en el conector sobre el lienzo abre `ConnectorModal` en modo edición con sus valores precargados.
+  - **Eliminación rápida**: Teclas `Supr` o `Backspace` al tener un conector seleccionado, botón rojo 'Eliminar Conector' en `ConnectorModal`, o icono de papelera en `ThemeTab`.
+- **Estilos de flecha**: none, start, end, both
+- **Forma de trazo**: curved, bezier, straight, step
+- **Patrón de línea**: solid, dashed, dotted
+- **Capas**: above / below de los nodos
+- **Propiedades**: opacidad, color, grosor, etiqueta de texto flotante
+- **Punto de control Bezier**: ajustable interactivamente arrastrando el manipulador central en el lienzo
+- **Sombra Modular (Objeto #6)**: Switch `[ OFF / ON ]`, presets temáticos (`Suave`, `Profunda`, `Glow` neón), sliders de desenfoque y desplazamiento Y, ColorPicker independiente.
 
-Nubes de Agrupacion (tipo NodeCloud):
-- Formas: arc, rectangle, round-rectangle, star
-- Color RGBA personalizable
-- Activable/desactivable por nodo
+### 7.2. Nubes de Agrupación (tipo NodeCloud)
+- **Formas**: 8 geometrías (cloud-scallop, arc, round-rectangle, rectangle, bubble, oval, hexagon, star)
+- **Color y Opacidad**: ColorPicker RGBA con relleno traslúcido configurable
+- **Bordes**: Grosor ajustable y patrones (solid, dashed, dotted)
+- **Sombra Modular (Objeto #4)**: Switch `[ OFF / ON ]`, presets (`Suave`, `Isla`, `Profunda`, `Glow`), slider de opacidad, blur, desplazamiento Y y silueta subyacente sólida.
 
 ---
 

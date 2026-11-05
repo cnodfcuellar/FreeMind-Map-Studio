@@ -1096,6 +1096,39 @@ Solo se monta si `showMiniMap && layoutMap.size > 0` (MiniMap:212).
 
 ---
 
+## 13. Componentes Nuevos y Controles Modulares (Fase 2)
+
+### 13.1 Átomo `Switch` (`src/components/atoms/Switch.tsx`)
+
+| Elemento | Medida Tailwind | Equivalente px |
+|---|---|---|
+| **Contenedor Track (sm)** | `w-8 h-4.5 rounded-full` | 32px × 18px, radio 9999px |
+| **Thumb deslizante (sm)** | `w-3.5 h-3.5 rounded-full` | 14px × 14px · translate `translate-x-3.5` (14px) |
+| **Contenedor Track (md)** | `w-11 h-6 rounded-full` | 44px × 24px, radio 9999px |
+| **Thumb deslizante (md)** | `w-5 h-5 rounded-full` | 20px × 20px · translate `translate-x-5` (20px) |
+| **Transición de estado** | `transition-transform duration-200 ease-in-out` | 200ms |
+
+### 13.2 Modal de Conectores Dual (`src/components/Modals/ConnectorModal.tsx`)
+
+| Elemento | Medida Tailwind | Equivalente px |
+|---|---|---|
+| **Tarjeta del Modal** | `max-w-md w-full` | Ancho máximo 448px |
+| **Header** | `ModalHeader` con icono `w-10 h-10 rounded-xl` | 40px × 40px |
+| **Grid de Presets de Sombra** | `grid grid-cols-3 gap-2` | 3 columnas, espacio 8px |
+| **Botón de Eliminación** | `px-4 py-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl` | Radio 12px, texto `text-xs font-semibold` |
+
+### 13.3 Sección 6 Conexiones Libres (`src/components/organisms/toolpanel/ThemeTab.tsx`)
+
+| Elemento | Medida Tailwind | Equivalente px |
+|---|---|---|
+| **Contenedor de Sección** | `pt-3 border-t border-[var(--sp-border)] space-y-2.5` | Padding superior 12px, espacio vertical 10px |
+| **Tarjeta de Conector** | `p-2.5 rounded-xl border border-[var(--sp-border)] bg-[var(--sp-bg)]` | Radio 12px, padding 10px |
+| **Puntos de Color** | `w-2.5 h-2.5 rounded-full` | 10px × 10px |
+| **Píldoras Informativas** | `px-1.5 py-0.5 rounded text-[10px]` | Altura compacta ~16px |
+| **Botones de Acción** | `p-1 rounded-md text-slate-400 hover:text-slate-600` | 20px × 20px (icono 13px) |
+
+---
+
 ## Resumen de alturas (columna vertical)
 
 | Barra | Alto | px |

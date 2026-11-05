@@ -1,0 +1,386 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1380 940" width="1380" height="940" style="background:#090d16; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de Sombra y Glow -->
+    <filter id="sw-shadow-soft" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+    <filter id="sw-glow-blue" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#38bdf8" flood-opacity="0.8" />
+    </filter>
+    <filter id="sw-glow-pink" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#f472b6" flood-opacity="0.8" />
+    </filter>
+    <filter id="sw-card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="sw-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.4" />
+    </pattern>
+
+    <!-- Gradientes -->
+    <linearGradient id="sw-grad-primary" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="sw-grad-purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#7e22ce" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo del Tablero -->
+  <rect width="1380" height="940" fill="#090d16" />
+  <rect width="1380" height="940" fill="url(#sw-grid-dots)" />
+
+  <!-- Cabecera Principal -->
+  <g transform="translate(60, 40)">
+    <rect x="0" y="0" width="1260" height="70" rx="16" fill="#0f172a" stroke="#1e293b" />
+    <circle cx="36" cy="35" r="14" fill="#3b82f6" fill-opacity="0.2" />
+    <path d="M28 35h16M36 27v16" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" />
+    <text x="64" y="32" font-size="16" font-weight="800" fill="#f8fafc">SISTEMA MODULAR DE SOMBRAS: 4 PANELES DE CONTROL &lt;Switch /&gt;</text>
+    <text x="64" y="52" font-size="12" font-weight="500" fill="#94a3b8">Interruptores accesibles independientes por objeto visual: Nodo, Nube, Aristas y Conectores</text>
+
+    <!-- Badge Estado -->
+    <rect x="1100" y="20" width="136" height="30" rx="15" fill="#10b981" fill-opacity="0.15" stroke="#10b981" />
+    <circle cx="1118" cy="35" r="4" fill="#10b981" />
+    <text x="1132" y="39" font-size="11" font-weight="700" fill="#34d399">100% OPERATIVO</text>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- PANEL 1: SOMBRA DE CONTORNO DEL NODO (ToolPanel > Formato > Bordes)       -->
+  <!-- ========================================================================= -->
+  <g transform="translate(60, 140)">
+    <rect width="295" height="360" rx="16" fill="#0f172a" stroke="#1e293b" filter="url(#sw-card-shadow)" />
+    <!-- Cabecera del Panel -->
+    <rect width="295" height="48" rx="16" fill="#1e293b" fill-opacity="0.6" />
+    <rect x="14" y="12" width="24" height="24" rx="6" fill="#3b82f6" fill-opacity="0.2" />
+    <text x="26" y="28" font-size="12" font-weight="800" text-anchor="middle" fill="#60a5fa">#3</text>
+    <text x="46" y="26" font-size="12" font-weight="700" fill="#f8fafc">Sombra de Contorno</text>
+    <text x="46" y="39" font-size="9" fill="#94a3b8">FormatTab.tsx · box-shadow &amp; SVG</text>
+
+    <!-- Switch Fila -->
+    <g transform="translate(16, 62)">
+      <text x="0" y="16" font-size="11" font-weight="700" fill="#cbd5e1">Activar Sombra</text>
+      <text x="0" y="28" font-size="9.5" fill="#64748b">Elevación perimetral del nodo</text>
+      <!-- Switch Component ON -->
+      <rect x="215" y="6" width="44" height="24" rx="12" fill="#2563eb" />
+      <circle cx="247" cy="18" r="9" fill="#ffffff" filter="url(#sw-shadow-soft)" />
+    </g>
+
+    <!-- Presets -->
+    <g transform="translate(16, 110)">
+      <text x="0" y="12" font-size="10" font-weight="700" fill="#94a3b8">PRESETS RÁPIDOS</text>
+      <g transform="translate(0, 20)">
+        <rect x="0" y="0" width="60" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="30" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Suave</text>
+
+        <rect x="66" y="0" width="60" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="96" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Media</text>
+
+        <rect x="132" y="0" width="60" height="26" rx="6" fill="#2563eb" fill-opacity="0.2" stroke="#3b82f6" />
+        <text x="162" y="16" font-size="9.5" font-weight="700" text-anchor="middle" fill="#60a5fa">3D Prof.</text>
+
+        <rect x="198" y="0" width="64" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="230" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Glow</text>
+      </g>
+    </g>
+
+    <!-- Sliders -->
+    <g transform="translate(16, 178)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Desenfoque (Blur)</text>
+      <text x="235" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#60a5fa">14px</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="105" height="6" rx="3" fill="#3b82f6" />
+      <circle cx="105" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <g transform="translate(16, 222)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Desplazamiento Y</text>
+      <text x="242" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#60a5fa">8px</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="70" height="6" rx="3" fill="#3b82f6" />
+      <circle cx="70" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <!-- Color Picker Fila -->
+    <g transform="translate(16, 268)">
+      <text x="0" y="18" font-size="10.5" font-weight="600" fill="#cbd5e1">Color de Sombra</text>
+      <rect x="183" y="2" width="80" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+      <circle cx="196" cy="15" r="6" fill="#000000" stroke="#475569" stroke-width="1.5" />
+      <text x="230" y="18" font-size="9" font-family="monospace" font-weight="700" fill="#94a3b8">rgba</text>
+    </g>
+
+    <!-- Footer de Aplicación -->
+    <g transform="translate(16, 312)">
+      <rect width="263" height="32" rx="8" fill="#1e293b" stroke="#334155" />
+      <text x="131" y="20" font-size="10" font-weight="600" text-anchor="middle" fill="#94a3b8">Aplicar a Hijos / Hermanos</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- PANEL 2: SOMBRA DE NUBE ENVOLVENTE (ToolPanel > Nubes)                   -->
+  <!-- ========================================================================= -->
+  <g transform="translate(382, 140)">
+    <rect width="295" height="360" rx="16" fill="#0f172a" stroke="#1e293b" filter="url(#sw-card-shadow)" />
+    <!-- Cabecera del Panel -->
+    <rect width="295" height="48" rx="16" fill="#1e293b" fill-opacity="0.6" />
+    <rect x="14" y="12" width="24" height="24" rx="6" fill="#0284c7" fill-opacity="0.2" />
+    <text x="26" y="28" font-size="12" font-weight="800" text-anchor="middle" fill="#38bdf8">#4</text>
+    <text x="46" y="26" font-size="12" font-weight="700" fill="#f8fafc">Sombra de Nube</text>
+    <text x="46" y="39" font-size="9" fill="#94a3b8">CloudsTab.tsx · Silueta sólida &lt;path&gt;</text>
+
+    <!-- Switch Fila -->
+    <g transform="translate(16, 62)">
+      <text x="0" y="16" font-size="11" font-weight="700" fill="#cbd5e1">Efecto Isla</text>
+      <text x="0" y="28" font-size="9.5" fill="#64748b">Sombra difusa envolvente</text>
+      <!-- Switch Component ON -->
+      <rect x="215" y="6" width="44" height="24" rx="12" fill="#0284c7" />
+      <circle cx="247" cy="18" r="9" fill="#ffffff" filter="url(#sw-shadow-soft)" />
+    </g>
+
+    <!-- Presets -->
+    <g transform="translate(16, 110)">
+      <text x="0" y="12" font-size="10" font-weight="700" fill="#94a3b8">PRESETS DE ISLA</text>
+      <g transform="translate(0, 20)">
+        <rect x="0" y="0" width="60" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="30" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Suave</text>
+
+        <rect x="66" y="0" width="60" height="26" rx="6" fill="#0284c7" fill-opacity="0.2" stroke="#38bdf8" />
+        <text x="96" y="16" font-size="9.5" font-weight="700" text-anchor="middle" fill="#38bdf8">Isla 3D</text>
+
+        <rect x="132" y="0" width="60" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="162" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Profunda</text>
+
+        <rect x="198" y="0" width="64" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="230" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Glow</text>
+      </g>
+    </g>
+
+    <!-- Sliders -->
+    <g transform="translate(16, 178)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Intensidad / Opacidad</text>
+      <text x="235" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#38bdf8">35%</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="92" height="6" rx="3" fill="#0284c7" />
+      <circle cx="92" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <g transform="translate(16, 222)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Desenfoque de Isla</text>
+      <text x="235" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#38bdf8">18px</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="140" height="6" rx="3" fill="#0284c7" />
+      <circle cx="140" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <!-- Soporte Transparencia Badge -->
+    <g transform="translate(16, 276)">
+      <rect width="263" height="68" rx="10" fill="#0369a1" fill-opacity="0.1" stroke="#0284c7" stroke-dasharray="4 3" />
+      <text x="14" y="24" font-size="10.5" font-weight="700" fill="#38bdf8">✓ Relleno translúcido soportado</text>
+      <text x="14" y="42" font-size="9" fill="#94a3b8">Renderiza silueta oculta para evitar que el</text>
+      <text x="14" y="55" font-size="9" fill="#94a3b8">filtro difumine el centro de la nube.</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- PANEL 3: SOMBRA DE ARISTAS Y RAMAS (ToolPanel > Mapa & Estilos)           -->
+  <!-- ========================================================================= -->
+  <g transform="translate(704, 140)">
+    <rect width="295" height="360" rx="16" fill="#0f172a" stroke="#1e293b" filter="url(#sw-card-shadow)" />
+    <!-- Cabecera del Panel -->
+    <rect width="295" height="48" rx="16" fill="#1e293b" fill-opacity="0.6" />
+    <rect x="14" y="12" width="24" height="24" rx="6" fill="#8b5cf6" fill-opacity="0.2" />
+    <text x="26" y="28" font-size="12" font-weight="800" text-anchor="middle" fill="#c084fc">#5</text>
+    <text x="46" y="26" font-size="12" font-weight="700" fill="#f8fafc">Sombra de Aristas</text>
+    <text x="46" y="39" font-size="9" fill="#94a3b8">ThemeTab / FormatTab · Dual Level</text>
+
+    <!-- Switch Fila -->
+    <g transform="translate(16, 62)">
+      <text x="0" y="16" font-size="11" font-weight="700" fill="#cbd5e1">Sombra en Ramas</text>
+      <text x="0" y="28" font-size="9.5" fill="#64748b">Global de mapa o local de nodo</text>
+      <!-- Switch Component ON -->
+      <rect x="215" y="6" width="44" height="24" rx="12" fill="#8b5cf6" />
+      <circle cx="247" cy="18" r="9" fill="#ffffff" filter="url(#sw-shadow-soft)" />
+    </g>
+
+    <!-- Presets -->
+    <g transform="translate(16, 110)">
+      <text x="0" y="12" font-size="10" font-weight="700" fill="#94a3b8">PRESETS</text>
+      <g transform="translate(0, 20)">
+        <rect x="0" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="41" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Suave 2px</text>
+
+        <rect x="90" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="131" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">3D Elevada</text>
+
+        <rect x="180" y="0" width="83" height="26" rx="6" fill="#8b5cf6" fill-opacity="0.2" stroke="#a855f7" />
+        <text x="221" y="16" font-size="9.5" font-weight="700" text-anchor="middle" fill="#c084fc">Glow Neón</text>
+      </g>
+    </g>
+
+    <!-- Sliders -->
+    <g transform="translate(16, 178)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Desenfoque</text>
+      <text x="242" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#c084fc">6px</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="80" height="6" rx="3" fill="#8b5cf6" />
+      <circle cx="80" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <g transform="translate(16, 222)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Desplazamiento Y</text>
+      <text x="242" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#c084fc">0px</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="10" height="6" rx="3" fill="#8b5cf6" />
+      <circle cx="10" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <!-- Color Picker y Adaptabilidad -->
+    <g transform="translate(16, 268)">
+      <text x="0" y="18" font-size="10.5" font-weight="600" fill="#cbd5e1">Tinte Adaptativo</text>
+      <rect x="175" y="2" width="88" height="26" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#a855f7" />
+      <text x="219" y="18" font-size="9" font-weight="700" text-anchor="middle" fill="#c084fc">Color Rama</text>
+    </g>
+
+    <!-- Footer Nivel Dual -->
+    <g transform="translate(16, 312)">
+      <rect width="263" height="32" rx="8" fill="#1e293b" stroke="#334155" />
+      <text x="131" y="20" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Hereda de Mapa / Sobrescritura Local</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- PANEL 4: SOMBRA DE CONECTORES LIBRES (ConnectorModal & Canvas)            -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1026, 140)">
+    <rect width="295" height="360" rx="16" fill="#0f172a" stroke="#1e293b" filter="url(#sw-card-shadow)" />
+    <!-- Cabecera del Panel -->
+    <rect width="295" height="48" rx="16" fill="#1e293b" fill-opacity="0.6" />
+    <rect x="14" y="12" width="24" height="24" rx="6" fill="#ec4899" fill-opacity="0.2" />
+    <text x="26" y="28" font-size="12" font-weight="800" text-anchor="middle" fill="#f472b6">#6</text>
+    <text x="46" y="26" font-size="12" font-weight="700" fill="#f8fafc">Sombra de Conector</text>
+    <text x="46" y="39" font-size="9" fill="#94a3b8">ConnectorModal.tsx · Flotantes</text>
+
+    <!-- Switch Fila -->
+    <g transform="translate(16, 62)">
+      <text x="0" y="16" font-size="11" font-weight="700" fill="#cbd5e1">Efecto Flotante</text>
+      <text x="0" y="28" font-size="9.5" fill="#64748b">Relieves en trazo y flechas</text>
+      <!-- Switch Component ON -->
+      <rect x="215" y="6" width="44" height="24" rx="12" fill="#ec4899" />
+      <circle cx="247" cy="18" r="9" fill="#ffffff" filter="url(#sw-shadow-soft)" />
+    </g>
+
+    <!-- Presets -->
+    <g transform="translate(16, 110)">
+      <text x="0" y="12" font-size="10" font-weight="700" fill="#94a3b8">PRESETS DE CONECTOR</text>
+      <g transform="translate(0, 20)">
+        <rect x="0" y="0" width="82" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="41" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Suave</text>
+
+        <rect x="90" y="0" width="82" height="26" rx="6" fill="#ec4899" fill-opacity="0.2" stroke="#f472b6" />
+        <text x="131" y="16" font-size="9.5" font-weight="700" text-anchor="middle" fill="#f472b6">Profunda</text>
+
+        <rect x="180" y="0" width="83" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+        <text x="221" y="16" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Glow</text>
+      </g>
+    </g>
+
+    <!-- Sliders -->
+    <g transform="translate(16, 178)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Desenfoque (Blur)</text>
+      <text x="235" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#f472b6">10px</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="130" height="6" rx="3" fill="#ec4899" />
+      <circle cx="130" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <g transform="translate(16, 222)">
+      <text x="0" y="12" font-size="10" font-weight="600" fill="#cbd5e1">Desplazamiento Y</text>
+      <text x="242" y="12" font-size="10" font-weight="700" font-family="monospace" fill="#f472b6">4px</text>
+      <rect x="0" y="18" width="263" height="6" rx="3" fill="#1e293b" />
+      <rect x="0" y="18" width="60" height="6" rx="3" fill="#ec4899" />
+      <circle cx="60" cy="21" r="7" fill="#ffffff" />
+    </g>
+
+    <!-- Capa y Flechas -->
+    <g transform="translate(16, 268)">
+      <text x="0" y="18" font-size="10.5" font-weight="600" fill="#cbd5e1">Capa Visual</text>
+      <rect x="165" y="2" width="98" height="26" rx="6" fill="#1e293b" stroke="#334155" />
+      <text x="214" y="18" font-size="9" font-weight="700" text-anchor="middle" fill="#94a3b8">above (frente)</text>
+    </g>
+
+    <!-- Footer -->
+    <g transform="translate(16, 312)">
+      <rect width="263" height="32" rx="8" fill="#1e293b" stroke="#334155" />
+      <text x="131" y="20" font-size="9.5" font-weight="600" text-anchor="middle" fill="#94a3b8">Doble Clic en Lienzo para Editar</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- SECCIÓN INFERIOR: COMPARATIVA VISUAL DIRECTA EN EL LIENZO                 -->
+  <!-- ========================================================================= -->
+  <g transform="translate(60, 530)">
+    <rect width="1260" height="360" rx="16" fill="#0f172a" stroke="#1e293b" />
+
+    <!-- Título de la comparativa -->
+    <text x="32" y="38" font-size="15" font-weight="800" fill="#f8fafc">DEMOSTRACIÓN DE RENDERIZADO VECTORIAL EN LIENZO</text>
+    <text x="32" y="56" font-size="11" fill="#94a3b8">Efectos visuales combinados de los 4 paneles de sombra interactivos</text>
+
+    <!-- Escena 1: Nube con Isla Difusa -->
+    <g transform="translate(40, 80)">
+      <!-- Sombra de la Nube (Isla) -->
+      <path d="M 40 40 Q 60 10 110 20 Q 160 5 210 25 Q 260 10 290 45 Q 320 85 300 130 Q 320 180 270 205 Q 220 225 160 210 Q 100 230 60 195 Q 15 170 30 115 Q 10 70 40 40 Z"
+            fill="#0284c7" fill-opacity="0.12" stroke="#0284c7" stroke-width="2" stroke-dasharray="6 4"
+            filter="url(#sw-shadow-soft)" />
+
+      <!-- Nodo A dentro de la nube -->
+      <g transform="translate(60, 60)" filter="url(#sw-shadow-soft)">
+        <rect width="180" height="60" rx="14" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+        <text x="90" y="32" font-size="13" font-weight="700" text-anchor="middle" fill="#f8fafc">Tema de Nube</text>
+        <text x="90" y="48" font-size="10" font-weight="500" text-anchor="middle" fill="#38bdf8">Sombra #3 + #4</text>
+      </g>
+      <text x="160" y="235" font-size="11" font-weight="600" text-anchor="middle" fill="#38bdf8">Nube con Sombra Isla 3D</text>
+    </g>
+
+    <!-- Escena 2: Arista con Glow Neón conectando a Nodo Central -->
+    <g transform="translate(420, 80)">
+      <!-- Arista con Sombra/Glow Neón -->
+      <path d="M 0 100 C 100 100, 120 100, 220 100" fill="none" stroke="#38bdf8" stroke-width="3.5" filter="url(#sw-glow-blue)" />
+      
+      <!-- Nodo Raíz con Sombra 3D -->
+      <g transform="translate(220, 60)" filter="url(#sw-shadow-soft)">
+        <rect width="200" height="80" rx="20" fill="url(#sw-grad-primary)" stroke="#60a5fa" stroke-width="2.5" />
+        <text x="100" y="42" font-size="15" font-weight="800" text-anchor="middle" fill="#ffffff">NODO RAÍZ</text>
+        <text x="100" y="60" font-size="11" font-weight="600" text-anchor="middle" fill="#bfdbfe">Sombra Elevada 3D</text>
+      </g>
+
+      <!-- Arista conectando al nodo derecho con Glow Rosa -->
+      <path d="M 420 100 C 500 100, 520 100, 600 100" fill="none" stroke="#f472b6" stroke-width="3" filter="url(#sw-glow-pink)" />
+      
+      <text x="110" y="75" font-size="10.5" font-weight="700" fill="#38bdf8">Arista Neón #5</text>
+      <text x="490" y="75" font-size="10.5" font-weight="700" fill="#f472b6">Arista Neón #5</text>
+    </g>
+
+    <!-- Escena 3: Conector Flotante Libre Curvo (#6) -->
+    <g transform="translate(420, 80)">
+      <!-- Conector Flotante Bézier con Sombra Profunda -->
+      <path d="M 320 60 Q 460 -20 660 60" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-dasharray="6 3" filter="url(#sw-shadow-soft)" />
+      <!-- Flecha del Conector -->
+      <polygon points="660,60 648,52 652,62" fill="#ec4899" />
+      
+      <!-- Badge Etiqueta flotante del conector -->
+      <rect x="440" y="0" width="110" height="24" rx="12" fill="#831843" stroke="#f472b6" stroke-width="1.5" filter="url(#sw-shadow-soft)" />
+      <text x="495" y="16" font-size="10" font-weight="700" text-anchor="middle" fill="#fdf2f8">Conector Libre #6</text>
+    </g>
+
+    <!-- Escena 4: Nodo Destino con forma Hexágono SVG con drop-shadow -->
+    <g transform="translate(1040, 130)" filter="url(#sw-shadow-soft)">
+      <polygon points="90,10 160,50 160,110 90,150 20,110 20,50" fill="#1e293b" stroke="#f472b6" stroke-width="2" />
+      <text x="90" y="75" font-size="12" font-weight="700" text-anchor="middle" fill="#ffffff">Hexágono</text>
+      <text x="90" y="92" font-size="9.5" font-weight="600" text-anchor="middle" fill="#f472b6">drop-shadow SVG</text>
+    </g>
+  </g>
+</svg>
+

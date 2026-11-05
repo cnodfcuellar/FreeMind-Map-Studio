@@ -9,7 +9,7 @@
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Zustand](https://img.shields.io/badge/Zustand-5-433D37?style=for-the-badge)](https://zustand-demo.pmnd.rs/)
-[![Vitest](https://img.shields.io/badge/Tests-131%2F131%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
+[![Vitest](https://img.shields.io/badge/Tests-175%2F175%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
 [![Motion](https://img.shields.io/badge/Motion-12-ea580c?style=for-the-badge&logo=framer&logoColor=white)](https://motion.dev)
 [![Antigravity IDE](https://img.shields.io/badge/Antigravity%20IDE-2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
@@ -80,10 +80,12 @@ Inspirado en [Freeplane](https://www.freeplane.org/) y [Mindomo](https://www.min
 | Propiedad | Opciones |
 |-----------|---------|
 | **Formas** | `bubble` `fork` `rectangle` `square` `oval` `circle` `pill` `hexagon` `arrow` `star` |
+| **Colita de Burbuja** | 4 cualidades anatómicas: Longitud (0-32px), Ancho base (6-30px), Lado cardinal (auto/abajo/arriba/izq/der), Desplazamiento (15-85%), Estilo (recta/curva/pensamiento) |
 | **Fondo** | Color sólido · Transparente · Degradado (4 dir.) · Trama SVG (7 patrones) · Imagen de fondo |
 | **Tipografía** | Fuente · Tamaño · Negrita · Cursiva · Color · Alineación (para título y cuerpo por separado) |
 | **Imagen adjunta** | Posición: arriba · entre · abajo · izquierda · derecha · ajustar · Ancho 60–500px |
 | **Bordes** | Grosor 0–8px · Sólido / Discontinuo / Punteado · Color personalizado o automático |
+| **Sombras Modulares** | 6 objetos independientes con interruptores `Switch`: Texto, Imagen adjunta, Contorno del nodo, Nube envolvente, Aristas del árbol y Conectores |
 | **Tamaño** | Ancho 0–500px · Alto 0–300px · 0 = modo automático |
 | **Metadatos** | Progreso 0–100% · Iconos vectoriales · Tags · URL · Nota Markdown enriquecida |
 
@@ -156,10 +158,44 @@ Experiencia tridimensional inmersiva:
 
 ---
 
-## 🔗 Conectores Cruzados y Nubes
+## 🔗 Conectores Cruzados y Relaciones Libres
 
-- **Conectores flotantes** entre cualquier par de nodos: etiqueta personalizada, geometrías (`bezier`, `curved`, `straight`, `step`), capas (`above`/`below`), opacidad, estilo y color; la flecha es siempre final (`end`, sin selector en la UI).
-- **Nubes de agrupación visual** con 8 formas geométricas y color RGBA personalizable.
+- **Gestión Completa de Conectores:** Enlaza libremente cualquier par de nodos independientemente de la jerarquía del árbol.
+- **Edición en Vivo:** Haz **doble clic** sobre cualquier conector en el lienzo para abrir `ConnectorModal` en modo edición con todos sus datos precargados.
+- **Acceso Directo por Teclado:** Selecciona un conector con un clic y presiona `Supr` o `Backspace` para eliminarlo al instante.
+- **Panel Dedicado en Pestaña Mapa:** Al final de la pestaña *Mapa* (`ThemeTab.tsx`), una sección colapsable lista todas las conexiones activas con visualización de color, flechas ($\rightarrow$, $\leftrightarrow$), nombres de origen y destino, etiquetas y botones de edición y borrado rápido.
+- **Personalización Total:** Geometrías (`curved`, `bezier`, `straight`, `step`), curvatura ajustable con tirador interactivo, capas (`above`/`below`), estilo de trazo (`solid`, `dashed`, `dotted`), selector de flechas (`end`, `both`, `start`, `none`), color, opacidad y **Sombra Flotante** (presets Suave, Profunda, Glow).
+
+---
+
+## 🎛️ Sistema Modular de Sombras (6 Objetos Independientes)
+
+Cada objeto visual posee su propio interruptor `<Switch>` desacoplado (desactivado por defecto para 0 costo de GPU):
+1. **Texto del Nodo (`textShadow`):** Presets Suave, Media, Fuerte y Glow neón en `ContentTab.tsx`.
+2. **Imagen Adjunta (`imageShadow`):** Sombra envolvente con `filter: drop-shadow(...)` contorneando siluetas transparentes PNG.
+3. **Contorno del Nodo (`nodeShadow`):** Doble motor inteligente (`box-shadow` en formas estándar y `filter: drop-shadow` en polígonos SVG como hexágonos y estrellas).
+4. **Nubes Envolventes (`cloudShadow`):** Efecto "Isla Conceptual" flotante proyectado con una capa de silueta sólida `<path>` debajo del tinte translúcido.
+5. **Aristas del Árbol (`edgeShadow`):** Sistema dual con control Global en el mapa (`ThemeTab.tsx`) y Local en el nodo (`FormatTab.tsx`), con resplandor neón multicolor y propagación a hijos/hermanos.
+6. **Conectores Libres (`Connector.shadow`):** Sombra flotante y resplandor neón en curvas, flechas y badges de relación.
+
+---
+
+## 💬 Anatomía de la Colita de Bocadillo (`NodeBubbleTail`)
+
+Evolución de la forma `bubble` a un sistema anatómico vectorial totalmente configurable:
+- **Tamaño:** Longitud (`tailLength`) de 0 a 32px (0 = sin colita / tarjeta redondeada limpia; presets: Corta 6px, Media 12px, Larga 20px) y ancho de base (`tailWidth`).
+- **Orientación Cardinal:** Selector de salida: `Auto (Padre)`, `↓ Abajo`, `↑ Arriba`, `← Izq`, `→ Der`.
+- **Desplazamiento en el Borde:** Posición porcentual (`15%` a `85%`) con presets Inicio (20%), Centro (50%), Fin (80%).
+- **Estilo Anatómico:** `▲ Recta` (diálogo clásico), `~ Curva` (dinámica estilo cómic) y `○ Nube` (3 burbujas decrecientes de pensamiento).
+- **Sinergia con Sombras:** Hereda idéntico filtro de sombra del nodo si `nodeShadow` está activo.
+
+---
+
+## ☁️ Nubes de Agrupación Visual
+
+- Agrupación visual sobre cualquier nodo y todos sus descendientes con 8 formas geométricas (`cloud-scallop`, `arc`, `rectangle`, `round-rectangle`, `star`, `bubble`, `hexagon`, `oval`).
+- Rellenos sólidos, degradados, tramas y colores translúcidos con opacidad configurable.
+- Sombra envolvente de alta definición con slider de opacidad dedicado.
 
 ## 🔍 Búsqueda y Filtrado Acumulativo
 
@@ -224,7 +260,8 @@ freemind-map-studio/
 │   │   │   ├── CollapsibleSection.tsx # Acordeón colapsable
 │   │   │   ├── ColorPicker.tsx        # Selector de color con paletas y entrada hexadecimal
 │   │   │   ├── SliderInput.tsx        # Control deslizante numérico sincronizado
-│   │   │   ├── ToggleButton.tsx       # Switch interactivo on/off
+│   │   │   ├── Switch.tsx             # Interruptor iOS-style ON/OFF con etiqueta y accesibilidad
+│   │   │   ├── ToggleButton.tsx       # Botón conmutable con icono
 │   │   │   ├── ToggleButtonGroup.tsx  # Grupo de botones de opción única
 │   │   │   └── 📂 __tests__/          # Pruebas unitarias de átomos
 │   │   │
@@ -286,7 +323,10 @@ freemind-map-studio/
 │       ├── layoutEngine.ts            # Motor matemático de layout (9 algoritmos)
 │       ├── themes.ts                  # Definición de 8 temas y 12 fondos de lienzo
 │       ├── markdownRenderer.tsx       # Parser Markdown propio sin dependencias
-│       ├── connectorUtils.ts          # Cálculo geométrico de curvas de Bézier y conectores
+│       ├── connectorUtils.ts          # Cálculo geométrico de curvas Bézier y filtros de sombra
+│       ├── bubbleTailUtils.ts         # Motor geométrico de colita de burbuja (4 dimensiones)
+│       ├── cloudUtils.ts              # Motor de silueta y sombras para nubes envolventes
+│       ├── edgeUtils.ts               # Motor de sombras de aristas (dual global/local y neón)
 │       ├── freeplaneConverter.ts      # Importador y exportador nativo de XML .mm
 │       ├── htmlExporter.ts            # Generador de archivo HTML autónomo portable
 │       ├── storage.ts                 # Adaptador de almacenamiento en localStorage
@@ -323,6 +363,8 @@ freemind-map-studio/
 | `↑` `↓` `←` `→` | Navegar entre nodos adyacentes |
 | `Ctrl+C` / `Ctrl+X` / `Ctrl+V` | Copiar / Cortar / Pegar sub-árbol |
 | `Ctrl+Z` / `Ctrl+Y` | Deshacer / Rehacer (40 niveles inmutables) |
+| `Doble clic en conector` | Abrir editor modal de conector |
+| `Supr / Backspace en conector` | Eliminar conector libre seleccionado |
 | `Escape` | Seleccionar nodo raíz / Cerrar modales |
 
 ### Vistas y Navegación

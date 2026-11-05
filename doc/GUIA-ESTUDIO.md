@@ -1,4 +1,4 @@
-﻿# 📘 GUÍA DE ESTUDIO COMPLETA — FreeMind Map Studio
+# 📘 GUÍA DE ESTUDIO COMPLETA — FreeMind Map Studio
 
 > Capacitación de programadores novatos: qué hace cada parte y cada función, con código comentado.
 > Orden: fundamentos → estado → persistencia/temas → layout → conversores → iconos → componentes → lienzo/presentación.
@@ -1418,21 +1418,27 @@ Comportamientos:
   plantilla; categorías, tags, buscador; clic clona con `id map-Date.now()`.
 - **SavedMapsModal** (lg): lee el índice al abrir, abre/borra (con
   `confirm`), badge (Actual).
-- **ConnectorModal** (md): origen fijo, destino select (sin el origen),
-  forma/capa/curvatura (oculta en recta)/opacidad/estilo/color; crea
-  `conn-Date.now()` con flecha `end`.
+- **ConnectorModal** (md): modo dual creación/edición, origen/destino seleccionables,
+  forma/capa/curvatura (oculta en recta)/opacidad/estilo/color, sombra modular
+  con presets (`soft`, `deep`, `glow`), y botón rojo de eliminación con confirmación.
 - **IconPackModal** (5xl 90vh): sidebar 12 categorías con conteos,
   buscador + sugerencias, grid hasta 10 col, preview + copiar SVG/copiar ID,
   clic alterna icono del nodo.
 - **ShortcutsModal** (lg): tabla de 16 atajos con `kbd`.
 - *(ComingSoonModal: **eliminado** 2026-10-17 — era un modal huérfano; ver `doc/DESIGN.md` §8.5.7)*
 
-## 5. Tests: cómo están organizados (22 archivos, 106+ tests)
+## 5. Tests: cómo están organizados (34 archivos, 175 tests)
 
 ```
 src/**/__tests__/*.test.{ts,tsx}   ← junto al código que prueban
 src/test/setup.ts                  ← polyfills matchMedia + ResizeObserver
 ```
+- **Nuevas utilidades probadas**:
+  - `Switch.test.tsx`: verificación de renderizado accesible, teclado (Espacio/Enter), clases de tamaño y callback `onChange`.
+  - `bubbleTailUtils.test.ts`: 12 especificaciones de geometría SVG, orientación cardinal (`bottom`, `top`, `left`, `right`), cálculo de anclaje relativo a padre (`auto`) y estilos (recto, curvo, pensamiento).
+  - `cloudUtils.test.ts`: generación de siluetas `<path>` subyacentes con `drop-shadow` para nubes con fondos translúcidos.
+  - `edgeUtils.test.ts`: resolución en cascada de sombras en aristas (override local > global de mapa > desactivado) y propagación DFS.
+  - `connectorUtils.test.ts`: cálculo de curvas Bezier, puntos de control interactivos y estilos `drop-shadow` según presets temáticos.
 - **Patrones**: `BLANK_MAP` como fixture + `structuredClone` (no compartir
   objetos entre tests); store reseteado con `setState` en `beforeEach` +
   `localStorage.clear()`; `renderHook` para hooks; eventos `window` con

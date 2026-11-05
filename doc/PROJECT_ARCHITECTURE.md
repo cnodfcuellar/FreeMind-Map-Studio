@@ -34,7 +34,7 @@ FreeMind Map Studio es una suite de mapas mentales y presentaciones interactivas
 ### Comandos (fuente: `package.json`, manda sobre el README)
 - `pnpm install` / `pnpm dev` → http://localhost:3000 (`vite --port=3000 --host=0.0.0.0` fijado en `package.json`).
 - `pnpm lint` = `tsc --noEmit` (solo tipos, no hay ESLint). Verificado: exit 0.
-- `pnpm test` = `vitest run` (22 tests). ⚠️ En Windows/OneDrive el pool de workers por defecto puede colgarse (timeout 60s, 0 tests); usar `pnpm vitest run --pool=forks`. Un archivo: `pnpm vitest run src/utils/__tests__/<n>.test.ts`.
+- `pnpm test` = `vitest run` (175 tests en 34 archivos). ⚠️ En Windows/OneDrive el pool de workers por defecto puede colgarse (timeout 60s, 0 tests); usar `pnpm test:regression` (`vitest run --pool=forks`). Un archivo: `pnpm vitest run src/utils/__tests__/<n>.test.ts`.
 - `pnpm build` / `pnpm preview`. `pnpm clean` usa `rm -rf` → falla en PowerShell; borrar `dist/` a mano.
 - Alias `@/*` → raíz del repo (`./`), no `src/` (`tsconfig.json`, `vite.config.ts`). No tocar el bloque `DISABLE_HMR` de `vite.config.ts` (AI Studio lo usa durante ediciones de agentes).
 
@@ -42,7 +42,7 @@ FreeMind Map Studio es una suite de mapas mentales y presentaciones interactivas
 1. **100% Offline y Privacidad Absoluta**: Toda la información reside en la máquina del usuario (`localStorage` y descargas de archivos locales).
 2. **Cero Dependencias Externas en Exportables**: El exportador HTML genera un visor interactivo autónomo operable sin conexión.
 3. **Inmutabilidad y Robustez Funcional**: Cada operación genera nuevas referencias inmutables; historial de Deshacer/Rehacer de **40 estados**.
-4. **Desacoplamiento Estricto (Atomic Design)**: Átomos, Moléculas, Organismos y Templates, sin componentes monolíticos (ver §2.3: `NodeComponent` orquesta 4 sub-moléculas).
+4. **Desacoplamiento Estricto (Atomic Design)**: Átomos, Moléculas, Organismos y Templates, sin componentes monolíticos (ver §2.3: `NodeComponent` orquesta 5 sub-moléculas incluyendo `NodeBubbleTail`).
 5. **Tipado Estricto de Extremo a Extremo**: Cero errores en `tsc --noEmit` con React 19 y TypeScript 5.8.
 
 ```mermaid
@@ -154,6 +154,7 @@ graph TD
             M9["NodeHeaderRow.tsx"]
             M10["NodeBadgesBar.tsx"]
             M11["NodeActionButtons.tsx"]
+            M12["NodeBubbleTail (en NodeBackgroundRenderer)"]
         end
     end
 
@@ -169,6 +170,7 @@ graph TD
         A9["SliderInput.tsx"]
         A10["ToggleButton.tsx"]
         A11["ToggleButtonGroup.tsx"]
+        A12["Switch.tsx (iOS-Style Modular)"]
     end
 
     T1 --> O1 & O2 & O3 & O4 & O5 & O6
@@ -345,16 +347,22 @@ Puro, sin DOM: `estimateNodeSize(node)` + `computeMindMapLayout(map, center)` en
 
 ## 7. Infraestructura de Pruebas y Calidad de Código
 
-Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **22 tests / 6 archivos, 100% pasando** (verificado oct-2026 con `--pool=forks`; v3.0 decía 14):
+Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **175 tests / 34 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
 
 - `atoms/__tests__/Atoms.test.tsx` — Badge, Button (+loading), IconButton, Input onChange, ModalBackdrop cierre exterior.
+- `atoms/__tests__/Switch.test.tsx` — Switch conmutador accesible iOS-style con labels y aria-checked.
 - `templates/__tests__/MainEditorLayout.test.tsx` — slots y visibilidad condicional de paneles.
-- `molecules/node/__tests__/NodeBackgroundRenderer.test.ts` — geometrías SVG.
-- `utils/__tests__/layoutEngine.test.ts` — dimensiones y bifurcado estándar.
-- `utils/__tests__/connectorUtils.test.ts` — Bézier, step, anclajes perimetrales.
+- `molecules/node/__tests__/NodeBackgroundRenderer.test.ts` — geometrías SVG, cálculo de luminancia y doble motor de sombras (`box-shadow` y `drop-shadow`).
+- `molecules/node/__tests__/NodeHeaderRow.test.ts` — renderizado de cabecera, imagen, iconos y sincronización de sombras de texto.
+- `utils/__tests__/layoutEngine.test.ts` — dimensiones y bifurcado estándar (9 layouts).
+- `utils/__tests__/connectorUtils.test.ts` — Bézier, step, anclajes perimetrales y filtros drop-shadow.
+- `utils/__tests__/bubbleTailUtils.test.ts` — Motor anatómico de colita de burbuja (4 cualidades: longitud, ancho base, cardinalidad, offset, estilos).
+- `utils/__tests__/cloudUtils.test.ts` — Silueta sólida subyacente y sombras envolventes para nubes.
+- `utils/__tests__/edgeUtils.test.ts` — Jerarquía dual de sombras de aristas (global, local y resplandor neón adaptativo).
 - `utils/__tests__/freeplaneConverter.test.ts` — parseo `.mm` y round-trip sin pérdida.
+- `hooks/__tests__/useMindMapStore.test.ts` — 16 pruebas de CRUD, inmutabilidad y 40 pasos de historial.
 
-Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test` (si se cuelga en Windows: `pnpm vitest run --pool=forks`) · `pnpm build` (Vite prod).
+Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (ejecución robusta con `--pool=forks`) · `pnpm build` (Vite prod en ~7s).
 
 ---
 
@@ -366,22 +374,25 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test` (si se cuelga e
 | `src/main.tsx` | Entrada | `createRoot` + `StrictMode` |
 | `src/index.css` | Estilos | Solo Tailwind v4 + utilidades (`.bg-grid-*`, `.mind-node`, scrollbars) — ver `doc/DESIGN.md` |
 | `templates/MainEditorLayout.tsx` | Template | Slots de pantalla completa |
-| `MindMapCanvas.tsx` | Organismo | Orquestador del lienzo (zoom/pan/drag/coordenadas) |
+| `MindMapCanvas.tsx` | Organismo | Orquestador del lienzo (zoom/pan/drag/coordenadas, doble clic en conectores y atajo Supr) |
 | `organisms/canvas/*` (4) | Organismo | BackgroundLayer (12 fondos) · DrawingOverlay (marcos, `pointer-events-none`) · PresentationHUD (dinámica) · ContextMenu (clic derecho) |
-| `NodeComponent.tsx` | Organismo | Orquestador del nodo → 4 sub-moléculas |
-| `molecules/node/*` (4) | Molécula | BackgroundRenderer (SVG/polígonos/luminancia) · HeaderRow (título/imagen/progreso/iconos) · BadgesBar (tags/link/nota) · ActionButtons (fold/`+`/drag) |
-| `ToolPanel.tsx` + `organisms/toolpanel/*` (6) | Organismo | Inspector: Content · Format · Notes · Icons · Clouds · Theme |
+| `NodeComponent.tsx` | Organismo | Orquestador del nodo → 5 sub-moléculas |
+| `molecules/node/*` (4) | Molécula | BackgroundRenderer (SVG/polígonos/luminancia/colita `NodeBubbleTail`) · HeaderRow (título/imagen/progreso/iconos) · BadgesBar (tags/link/nota) · ActionButtons (fold/`+`/drag) |
+| `ToolPanel.tsx` + `organisms/toolpanel/*` (6) | Organismo | Inspector: Content · Format · Notes · Icons · Clouds · Theme (con sección Conexiones Libres) |
 | `PresentationMode.tsx` | Organismo | Clásica en slides (8 temas) |
 | `Presentation/*` (3) | Organismo | Espacial 3D + tarjetas + modal detalle |
 | `MenuBar/ToolBar/FilterBar/StatusBar/OutlineView/MiniMap` | Organismo | Shell: menús, accesos, búsqueda, métricas, esquema, radar |
-| `Modals/*` (7) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` |
-| `atoms/*` (11) | Átomo | Button, IconButton, Input, Badge, ModalBackdrop, ErrorBoundary, CollapsibleSection, ColorPicker, SliderInput, ToggleButton(+Group) |
+| `Modals/*` (7) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` (incluye `ConnectorModal.tsx` dual Crear/Editar) |
+| `atoms/*` (12) | Átomo | Button, IconButton, Input, Badge, ModalBackdrop, ErrorBoundary, CollapsibleSection, ColorPicker, SliderInput, Switch, ToggleButton(+Group) |
 | `molecules/*` (7) | Molécula | ModalHeader, SearchInput, HistoryControls, ZoomControls, FontFormatToolbar, ShapeSelector, TagManager |
-| `hooks/useMindMapStore.ts` | Store | CRUD, historial 40, clipboard con IDs nuevos, propagación estilos/iconos |
+| `hooks/useMindMapStore.ts` | Store | CRUD, historial 40, clipboard con IDs nuevos, propagación estilos/iconos/sombras |
 | `hooks/useKeyboardShortcuts.ts` | Hook | Atajos globales (inactivos escribiendo/modal/presentación) |
 | `hooks/useSearchFilter.ts` | Hook | Filtro acumulativo → `Set<string> \| undefined` |
 | `utils/layoutEngine.ts` | Motor | 9 layouts, colisiones, aristas Bézier, nubes |
-| `utils/connectorUtils.ts` | Motor | Conectores flotantes + geometría etiquetas |
+| `utils/connectorUtils.ts` | Motor | Conectores flotantes + geometría etiquetas + filtros de sombra |
+| `utils/bubbleTailUtils.ts` | Motor | Geometría anatómica de colita de burbuja (recta, curva, pensamiento) |
+| `utils/cloudUtils.ts` | Motor | Cálculo de siluetas sólidas y sombras para nubes envolventes |
+| `utils/edgeUtils.ts` | Motor | Sistema dual de sombras de aristas (global y local con halo neón) |
 | `utils/presentationGenerator.ts` | Generador | Slides clásicas por defecto |
 | `utils/spatialPresentationGenerator.ts` | Generador | Tarjetas 720×440 (`spiral/constellation/grid`) |
 | `utils/freeplaneConverter.ts` | Conversor | `.mm` bidireccional + Markdown |
@@ -392,9 +403,10 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test` (si se cuelga e
 | `utils/sampleMaps.ts` + `additionalTemplates.ts` | Contenido | Tutorial + blanco + ~20 plantillas (`ALL_TEMPLATES`) |
 | `utils/iconMap.tsx` + `vectorIconPack.tsx` | Contenido | Iconos temáticos + pack 520+/12 categorías |
 | `utils/templateIllustrations.ts` | Contenido | 32 SVG DataURI de vista previa |
-| `types/mindmap.ts` | Tipos | `MindNode/MindMap/Connector/NodeCloud/FilterOptions/HistoryState`, enums (10 formas, 5 edge styles, 4 profiles, 9 layouts, 7 sides, 8 clouds) |
+| `types/mindmap.ts` | Tipos | `MindNode/MindMap/Connector/NodeCloud/FilterOptions/HistoryState`, enums (10 formas, 5 edge styles, 4 profiles, 9 layouts, 7 sides, 8 clouds, bubble tail side/style) |
 | `enrich_shapes.py` | Utilidad | Reescritura de shapes en plantillas |
 | `doc/DESIGN.md` | Doc | Sistema de diseño verificado (tokens, componentes, reglas) |
+| `doc/mejoras.md` | Doc | Registro y especificación técnica de mejoras y hojas de ruta |
 | `AGENTS.md` | Doc | Instrucciones compactas para agentes |
 | `opencode.json` | Config | Plugin `opencode-agent-memory@0.3.0` |
 | `metadata.json` / `.env.example` | Hosted | Capacidad Gemini + vars inyectadas por AI Studio |
@@ -410,23 +422,24 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test` (si se cuelga e
 │                                [✓ Badge de Selección / Staged]                         │
 │                                (NodeComponent.tsx — z-index 50)                       │
 │   ╭────────────────────────────────────────────────────────────────────────────────╮   │
-│   │ [1. FONDO VECTORIAL SVG] -> NodeBackgroundRenderer.tsx                        │   │
+│   │ [1. FONDO VECTORIAL SVG Y SOMBRAS] -> NodeBackgroundRenderer.tsx               │   │
 │   │ Polígonos SVG (Hexágono, Estrella, Flecha), Tramas o Color/Degradado          │   │
+│   │ Sombra de Contorno: box-shadow (estándar) o drop-shadow (polígonos SVG)       │   │
 │   │   ┌────────────────────────────────────────────────────────────────────────┐   │   │
 │   │   │ [2. ENCABEZADO Y CONTENIDO] -> NodeHeaderRow.tsx                       │   │   │
-│   │   │ 🖼️ Imagen (top/fit/left/between/bottom; 140px ó 100px)                  │   │   │
+│   │   │ 🖼️ Imagen (top/fit/left/between/bottom) + Sombra envolvente drop-shadow │   │   │
 │   │   │ 🏷️ Iconos SVG (color + escala)  📊 Progreso (0-100%)                    │   │   │
-│   │   │ ✏️ TÍTULO (div o textarea inline, F2)  📝 CUERPO (multilínea)           │   │   │
+│   │   │ ✏️ TÍTULO (F2 inline + textShadow)  📝 CUERPO (multilínea)              │   │   │
 │   │   └────────────────────────────────────────────────────────────────────────┘   │   │
 │   │   ┌────────────────────────────────────────────────────────────────────────┐   │   │
 │   │   │ [3. BADGES Y METADATOS] -> NodeBadgesBar.tsx                           │   │   │
 │   │   │ 🏷️ Tags  🔗 Enlace (target=_blank)  📋 Nota Markdown  📶 Progreso      │   │   │
 │   │   └────────────────────────────────────────────────────────────────────────┘   │   │
 │   ╰──────────────────────────────────────┬─────────────────────────────────────────╯   │
-│       [4. ACCIÓN FLOTANTE]              │  [COLA BURBUJA SVG]                         │
+│       [4. ACCIÓN FLOTANTE]              │  [COLA BURBUJA ANATÓMICA SVG]                │
 │       -> NodeActionButtons.tsx          │  -> NodeBackgroundRenderer.tsx               │
-│       • (+) Agregar hijo  • [n] Fold    │  Punta triangular hacia la rama padre        │
-│       • (⠿) Drag&Drop anti-ciclos       │                                              │
+│       • (+) Agregar hijo  • [n] Fold    │  Longitud, ancho base, lado cardinal,       │
+│       • (⠿) Drag&Drop anti-ciclos       │  desplazamiento % y estilo recta/curva/nube  │
 └──────────────────────────────────────────┴─────────────────────────────────────────────┘
 ```
 

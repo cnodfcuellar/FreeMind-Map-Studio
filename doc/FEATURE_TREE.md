@@ -1,7 +1,6 @@
 # 🌳 Árbol de Características — FreeMind Map Studio
 
-> **Actualizado**: 2026-10-17 · **Estado**: verificado contra el código real de `src/` (auditorías de DESIGN §6-§10 del mismo día; controles de nodos y ZoomContr
-ols leídos directamente de `NodeActionButtons.tsx` y `ZoomControls.tsx`).
+> **Actualizado**: 2026-11-05 · **Estado**: verificado contra el código real de `src/` (incorporando Sistema Modular de Sombras para 6 objetos con `<Switch>`, Anatomía de Colita de Bocadillo con 4 dimensiones, Edición interactiva y Gestión de Conectores Libres en mapa).
 > Un *feature tree* es la descomposición jerárquica de todo lo que el producto ofrece: raíz = producto, primer nivel = áreas/módulos, hojas = capacidades atómicas y verificables.
 
 Este documento recoge **2 árboles complementarios**:
@@ -28,12 +27,21 @@ FreeMind Map Studio (editor de mapas mentales 100% offline)
 │
 ├── 🎨 Formato y estilo
 │   ├── 10 formas de nodo (bubble, fork, rectangle, square, oval, circle, pill, hexagon, arrow, star)
+│   ├── Anatomía de colita de bocadillo (NodeBubbleTail): longitud (0-32px), ancho de base (6-30px), lado cardinal (auto/abajo/arriba/izq/der), desplazamiento (15-85%) y estilo (recta/curva/nube de pensamiento)
+│   ├── Sistema modular de sombras (6 objetos con Switch ON/OFF y presets):
+│   │   ├── Objeto #1: Sombra de texto (título y cuerpo propagable)
+│   │   ├── Objeto #2: Sombra de imagen adjunta (drop-shadow perimetral en transparencias PNG)
+│   │   ├── Objeto #3: Sombra de contorno del nodo (box-shadow en estándar y drop-shadow en SVG)
+│   │   ├── Objeto #4: Sombra de nube de rama (silueta sólida subyacente para soporte de transparencia)
+│   │   ├── Objeto #5: Sombra de aristas y conexiones (global de mapa y override local con propagación)
+│   │   └── Objeto #6: Sombra en conectores libres flotantes
 │   ├── Fondo: sólido / degradado / trama (7) / imagen / transparente
 │   ├── Bordes: color, grosor, estilo (sólido/guiones/puntos)
-│   ├── Aristas: 4 formas, 4 perfiles de grosor (ribbon), color por nodo/mapa, grosor, dash
-│   ├── Propagación de estilo a hijos (recursivo) y hermanos
+│   ├── Aristas: 4 formas, 4 perfiles de grosor (ribbon), color por nodo/mapa, grosor, dash y sombra
+│   ├── Conectores libres: ciclo completo (crear, seleccionar con glow, doble clic para editar, suprimir, arrastrar Bezier)
+│   ├── Propagación de estilo a hijos (recursivo) y hermanos (incluye sombras y colita de bocadillo)
 │   ├── 520+ iconos vectoriales (pack en grid, buscador, categorías, galería completa)
-│   └── Nubes de agrupación (8 formas, relleno, borde) sobre nodo + descendientes
+│   └── Nubes de agrupación (8 formas, relleno, borde, sombra y silueta) sobre nodo + descendientes
 │
 ├── 🗺 Lienzo y organización
 │   ├── 9 layouts (estándar, balanceado, derecha, izquierda, arriba, abajo, árbol, radial, circular)
@@ -192,6 +200,7 @@ Interfaz de FreeMind Map Studio
 │   ├── 📝 Texto
 │   │   ├── Título — [textarea] → `updateNode({ text })` en tiempo real · [FontFormatToolbar] → `updateNode({ bold, italic, textAlign })` ·
 │   │   │     [ColorPicker con Reset] → `updateNode({ textColor: color | undefined })` · [Slider fuente 10-36px] → `updateNode({ fontSize })`
+│   │   │     └── [Sombra de Texto (Objeto #1)] → Switch ON/OFF, 4 presets (Suave, Media, Fuerte, Glow), Slider Desenfoque 1-16px, ColorPicker, y sub-switch propagar a cuerpo
 │   │   ├── Cuerpo — [ojo] alterna visibilidad en lienzo `updateNode({ hideBody: !hideBody })` · [textarea] → `updateNode({ body })` ·
 │   │   │     [FontFormatToolbar cuerpo] → `updateNode({ bodyBold, bodyItalic, bodyAlign })` · [ColorPicker cuerpo] → `updateNode({ bodyColor })` ·
 │   │   │     [Slider tamaño cuerpo 9-24px] → `updateNode({ bodyFontSize })`
@@ -201,7 +210,8 @@ Interfaz de FreeMind Map Studio
 │   │   │     ├── [Trash2] → limpia `updateNode({ imageUrl: undefined, imagePosition: undefined, imageWidth: undefined })`
 │   │   │     └── [Si imageUrl existe]:
 │   │   │           ├── [6 botones de posición] → `updateNode({ imagePosition: 'top'|'above-text'|'below'|'left'|'right'|'fit' })`
-│   │   │           └── [Slider ancho 60-500px, step 10] → `updateNode({ imageWidth })` (Reset = 200px)
+│   │   │           ├── [Slider ancho 60-500px, step 10] → `updateNode({ imageWidth })` (Reset = 200px)
+│   │   │           └── [Sombra de Imagen (Objeto #2)] → Switch ON/OFF, 4 presets (Suave, Media, 3D, Glow), Slider Desenfoque 2-24px, ColorPicker (drop-shadow perimetral)
 │   │   └── Metadatos —
 │   │         ├── [TagManager] → input texto + Enter/botón Plus añade tag a array; clic en [X] de chip lo remueve → `updateNode({ tags })`
 │   │         ├── [input enlace web] → valida y actualiza `updateNode({ link: url })` (muestra icono ExternalLink en nodo)
@@ -211,6 +221,12 @@ Interfaz de FreeMind Map Studio
 │   ├── 🎨 Estilos
 │   │   ├── Forma — [ShapeSelector: grid 2×5 con 10 formas geométricas] → `updateNode({ shape: id })` ·
 │   │   │     [Slider Ancho 0-500px (0 = auto)] → `updateNode({ customWidth })` · [Slider Alto 0-300px] → `updateNode({ customHeight })`
+│   │   │     └── [Anatomía de Colita de Bocadillo (solo si shape === 'bubble')] →
+│   │   │           ├── [Slider Longitud 0-32px] → 0 apaga colita; presets Ninguna, Corta, Media, Larga
+│   │   │           ├── [Slider Ancho Base 6-30px] → amplitud de anclaje
+│   │   │           ├── [5 Botones Lado Cardinal] → Auto (según padre), Abajo, Arriba, Izquierda, Derecha
+│   │   │           ├── [Slider Desplazamiento 15-85%] → posición en el borde con presets Inicio, Centro, Fin
+│   │   │           └── [3 Botones Estilo Anatómico] → Recta clásica, Curva dinámica, Nube de pensamiento
 │   │   ├── Fondo del Nodo — [Selector de tipo: 5 botones mutuamente exclusivos]:
 │   │   │     ├── 1. Tipo Sólido (`bgType === 'color'`) →
 │   │   │     │     [ColorPicker + 16 presets] → `updateNode({ color, bgType: 'color' })` · [Reset] → restaura a undefined (hereda del tema)
@@ -227,11 +243,13 @@ Interfaz de FreeMind Map Studio
 │   │   │     └── 5. Tipo Transparente (`bgType === 'transparent'`) → `updateNode({ bgType: 'transparent', color: 'transparent' })` (sin controles secundarios)
 │   │   ├── Borde y Contorno — [ColorPicker color con Reset] → `updateNode({ borderColor })` ·
 │   │   │     [Slider grosor 0-8px] → `updateNode({ borderWidth })` (0 = sin borde) ·
-│   │   │     [3 botones de estilo de línea] Sólido (`solid`) / Guiones (`dashed`) / Puntos (`dotted`) → `updateNode({ borderDash })`
+│   │   │     [3 botones de estilo de línea] Sólido (`solid`) / Guiones (`dashed`) / Puntos (`dotted`) → `updateNode({ borderDash })` ·
+│   │   │     └── [Sombra del Contorno del Nodo (Objeto #3)] → Switch ON/OFF, 4 presets (Suave, Media, 3D, Glow), Slider Desenfoque 1-40px, Slider Desplazamiento Y 0-30px, ColorPicker (doble motor box-shadow y SVG drop-shadow)
 │   │   └── Arista y Propagación —
 │   │         ├── [4 formas de conexión] Curva orgánica / Bézier / Línea Recta / Ortogonal → `updateNode({ edgeShape })`
 │   │         ├── [ColorPicker color de arista] → `updateNode({ edgeColor })` (Reset = auto, hereda de rama)
-│   │         ├── [Aplicar a Hijos (azul)] → propaga en cascada recursiva (DFS) forma, color, bordes y aristas a todos los descendientes en 1 paso de historial
+│   │         ├── [Sombra de la Rama Local (Objeto #5)] → Switch ON/OFF, 3 presets (Suave, 3D, Glow), Slider Desenfoque 1-20px, Slider Desplazamiento Y 0-16px, ColorPicker
+│   │         ├── [Aplicar a Hijos (azul)] → propaga en cascada recursiva (DFS) forma, color, bordes, aristas, sombras y colita a descendientes en 1 paso de historial
 │   │         └── [Aplicar a Hermanos (gris)] → propaga los mismos estilos a todos los nodos del mismo padre (deshabilitado si no hay hermanos)
 │   │
 │   ├── 📒 Notas
@@ -258,8 +276,9 @@ Interfaz de FreeMind Map Studio
 │   │         ├── Forma — [8 botones de forma] (cloud-scallop, cloud-bubble, cloud-wave, cloud-rect, oval, rounded, star, comic) → `updateCloudProps({ shape })`
 │   │         ├── Márgenes — [Slider horizontal -50..200px] → `updateCloudProps({ paddingX })` · [Slider vertical -50..200px] → `updateCloudProps({ paddingY })`
 │   │         ├── Relleno — [ColorPicker color de nube] → `updateCloudProps({ color })` · [Slider opacidad 0-100%] → `updateCloudProps({ opacity: val/100 })`
-│   │         └── Borde — [ColorPicker borde] → `updateCloudProps({ borderColor })` · [Slider grosor 0-6px] → `updateCloudProps({ borderWidth })` ·
-│   │               [3 estilos de trazo] Sólido / Guiones / Puntos → `updateCloudProps({ borderDash })`
+│   │         ├── Borde — [ColorPicker borde] → `updateCloudProps({ borderColor })` · [Slider grosor 0-6px] → `updateCloudProps({ borderWidth })` ·
+│   │         │     [3 estilos de trazo] Sólido / Guiones / Puntos → `updateCloudProps({ borderDash })`
+│   │         └── Sombra de Nube (Objeto #4) — Switch ON/OFF, 4 presets (Suave, Isla, Profunda, Glow neón), Slider Opacidad 5-100%, Slider Desenfoque 2-30px, Slider Desplazamiento Y 0-20px, ColorPicker personalizado (renderizado con silueta sólida subyacente)
 │   │
 │   └── 🗺 Mapa (Configuración global sin necesidad de nodo seleccionado)
 │       ├── Temas del Mapa — [8 tarjetas de tema] → `setMindMap({ themeId })` + restyle completo del mapa
@@ -272,8 +291,20 @@ Interfaz de FreeMind Map Studio
 │       │     [4 perfiles de grosor: cónica, ribbon, uniforme, fina] → `setMindMap({ globalEdgeProfile })` ·
 │       │     [Multicolor toggle] → alterna `setMindMap({ globalEdgeMulticolor: !val })` (asigna paleta por rama) ·
 │       │     [Randomizar (Dices)] → genera colores aleatorios por rama · [ColorPicker uniforme] → `setMindMap({ globalEdgeColor })` ·
-│       │     [3 estilos de trazo: sólido/guiones/puntos] → `setMindMap({ globalEdgeDash })` · [Slider grosor 1-8px] → `setMindMap({ globalEdgeWidth })`
-│       └── Espaciado del Árbol — [Slider separación horizontal 20-150px] → `setMindMap({ horizontalSpacing })` · [Slider separación vertical 4-60px] → `setMindMap({ verticalSpacing })`
+│       │     [3 estilos de trazo: sólido/guiones/puntos] → `setMindMap({ globalEdgeDash })` · [Slider grosor 1-8px] → `setMindMap({ globalEdgeWidth })` ·
+│       │     └── [Sombra Global de Aristas (Objeto #5 Global)] → Switch ON/OFF, 3 presets (Suave, 3D, Glow), Slider Desenfoque 1-20px, Slider Desplazamiento Y 0-16px, ColorPicker
+│       ├── Espaciado del Árbol — [Slider separación horizontal 20-150px] → `setMindMap({ horizontalSpacing })` · [Slider separación vertical 4-60px] → `setMindMap({ verticalSpacing })`
+│       └── Sección 6: Conexiones Libres (Free Connectors) —
+│             ├── [Badge Contador interactivo] → total de conectores creados en el mapa
+│             ├── [Botón + Nueva Conexión] → abre `ConnectorModal` en modo creación
+│             ├── [Lista de Tarjetas de Conectores]:
+│             │     ├── Indicador de color y tipo de flecha
+│             │     ├── Nombres de nodos origen y destino (`Nodo A ➔ Nodo B`)
+│             │     ├── Badge de etiqueta descriptiva
+│             │     ├── Píldoras informativas (estilo, capa, sombra ON/OFF)
+│             │     ├── [Botón Editar] → abre `ConnectorModal` precargado en modo edición
+│             │     └── [Botón Eliminar] → elimina la conexión con registro en el historial undo/redo
+│             └── [Estado Vacío] → mensaje e ilustración cuando no hay conectores creados
 │
 ├── ⌨️ StatusBar (pie de pantalla)
 │   └── Nodos totales · Seleccionado ("texto" + ID) · Zoom % (real, desde el viewport) ·
@@ -299,14 +330,18 @@ Interfaz de FreeMind Map Studio
 │   │     ├── [Crear Nuevo Mapa] → crea mapa en blanco con ID `map_${Date.now()}` y lo activa en el store
 │   │     ├── Filas de mapas: [clic en fila] serializa el mapa actual en `localStorage`, carga el mapa seleccionado y cierra el modal
 │   │     └── [Botón Eliminar (Trash2)] → `confirm()` nativo; si confirma, borra la clave `freemind_map_{id}` y actualiza el índice (oculto en el mapa activo)
-│   ├── 🔗 Crear Conector (`ConnectorModal`) —
-│   │     ├── [select Destino] (requerido, excluye el nodo de origen) · [input Etiqueta] (opcional)
+│   ├── 🔗 Crear / Editar Conector (`ConnectorModal`) —
+│   │     ├── Modo Dual: Detección automática de 'Crear Conector' o 'Editar Conector' según si recibe `connector` existente
+│   │     ├── [select Origen] y [select Destino] (selectores interactivos de nodos con nombres legibles)
+│   │     ├── [input Etiqueta] (texto flotante sobre la línea del conector)
 │   │     ├── [select Forma: curved | bezier | straight | step]
-│   │     │     ├── Si es 'straight': el slider de curvatura se **oculta completamente**
+│   │     │     ├── Si es 'straight': el slider de curvatura se oculta completamente
 │   │     │     └── Si es 'curved' o 'bezier': muestra [Slider Curvatura -200..200]
 │   │     ├── [select Capa: above (frente) | below (fondo)] · [Slider Opacidad 10-100%]
 │   │     ├── [Estilo: sólido | guiones | puntos] · [ColorPicker color con Reset]
-│   │     └── [Crear Conector (Submit)] → crea objeto en `mindMap.connectors`, añade a historial y cierra modal
+│   │     ├── [Sombra de Conector (Objeto #6)] → Switch ON/OFF, 3 presets (Suave, Profunda, Glow neón), Sliders Desenfoque 1-20px y Desplazamiento Y 0-16px, ColorPicker
+│   │     ├── [Guardar Cambios / Crear Conector (Submit)] → aplica actualización o creación en historial y cierra modal
+│   │     └── [Botón Eliminar Conector (rojo)] → visible en modo edición; borra la conexión de inmediato y registra en el historial undo/redo
 │   └── 🖼 Pack de Iconos (`IconPackModal`) —
 │         ├── Barra lateral: [12 categorías con conteo dinámico] · [buscador de texto] · [8 quick search tags]
 │         ├── Grid interactivo: [clic en icono] alterna su presencia en `selectedNode.icons` en vivo
