@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateConnectorGeometry } from '../connectorUtils';
+import { calculateConnectorGeometry, computeConnectorShadowFilter } from '../connectorUtils';
 import { Connector } from '../../types/mindmap';
 
 describe('connectorUtils', () => {
@@ -37,5 +37,27 @@ describe('connectorUtils', () => {
     });
     expect(geo.pathD).toContain('M 0 0 L');
     expect(geo.pathD).toContain('L 100 100');
+  });
+
+  it('computes connector shadow filter correctly', () => {
+    expect(computeConnectorShadowFilter(baseConnector)).toBeUndefined();
+
+    const softConn: Connector = { ...baseConnector, shadow: true, shadowPreset: 'soft' };
+    expect(computeConnectorShadowFilter(softConn)).toBe('drop-shadow(0 2px 4px rgba(0,0,0,0.20))');
+
+    const deepConn: Connector = { ...baseConnector, shadow: true, shadowPreset: 'deep' };
+    expect(computeConnectorShadowFilter(deepConn)).toBe('drop-shadow(0 4px 10px rgba(0,0,0,0.35))');
+
+    const glowConn: Connector = { ...baseConnector, shadow: true, shadowPreset: 'glow' };
+    expect(computeConnectorShadowFilter(glowConn)).toBe('drop-shadow(0 0 8px #3b82f6)');
+
+    const customConn: Connector = {
+      ...baseConnector,
+      shadow: true,
+      shadowBlur: 10,
+      shadowOffsetY: 5,
+      shadowColor: '#ec4899',
+    };
+    expect(computeConnectorShadowFilter(customConn)).toBe('drop-shadow(0 5px 10px #ec4899)');
   });
 });

@@ -13,6 +13,8 @@ import {
   generateRibbonEdgePath,
   computeCloudBounds,
 } from '../utils/layoutEngine';
+import { computeCloudShadowFilter, getCloudShadowConfig } from '../utils/cloudUtils';
+import { computeEdgeShadowFilter } from '../utils/edgeUtils';
 import { generateDefaultPresentationSlides } from '../utils/presentationGenerator';
 import { MarkdownView } from '../utils/markdownRenderer';
 import { NodeComponent } from './NodeComponent';
@@ -55,7 +57,7 @@ import {
   MousePointer,
   Maximize,
 } from 'lucide-react';
-import { calculateConnectorGeometry } from '../utils/connectorUtils';
+import { calculateConnectorGeometry, computeConnectorShadowFilter } from '../utils/connectorUtils';
 
 interface MindMapCanvasProps {
   mindMap: MindMap;
@@ -82,6 +84,8 @@ interface MindMapCanvasProps {
   onApplyStyleToChildren?: (nodeId: string) => void;
   onApplyStyleToSiblings?: (nodeId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
+  onEditConnector?: (connector: Connector) => void;
+  onDeleteConnector?: (connectorId: string) => void;
   // Direct Presentation Mode Props
   isPresentationMode?: boolean;
   onClosePresentation?: () => void;
@@ -122,6 +126,8 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   onApplyStyleToChildren,
   onApplyStyleToSiblings,
   onUpdateConnector,
+  onEditConnector,
+  onDeleteConnector,
   isPresentationMode = false,
   onClosePresentation,
   onUpdateMindMap,
@@ -266,6 +272,9 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
   }, [layoutMap]);
 
   // Camera flight directly on MindMapCanvas pan & zoom
+  const [isCameraFlying, setIsCameraFlying] = useState<boolean>(false);
+  const cameraFlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const flyCameraToBounds = useCallback(
     (bounds: { x: number; y: number; width: number; height: number }) => {
       if (!containerRef.current) return;
@@ -280,6 +289,14 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
       const centerX = bounds.x + bounds.width / 2;
       const centerY = bounds.y + bounds.height / 2;
 
+      setIsCameraFlying(true);
+      if (cameraFlightTimerRef.current) {
+        clearTimeout(cameraFlightTimerRef.current);
+      }
+      cameraFlightTimerRef.current = setTimeout(() => {
+        setIsCameraFlying(false);
+      }, 780);
+
       setZoom(targetZoom);
       setPan({
         x: vw / 2 - centerX * targetZoom,
@@ -288,6 +305,14 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
     },
     []
   );
+
+  useEffect(() => {
+    return () => {
+      if (cameraFlightTimerRef.current) {
+        clearTimeout(cameraFlightTimerRef.current);
+      }
+    };
+  }, []);
 
   // Focus slide when in presentation mode and sync note drawer
   useEffect(() => {
@@ -471,6 +496,36 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
       y: rect.height / 2 - centerY * newZoom,
     });
   }, [layoutMap]);
+
+  // Global keydown for deleting selected connector
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedConnectorId) return;
+
+      // Ignore if user is typing in an input/textarea
+      const activeEl = document.activeElement;
+      if (
+        activeEl instanceof HTMLInputElement ||
+        activeEl instanceof HTMLTextAreaElement ||
+        activeEl?.getAttribute('contenteditable') === 'true'
+      ) {
+        return;
+      }
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        if (onDeleteConnector) {
+          onDeleteConnector(selectedConnectorId);
+          setSelectedConnectorId(null);
+        }
+      } else if (e.key === 'Escape') {
+        setSelectedConnectorId(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedConnectorId, onDeleteConnector]);
 
   // Handle Pan & Drag Events
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -743,10 +798,13 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
     const endMarkerUrl = isTopLayer ? 'url(#top-connector-arrow-end)' : 'url(#connector-arrow-end)';
     const startMarkerUrl = isTopLayer ? 'url(#top-connector-arrow-start)' : 'url(#connector-arrow-start)';
 
+    const connShadowFilter = computeConnectorShadowFilter(conn);
+
     return (
       <g
         key={conn.id}
         className="cursor-pointer pointer-events-auto"
+        style={connShadowFilter ? { filter: connShadowFilter } : undefined}
         onMouseEnter={() => setHoveredConnectorId(conn.id)}
         onMouseLeave={() => {
           if (!isDraggingThis) setHoveredConnectorId(null);
@@ -754,6 +812,12 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
         onClick={(e) => {
           e.stopPropagation();
           setSelectedConnectorId(conn.id);
+        }}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          if (onEditConnector) {
+            onEditConnector(conn);
+          }
         }}
       >
         {/* Broad invisible hit area for easy click/hover */}
@@ -879,18 +943,26 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
       {/* Viewport Transform Container */}
       <div
         id="canvas-viewport"
+        onTransitionEnd={(e) => {
+          if (e.target === e.currentTarget) {
+            setIsCameraFlying(false);
+          }
+        }}
         style={{
-          transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: '0 0',
           transition: isPresentationMode && !isPanning && !isDrawingFrame ? 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+          willChange: isCameraFlying ? 'transform' : 'auto',
+          WebkitFontSmoothing: 'subpixel-antialiased',
+          textRendering: 'optimizeLegibility',
         }}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none will-change-transform"
+        className="absolute top-0 left-0 w-full h-full pointer-events-none"
       >
         {/* SVG Rendering Layer for Background Patterns, Edges, Clouds and Connectors */}
         <svg
           id="svg-edges-layer"
           className="absolute top-0 left-0 w-full h-full overflow-visible pointer-events-none"
-          style={{ overflow: 'visible' }}
+          style={{ overflow: 'visible', shapeRendering: 'geometricPrecision' }}
         >
           <defs>
             {/* Arrowhead marker for connectors (End) */}
@@ -1095,8 +1167,10 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   shapePath = `${scallops.join(' ')} Z`;
                 }
 
+                const cloudShadowConfig = getCloudShadowConfig(cloud);
+
                 return (
-                  <g key={`cloud-group-${node.id}`} filter={cloud.shadow ? 'url(#cloud-drop-shadow)' : undefined}>
+                  <g key={`cloud-group-${node.id}`}>
                     <defs>
                       {/* Gradient def */}
                       {bgType === 'gradient' && (
@@ -1202,6 +1276,19 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                       </clipPath>
                     </defs>
 
+                    {/* Capa de Sombra de Silueta Sólida (Efecto Isla Conceptual nítido e intenso) */}
+                    {cloudShadowConfig && (
+                      <path
+                        d={shapePath}
+                        fill={cloudShadowConfig.color}
+                        style={{
+                          opacity: cloudShadowConfig.opacity,
+                          filter: `blur(${Math.max(2, Math.round(cloudShadowConfig.blur / 2))}px)`,
+                          transform: cloudShadowConfig.offsetY > 0 ? `translateY(${cloudShadowConfig.offsetY}px)` : undefined,
+                        }}
+                      />
+                    )}
+
                     {/* Base Background Tint Layer */}
                     <path
                       d={shapePath}
@@ -1288,6 +1375,9 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   ? `0.1 ${Math.max(8, width * 3.0)}`
                   : undefined;
 
+              const edgeShadowFilter = computeEdgeShadowFilter(childNode, color, mindMap);
+              const edgeShadowStyle = edgeShadowFilter ? { filter: edgeShadowFilter } : undefined;
+
               // If a variable-width profile is active, render dynamic filled ribbon
               if (effectiveProfile !== 'uniform') {
                 const ribbonPath = generateRibbonEdgePath(
@@ -1310,13 +1400,17 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                         stroke={color}
                         strokeWidth={0.5}
                         strokeLinejoin="round"
+                        style={edgeShadowStyle}
                       />
                     );
                   }
 
                   // If dashed or dotted with variable thickness profile, render both profile silhouette and dashed spine
                   return (
-                    <g key={`edge-group-${childNode.parentId}-${childNode.id}`}>
+                    <g
+                      key={`edge-group-${childNode.parentId}-${childNode.id}`}
+                      style={edgeShadowStyle}
+                    >
                       <path
                         d={ribbonPath}
                         fill={color}
@@ -1348,6 +1442,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   strokeDasharray={strokeDasharray}
                   fill="none"
                   strokeLinecap="round"
+                  style={edgeShadowStyle}
                 />
               );
             })}

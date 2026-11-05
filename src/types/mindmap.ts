@@ -10,6 +10,9 @@ export type NodeShape =
   | 'arrow'
   | 'star';
 
+export type BubbleTailSide = 'auto' | 'bottom' | 'top' | 'left' | 'right';
+export type BubbleTailStyle = 'straight' | 'curved' | 'thought';
+
 export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden';
 
 export type EdgeProfile = 'uniform' | 'tapered' | 'spindle' | 'hourglass';
@@ -66,7 +69,14 @@ export interface NodeCloud {
   borderColor?: string;
   borderWidth?: number;
   borderDash?: 'solid' | 'dashed' | 'dotted';
+
+  // Cloud Shadow (Sombra envolvente de isla conceptual)
   shadow?: boolean;
+  shadowPreset?: 'soft' | 'island' | 'deep' | 'glow';
+  shadowBlur?: number;
+  shadowOffsetY?: number;
+  shadowOpacity?: number;
+  shadowColor?: string;
 }
 
 export type NodeBackgroundType = 'color' | 'transparent' | 'gradient' | 'pattern' | 'image';
@@ -86,6 +96,13 @@ export interface MindNode {
   shape?: NodeShape;
   customWidth?: number;
   customHeight?: number;
+
+  // Bubble Shape Tail Customization (Anatomía de la colita de burbuja)
+  tailLength?: number;
+  tailWidth?: number;
+  tailSide?: BubbleTailSide;
+  tailOffset?: number;
+  tailStyle?: BubbleTailStyle;
   color?: string; // background fill or accent
   bgType?: NodeBackgroundType;
   gradientColor1?: string;
@@ -106,11 +123,22 @@ export interface MindNode {
   borderDash?: 'solid' | 'dashed' | 'dotted';
   borderStyle?: 'solid' | 'dashed' | 'dotted';
 
+  // Node Box / Shape Shadow (Sombra del contorno del nodo)
+  nodeShadow?: boolean;
+  nodeShadowPreset?: 'soft' | 'medium' | 'deep' | 'glow';
+  nodeShadowBlur?: number;
+  nodeShadowOffsetY?: number;
+  nodeShadowColor?: string;
+
   // Node Attached Content Image (Imagen de contenido del nodo)
   imageUrl?: string;
   imageWidth?: number;
   imageHeight?: number;
   imagePosition?: 'top' | 'bottom' | 'left' | 'right' | 'between' | 'background' | 'fit';
+  imageShadow?: boolean;
+  imageShadowPreset?: 'soft' | 'medium' | 'deep' | 'glow';
+  imageShadowBlur?: number;
+  imageShadowColor?: string;
 
   // Title Text & Typography
   textColor?: string;
@@ -119,6 +147,13 @@ export interface MindNode {
   italic?: boolean;
   fontFamily?: string;
   textAlign?: 'left' | 'center' | 'right';
+  textShadow?: boolean;
+  textShadowPreset?: 'soft' | 'medium' | 'deep' | 'glow';
+  textShadowColor?: string;
+  textShadowBlur?: number;
+  textShadowOffsetX?: number;
+  textShadowOffsetY?: number;
+  applyTextShadowToBody?: boolean;
 
   // Body Text & Typography (Cuerpo del nodo)
   body?: string;
@@ -135,6 +170,11 @@ export interface MindNode {
   edgeWidth?: number;
   edgeDash?: 'solid' | 'dashed' | 'dotted';
   edgeProfile?: EdgeProfile;
+  edgeShadow?: boolean;
+  edgeShadowPreset?: 'soft' | 'deep' | 'glow';
+  edgeShadowBlur?: number;
+  edgeShadowOffsetY?: number;
+  edgeShadowColor?: string;
   
   // Metadata & Features
   icons?: string[];
@@ -182,6 +222,13 @@ export interface Connector {
   controlPoint?: { x: number; y: number };
   layer?: 'above' | 'below';
   opacity?: number;
+
+  // Connector Shadow
+  shadow?: boolean;
+  shadowPreset?: 'soft' | 'deep' | 'glow';
+  shadowBlur?: number;
+  shadowOffsetY?: number;
+  shadowColor?: string;
 }
 
 export type BackgroundPatternStyle =
@@ -237,6 +284,11 @@ export interface MindMap {
   edgeColor?: string;
   edgeDash?: 'solid' | 'dashed' | 'dotted';
   edgeProfile?: EdgeProfile;
+  edgeShadow?: boolean;
+  edgeShadowPreset?: 'soft' | 'deep' | 'glow';
+  edgeShadowBlur?: number;
+  edgeShadowOffsetY?: number;
+  edgeShadowColor?: string;
   horizontalGap?: number;
   verticalGap?: number;
 

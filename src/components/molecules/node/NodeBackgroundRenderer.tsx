@@ -296,6 +296,55 @@ export const getNodeShapeStyles = (
 };
 
 /**
+ * Computes custom node shape shadow styling (box-shadow for standard shapes, drop-shadow for SVG polygons)
+ */
+export const computeNodeShadowStyle = (
+  node: MindNode,
+  isPolygonShape: boolean
+): { boxShadow?: string; filter?: string } => {
+  if (!node.nodeShadow) return {};
+
+  const preset = node.nodeShadowPreset || 'soft';
+  const blur =
+    node.nodeShadowBlur ??
+    (preset === 'soft' ? 8 : preset === 'medium' ? 14 : preset === 'deep' ? 24 : 16);
+  const offsetY =
+    node.nodeShadowOffsetY ??
+    (preset === 'soft' ? 3 : preset === 'medium' ? 6 : preset === 'deep' ? 10 : 0);
+  const defaultColor =
+    preset === 'glow'
+      ? '#38bdf8'
+      : preset === 'deep'
+      ? 'rgba(0,0,0,0.35)'
+      : preset === 'medium'
+      ? 'rgba(0,0,0,0.22)'
+      : 'rgba(0,0,0,0.12)';
+  const color = node.nodeShadowColor || defaultColor;
+
+  if (isPolygonShape) {
+    if (preset === 'glow') {
+      return {
+        filter: `drop-shadow(0 0 ${blur}px ${color})`,
+      };
+    }
+    return {
+      filter: `drop-shadow(0 ${offsetY}px ${blur}px ${color})`,
+    };
+  }
+
+  // Standard CSS container shapes
+  if (preset === 'glow') {
+    return {
+      boxShadow: `0 0 ${blur}px ${color}`,
+    };
+  }
+  const spread = preset === 'deep' ? 2 : 0;
+  return {
+    boxShadow: `0 ${offsetY}px ${blur}px ${spread > 0 ? `${spread}px ` : ''}${color}`,
+  };
+};
+
+/**
  * Renders SVG overlay polygon/path background for Hexagon, Arrow, Star
  */
 export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({

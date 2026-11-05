@@ -41,6 +41,13 @@ export interface ToolPanelProps {
   onUpdateMapEdgeWidth?: (width: number) => void;
   onUpdateMapEdgeColor?: (color: string | undefined) => void;
   onUpdateMapEdgeDash?: (dash: 'solid' | 'dashed' | 'dotted') => void;
+  onUpdateMapEdgeShadow?: (updates: {
+    edgeShadow?: boolean;
+    edgeShadowPreset?: 'soft' | 'deep' | 'glow';
+    edgeShadowBlur?: number;
+    edgeShadowOffsetY?: number;
+    edgeShadowColor?: string;
+  }) => void;
   onApplyEdgeStyleToAllNodes?: (edgeStyle: EdgeStyle) => void;
   onApplyEdgeProfileToAllNodes?: (edgeProfile: EdgeProfile) => void;
   onRandomizeEdgeColors?: () => void;
@@ -49,6 +56,7 @@ export interface ToolPanelProps {
   onApplyIconsToChildren?: (nodeId: string) => void;
   onApplyIconsToSiblings?: (nodeId: string) => void;
   onOpenConnectorModal?: (fromId?: string) => void;
+  onEditConnector?: (connector: Connector) => void;
   onDeleteConnector?: (connectorId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
   onUpdateMapGaps?: (gaps: { horizontal?: number; vertical?: number }) => void;
@@ -243,6 +251,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
                 onUpdateMapEdgeWidth={props.onUpdateMapEdgeWidth}
                 onUpdateMapEdgeColor={props.onUpdateMapEdgeColor}
                 onUpdateMapEdgeDash={props.onUpdateMapEdgeDash}
+                onUpdateMapEdgeShadow={props.onUpdateMapEdgeShadow}
                 onApplyEdgeStyleToAllNodes={props.onApplyEdgeStyleToAllNodes}
                 onApplyEdgeProfileToAllNodes={props.onApplyEdgeProfileToAllNodes}
                 onRandomizeEdgeColors={props.onRandomizeEdgeColors}
@@ -258,6 +267,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
                   })
                 }
                 onOpenConnectorModal={props.onOpenConnectorModal}
+                onEditConnector={props.onEditConnector}
                 onDeleteConnector={props.onDeleteConnector}
                 onUpdateConnector={props.onUpdateConnector}
                 onUpdateMapBackground={props.onUpdateMapBackground}

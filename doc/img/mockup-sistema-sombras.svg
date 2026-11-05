@@ -1,0 +1,315 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 880" width="1360" height="880" style="background:#090d16; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtro: Sombra Suave para Nodos (Modern Soft) -->
+    <filter id="shadow-soft" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.28" />
+    </filter>
+
+    <!-- Filtro: Sombra Elevada 3D para Nodos (Deep Float) -->
+    <filter id="shadow-deep" x="-30%" y="-30%" width="170%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+
+    <!-- Filtro: Nube Envolvente Difusa (Cloud Island) -->
+    <filter id="shadow-cloud" x="-15%" y="-15%" width="135%" height="135%">
+      <feDropShadow dx="0" dy="8" stdDeviation="18" flood-color="#0284c7" flood-opacity="0.25" />
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#000000" flood-opacity="0.2" />
+    </filter>
+
+    <!-- ======================================================== -->
+    <!-- NUEVOS FILTROS DE ALTO RENDIMIENTO PARA ARISTAS Y CONECTORES -->
+    <!-- ======================================================== -->
+    <!-- 1. Sombra Difusa Real en Aristas (Single GPU Pass Group Filter) -->
+    <filter id="edges-shadow-pass" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+
+    <!-- 2. Resplandor Neón Glow para Aristas (Single GPU Pass Group Filter) -->
+    <filter id="edges-glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#38bdf8" flood-opacity="0.7" />
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+
+    <filter id="edges-glow-pink" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#f472b6" flood-opacity="0.75" />
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+
+    <!-- Filtro Glow General para Nodos -->
+    <filter id="glow-purple" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#c084fc" flood-opacity="0.75" />
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ffffff" flood-opacity="0.9" />
+    </filter>
+
+    <!-- Patrón de Fondo de Puntos -->
+    <pattern id="bg-dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#334155" opacity="0.6" />
+    </pattern>
+
+    <!-- Gradientes -->
+    <linearGradient id="grad-root" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#2563eb" />
+      <stop offset="100%" stopColor="#1d4ed8" />
+    </linearGradient>
+
+    <linearGradient id="grad-cloud" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#0369a1" stopOpacity="0.22" />
+      <stop offset="100%" stopColor="#0284c7" stopOpacity="0.08" />
+    </linearGradient>
+
+    <!-- Marcador Flecha Conector con Sombra -->
+    <marker id="arrow-glow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 2 L 8 5 L 0 8 z" fill="#f59e0b" />
+    </marker>
+  </defs>
+
+  <!-- FONDO CON PATRÓN -->
+  <rect width="100%" height="100%" fill="#090d16" />
+  <rect width="100%" height="100%" fill="url(#bg-dots)" />
+
+  <!-- HEADER / TÍTULO -->
+  <g transform="translate(60, 40)">
+    <rect x="-10" y="-8" width="560" height="64" rx="12" fill="#1e293b" opacity="0.7" stroke="#334155" stroke-width="1" />
+    <circle cx="16" cy="24" r="14" fill="#3b82f6" opacity="0.2" />
+    <path d="M 12 24 L 15 28 L 22 18" stroke="#38bdf8" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="42" y="22" fill="#f8fafc" font-size="16" font-weight="700" letter-spacing="0.3">SISTEMA DE SOMBRAS COMPLETO (INCLUYE ARISTAS)</text>
+    <text x="42" y="42" fill="#94a3b8" font-size="12">Sombra difusa en curvas Bézier, resplandor neón glow en aristas, nodos y nubes</text>
+  </g>
+
+  <!-- LEYENDA SUPERIOR DERECHA -->
+  <g transform="translate(860, 40)">
+    <rect width="440" height="64" rx="10" fill="#1e293b" opacity="0.6" stroke="#334155" stroke-width="1" />
+    <circle cx="20" cy="24" r="6" fill="#38bdf8" filter="url(#edges-glow-blue)" />
+    <text x="32" y="28" fill="#e2e8f0" font-size="11" font-weight="600">Arista Glow Neón</text>
+    <path d="M 140 24 L 165 24" stroke="#8b5cf6" stroke-width="3.5" filter="url(#edges-shadow-pass)" />
+    <text x="175" y="28" fill="#e2e8f0" font-size="11" font-weight="600">Arista Sombra Difusa</text>
+    <circle cx="310" cy="24" r="6" fill="#0284c7" fill-opacity="0.3" stroke="#0284c7" stroke-width="1.5" />
+    <text x="324" y="28" fill="#e2e8f0" font-size="11" font-weight="600">Isla Nube</text>
+    <text x="20" y="50" fill="#38bdf8" font-size="10.5" font-weight="600">⚡ Optimización: 1 solo pase de GPU en el grupo &lt;g&gt; (60 FPS fluidos)</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 1. NUBE ENVOLVENTE (ISLA CONCEPTUAL CON SOMBRA DIFUSA) -->
+  <!-- ======================================================== -->
+  <g transform="translate(680, 175)">
+    <path d="M 30 80 
+             C 10 30, 80 0, 150 20 
+             C 210 -10, 310 0, 350 40 
+             C 420 20, 480 60, 470 120 
+             C 520 160, 500 240, 460 280 
+             C 470 330, 410 380, 340 370 
+             C 280 400, 180 390, 140 360 
+             C 80 380, 10 340, 20 270 
+             C -15 220, 0 140, 30 80 Z" 
+          fill="url(#grad-cloud)" 
+          stroke="#0284c7" 
+          stroke-width="1.8" 
+          stroke-dasharray="6,4"
+          filter="url(#shadow-cloud)" />
+    
+    <rect x="20" y="20" width="130" height="24" rx="6" fill="#0284c7" opacity="0.9" filter="url(#shadow-soft)" />
+    <text x="32" y="36" fill="#ffffff" font-size="11" font-weight="700">☁ NUBE: CLOUD SHADOW</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 2. ARISTAS CURVAS BÉZIER CON SOMBRA DIFUSA REAL (GRUPO GPU) -->
+  <!-- ======================================================== -->
+  
+  <!-- GRUPO A: ARISTAS CON SOMBRA DIFUSA SUSPENDIDA (Efecto cable flotante) -->
+  <g id="edges-diffuse-group" filter="url(#edges-shadow-pass)">
+    <!-- Rama Superior (Azul): Sombra difusa proyectada sobre el lienzo -->
+    <path d="M 340 430 C 460 430, 480 270, 590 270" fill="none" stroke="#3b82f6" stroke-width="3.5" stroke-linecap="round" />
+    
+    <!-- Sub-aristas dentro de la nube -->
+    <path d="M 810 270 C 860 270, 880 250, 930 250" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M 810 270 C 860 270, 880 340, 930 340" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Rama Central (Púrpura): Sombra difusa elegante -->
+    <path d="M 340 430 C 460 430, 490 430, 590 430" fill="none" stroke="#8b5cf6" stroke-width="3.5" stroke-linecap="round" />
+  </g>
+
+  <!-- GRUPO B: ARISTA CON RESPLANDOR NEÓN GLOW (Efecto fibra óptica iluminada) -->
+  <g id="edges-glow-group" filter="url(#edges-glow-pink)">
+    <!-- Rama Inferior (Rosa/Magenta Neón): Emite halo de luz propio -->
+    <path d="M 340 430 C 460 430, 480 590, 590 590" fill="none" stroke="#ec4899" stroke-width="3.5" stroke-linecap="round" />
+  </g>
+
+  <!-- CALLOUT EXPLICATIVO DE LA ARISTA SOMBREADA -->
+  <g transform="translate(410, 310)">
+    <rect width="165" height="36" rx="6" fill="#0f172a" stroke="#3b82f6" stroke-width="1" opacity="0.95" filter="url(#shadow-soft)" />
+    <text x="10" y="16" fill="#38bdf8" font-size="10" font-weight="700">✓ ARISTA CON SOMBRA DIFUSA</text>
+    <text x="10" y="28" fill="#94a3b8" font-size="9">feDropShadow dx=0 dy=4 blur=4</text>
+    <line x1="120" y1="36" x2="135" y2="60" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="2,2" />
+  </g>
+
+  <g transform="translate(410, 520)">
+    <rect width="165" height="36" rx="6" fill="#0f172a" stroke="#ec4899" stroke-width="1" opacity="0.95" filter="url(#shadow-soft)" />
+    <text x="10" y="16" fill="#f472b6" font-size="10" font-weight="700">★ ARISTA GLOW NEÓN</text>
+    <text x="10" y="28" fill="#94a3b8" font-size="9">Halo de luz emitido por la arista</text>
+    <line x1="120" y1="36" x2="135" y2="45" stroke="#ec4899" stroke-width="1.2" stroke-dasharray="2,2" />
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 3. CONECTOR FLOTANTE CRUZADO (CONECTA NODOS DISTANTES) -->
+  <!-- ======================================================== -->
+  <g id="connectors-layer" filter="url(#edges-shadow-pass)">
+    <!-- Línea conector flotante curva con sombra difusa proyectada -->
+    <path d="M 800 450 C 860 520, 880 540, 930 570" fill="none" stroke="#f59e0b" stroke-width="2.6" stroke-dasharray="5,4" marker-end="url(#arrow-glow)" />
+  </g>
+
+  <!-- Etiqueta Flotante sobre el Conector -->
+  <g transform="translate(850, 500)">
+    <rect x="0" y="0" width="76" height="22" rx="11" fill="#f59e0b" filter="url(#shadow-deep)" />
+    <text x="38" y="14" fill="#0f172a" font-size="10" font-weight="700" text-anchor="middle">relación</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 4. NODO RAÍZ (ELEVACIÓN PROFUNDA 3D + TEXT SHADOW) -->
+  <!-- ======================================================== -->
+  <g transform="translate(130, 385)">
+    <rect width="210" height="90" rx="18" fill="url(#grad-root)" stroke="#60a5fa" stroke-width="2" filter="url(#shadow-deep)" />
+    
+    <rect x="16" y="-10" width="68" height="20" rx="10" fill="#1e40af" stroke="#93c5fd" stroke-width="1" filter="url(#shadow-soft)" />
+    <text x="50" y="4" fill="#ffffff" font-size="9" font-weight="700" text-anchor="middle">RAÍZ (3D)</text>
+
+    <text x="105" y="42" fill="#ffffff" font-size="17" font-weight="800" text-anchor="middle" style="text-shadow: 0 2px 4px rgba(0,0,0,0.6);">Arquitectura Central</text>
+    <text x="105" y="64" fill="#bfdbfe" font-size="11.5" text-anchor="middle" style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Sombra Profunda (Elevación)</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 5. NODOS HIJOS -->
+  <!-- ======================================================== -->
+
+  <!-- NODO 1: HEXÁGONO -->
+  <g transform="translate(590, 230)">
+    <path d="M 30 0 L 190 0 L 220 38 L 190 76 L 30 76 L 0 38 Z" 
+          fill="#1e293b" 
+          stroke="#38bdf8" 
+          stroke-width="1.8" 
+          filter="url(#shadow-deep)" />
+    
+    <circle cx="36" cy="38" r="14" fill="#0284c7" opacity="0.3" />
+    <text x="36" y="43" fill="#38bdf8" font-size="14" text-anchor="middle">⬢</text>
+    <text x="64" y="34" fill="#f8fafc" font-size="13" font-weight="700">Nodo Hexagonal</text>
+    <text x="64" y="52" fill="#94a3b8" font-size="11">Arista con sombra difusa</text>
+  </g>
+
+  <!-- NODOS EN LA NUBE -->
+  <g transform="translate(930, 220)">
+    <rect width="180" height="52" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2" filter="url(#shadow-soft)" />
+    <text x="90" y="28" fill="#f8fafc" font-size="12" font-weight="600" text-anchor="middle">Elemento A en Nube</text>
+    <text x="90" y="42" fill="#0ea5e9" font-size="9.5" text-anchor="middle">Sombra suave integrada</text>
+  </g>
+
+  <g transform="translate(930, 310)">
+    <rect width="180" height="52" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2" filter="url(#shadow-soft)" />
+    <text x="90" y="28" fill="#f8fafc" font-size="12" font-weight="600" text-anchor="middle">Elemento B en Nube</text>
+    <text x="90" y="42" fill="#0ea5e9" font-size="9.5" text-anchor="middle">Sub-aristas con sombra</text>
+  </g>
+
+  <!-- NODO 2: CON IMAGEN -->
+  <g transform="translate(590, 375)">
+    <rect width="210" height="110" rx="14" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow-deep)" />
+    <rect x="14" y="14" width="48" height="48" rx="8" fill="#6d28d9" opacity="0.6" stroke="#a78bfa" stroke-width="1" filter="url(#shadow-soft)" />
+    <text x="38" y="44" fill="#ede9fe" font-size="20" text-anchor="middle">🖼</text>
+    <text x="72" y="32" fill="#f8fafc" font-size="13" font-weight="700">Nodo con Imagen</text>
+    <text x="72" y="50" fill="#a78bfa" font-size="11">Arista conectora con sombra</text>
+    
+    <rect x="14" y="74" width="58" height="20" rx="6" fill="#8b5cf6" opacity="0.25" stroke="#a78bfa" stroke-width="1" />
+    <text x="43" y="88" fill="#ddd6fe" font-size="10" font-weight="600" text-anchor="middle">#diseño</text>
+
+    <rect x="78" y="74" width="54" height="20" rx="6" fill="#10b981" opacity="0.25" stroke="#6ee7b7" stroke-width="1" />
+    <text x="105" y="88" fill="#a7f3d0" font-size="10" font-weight="600" text-anchor="middle">#media</text>
+  </g>
+
+  <!-- NODO 3: NEÓN GLOW -->
+  <g transform="translate(590, 545)">
+    <rect width="210" height="80" rx="14" fill="#1e112a" stroke="#ec4899" stroke-width="2" filter="url(#glow-purple)" />
+    
+    <circle cx="28" cy="34" r="8" fill="#f43f5e" filter="url(#glow-purple)" />
+    <text x="28" y="37" fill="#ffffff" font-size="10" font-weight="900" text-anchor="middle">⚡</text>
+
+    <text x="46" y="36" fill="#ffffff" font-size="13.5" font-weight="800" style="text-shadow: 0 0 10px #f43f5e;">Efecto Neón Glow</text>
+    <text x="46" y="56" fill="#fbcfe8" font-size="11">Arista con Glow coordinado</text>
+  </g>
+
+  <!-- NODO RECEPTOR DEL CONECTOR -->
+  <g transform="translate(930, 545)">
+    <rect width="200" height="70" rx="14" fill="#1e293b" stroke="#f59e0b" stroke-width="1.8" filter="url(#shadow-deep)" />
+    <text x="100" y="35" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">Nodo Receptor</text>
+    <text x="100" y="53" fill="#fbbf24" font-size="11" text-anchor="middle">Conector con sombra y flecha</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 6. TARJETA EXPLICATIVA EN TOOLPANEL -->
+  <!-- ======================================================== -->
+  <g transform="translate(60, 550)">
+    <rect width="450" height="270" rx="16" fill="#0b1329" stroke="#1e293b" stroke-width="1.5" filter="url(#shadow-deep)" />
+    
+    <rect x="0" y="0" width="450" height="42" rx="16" fill="#1e293b" />
+    <rect x="0" y="24" width="450" height="18" fill="#1e293b" />
+    <text x="20" y="26" fill="#e2e8f0" font-size="12" font-weight="700">TOOLPANEL: NUEVA SECCIÓN «SOMBRAS Y ELEVACIÓN»</text>
+    
+    <text x="20" y="70" fill="#94a3b8" font-size="11" font-weight="600">PRESETS GLOBALES DE SOMBRA:</text>
+    
+    <g transform="translate(20, 82)">
+      <rect width="90" height="36" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="45" y="22" fill="#94a3b8" font-size="11" font-weight="600" text-anchor="middle">Plana (Off)</text>
+    </g>
+
+    <g transform="translate(120, 82)">
+      <rect width="90" height="36" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="45" y="22" fill="#e2e8f0" font-size="11" font-weight="600" text-anchor="middle">Suave</text>
+    </g>
+
+    <g transform="translate(220, 82)">
+      <rect width="100" height="36" rx="8" fill="#2563eb" stroke="#60a5fa" stroke-width="1.5" filter="url(#shadow-soft)" />
+      <text x="50" y="22" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">✓ Elevada 3D</text>
+    </g>
+
+    <g transform="translate(330, 82)">
+      <rect width="100" height="36" rx="8" fill="#1e293b" stroke="#ec4899" stroke-width="1.5" />
+      <text x="50" y="22" fill="#f472b6" font-size="11" font-weight="700" text-anchor="middle">★ Neón Glow</text>
+    </g>
+
+    <text x="20" y="148" fill="#94a3b8" font-size="11" font-weight="600">ELEMENTOS AFECTADOS:</text>
+
+    <g transform="translate(20, 160)">
+      <rect width="95" height="28" rx="6" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1" />
+      <text x="47" y="18" fill="#93c5fd" font-size="10.5" font-weight="600" text-anchor="middle">✓ Nodos (box)</text>
+    </g>
+
+    <g transform="translate(125, 160)">
+      <rect width="95" height="28" rx="6" fill="#0369a1" stroke="#0284c7" stroke-width="1" />
+      <text x="47" y="18" fill="#7dd3fc" font-size="10.5" font-weight="600" text-anchor="middle">✓ Nubes (diffuse)</text>
+    </g>
+
+    <g transform="translate(230, 160)">
+      <rect width="95" height="28" rx="6" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1" />
+      <text x="47" y="18" fill="#93c5fd" font-size="10.5" font-weight="600" text-anchor="middle">✓ Aristas (SVG)</text>
+    </g>
+
+    <g transform="translate(335, 160)">
+      <rect width="95" height="28" rx="6" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1" />
+      <text x="47" y="18" fill="#93c5fd" font-size="10.5" font-weight="600" text-anchor="middle">✓ Conectores</text>
+    </g>
+
+    <rect x="20" y="206" width="410" height="48" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+    <text x="32" y="226" fill="#38bdf8" font-size="10.5" font-weight="700">⚡ CÓMO LOGRA 60 FPS CON ARISTAS SOMBREADAS:</text>
+    <text x="32" y="242" fill="#94a3b8" font-size="10">El filtro se aplica al grupo &lt;g&gt; contenedor padre en 1 solo pase de GPU.</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 7. RESUMEN TÉCNICO -->
+  <!-- ======================================================== -->
+  <g transform="translate(930, 680)">
+    <rect width="370" height="140" rx="12" fill="#1e293b" opacity="0.8" stroke="#334155" stroke-width="1" />
+    <text x="18" y="26" fill="#f8fafc" font-size="12" font-weight="700">🎨 RESUMEN TÉCNICO DE IMPLEMENTACIÓN</text>
+    <text x="18" y="50" fill="#94a3b8" font-size="11">• <tspan fill="#38bdf8" font-weight="600">Aristas SVG:</tspan> Sombra difusa real proyectada sobre lienzo.</text>
+    <text x="18" y="70" fill="#94a3b8" font-size="11">• <tspan fill="#38bdf8" font-weight="600">Aristas Glow:</tspan> Halo luminoso neón coordinado con la rama.</text>
+    <text x="18" y="90" fill="#94a3b8" font-size="11">• <tspan fill="#38bdf8" font-weight="600">Nubes y Conectores:</tspan> Elevación difusa y flechas flotantes.</text>
+    <text x="18" y="110" fill="#94a3b8" font-size="11">• <tspan fill="#38bdf8" font-weight="600">Nodos y Texto:</tspan> Elevación 3D y text-shadow cinematográfico.</text>
+  </g>
+
+</svg>

@@ -95,10 +95,33 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
     [mindMap, onUpdateMindMap]
   );
 
+  // Camera Flight State
+  const [isCameraFlying, setIsCameraFlying] = useState<boolean>(false);
+  const cameraFlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startFlight = useCallback(() => {
+    setIsCameraFlying(true);
+    if (cameraFlightTimerRef.current) {
+      clearTimeout(cameraFlightTimerRef.current);
+    }
+    cameraFlightTimerRef.current = setTimeout(() => {
+      setIsCameraFlying(false);
+    }, 780);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (cameraFlightTimerRef.current) {
+        clearTimeout(cameraFlightTimerRef.current);
+      }
+    };
+  }, []);
+
   // Fly Camera smoothly to a target slide (Prezi Cinematic Flight)
   const flyCameraToSlide = useCallback(
     (card: SpatialSlideCard) => {
       if (!containerRef.current) return;
+      startFlight();
       const rect = containerRef.current.getBoundingClientRect();
       const vw = rect.width || window.innerWidth;
       const vh = rect.height || window.innerHeight;
@@ -136,6 +159,7 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
   // Overview calculation
   const flyToOverview = useCallback(() => {
     if (!containerRef.current || slides.length === 0) return;
+    startFlight();
     const rect = containerRef.current.getBoundingClientRect();
     const vw = rect.width || window.innerWidth;
     const vh = rect.height || window.innerHeight;
@@ -512,12 +536,20 @@ export const ElaboratePresentationSystem: React.FC<ElaboratePresentationSystemPr
       >
         {/* Spatial Camera Viewport with Inverse Prezi Matrix Transformation */}
         <div
+          onTransitionEnd={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsCameraFlying(false);
+            }
+          }}
           style={{
-            transform: `translate3d(${camPan.x}px, ${camPan.y}px, 0) scale(${camZoom}) rotate(${camRotation}deg)`,
+            transform: `translate(${camPan.x}px, ${camPan.y}px) scale(${camZoom}) rotate(${camRotation}deg)`,
             transformOrigin: '0 0',
             transition: !isPanningBoard && !transformingCardId ? 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+            willChange: isCameraFlying ? 'transform' : 'auto',
+            WebkitFontSmoothing: 'subpixel-antialiased',
+            textRendering: 'optimizeLegibility',
           }}
-          className="absolute top-0 left-0 w-full h-full pointer-events-none will-change-transform"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
         >
           {/* Flight Trajectory Connecting Line */}
           <svg className="absolute top-0 left-0 w-full h-full overflow-visible pointer-events-none z-10">

@@ -27,6 +27,55 @@ export interface NodeHeaderRowProps {
   mediaMaxWidth?: string;
 }
 
+/**
+ * Computes CSS text-shadow string based on node settings and presets
+ */
+export const computeNodeTextShadow = (node: MindNode): string | undefined => {
+  if (!node.textShadow) return undefined;
+
+  const preset = node.textShadowPreset || 'soft';
+  const blur = node.textShadowBlur ?? (preset === 'glow' ? 8 : preset === 'deep' ? 6 : preset === 'medium' ? 4 : 3);
+  const color =
+    node.textShadowColor ||
+    (preset === 'glow'
+      ? '#38bdf8'
+      : preset === 'deep'
+      ? 'rgba(0,0,0,0.85)'
+      : preset === 'medium'
+      ? 'rgba(0,0,0,0.75)'
+      : 'rgba(0,0,0,0.65)');
+  const offX = node.textShadowOffsetX ?? 0;
+  const offY = node.textShadowOffsetY ?? (preset === 'glow' ? 0 : preset === 'deep' ? 2 : 1);
+
+  if (preset === 'glow') {
+    return `0 0 ${blur}px ${color}, 0 0 ${Math.max(2, Math.round(blur / 2))}px rgba(255,255,255,0.85)`;
+  }
+
+  return `${offX}px ${offY}px ${blur}px ${color}`;
+};
+
+/**
+ * Computes CSS filter drop-shadow string for attached images
+ */
+export const computeNodeImageShadow = (node: MindNode): string | undefined => {
+  if (!node.imageShadow) return undefined;
+
+  const preset = node.imageShadowPreset || 'soft';
+  const blur = node.imageShadowBlur ?? (preset === 'glow' ? 12 : preset === 'deep' ? 14 : preset === 'medium' ? 8 : 4);
+  const color =
+    node.imageShadowColor ||
+    (preset === 'glow'
+      ? '#38bdf8'
+      : preset === 'deep'
+      ? 'rgba(0,0,0,0.55)'
+      : preset === 'medium'
+      ? 'rgba(0,0,0,0.38)'
+      : 'rgba(0,0,0,0.25)');
+  const offY = preset === 'glow' ? 0 : preset === 'deep' ? 6 : preset === 'medium' ? 3 : 2;
+
+  return `drop-shadow(0px ${offY}px ${blur}px ${color})`;
+};
+
 export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
   node,
   theme,
@@ -88,11 +137,14 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
     ? { maxWidth: mediaMaxWidth, marginLeft: 'auto', marginRight: 'auto' }
     : contentStyle;
 
+  const textShadowStyle = computeNodeTextShadow(node);
+  const imageShadowStyle = computeNodeImageShadow(node);
+
   return (
     <>
       {/* Top Image if position is top, fit or default */}
       {!isImageHidden && node.imageUrl && (!node.imagePosition || node.imagePosition === 'top' || node.imagePosition === 'fit') && (
-        <div className="w-full flex justify-center mb-1.5 overflow-hidden rounded-lg relative z-10" style={mediaStyle}>
+        <div className={`w-full flex justify-center mb-1.5 ${imageShadowStyle ? 'overflow-visible' : 'overflow-hidden'} rounded-lg relative z-10`} style={mediaStyle}>
           <img
             src={node.imageUrl}
             alt=""
@@ -101,6 +153,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
               width: `${node.imageWidth || 140}px`,
               maxWidth: '100%',
               height: 'auto',
+              filter: imageShadowStyle,
             }}
           />
         </div>
@@ -180,7 +233,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
 
         {/* Left Attached Content Image */}
         {!isImageHidden && node.imageUrl && node.imagePosition === 'left' && (
-          <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 mr-1.5" style={mediaStyle}>
+          <div className={`shrink-0 flex items-center justify-center ${imageShadowStyle ? 'overflow-visible' : 'overflow-hidden'} rounded-lg relative z-10 mr-1.5`} style={mediaStyle}>
             <img
               src={node.imageUrl}
               alt=""
@@ -189,6 +242,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
                 width: `${node.imageWidth || 100}px`,
                 maxWidth: '100%',
                 height: 'auto',
+                filter: imageShadowStyle,
               }}
             />
           </div>
@@ -229,6 +283,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
                   wordBreak: 'break-word',
                   overflowWrap: 'break-word',
                   hyphens: 'auto',
+                  textShadow: textShadowStyle,
                 }}
               >
                 {node.text || 'Nuevo Nodo'}
@@ -236,7 +291,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
 
               {/* Between Image (between title and body) */}
               {!isImageHidden && node.imageUrl && node.imagePosition === 'between' && (
-                <div className="w-full flex justify-center my-1.5 overflow-hidden rounded-lg relative z-10" style={mediaStyle}>
+                <div className={`w-full flex justify-center my-1.5 ${imageShadowStyle ? 'overflow-visible' : 'overflow-hidden'} rounded-lg relative z-10`} style={mediaStyle}>
                   <img
                     src={node.imageUrl}
                     alt=""
@@ -245,6 +300,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
                       width: `${node.imageWidth || 140}px`,
                       maxWidth: '100%',
                       height: 'auto',
+                      filter: imageShadowStyle,
                     }}
                   />
                 </div>
@@ -264,6 +320,7 @@ export const NodeHeaderRow: React.FC<NodeHeaderRowProps> = ({
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',
                     hyphens: 'auto',
+                    textShadow: node.applyTextShadowToBody ? textShadowStyle : undefined,
                   }}
                 >
                   {node.body}

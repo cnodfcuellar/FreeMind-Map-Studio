@@ -97,6 +97,7 @@ export default function App() {
   const [isSavedMapsModalOpen, setIsSavedMapsModalOpen] = useState(false);
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
+  const [editingConnector, setEditingConnector] = useState<Connector | null>(null);
   const [presentationType, setPresentationType] = useState<'classic' | 'dynamic' | 'elaborate'>('dynamic');
   const [viewport, setViewport] = useState<{ zoom: number; x: number; y: number }>({ zoom: 1, x: 0, y: 0 });
 
@@ -112,7 +113,8 @@ export default function App() {
       isTemplatesModalOpen ||
       isSavedMapsModalOpen ||
       isIconPackModalOpen ||
-      connectorSourceId
+      connectorSourceId ||
+      editingConnector
   );
 
   const handleCloseModals = () => {
@@ -122,6 +124,7 @@ export default function App() {
     setIsSavedMapsModalOpen(false);
     setIsIconPackModalOpen(false);
     setConnectorSourceId(null);
+    setEditingConnector(null);
   };
 
   // Atajos de teclado globales
@@ -395,6 +398,15 @@ export default function App() {
                 setIsToolPanelOpen(true);
               }}
               onOpenConnectorModal={(fromId) => setConnectorSourceId(fromId)}
+              onEditConnector={(conn) => setEditingConnector(conn)}
+              onDeleteConnector={(connectorId) => {
+                pushHistory(mindMap);
+                setMindMap((m) => ({
+                  ...m,
+                  connectors: (m.connectors || []).filter((c) => c.id !== connectorId),
+                  updatedAt: Date.now(),
+                }));
+              }}
               onToggleCloud={(nid) => {
                 const curr = mindMap.nodes[nid];
                 updateNode(nid, {
@@ -508,6 +520,10 @@ export default function App() {
               return { ...m, edgeDash, nodes: updatedNodes, updatedAt: Date.now() };
             });
           }}
+          onUpdateMapEdgeShadow={(updates) => {
+            pushHistory(mindMap);
+            setMindMap((m) => ({ ...m, ...updates, updatedAt: Date.now() }));
+          }}
           onUpdateMapBackgroundColor={(backgroundColor?: string) => {
             pushHistory(mindMap);
             setMindMap((m) => ({ ...m, backgroundColor, updatedAt: Date.now() }));
@@ -571,6 +587,16 @@ export default function App() {
             setMindMap((m) => ({
               ...m,
               ...visibility,
+              updatedAt: Date.now(),
+            }));
+          }}
+          onOpenConnectorModal={(fromId) => setConnectorSourceId(fromId || mindMap.rootId)}
+          onEditConnector={(conn) => setEditingConnector(conn)}
+          onDeleteConnector={(connectorId) => {
+            pushHistory(mindMap);
+            setMindMap((m) => ({
+              ...m,
+              connectors: (m.connectors || []).filter((c) => c.id !== connectorId),
               updatedAt: Date.now(),
             }));
           }}
@@ -680,13 +706,31 @@ export default function App() {
           <ConnectorModal
             mindMap={mindMap}
             fromNodeId={connectorSourceId}
-            isOpen={Boolean(connectorSourceId)}
-            onClose={() => setConnectorSourceId(null)}
+            connectorToEdit={editingConnector}
+            isOpen={Boolean(connectorSourceId || editingConnector)}
+            onClose={() => {
+              setConnectorSourceId(null);
+              setEditingConnector(null);
+            }}
             onSaveConnector={(conn: Connector) => {
+              pushHistory(mindMap);
+              setMindMap((m) => {
+                const existing = m.connectors || [];
+                const isExisting = existing.some((c) => c.id === conn.id);
+                return {
+                  ...m,
+                  connectors: isExisting
+                    ? existing.map((c) => (c.id === conn.id ? conn : c))
+                    : [...existing, conn],
+                  updatedAt: Date.now(),
+                };
+              });
+            }}
+            onDeleteConnector={(connectorId: string) => {
               pushHistory(mindMap);
               setMindMap((m) => ({
                 ...m,
-                connectors: [...(m.connectors || []), conn],
+                connectors: (m.connectors || []).filter((c) => c.id !== connectorId),
                 updatedAt: Date.now(),
               }));
             }}

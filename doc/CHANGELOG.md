@@ -1776,6 +1776,218 @@ Hacer justicia al objetivo del *Feature Tree*: documentar la acción técnica ex
 - [x] Controles y llamadas a `updateNode` / `setMindMap` / `pushHistory` contrastados directamente con el código fuente en `src/components/organisms/toolpanel/`, `src/components/Modals/` y `src/components/Presentation/`.
 - [x] Sin cambios de código.
 
+---
+
+## 🎨 [Canvas / Presentación] — 2026-11-04: Corrección de desenfoque GPU (Anti-Blurry) en Presentación Dinámica y Elaborada
+
+### 🎯 Motivo
+En mapas grandes, al realizar la presentación dinámica estilo Mindomo o la presentación elaborada estilo Prezi, la cámara al aproximarse a los nodos generaba una visualización borrosa ("como captura de pantalla ampliada"). Esto ocurría porque `will-change: transform` permanente y `translate3d(..., 0)` forzaban a la GPU a congelar un bitmap estático del DOM a baja resolución y escalarlo artificialmente, suprimiendo la re-rasterización vectorial y el antialiasing subpíxel.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/components/MindMapCanvas.tsx` | - Eliminada la clase CSS estática `will-change-transform` del contenedor `#canvas-viewport`.<br>- Agregado estado dinámico `isCameraFlying` que solo activa `willChange: 'transform'` durante los 750ms del vuelo de cámara y lo conmuta a `'auto'` al aterrizar (`onTransitionEnd` / timeout de 780ms), forzando a Chromium a descartar la textura intermedia y re-dibujar las fuentes y nodos vectoriales con nitidez nativa 1:1.<br>- Migrado `translate3d(${pan.x}px, ${pan.y}px, 0)` a `translate(${pan.x}px, ${pan.y}px)` 2D para conservar el antialiasing de fuentes en el sistema operativo.<br>- Añadido `WebkitFontSmoothing: 'subpixel-antialiased'`, `textRendering: 'optimizeLegibility'` y en `#svg-edges-layer` `shapeRendering: 'geometricPrecision'`. |
+| `src/components/Presentation/ElaboratePresentationSystem.tsx` | - Implementado el mismo patrón de `isCameraFlying` dinámico en el viewport espacial.<br>- Eliminada la clase fija `will-change-transform` y migrado a `translate(x, y)` 2D con subpixel antialiasing al aterrizar en cada tarjeta de diapositiva. |
+| `doc/img/mockup-sistema-sombras.svg` | Mockup SVG interactivo y validado (viewBox 1360×880) ilustrando la propuesta del sistema multi-sombra: Nodo raíz con elevación profunda 3D, nodos hijos con formas poligonales (`drop-shadow`), nodos con imagen, modo Glow Neón para temas oscuros, nubes con sombra difusa envolvente, aristas con `shadow-stroke` de alto rendimiento y el selector de presets en el ToolPanel. |
+| `doc/img/ejemplos-paneles-switch-sombras.svg` | Nuevo mockup SVG (viewBox 1380×940) con los 4 ejemplos de subpaneles y botones switch (ON/OFF) dedicados debajo de cada objeto: Panel de Nodo (Estilos), Panel de Nube (Isla), Panel de Aristas del Árbol (con comparativa Plana vs Sombra Difusa vs Glow) y Panel de Conectores (Relaciones flotantes). |
+| `doc/img/mockup-sombra-texto.svg` | Mockup SVG especializado (viewBox 1280×840) enfocado exclusivamente en la Sombra de Texto: subpanel en ContentTab (Título del Nodo) con Switch ON/OFF, selector de presets (Suave, Media, Fuerte, Glow), slider de desenfoque, selector de color y la comparativa visual en vivo en el lienzo. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm test:regression`: 29 suites superadas, 131/131 pruebas unitarias pasando al 100%.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+---
+
+## 🔤 [Tipografía / UI] — 2026-11-04: Subpanel y Switch de «Sombra de Texto» en Nodos
+
+### 🎯 Motivo
+Proveer al usuario control de sombra tipográfica granular e independiente en los nodos mediante un botón Switch (OFF por defecto). Mejora la legibilidad sobre fondos complejos o degradados y permite destacar nodos clave sin penalización de rendimiento en la GPU.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Añadidas propiedades tipográficas en `MindNode`: `textShadow?: boolean`, `textShadowPreset?: 'soft' \| 'medium' \| 'deep' \| 'glow'`, `textShadowColor?: string`, `textShadowBlur?: number`, `textShadowOffsetX?: number`, `textShadowOffsetY?: number` y `applyTextShadowToBody?: boolean`. |
+| `src/components/atoms/Switch.tsx` | Nuevo componente átomo accesible de interruptor interactivo tipo iOS con soporte de roles ARIA (`role="switch"`), deslizamiento suave y variantes de tamaño (`sm` / `md`). |
+| `src/components/atoms/__tests__/Switch.test.tsx` | Suite de 4 pruebas unitarias cubriendo renderizado, accesibilidad, clic de activación y estado deshabilitado. |
+| `src/components/molecules/node/NodeHeaderRow.tsx` | Implementada función `computeNodeTextShadow(node)` que calcula el valor CSS `text-shadow` según preset y configuraciones. Inyectado `textShadow` en el título del nodo y condicionalmente en el cuerpo (`applyTextShadowToBody`). |
+| `src/components/molecules/node/__tests__/NodeHeaderRow.test.ts` | Suite de 6 pruebas unitarias cubriendo los presets `soft`, `medium`, `deep`, `glow`, colores personalizados y desactivación. |
+| `src/components/organisms/toolpanel/ContentTab.tsx` | Añadido subpanel dedicado dentro de "Título del Nodo" debajo de "Tamaño de Fuente": Switch interactivo ON/OFF, selector de 4 presets rápidos (`Suave`, `Media`, `Fuerte`, `Glow`), slider de desenfoque (1-16px), ColorPicker y switch secundario para el cuerpo. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm vitest run src/components/atoms/__tests__/Switch.test.tsx`: 4/4 tests pasados.
+- [x] `pnpm vitest run src/components/molecules/node/__tests__/NodeHeaderRow.test.ts`: 6/6 tests pasados.
+- [x] `pnpm test:regression`: 31 suites de pruebas superadas, 141/141 pruebas unitarias exitosas (100%).
+- [x] `pnpm build`: Compilación de producción con Vite exitosa en 14.8s.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+---
+
+## 🖼️ [Imágenes / UI] — 2026-11-04: Subpanel y Switch de «Sombra en Imagen Adjunta» en Nodos
+
+### 🎯 Motivo
+Permitir a los usuarios activar y personalizar de forma independiente sombras y relieves flotantes en las imágenes adjuntas a los nodos (`imageUrl`), con soporte de silueta para PNGs transparentes y fotos rectangulares mediante `drop-shadow`.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Añadidas propiedades de sombra de imagen en `MindNode`: `imageShadow?: boolean`, `imageShadowPreset?: 'soft' \| 'medium' \| 'deep' \| 'glow'`, `imageShadowBlur?: number` y `imageShadowColor?: string`. |
+| `src/components/molecules/node/NodeHeaderRow.tsx` | Implementada función `computeNodeImageShadow(node)` con presets `soft`, `medium`, `deep` y `glow`. Inyectado `filter: imageShadowStyle` en las posiciones de imagen `'top'`, `'fit'`, `'left'` y `'between'`. |
+| `src/components/molecules/node/NodeBadgesBar.tsx` | Inyectado `filter: imageShadowStyle` en las posiciones de imagen `'right'` y `'bottom'`. |
+| `src/components/molecules/node/__tests__/NodeHeaderRow.test.ts` | Ampliada la suite con 6 nuevas pruebas unitarias para `computeNodeImageShadow` (12 tests en total). |
+| `src/components/organisms/toolpanel/ContentTab.tsx` | Añadido subpanel dedicado dentro de "Imagen Adjunta" debajo de "Ancho de imagen": Switch interactivo ON/OFF, selector de 4 presets rápidos (`Suave`, `Media`, `3D`, `Glow`), slider de desenfoque (2-24px) y ColorPicker. |
+| `doc/mejoras.md` | Nuevo documento de control y hoja de ruta (Roadmap) detallando las mejoras anti-desenfoque en presentaciones, el sistema modular de sombras con switches ON/OFF (Objetos #1 y #2 completados), la planificación de los Objetos #3 a #6 y propuestas futuras de producto. |
+| `doc/img/propuesta-anatomia-colita-burbuja.svg` | Diagrama de diseño y especificación anatómica (viewBox 960×820) para la forma de nodo Burbuja (`bubble`), detallando las 4 dimensiones de configuración: Tamaño (largo/ancho), Orientación cardinal (arriba, abajo, izquierda, derecha), Posición en el borde (desplazamiento 20-80%) y Estilos anatómicos (Recta, Curva y Pensamiento con burbujitas). |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm vitest run src/components/molecules/node/__tests__/NodeHeaderRow.test.ts`: 12/12 tests superados.
+- [x] `pnpm test:regression`: 31 suites de pruebas superadas, 147/147 pruebas unitarias exitosas (100%).
+- [x] `pnpm build`: Compilación de producción exitosa en 10.7s.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+---
+
+## 🔲 [Contorno / UI] — 2026-11-04: Subpanel y Switch de «Sombra del Contorno» en Nodos (Objeto #3)
+
+### 🎯 Motivo
+Proveer control granular de relieve, sombra y elevación sobre el contorno y tarjeta de los nodos en la sección "Bordes y Contorno" del panel de herramientas. Soporta geometrías estándar vía `box-shadow` y polígonos recortados (`hexagon`, `arrow`, `star`) vía `filter: drop-shadow(...)` para preservar el contorno exacto sin cortes. Desactivado por defecto (cero sobrecosto de render).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Añadidas propiedades de sombra de nodo en `MindNode`: `nodeShadow?: boolean`, `nodeShadowPreset?: 'soft' \| 'medium' \| 'deep' \| 'glow'`, `nodeShadowBlur?: number`, `nodeShadowOffsetY?: number` y `nodeShadowColor?: string`. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Implementada función `computeNodeShadowStyle(node, isPolygonShape)` que calcula `boxShadow` o `filter: drop-shadow(...)` según el tipo de forma y presets (`soft`, `medium`, `deep`, `glow`). |
+| `src/components/NodeComponent.tsx` | Integrado `computeNodeShadowStyle`, aplicándolo dinámicamente en `style` y gestionando la coexistencia de clases Tailwind `shadow-xs` / `shadow-md` para evitar interferencias. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Añadido subpanel dedicado dentro de "Bordes y Contorno" (sección 3): Switch interactivo `Sombra del Contorno [ OFF / ON ]`, 4 presets rápidos (`Suave`, `Media`, `3D`, `Glow`), slider de Desenfoque (1-40px), slider de Desplazamiento Vertical Y (0-30px) y ColorPicker con botón de reset. |
+| `src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts` | Añadida suite de 4 nuevas pruebas unitarias para `computeNodeShadowStyle` validando estado apagado, presets estándar `box-shadow`, siluetas poligonales `drop-shadow` y sobreescrituras manuales (12 tests en total). |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm vitest run src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts`: 12/12 tests superados.
+- [x] `pnpm test:regression`: 31 suites de pruebas superadas, 151/151 pruebas unitarias exitosas (100%).
+- [x] `pnpm build`: Compilación de producción exitosa en 7.91s.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+---
+
+## ☁️ [Nubes / UI] — 2026-11-04: Subpanel y Switch de «Sombra Envolvente» en Nubes (Objeto #4)
+
+### 🎯 Motivo
+Permitir a los usuarios activar y personalizar sombras difusas de amplia área en las nubes envolventes de subárboles para crear un efecto de "Isla Conceptual" flotante sobre el lienzo. Corrige la ausencia previa de renderizado de sombra en el SVG y deja el efecto desactivado por defecto para garantizar cero coste en mapas masivos.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Ampliada la interfaz `NodeCloud`: añadidas propiedades `shadowPreset?: 'soft' \| 'island' \| 'deep' \| 'glow'`, `shadowBlur?: number`, `shadowOffsetY?: number`, `shadowOpacity?: number` y `shadowColor?: string`. |
+| `src/utils/cloudUtils.ts` | Nueva utilidad pura que implementa `getCloudShadowConfig(cloud)` y `computeCloudShadowFilter(cloud)` calculando parámetros de sombra real (`blur`, `offsetY`, `opacity`, `color`) y presets (`soft`, `island`, `deep`, `glow`). |
+| `src/utils/__tests__/cloudUtils.test.ts` | Suite completa de 6 pruebas unitarias verificando presets, cálculo sin desplazamiento en glow y sobreescrituras manuales. |
+| `src/components/MindMapCanvas.tsx` | Reemplazado el filtro diluido por una **capa de silueta sólida dedicada (`<path d={shapePath} ... />`)** renderizada debajo del tinte de la nube con `filter: blur(...)` y `opacity` configurada. Esto soluciona que la sombra se vea demasiado sutil o invisible debido al 0.08 de opacidad del tinte de la nube. |
+| `src/components/organisms/toolpanel/CloudsTab.tsx` | Reemplazado el botón HTML crudo por el átomo accesible `<Switch>` en el toggle maestro. Cambiado el default de `shadow` a `false`. Añadido subpanel dentro de "Bordes y Contorno" con Switch `Sombra Envolvente [ OFF / ON ]`, 4 presets (`Suave`, `Isla 3D`, `Profunda`, `Glow`), slider de Intensidad / Opacidad (10-95%), slider de Desenfoque (4-48px), slider de Desplazamiento Y (0-30px) y ColorPicker. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm vitest run src/utils/__tests__/cloudUtils.test.ts`: 6/6 tests superados.
+- [x] `pnpm test:regression`: 32 suites de pruebas superadas, 157/157 pruebas unitarias exitosas (100%).
+- [x] `pnpm build`: Compilación de producción exitosa en 7.00s.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+---
+
+## 🌿 [Aristas / UI] — 2026-11-05: Sistema Dual de «Sombra en Aristas del Árbol» (Global y Local con Propagación - Objeto #5)
+
+### 🎯 Motivo
+Dotar de relieve 3D y resplandor neón glow a las ramas y curvas de conexión del mapa mental, implementando la funcionalidad en ambos niveles:
+1. **Nivel Global del Mapa:** Gobierna todas las ramas del árbol desde la pestaña *Mapa* (`ThemeTab.tsx`).
+2. **Nivel Local del Nodo:** Permite destacar ramas específicas desde la pestaña *Estilos* (`FormatTab.tsx`), con soporte de propagación a descendientes (*"Aplicar a Hijos"*) o hermanos (*"Aplicar a Hermanos"*).
+Desactivado por defecto (cero coste de render).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Añadidas propiedades de sombra de arista en `MindNode` y `MindMap`: `edgeShadow?: boolean`, `edgeShadowPreset?: 'soft' \| 'deep' \| 'glow'`, `edgeShadowBlur?: number`, `edgeShadowOffsetY?: number` y `edgeShadowColor?: string`. |
+| `src/utils/edgeUtils.ts` | Nueva utilidad pura que implementa `computeEdgeShadowFilter(childNode, edgeColor, mindMap)` resolviendo la jerarquía de herencia (override local > fallback global) y cálculo de presets (`soft`, `deep`, `glow`). En el modo `glow`, el halo toma automáticamente el color específico de cada rama (`edgeColor`), preservando mapas multicolor. |
+| `src/utils/__tests__/edgeUtils.test.ts` | Suite completa de 6 pruebas unitarias verificando herencia global, sobreescritura local, resplandor neón dinámico y overrides manuales. |
+| `src/hooks/useMindMapStore.ts` | Actualizado `extractNodeStyleBundle` para incluir `edgeShadow...`, permitiendo que las acciones *"Aplicar a Hijos"* y *"Aplicar a Hermanos"* propaguen la sombra de arista en cascada. |
+| `src/components/organisms/toolpanel/ThemeTab.tsx` | Añadido subpanel dentro de "Aristas Globales" (sección 4) con Switch `Sombra de Aristas Global [ OFF / ON ]`, 3 presets rápidos (`Suave`, `3D`, `Glow`), slider de Desenfoque (1-20px), slider de Desplazamiento Y (0-16px) y ColorPicker. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Añadido subpanel dentro de "Aristas y Propagación" (sección 4) con Switch `Sombra de la Rama [ OFF / ON ]`, 3 presets rápidos (`Suave`, `3D`, `Glow`), slider de Desenfoque (1-20px), slider de Desplazamiento Y (0-16px), ColorPicker y botones de propagación. |
+| `src/components/ToolPanel.tsx` & `src/App.tsx` | Cableado el callback `onUpdateMapEdgeShadow` para persistir la configuración global en el estado del mapa. |
+| `src/components/MindMapCanvas.tsx` | Integrado `computeEdgeShadowFilter` en el renderizado de cada curva SVG y cinta poligonal en `#tree-edges-group`. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm vitest run src/utils/__tests__/edgeUtils.test.ts`: 6/6 tests superados.
+- [x] `pnpm test:regression`: 33 suites de pruebas superadas, 163/163 pruebas unitarias exitosas (100%).
+- [x] `pnpm build`: Compilación de producción exitosa en 7.29s.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+---
+
+## 🔗 [Conectores Libres / UI] — 2026-11-05: Sombra Modular en Relaciones Libres (Objeto #6)
+
+### 🎯 Motivo
+Completar el objeto final del Sistema Modular de Sombras (Objeto #6) dotando a los conectores y relaciones libres entre nodos de relieve flotante y resplandor neón `drop-shadow`.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Añadidas propiedades de sombra a la interfaz `Connector`: `shadow?: boolean`, `shadowPreset?: 'soft' \| 'deep' \| 'glow'`, `shadowBlur?: number`, `shadowOffsetY?: number` y `shadowColor?: string`. |
+| `src/utils/connectorUtils.ts` | Creada función pura `computeConnectorShadowFilter(connector)` que calcula el filtro SVG `drop-shadow(...)` correspondiente. |
+| `src/utils/__tests__/connectorUtils.test.ts` | 8 pruebas unitarias cubriendo retorno undefined cuando está desactivado, presets (`soft`, `deep`, `glow`), halos de resplandor neón basados en `conn.color` y overrides manuales. |
+| `src/components/Modals/ConnectorModal.tsx` | Integrado bloque de sombra con `<Switch>`, 3 presets rápidos (`Suave`, `Profunda`, `Glow`), slider de Desenfoque (1-20px), slider de Desplazamiento Y (0-16px) y ColorPicker. |
+| `src/components/MindMapCanvas.tsx` | Aplicado `filter: computeConnectorShadowFilter(conn)` en el elemento `<g>` del conector, proyectando sombra en curva, flecha y badge de texto. |
+
+---
+
+## 🔗 [Conectores Libres / UI] — 2026-11-05: Sistema Completo de Edición y Panel de Conexiones Libres
+
+### 🎯 Motivo
+Resolver la limitación por la cual no era posible editar conectores ya creados en el lienzo, dotando al sistema de una arquitectura completa de gestión de relaciones transversales:
+1. **Doble clic en el lienzo**: Abrir directamente el modal de edición al hacer doble clic sobre la curva, flecha o etiqueta de cualquier conector.
+2. **Tecla Supr / Backspace**: Eliminar conector seleccionado al instante.
+3. **Modal Universal (`ConnectorModal.tsx`)**: Soporte dual tanto para creación como para edición completa de propiedades (origen, destino, etiqueta, forma, curvatura, estilo de trazo, grosor, flechas, capa, sombra flotante y botón de eliminación).
+4. **Nuevo Panel en ToolPanel (`ThemeTab.tsx`)**: Sección colapsable *"Conexiones Libres"* al final de la pestaña Mapa, listando todas las conexiones con vista previa de color/flechas, nombres de nodos origen/destino, etiqueta, metadatos y botones rápidos de edición y borrado.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/components/Modals/ConnectorModal.tsx` | Rediseñado para soportar `connectorToEdit`. Pre-carga automática de todos los campos, selector de nodos origen y destino, botón *"Guardar Cambios"* / *"Crear Conector"*, y botón rojo *"Eliminar Conector"*. |
+| `src/components/MindMapCanvas.tsx` | Añadido manejador `onDoubleClick` en el elemento `<g>` de cada conector para disparar `onEditConnector(conn)`. Implementado listener global de teclado para `Delete` y `Backspace` con eliminación directa y `Escape` para deseleccionar. |
+| `src/components/organisms/toolpanel/ThemeTab.tsx` | Creada la sección 6 *"Conexiones Libres"* con badge dinámico de conteo, botón de creación rápida `+ Nueva Conexión`, empty state ilustrado y tarjetas detalladas con indicador de color, flechas de dirección, nombres de nodos, badges de capa/sombra y acciones de editar y eliminar. |
+| `src/components/ToolPanel.tsx` | Propagados los callbacks `onEditConnector` y `onDeleteConnector` hacia `ThemeTab`. |
+| `src/App.tsx` | Cableado el estado `editingConnector`, el callback `onEditConnector`, el borrado `onDeleteConnector` persistido con `pushHistory` para soporte completo de `Ctrl + Z` / `Ctrl + Y`. |
+| `src/utils/__tests__/connectorUtils.test.ts` | Actualizada la suite de pruebas para verificar el cálculo del filtro de sombra en todas las variantes (`soft`, `deep`, `glow`, custom). |
+
+---
+
+## 💬 [Burbuja / Geometría] — 2026-11-05: Anatomía Configurable de la Colita de Bocadillo (`NodeBubbleTail`)
+
+### 🎯 Motivo
+Implementar las 4 cualidades anatómicas del bocadillo según la especificación técnica y diagrama vectorial en `doc/img/propuesta-anatomia-colita-burbuja.svg`:
+1. **Tamaño de la colita**: Longitud (`tailLength`) de 0 a 32px (0 = sin colita; presets: Corta 6px, Media 12px estándar, Larga 20px) y ancho de base (`tailWidth`).
+2. **Lado de salida (orientación cardinal)**: `tailSide` (`auto` apunta al padre, `bottom` ↓, `top` ↑, `left` ←, `right` →).
+3. **Posición en el borde**: Desplazamiento porcentual `tailOffset` (15% a 85%; presets: Inicio 20%, Centro 50%, Fin 80%).
+4. **Estilo anatómico de la colita**: `tailStyle` con 3 geometrías vectoriales (`straight` recta/clásica, `curved` curva/dinámica estilo cómic, `thought` tres burbujas decrecientes de pensamiento).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Exportados tipos `BubbleTailSide` y `BubbleTailStyle`. Añadidas propiedades a `MindNode`: `tailLength`, `tailWidth`, `tailSide`, `tailOffset`, `tailStyle`. |
+| `src/utils/bubbleTailUtils.ts` | Nueva utilidad geométrica pura: `resolveBubbleTailSide` y `computeBubbleTailGeometry` calculando estilos de contenedor CSS absoluto, viewBox SVG, trazados bezier y coordenadas de círculos para pensamiento. |
+| `src/utils/__tests__/bubbleTailUtils.test.ts` | Suite completa de 11 pruebas unitarias cubriendo todas las orientaciones, presets, estilos, supresión con longitud 0 y límites de clamp. |
+| `src/hooks/useMindMapStore.ts` | Actualizado `extractNodeStyleBundle` con `tail*` y `nodeShadow*` para propagación inmediata en cascada a hijos y hermanos. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Refactorizado `NodeBubbleTail` para consumir `computeBubbleTailGeometry`, sincronizar estilos de borde y heredar la sombra del nodo (`nodeShadow`) como `drop-shadow`. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Incorporado subpanel interactivo en *"Forma y Geometría"* bajo la forma de burbuja: sliders de longitud y ancho, selector segmentado cardinal, slider de desplazamiento con presets y botones de estilo anatómico. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm test:regression`: **34 suites de pruebas superadas, 179/179 pruebas unitarias exitosas (100%)**.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
+
+
+
 
 
 

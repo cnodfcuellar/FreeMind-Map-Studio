@@ -4,6 +4,7 @@ import { CollapsibleSection } from '../../atoms/CollapsibleSection';
 import { ColorPicker } from '../../atoms/ColorPicker';
 import { SliderInput } from '../../atoms/SliderInput';
 import { ToggleButtonGroup } from '../../atoms/ToggleButtonGroup';
+import { Switch } from '../../atoms/Switch';
 import {
   Cloud,
   Layers,
@@ -43,7 +44,7 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
     borderColor: '#3b82f6',
     borderWidth: 1.5,
     borderDash: 'dashed',
-    shadow: true,
+    shadow: false,
   };
 
   const [sectionsOpen, setSectionsOpen] = React.useState<Record<string, boolean>>({
@@ -78,7 +79,7 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
           borderColor: '#3b82f6',
           borderWidth: 1.5,
           borderDash: 'dashed',
-          shadow: true,
+          shadow: false,
         },
       });
     }
@@ -107,19 +108,10 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleToggleCloud}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            isCloudEnabled ? 'bg-blue-600' : 'bg-slate-300'
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-              isCloudEnabled ? 'translate-x-4' : 'translate-x-0'
-            }`}
-          />
-        </button>
+        <Switch
+          checked={isCloudEnabled}
+          onChange={handleToggleCloud}
+        />
       </div>
 
       {isCloudEnabled && (
@@ -278,6 +270,146 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Sombra Envolvente de Isla Conceptual */}
+              <div className="pt-3 border-t border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[11px] font-semibold text-slate-700 block">Sombra Envolvente</span>
+                    <span className="text-[10px] text-slate-500 block">Efecto isla conceptual flotante</span>
+                  </div>
+                  <Switch
+                    checked={Boolean(currentCloud.shadow)}
+                    onChange={(val) => updateCloudProps({ shadow: val })}
+                  />
+                </div>
+
+                {currentCloud.shadow && (
+                  <div className="space-y-3 pt-1">
+                    {/* 4 Presets Rápidos */}
+                    <div>
+                      <span className="text-[10px] font-medium text-slate-600 block mb-1.5">Presets Rápidos</span>
+                      <div className="grid grid-cols-4 gap-1">
+                        {[
+                          { id: 'soft' as const, label: 'Suave' },
+                          { id: 'island' as const, label: 'Isla 3D' },
+                          { id: 'deep' as const, label: 'Profunda' },
+                          { id: 'glow' as const, label: 'Glow' },
+                        ].map((preset) => {
+                          const isCur = (currentCloud.shadowPreset || 'island') === preset.id;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => {
+                                let blur = 24;
+                                let offsetY = 10;
+                                let opacity = 0.40;
+                                let color = '#0f172a';
+                                if (preset.id === 'soft') {
+                                  blur = 14;
+                                  offsetY = 4;
+                                  opacity = 0.22;
+                                  color = '#0f172a';
+                                } else if (preset.id === 'deep') {
+                                  blur = 36;
+                                  offsetY = 16;
+                                  opacity = 0.60;
+                                  color = '#0f172a';
+                                } else if (preset.id === 'glow') {
+                                  blur = 18;
+                                  offsetY = 0;
+                                  opacity = 0.70;
+                                  color = currentCloud.borderColor || '#3b82f6';
+                                }
+                                updateCloudProps({
+                                  shadowPreset: preset.id,
+                                  shadowBlur: blur,
+                                  shadowOffsetY: offsetY,
+                                  shadowOpacity: opacity,
+                                  shadowColor: color,
+                                });
+                              }}
+                              className={`py-1 px-1.5 rounded-lg text-[10px] font-semibold border transition-all cursor-pointer ${
+                                isCur
+                                  ? 'border-blue-600 bg-blue-50/80 text-blue-700 shadow-2xs'
+                                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              {preset.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Slider de Intensidad / Opacidad */}
+                    <SliderInput
+                      label="Intensidad de Sombra"
+                      value={Math.round(
+                        (currentCloud.shadowOpacity ??
+                          (currentCloud.shadowPreset === 'deep'
+                            ? 0.60
+                            : currentCloud.shadowPreset === 'soft'
+                            ? 0.22
+                            : currentCloud.shadowPreset === 'glow'
+                            ? 0.70
+                            : 0.40)) * 100
+                      )}
+                      min={10}
+                      max={95}
+                      unit="%"
+                      onChange={(pct) => updateCloudProps({ shadowOpacity: pct / 100 })}
+                    />
+
+                    {/* Slider de Desenfoque */}
+                    <SliderInput
+                      label="Desenfoque (Blur)"
+                      value={
+                        currentCloud.shadowBlur ??
+                        (currentCloud.shadowPreset === 'deep'
+                          ? 36
+                          : currentCloud.shadowPreset === 'soft'
+                          ? 14
+                          : currentCloud.shadowPreset === 'glow'
+                          ? 18
+                          : 24)
+                      }
+                      min={4}
+                      max={48}
+                      unit="px"
+                      onChange={(blur) => updateCloudProps({ shadowBlur: blur })}
+                    />
+
+                    {/* Slider de Desplazamiento Y */}
+                    <SliderInput
+                      label="Desplazamiento Vertical (Y)"
+                      value={
+                        currentCloud.shadowOffsetY ??
+                        (currentCloud.shadowPreset === 'deep'
+                          ? 16
+                          : currentCloud.shadowPreset === 'soft'
+                          ? 4
+                          : currentCloud.shadowPreset === 'glow'
+                          ? 0
+                          : 10)
+                      }
+                      min={0}
+                      max={30}
+                      unit="px"
+                      onChange={(y) => updateCloudProps({ shadowOffsetY: y })}
+                    />
+
+                    {/* Selector de Color de Sombra */}
+                    <ColorPicker
+                      label="Color de Sombra"
+                      value={currentCloud.shadowColor}
+                      onChange={(color) => updateCloudProps({ shadowColor: color })}
+                      onClear={() => updateCloudProps({ shadowColor: undefined })}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </CollapsibleSection>

@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 840" width="1280" height="840" style="background:#090d16; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <!-- Filtros de Sombra para el Contenedor UI -->
+    <filter id="ui-card-shadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="panel-header" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stopColor="#1e293b" />
+      <stop offset="100%" stopColor="#0f172a" />
+    </linearGradient>
+
+    <linearGradient id="node-gradient-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#3b82f6" />
+      <stop offset="100%" stopColor="#8b5cf6" />
+    </linearGradient>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="bg-grid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.1" fill="#1e293b" />
+    </pattern>
+  </defs>
+
+  <!-- FONDO GENERAL -->
+  <rect width="100%" height="100%" fill="#070a12" />
+  <rect width="100%" height="100%" fill="url(#bg-grid)" />
+
+  <!-- HEADER DEL DIAGRAMA -->
+  <g transform="translate(60, 35)">
+    <rect x="-10" y="-8" width="560" height="64" rx="12" fill="#111827" stroke="#1f2937" stroke-width="1" />
+    <circle cx="18" cy="24" r="14" fill="#3b82f6" opacity="0.2" />
+    <path d="M 12 18 L 24 18 M 18 18 L 18 30" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" />
+    <text x="44" y="22" fill="#f9fafb" font-size="16" font-weight="700">SUBPANEL Y SWITCH: «SOMBRA DE TEXTO»</text>
+    <text x="44" y="42" fill="#9ca3af" font-size="12">Ubicado en ContentTab (Título del Nodo) con presets y vista previa en tiempo real</text>
+  </g>
+
+  <g transform="translate(900, 35)">
+    <rect width="320" height="64" rx="10" fill="#111827" stroke="#1f2937" stroke-width="1" />
+    <text x="18" y="26" fill="#38bdf8" font-size="11" font-weight="700">OBJETO #1 A REALIZAR:</text>
+    <text x="18" y="46" fill="#e5e7eb" font-size="11">Sombra tipográfica pura (CSS text-shadow)</text>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- COLUMNA IZQUIERDA: EL SUBPANEL EN EL TOOLPANEL (CONTENTTAB)         -->
+  <!-- =================================================================== -->
+  <g transform="translate(60, 125)">
+    <!-- Contenedor del ToolPanel (Ancho 380px) -->
+    <rect width="400" height="660" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" filter="url(#ui-card-shadow)" />
+    
+    <!-- Header del Acordeón "Título del Nodo" -->
+    <rect width="400" height="46" rx="16" fill="url(#panel-header)" />
+    <rect y="26" width="400" height="20" fill="url(#panel-header)" />
+    <circle cx="24" cy="23" r="10" fill="#3b82f6" opacity="0.2" />
+    <text x="24" y="27" fill="#38bdf8" font-size="11" font-weight="800" text-anchor="middle">T</text>
+    <text x="42" y="27" fill="#f8fafc" font-size="12.5" font-weight="700">Título del Nodo</text>
+    <rect x="325" y="14" width="55" height="18" rx="9" fill="#1e3a8a" />
+    <text x="352" y="26" fill="#93c5fd" font-size="10" font-weight="700" text-anchor="middle">16px</text>
+
+    <!-- Controles existentes de texto (simulados para contexto) -->
+    <g transform="translate(20, 60)">
+      <!-- Textarea del nodo -->
+      <rect width="360" height="42" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="14" y="26" fill="#e2e8f0" font-size="12">Plan Estratégico 2026</text>
+
+      <!-- Barra de Formato (Negrita, Cursiva, Alineación) -->
+      <g transform="translate(0, 52)">
+        <rect width="360" height="34" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+        <rect x="4" y="4" width="28" height="26" rx="4" fill="#2563eb" />
+        <text x="18" y="21" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">B</text>
+        <rect x="36" y="4" width="28" height="26" rx="4" fill="transparent" />
+        <text x="50" y="21" fill="#94a3b8" font-size="12" font-style="italic" text-anchor="middle">I</text>
+        <line x1="72" y1="6" x2="72" y2="28" stroke="#334155" stroke-width="1" />
+        <text x="90" y="21" fill="#94a3b8" font-size="11">⇤</text>
+        <text x="110" y="21" fill="#38bdf8" font-size="11">≡</text>
+        <text x="130" y="21" fill="#94a3b8" font-size="11">⇥</text>
+      </g>
+
+      <!-- Color de Texto y Tamaño de Fuente existentes -->
+      <g transform="translate(0, 96)">
+        <text x="0" y="14" fill="#94a3b8" font-size="11" font-weight="600">Color del Texto:</text>
+        <rect x="290" y="0" width="70" height="22" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+        <circle cx="302" cy="11" r="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1" />
+        <text x="325" y="15" fill="#e2e8f0" font-size="10.5">#FFFFFF</text>
+      </g>
+
+      <!-- ======================================================== -->
+      <!-- NUEVO SUBPANEL DEDICADO: SOMBRA DE TEXTO CON BOTÓN SWITCH -->
+      <!-- ======================================================== -->
+      <g transform="translate(0, 135)">
+        <!-- Recuadro contenedor del Subpanel -->
+        <rect width="360" height="390" rx="12" fill="#070c18" stroke="#1e3a8a" stroke-width="1.5" />
+        
+        <!-- Fila 1: Título del Subpanel + BOTÓN SWITCH PRINCIPAL -->
+        <g transform="translate(14, 16)">
+          <circle cx="10" cy="12" r="9" fill="#1e3a8a" />
+          <text x="10" y="16" fill="#60a5fa" font-size="10" font-weight="800" text-anchor="middle">S</text>
+          <text x="26" y="16" fill="#f8fafc" font-size="12.5" font-weight="700">Sombra de Texto</text>
+          <text x="26" y="30" fill="#64748b" font-size="10">Relieve y contraste tipográfico</text>
+
+          <!-- BOTÓN SWITCH INTERACTIVO (ESTADO ON) -->
+          <g transform="translate(270, 4)">
+            <rect width="52" height="26" rx="13" fill="#10b981" />
+            <circle cx="39" cy="13" r="10" fill="#ffffff" filter="url(#ui-card-shadow)" />
+          </g>
+        </g>
+
+        <!-- Divisor decorativo -->
+        <line x1="14" y1="62" x2="346" y2="62" stroke="#1e293b" stroke-width="1" />
+
+        <!-- Fila 2: Presets Rápidos de Sombra -->
+        <g transform="translate(14, 76)">
+          <text x="0" y="12" fill="#94a3b8" font-size="10.5" font-weight="700" letter-spacing="0.3">PRESETS DE SOMBRA:</text>
+          
+          <g transform="translate(0, 22)">
+            <!-- Preset 1: Suave (Activo) -->
+            <rect width="78" height="32" rx="6" fill="#1e40af" stroke="#60a5fa" stroke-width="1.5" />
+            <text x="39" y="20" fill="#ffffff" font-size="10.5" font-weight="700" text-anchor="middle">✓ Suave</text>
+
+            <!-- Preset 2: Media -->
+            <rect x="84" width="78" height="32" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+            <text x="123" y="20" fill="#cbd5e1" font-size="10.5" font-weight="600" text-anchor="middle">Media</text>
+
+            <!-- Preset 3: Fuerte -->
+            <rect x="168" width="78" height="32" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+            <text x="207" y="20" fill="#cbd5e1" font-size="10.5" font-weight="600" text-anchor="middle">Fuerte</text>
+
+            <!-- Preset 4: Glow -->
+            <rect x="252" width="78" height="32" rx="6" fill="#1e293b" stroke="#ec4899" stroke-width="1" />
+            <text x="291" y="20" fill="#f472b6" font-size="10.5" font-weight="700" text-anchor="middle">★ Glow</text>
+          </g>
+        </g>
+
+        <!-- Fila 3: Slider de Desenfoque (Blur) -->
+        <g transform="translate(14, 155)">
+          <text x="0" y="12" fill="#94a3b8" font-size="10.5" font-weight="700">RADIO DE DESENFOQUE (BLUR):</text>
+          <text x="310" y="12" fill="#38bdf8" font-size="11" font-weight="700">3px</text>
+          
+          <g transform="translate(0, 22)">
+            <rect width="330" height="6" rx="3" fill="#1e293b" />
+            <rect width="110" height="6" rx="3" fill="#3b82f6" />
+            <circle cx="110" cy="3" r="8" fill="#ffffff" />
+          </g>
+        </g>
+
+        <!-- Fila 4: Color y Opacidad de la Sombra -->
+        <g transform="translate(14, 215)">
+          <text x="0" y="12" fill="#94a3b8" font-size="10.5" font-weight="700">COLOR DE LA SOMBRA:</text>
+          
+          <g transform="translate(0, 24)">
+            <!-- Selector de Color Negro (Sombra Clásica) -->
+            <circle cx="16" cy="14" r="14" fill="#000000" stroke="#38bdf8" stroke-width="2" />
+            <!-- Blanco (Glow) -->
+            <circle cx="56" cy="14" r="14" fill="#ffffff" stroke="#334155" stroke-width="1" />
+            <!-- Azul -->
+            <circle cx="96" cy="14" r="14" fill="#3b82f6" />
+            <!-- Rosa / Neón -->
+            <circle cx="136" cy="14" r="14" fill="#ec4899" />
+            <!-- Ámbar -->
+            <circle cx="176" cy="14" r="14" fill="#f59e0b" />
+
+            <text x="210" y="18" fill="#cbd5e1" font-size="11">rgba(0,0,0,0.65)</text>
+          </g>
+        </g>
+
+        <!-- Fila 5: Switch Secundario (Aplicar también al Cuerpo/Subtexto) -->
+        <g transform="translate(14, 285)">
+          <rect width="330" height="42" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+          <text x="12" y="25" fill="#e2e8f0" font-size="11" font-weight="600">Aplicar también al Cuerpo / Subtexto</text>
+          <g transform="translate(275, 11)">
+            <rect width="40" height="20" rx="10" fill="#10b981" />
+            <circle cx="30" cy="10" r="7.5" fill="#ffffff" />
+          </g>
+        </g>
+
+        <!-- Nota de Rendimiento -->
+        <g transform="translate(14, 340)">
+          <rect width="330" height="34" rx="6" fill="#091226" stroke="#1d4ed8" stroke-width="1" />
+          <text x="10" y="21" fill="#60a5fa" font-size="10" font-weight="600">⚡ text-shadow nativo CSS: Cero coste de renderizado GPU.</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- =================================================================== -->
+  <!-- COLUMNA DERECHA: RESULTADO EN VIVO EN EL LIENZO (COMPARATIVA)       -->
+  <!-- =================================================================== -->
+  <g transform="translate(500, 125)">
+    <rect width="720" height="660" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" filter="url(#ui-card-shadow)" />
+    
+    <rect width="720" height="46" rx="16" fill="url(#panel-header)" />
+    <rect y="26" width="720" height="20" fill="url(#panel-header)" />
+    <text x="24" y="28" fill="#f8fafc" font-size="13" font-weight="700">VISUALIZACIÓN REAL EN EL LIENZO (ANTES VS DESPUÉS)</text>
+
+    <!-- CASO 1: NODO SOBRE FONDO DEGRADADO SIN SOMBRA (SWITCH OFF) -->
+    <g transform="translate(35, 75)">
+      <rect width="310" height="135" rx="14" fill="url(#node-gradient-bg)" stroke="#93c5fd" stroke-width="1" />
+      <rect x="12" y="10" width="85" height="18" rx="4" fill="#000000" opacity="0.4" />
+      <text x="54" y="22" fill="#f87171" font-size="9" font-weight="700" text-anchor="middle">SWITCH: OFF (PLANO)</text>
+      
+      <!-- Texto SIN sombra -->
+      <text x="24" y="62" fill="#ffffff" font-size="17" font-weight="800">Plan Estratégico 2026</text>
+      <text x="24" y="86" fill="#e0e7ff" font-size="12">Sin contraste definido sobre el fondo</text>
+      <text x="24" y="110" fill="#fca5a5" font-size="10.5">⚠️ Se confunde ligeramente en gradientes claros</text>
+    </g>
+
+    <!-- CASO 2: NODO CON SOMBRA SUAVE (SWITCH ON - PRESET SUAVE) -->
+    <g transform="translate(375, 75)">
+      <rect width="310" height="135" rx="14" fill="url(#node-gradient-bg)" stroke="#93c5fd" stroke-width="1" />
+      <rect x="12" y="10" width="95" height="18" rx="4" fill="#065f46" />
+      <text x="59" y="22" fill="#6ee7b7" font-size="9" font-weight="700" text-anchor="middle">SWITCH: ON (SUAVE)</text>
+      
+      <!-- Texto CON sombra suave -->
+      <text x="24" y="62" fill="#ffffff" font-size="17" font-weight="800" style="text-shadow: 0 1px 3px rgba(0,0,0,0.7);">Plan Estratégico 2026</text>
+      <text x="24" y="86" fill="#e0e7ff" font-size="12" style="text-shadow: 0 1px 2px rgba(0,0,0,0.6);">Contraste nítido y separación de plano</text>
+      <text x="24" y="110" fill="#86efac" font-size="10.5">✓ Legibilidad óptima sin saturar</text>
+    </g>
+
+    <!-- CASO 3: NODO CON SOMBRA PROFUNDA (SWITCH ON - PRESET FUERTE) -->
+    <g transform="translate(35, 245)">
+      <rect width="310" height="135" rx="14" fill="#1e293b" stroke="#38bdf8" stroke-width="1.8" />
+      <rect x="12" y="10" width="105" height="18" rx="4" fill="#1e3a8a" />
+      <text x="64" y="22" fill="#93c5fd" font-size="9" font-weight="700" text-anchor="middle">SWITCH: ON (MEDIA/FUERTE)</text>
+      
+      <!-- Texto CON sombra profunda 3D -->
+      <text x="24" y="62" fill="#ffffff" font-size="17" font-weight="800" style="text-shadow: 0 2px 6px rgba(0,0,0,0.9);">Arquitectura del Sistema</text>
+      <text x="24" y="86" fill="#94a3b8" font-size="12" style="text-shadow: 0 1px 3px rgba(0,0,0,0.8);">Relieve tipográfico tridimensional</text>
+      <text x="24" y="110" fill="#38bdf8" font-size="10.5">✓ Destacado especial para nodos clave</text>
+    </g>
+
+    <!-- CASO 4: MODO GLOW NEÓN (SWITCH ON - PRESET GLOW COLOR) -->
+    <g transform="translate(375, 245)">
+      <rect width="310" height="135" rx="14" fill="#180d24" stroke="#ec4899" stroke-width="1.8" />
+      <rect x="12" y="10" width="95" height="18" rx="4" fill="#831843" />
+      <text x="59" y="22" fill="#f472b6" font-size="9" font-weight="700" text-anchor="middle">SWITCH: ON (GLOW)</text>
+      
+      <!-- Texto con resplandor GLOW -->
+      <text x="24" y="62" fill="#ffffff" font-size="17" font-weight="800" style="text-shadow: 0 0 10px #ec4899, 0 0 4px #ffffff;">Objetivo Prioritario</text>
+      <text x="24" y="86" fill="#fbcfe8" font-size="12" style="text-shadow: 0 0 6px #ec4899;">Resplandor luminoso neón</text>
+      <text x="24" y="110" fill="#f472b6" font-size="10.5">★ Ideal para presentaciones y dark mode</text>
+    </g>
+
+    <!-- RESUMEN DE VENTAJAS DE LA SOMBRA DE TEXTO -->
+    <g transform="translate(35, 415)">
+      <rect width="650" height="210" rx="12" fill="#070c18" stroke="#1e293b" stroke-width="1" />
+      <text x="20" y="32" fill="#f8fafc" font-size="13" font-weight="700">📋 VENTAJAS DE IMPLEMENTAR PRIMERO «SOLO TEXTO»:</text>
+      
+      <g transform="translate(20, 55)">
+        <circle cx="8" cy="8" r="4" fill="#10b981" />
+        <text x="22" y="12" fill="#e2e8f0" font-size="11.5"><strong>1. Control Granular:</strong> Cada nodo puede tener o no sombra según su jerarquía.</text>
+
+        <circle cx="8" cy="40" r="4" fill="#10b981" />
+        <text x="22" y="44" fill="#e2e8f0" font-size="11.5"><strong>2. Desactivado por defecto:</strong> No altera ningún nodo existente (`textShadow: undefined / false`).</text>
+
+        <circle cx="8" cy="72" r="4" fill="#10b981" />
+        <text x="22" y="76" fill="#e2e8f0" font-size="11.5"><strong>3. Rendimiento Nativo 100%:</strong> La propiedad CSS <code>text-shadow</code> es procesada de forma ultra-eficiente por el motor tipográfico del navegador sin bitmaps adicionales.</text>
+
+        <circle cx="8" cy="104" r="4" fill="#10b981" />
+        <text x="22" y="108" fill="#e2e8f0" font-size="11.5"><strong>4. Reutilización del Switch:</strong> El componente <code>Switch.tsx</code> creado aquí servirá directamente para los siguientes objetos (nodos, nubes, aristas).</text>
+      </g>
+    </g>
+  </g>
+
+</svg>

@@ -1,9 +1,21 @@
 import React from 'react';
-import { NodeShape, NodeBackgroundType, NodeGradientDirection, NodePatternStyle, NodeBgImageMode, EdgeStyle, EdgeProfile, MindNode } from '../../../types/mindmap';
+import {
+  NodeShape,
+  NodeBackgroundType,
+  NodeGradientDirection,
+  NodePatternStyle,
+  NodeBgImageMode,
+  EdgeStyle,
+  EdgeProfile,
+  MindNode,
+  BubbleTailSide,
+  BubbleTailStyle,
+} from '../../../types/mindmap';
 import { CollapsibleSection } from '../../atoms/CollapsibleSection';
 import { ColorPicker } from '../../atoms/ColorPicker';
 import { SliderInput } from '../../atoms/SliderInput';
 import { ToggleButtonGroup } from '../../atoms/ToggleButtonGroup';
+import { Switch } from '../../atoms/Switch';
 import { ShapeSelector } from '../../molecules/ShapeSelector';
 import {
   Square,
@@ -21,6 +33,7 @@ import {
   Upload,
   Trash2,
   Image as ImageIcon,
+  MessageSquare,
 } from 'lucide-react';
 
 interface FormatTabProps {
@@ -139,6 +152,186 @@ export const FormatTab: React.FC<FormatTabProps> = ({
             description="0 = Ajuste automático al contenido"
           />
         </div>
+
+        {/* Anatomía de la Colita (Bocadillo / Speech Bubble) */}
+        {(selectedNode.shape || 'bubble') === 'bubble' && (
+          <div className="pt-3 border-t border-slate-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
+                Anatomía de la Colita
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium">Bocadillo</span>
+            </div>
+
+            {/* 1. Longitud de la Colita */}
+            <SliderInput
+              label="Longitud de la colita"
+              value={selectedNode.tailLength !== undefined ? selectedNode.tailLength : 12}
+              min={0}
+              max={32}
+              step={2}
+              unit="px"
+              badge={
+                selectedNode.tailLength === 0
+                  ? 'Sin colita'
+                  : `${selectedNode.tailLength !== undefined ? selectedNode.tailLength : 12}px`
+              }
+              onChange={(val) => onUpdateNode(selectedNode.id, { tailLength: val })}
+              onReset={() => onUpdateNode(selectedNode.id, { tailLength: undefined })}
+              description="0 = Sin colita. 6px corta, 12px estándar, 20px larga."
+            />
+
+            {/* Presets rápidos de longitud */}
+            <div className="flex items-center gap-1.5">
+              {[
+                { label: 'Ninguna', len: 0 },
+                { label: 'Corta (6px)', len: 6 },
+                { label: 'Media (12px)', len: 12 },
+                { label: 'Larga (20px)', len: 20 },
+              ].map((p) => {
+                const currentLen = selectedNode.tailLength !== undefined ? selectedNode.tailLength : 12;
+                const isSelected = currentLen === p.len;
+                return (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => onUpdateNode(selectedNode.id, { tailLength: p.len })}
+                    className={`flex-1 py-1 px-1.5 rounded-lg border text-[10px] font-semibold text-center transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-blue-600 bg-blue-50/80 text-blue-700 shadow-2xs'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Controles anatómicos detallados (visibles si tailLength > 0) */}
+            {(selectedNode.tailLength !== undefined ? selectedNode.tailLength : 12) > 0 && (
+              <>
+                {/* 2. Ancho de la Base */}
+                <SliderInput
+                  label="Ancho de la base"
+                  value={selectedNode.tailWidth !== undefined ? selectedNode.tailWidth : 14}
+                  min={6}
+                  max={30}
+                  step={2}
+                  unit="px"
+                  badge={`${selectedNode.tailWidth !== undefined ? selectedNode.tailWidth : 14}px`}
+                  onChange={(w) => onUpdateNode(selectedNode.id, { tailWidth: w })}
+                  onReset={() => onUpdateNode(selectedNode.id, { tailWidth: undefined })}
+                  description="Amplitud de la unión con el nodo"
+                />
+
+                {/* 3. Lado de Salida (Orientación Cardinal) */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-semibold text-slate-600 block">
+                    Lado de Salida (Orientación)
+                  </span>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[
+                      { id: 'auto' as BubbleTailSide, label: 'Auto' },
+                      { id: 'bottom' as BubbleTailSide, label: '↓ Abajo' },
+                      { id: 'top' as BubbleTailSide, label: '↑ Arriba' },
+                      { id: 'left' as BubbleTailSide, label: '← Izq' },
+                      { id: 'right' as BubbleTailSide, label: '→ Der' },
+                    ].map((sideOpt) => {
+                      const isSelected = (selectedNode.tailSide || 'auto') === sideOpt.id;
+                      return (
+                        <button
+                          key={sideOpt.id}
+                          type="button"
+                          onClick={() => onUpdateNode(selectedNode.id, { tailSide: sideOpt.id })}
+                          className={`py-1.5 px-1 rounded-lg border text-center transition-all cursor-pointer text-[10px] font-medium truncate ${
+                            isSelected
+                              ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-bold shadow-2xs'
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          {sideOpt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 4. Posición en el Borde (Desplazamiento %) */}
+                <div className="space-y-1.5">
+                  <SliderInput
+                    label="Posición en el borde"
+                    value={selectedNode.tailOffset !== undefined ? selectedNode.tailOffset : 50}
+                    min={15}
+                    max={85}
+                    step={5}
+                    unit="%"
+                    badge={`${selectedNode.tailOffset !== undefined ? selectedNode.tailOffset : 50}%`}
+                    onChange={(off) => onUpdateNode(selectedNode.id, { tailOffset: off })}
+                    onReset={() => onUpdateNode(selectedNode.id, { tailOffset: undefined })}
+                    description="Desplazamiento a lo largo del lado del nodo"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    {[
+                      { label: 'Inicio (20%)', val: 20 },
+                      { label: 'Centro (50%)', val: 50 },
+                      { label: 'Fin (80%)', val: 80 },
+                    ].map((p) => {
+                      const currentOff = selectedNode.tailOffset !== undefined ? selectedNode.tailOffset : 50;
+                      const isSelected = currentOff === p.val;
+                      return (
+                        <button
+                          key={p.label}
+                          type="button"
+                          onClick={() => onUpdateNode(selectedNode.id, { tailOffset: p.val })}
+                          className={`flex-1 py-1 px-1.5 rounded-lg border text-[10px] font-semibold text-center transition-all cursor-pointer ${
+                            isSelected
+                              ? 'border-blue-600 bg-blue-50/80 text-blue-700 shadow-2xs'
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          {p.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 5. Estilo Anatómico */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-semibold text-slate-600 block">
+                    Estilo de la Colita
+                  </span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: 'straight' as BubbleTailStyle, label: '▲ Recta', sub: 'Clásica' },
+                      { id: 'curved' as BubbleTailStyle, label: '~ Curva', sub: 'Dinámica' },
+                      { id: 'thought' as BubbleTailStyle, label: '○ Nube', sub: 'Pensamiento' },
+                    ].map((styleOpt) => {
+                      const isSelected = (selectedNode.tailStyle || 'straight') === styleOpt.id;
+                      return (
+                        <button
+                          key={styleOpt.id}
+                          type="button"
+                          onClick={() => onUpdateNode(selectedNode.id, { tailStyle: styleOpt.id })}
+                          className={`p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                            isSelected
+                              ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          <span className="text-xs font-bold">{styleOpt.label}</span>
+                          <span className="text-[9.5px] text-slate-500 font-normal">{styleOpt.sub}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </CollapsibleSection>
 
       {/* 2. Fondo y Relleno */}
@@ -432,6 +625,122 @@ export const FormatTab: React.FC<FormatTabProps> = ({
               );
             })}
           </div>
+
+          {/* Sombra del Contorno / Tarjeta del Nodo */}
+          <div className="pt-3 border-t border-slate-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[11px] font-semibold text-slate-700 block">Sombra del Contorno</span>
+                <span className="text-[10px] text-slate-500 block">Relieve y elevación de la tarjeta</span>
+              </div>
+              <Switch
+                checked={Boolean(selectedNode.nodeShadow)}
+                onChange={(val) => onUpdateNode(selectedNode.id, { nodeShadow: val })}
+              />
+            </div>
+
+            {selectedNode.nodeShadow && (
+              <div className="space-y-3 pt-1">
+                {/* 4 Presets Rápidos */}
+                <div>
+                  <span className="text-[10px] font-medium text-slate-600 block mb-1.5">Presets Rápidos</span>
+                  <div className="grid grid-cols-4 gap-1">
+                    {[
+                      { id: 'soft' as const, label: 'Suave' },
+                      { id: 'medium' as const, label: 'Media' },
+                      { id: 'deep' as const, label: '3D' },
+                      { id: 'glow' as const, label: 'Glow' },
+                    ].map((preset) => {
+                      const isCur = (selectedNode.nodeShadowPreset || 'soft') === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => {
+                            let blur = 8;
+                            let offsetY = 3;
+                            let color = 'rgba(0,0,0,0.12)';
+                            if (preset.id === 'medium') {
+                              blur = 14;
+                              offsetY = 6;
+                              color = 'rgba(0,0,0,0.22)';
+                            } else if (preset.id === 'deep') {
+                              blur = 24;
+                              offsetY = 10;
+                              color = 'rgba(0,0,0,0.35)';
+                            } else if (preset.id === 'glow') {
+                              blur = 16;
+                              offsetY = 0;
+                              color = '#38bdf8';
+                            }
+                            onUpdateNode(selectedNode.id, {
+                              nodeShadowPreset: preset.id,
+                              nodeShadowBlur: blur,
+                              nodeShadowOffsetY: offsetY,
+                              nodeShadowColor: color,
+                            });
+                          }}
+                          className={`py-1 px-1.5 rounded-lg text-[10px] font-semibold border transition-all cursor-pointer ${
+                            isCur
+                              ? 'border-blue-600 bg-blue-50/80 text-blue-700 shadow-2xs'
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Slider de Desenfoque */}
+                <SliderInput
+                  label="Desenfoque (Blur)"
+                  value={
+                    selectedNode.nodeShadowBlur ??
+                    (selectedNode.nodeShadowPreset === 'deep'
+                      ? 24
+                      : selectedNode.nodeShadowPreset === 'medium'
+                      ? 14
+                      : selectedNode.nodeShadowPreset === 'glow'
+                      ? 16
+                      : 8)
+                  }
+                  min={1}
+                  max={40}
+                  unit="px"
+                  onChange={(blur) => onUpdateNode(selectedNode.id, { nodeShadowBlur: blur })}
+                />
+
+                {/* Slider de Desplazamiento Y */}
+                <SliderInput
+                  label="Desplazamiento Vertical (Y)"
+                  value={
+                    selectedNode.nodeShadowOffsetY ??
+                    (selectedNode.nodeShadowPreset === 'deep'
+                      ? 10
+                      : selectedNode.nodeShadowPreset === 'medium'
+                      ? 6
+                      : selectedNode.nodeShadowPreset === 'glow'
+                      ? 0
+                      : 3)
+                  }
+                  min={0}
+                  max={30}
+                  unit="px"
+                  onChange={(y) => onUpdateNode(selectedNode.id, { nodeShadowOffsetY: y })}
+                />
+
+                {/* Selector de Color de Sombra */}
+                <ColorPicker
+                  label="Color de Sombra"
+                  value={selectedNode.nodeShadowColor}
+                  onChange={(color) => onUpdateNode(selectedNode.id, { nodeShadowColor: color })}
+                  onClear={() => onUpdateNode(selectedNode.id, { nodeShadowColor: undefined })}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </CollapsibleSection>
 
@@ -509,6 +818,113 @@ export const FormatTab: React.FC<FormatTabProps> = ({
             onChange={(c) => onUpdateNode(selectedNode.id, { edgeColor: c })}
             onClear={() => onUpdateNode(selectedNode.id, { edgeColor: undefined })}
           />
+
+          {/* Sombra de la Arista del Nodo */}
+          <div className="pt-3 border-t border-slate-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[11px] font-semibold text-slate-700 block">Sombra de la Rama</span>
+                <span className="text-[10px] text-slate-500 block">Relieve o resplandor de esta conexión</span>
+              </div>
+              <Switch
+                checked={Boolean(selectedNode.edgeShadow)}
+                onChange={(val) => onUpdateNode(selectedNode.id, { edgeShadow: val })}
+              />
+            </div>
+
+            {selectedNode.edgeShadow && (
+              <div className="space-y-3 pt-1">
+                {/* 3 Presets Rápidos */}
+                <div>
+                  <span className="text-[10px] font-medium text-slate-600 block mb-1.5">Presets Rápidos</span>
+                  <div className="grid grid-cols-3 gap-1">
+                    {[
+                      { id: 'soft' as const, label: 'Suave' },
+                      { id: 'deep' as const, label: '3D' },
+                      { id: 'glow' as const, label: 'Glow' },
+                    ].map((preset) => {
+                      const isCur = (selectedNode.edgeShadowPreset || 'soft') === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => {
+                            let blur = 4;
+                            let offsetY = 2;
+                            let color = 'rgba(0,0,0,0.20)';
+                            if (preset.id === 'deep') {
+                              blur = 8;
+                              offsetY = 4;
+                              color = 'rgba(0,0,0,0.35)';
+                            } else if (preset.id === 'glow') {
+                              blur = 6;
+                              offsetY = 0;
+                              color = selectedNode.edgeColor || '#3b82f6';
+                            }
+                            onUpdateNode(selectedNode.id, {
+                              edgeShadowPreset: preset.id,
+                              edgeShadowBlur: blur,
+                              edgeShadowOffsetY: offsetY,
+                              edgeShadowColor: color,
+                            });
+                          }}
+                          className={`py-1 px-1.5 rounded-lg text-[10px] font-semibold border transition-all cursor-pointer ${
+                            isCur
+                              ? 'border-blue-600 bg-blue-50/80 text-blue-700 shadow-2xs'
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Slider de Desenfoque */}
+                <SliderInput
+                  label="Desenfoque (Blur)"
+                  value={
+                    selectedNode.edgeShadowBlur ??
+                    (selectedNode.edgeShadowPreset === 'deep'
+                      ? 8
+                      : selectedNode.edgeShadowPreset === 'glow'
+                      ? 6
+                      : 4)
+                  }
+                  min={1}
+                  max={20}
+                  unit="px"
+                  onChange={(blur) => onUpdateNode(selectedNode.id, { edgeShadowBlur: blur })}
+                />
+
+                {/* Slider de Desplazamiento Y */}
+                <SliderInput
+                  label="Desplazamiento Vertical (Y)"
+                  value={
+                    selectedNode.edgeShadowOffsetY ??
+                    (selectedNode.edgeShadowPreset === 'deep'
+                      ? 4
+                      : selectedNode.edgeShadowPreset === 'glow'
+                      ? 0
+                      : 2)
+                  }
+                  min={0}
+                  max={16}
+                  unit="px"
+                  onChange={(y) => onUpdateNode(selectedNode.id, { edgeShadowOffsetY: y })}
+                />
+
+                {/* Selector de Color de Sombra */}
+                <ColorPicker
+                  label="Color de Sombra / Resplandor"
+                  value={selectedNode.edgeShadowColor}
+                  onChange={(color) => onUpdateNode(selectedNode.id, { edgeShadowColor: color })}
+                  onClear={() => onUpdateNode(selectedNode.id, { edgeShadowColor: undefined })}
+                />
+              </div>
+            )}
+          </div>
 
           <div className="pt-2 border-t border-slate-200/80 space-y-2">
             <span className="text-[11px] font-semibold text-slate-700 block">Propagación de Estilo</span>

@@ -98,3 +98,32 @@ export function calculateConnectorGeometry(
     labelY,
   };
 }
+
+export type ConnectorShadowPreset = 'soft' | 'deep' | 'glow';
+
+/**
+ * Computes CSS drop-shadow filter string for SVG connectors
+ */
+export function computeConnectorShadowFilter(conn?: Connector): string | undefined {
+  if (!conn || !conn.shadow) return undefined;
+
+  const preset: ConnectorShadowPreset = conn.shadowPreset || 'soft';
+  const blur =
+    conn.shadowBlur ??
+    (preset === 'soft' ? 4 : preset === 'deep' ? 10 : 8);
+  const offsetY =
+    conn.shadowOffsetY ??
+    (preset === 'soft' ? 2 : preset === 'deep' ? 4 : 0);
+  const defaultColor =
+    preset === 'glow'
+      ? (conn.color || '#3b82f6')
+      : preset === 'deep'
+      ? 'rgba(0,0,0,0.35)'
+      : 'rgba(0,0,0,0.20)';
+  const color = conn.shadowColor || defaultColor;
+
+  if (preset === 'glow') {
+    return `drop-shadow(0 0 ${blur}px ${color})`;
+  }
+  return `drop-shadow(0 ${offsetY}px ${blur}px ${color})`;
+}

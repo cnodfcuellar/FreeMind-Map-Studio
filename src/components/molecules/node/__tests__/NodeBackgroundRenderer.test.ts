@@ -3,6 +3,7 @@ import {
   getNodeBackgroundStyles,
   getNodeShapeStyles,
   isDarkNodeBackground,
+  computeNodeShadowStyle,
 } from '../NodeBackgroundRenderer';
 import { MindNode, MindMapTheme } from '../../../../types/mindmap';
 
@@ -164,5 +165,69 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
       expect(styles.border).toBe('none');
       expect(styles.background).toBe('transparent');
     }
+  });
+
+  describe('computeNodeShadowStyle', () => {
+    it('returns empty object when nodeShadow is undefined or false', () => {
+      const nodeOff = createNode({ id: 'n1', text: 'Off' });
+      expect(computeNodeShadowStyle(nodeOff, false)).toEqual({});
+      expect(computeNodeShadowStyle(nodeOff, true)).toEqual({});
+
+      const nodeFalse = createNode({ id: 'n2', text: 'False', nodeShadow: false });
+      expect(computeNodeShadowStyle(nodeFalse, false)).toEqual({});
+      expect(computeNodeShadowStyle(nodeFalse, true)).toEqual({});
+    });
+
+    it('computes box-shadow for standard shapes with presets', () => {
+      const softNode = createNode({ id: 's1', text: 'Soft', nodeShadow: true, nodeShadowPreset: 'soft' });
+      const softRes = computeNodeShadowStyle(softNode, false);
+      expect(softRes.boxShadow).toBeDefined();
+      expect(softRes.boxShadow).toContain('0 3px 8px');
+      expect(softRes.boxShadow).toContain('rgba(0,0,0,0.12)');
+
+      const medNode = createNode({ id: 'm1', text: 'Med', nodeShadow: true, nodeShadowPreset: 'medium' });
+      const medRes = computeNodeShadowStyle(medNode, false);
+      expect(medRes.boxShadow).toContain('0 6px 14px');
+      expect(medRes.boxShadow).toContain('rgba(0,0,0,0.22)');
+
+      const deepNode = createNode({ id: 'd1', text: 'Deep', nodeShadow: true, nodeShadowPreset: 'deep' });
+      const deepRes = computeNodeShadowStyle(deepNode, false);
+      expect(deepRes.boxShadow).toContain('0 10px 24px 2px');
+      expect(deepRes.boxShadow).toContain('rgba(0,0,0,0.35)');
+
+      const glowNode = createNode({ id: 'g1', text: 'Glow', nodeShadow: true, nodeShadowPreset: 'glow' });
+      const glowRes = computeNodeShadowStyle(glowNode, false);
+      expect(glowRes.boxShadow).toContain('0 0 16px');
+      expect(glowRes.boxShadow).toContain('#38bdf8');
+    });
+
+    it('computes filter: drop-shadow for polygon shapes with presets', () => {
+      const polySoft = createNode({ id: 'p1', text: 'Poly Soft', nodeShadow: true, nodeShadowPreset: 'soft' });
+      const polyRes = computeNodeShadowStyle(polySoft, true);
+      expect(polyRes.filter).toBeDefined();
+      expect(polyRes.filter).toContain('drop-shadow(0 3px 8px');
+      expect(polyRes.filter).toContain('rgba(0,0,0,0.12)');
+
+      const polyGlow = createNode({ id: 'p2', text: 'Poly Glow', nodeShadow: true, nodeShadowPreset: 'glow' });
+      const glowRes = computeNodeShadowStyle(polyGlow, true);
+      expect(glowRes.filter).toContain('drop-shadow(0 0 16px');
+      expect(glowRes.filter).toContain('#38bdf8');
+    });
+
+    it('respects custom blur, offsetY, and color overrides', () => {
+      const customNode = createNode({
+        id: 'c1',
+        text: 'Custom',
+        nodeShadow: true,
+        nodeShadowBlur: 20,
+        nodeShadowOffsetY: 8,
+        nodeShadowColor: '#f43f5e',
+      });
+      const boxRes = computeNodeShadowStyle(customNode, false);
+      expect(boxRes.boxShadow).toBe('0 8px 20px #f43f5e');
+
+      const dropRes = computeNodeShadowStyle(customNode, true);
+      expect(dropRes.filter).toBe('drop-shadow(0 8px 20px #f43f5e)');
+    });
   });
 });

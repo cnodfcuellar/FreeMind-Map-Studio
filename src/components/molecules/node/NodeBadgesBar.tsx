@@ -2,6 +2,7 @@ import React from 'react';
 import { MindNode } from '../../../types/mindmap';
 import { MarkdownView } from '../../../utils/markdownRenderer';
 import { FileText, ExternalLink } from 'lucide-react';
+import { computeNodeImageShadow } from './NodeHeaderRow';
 
 export interface NodeBadgesBarProps {
   node: MindNode;
@@ -44,11 +45,13 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
   const mediaStyle: React.CSSProperties | undefined = mediaMaxWidth
     ? { maxWidth: mediaMaxWidth, marginLeft: 'auto', marginRight: 'auto' }
     : contentStyle;
+
+  const imageShadowStyle = computeNodeImageShadow(node);
   return (
     <>
       {/* Right Attached Content Image */}
       {!isImageHidden && node.imageUrl && node.imagePosition === 'right' && (
-        <div className="shrink-0 flex items-center justify-center overflow-hidden rounded-lg relative z-10 ml-1.5" style={mediaStyle}>
+        <div className={`shrink-0 flex items-center justify-center ${imageShadowStyle ? 'overflow-visible' : 'overflow-hidden'} rounded-lg relative z-10 ml-1.5`} style={mediaStyle}>
           <img
             src={node.imageUrl}
             alt=""
@@ -57,6 +60,7 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
               width: `${node.imageWidth || 100}px`,
               maxWidth: '100%',
               height: 'auto',
+              filter: imageShadowStyle,
             }}
           />
         </div>
@@ -124,7 +128,7 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
 
       {/* Bottom Image if position is bottom */}
       {!isImageHidden && node.imageUrl && node.imagePosition === 'bottom' && (
-        <div className="w-full flex justify-center mt-1.5 overflow-hidden rounded-lg relative z-10" style={mediaStyle}>
+        <div className={`w-full flex justify-center mt-1.5 ${imageShadowStyle ? 'overflow-visible' : 'overflow-hidden'} rounded-lg relative z-10`} style={mediaStyle}>
           <img
             src={node.imageUrl}
             alt=""
@@ -133,6 +137,7 @@ export const NodeBadgesBar: React.FC<NodeBadgesBarProps> = ({
               width: `${node.imageWidth || 140}px`,
               maxWidth: '100%',
               height: 'auto',
+              filter: imageShadowStyle,
             }}
           />
         </div>

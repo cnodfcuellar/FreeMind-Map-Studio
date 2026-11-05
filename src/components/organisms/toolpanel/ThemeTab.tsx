@@ -13,6 +13,7 @@ import { CollapsibleSection } from '../../atoms/CollapsibleSection';
 import { ColorPicker } from '../../atoms/ColorPicker';
 import { SliderInput } from '../../atoms/SliderInput';
 import { ToggleButtonGroup } from '../../atoms/ToggleButtonGroup';
+import { Switch } from '../../atoms/Switch';
 import {
   Layers,
   Palette,
@@ -26,6 +27,11 @@ import {
   CircleDot,
   Check,
   Dices,
+  Plus,
+  Edit2,
+  Trash2,
+  ArrowRight,
+  ArrowLeftRight,
 } from 'lucide-react';
 
 interface ThemeTabProps {
@@ -39,11 +45,19 @@ interface ThemeTabProps {
   onUpdateMapEdgeWidth?: (width: number) => void;
   onUpdateMapEdgeColor?: (color: string | undefined) => void;
   onUpdateMapEdgeDash?: (dash: 'solid' | 'dashed' | 'dotted') => void;
+  onUpdateMapEdgeShadow?: (updates: {
+    edgeShadow?: boolean;
+    edgeShadowPreset?: 'soft' | 'deep' | 'glow';
+    edgeShadowBlur?: number;
+    edgeShadowOffsetY?: number;
+    edgeShadowColor?: string;
+  }) => void;
   onApplyEdgeStyleToAllNodes?: (edgeStyle: EdgeStyle) => void;
   onApplyEdgeProfileToAllNodes?: (edgeProfile: EdgeProfile) => void;
   onRandomizeEdgeColors?: () => void;
   onUpdateMapGaps?: (gaps: { horizontal?: number; vertical?: number }) => void;
   onOpenConnectorModal?: (fromId?: string) => void;
+  onEditConnector?: (connector: Connector) => void;
   onDeleteConnector?: (connectorId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
   onUpdateMapBackground?: (config: {
@@ -79,11 +93,13 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
   onUpdateMapEdgeWidth,
   onUpdateMapEdgeColor,
   onUpdateMapEdgeDash,
+  onUpdateMapEdgeShadow,
   onApplyEdgeStyleToAllNodes,
   onApplyEdgeProfileToAllNodes,
   onRandomizeEdgeColors,
   onUpdateMapGaps,
   onOpenConnectorModal,
+  onEditConnector,
   onDeleteConnector,
   onUpdateConnector,
   onUpdateMapBackground,
@@ -95,6 +111,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
     layout: false,
     edges: false,
     gaps: false,
+    connectors: true,
   });
 
   const toggleSection = (s: string) => {
@@ -108,6 +125,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
       layout: expand,
       edges: expand,
       gaps: expand,
+      connectors: expand,
     });
   };
 
@@ -585,6 +603,129 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
             unit="px"
             onChange={(w) => onUpdateMapEdgeWidth && onUpdateMapEdgeWidth(w)}
           />
+
+          {/* Sombra de Aristas Global del Mapa */}
+          <div className="pt-3 border-t border-slate-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[11px] font-semibold text-slate-700 block">Sombra de Aristas Global</span>
+                <span className="text-[10px] text-slate-500 block">Relieve o resplandor neón en todas las ramas</span>
+              </div>
+              <Switch
+                checked={Boolean(mindMap?.edgeShadow)}
+                onChange={(val) =>
+                  onUpdateMapEdgeShadow &&
+                  onUpdateMapEdgeShadow({
+                    edgeShadow: val,
+                    edgeShadowPreset: mindMap?.edgeShadowPreset || 'soft',
+                  })
+                }
+              />
+            </div>
+
+            {mindMap?.edgeShadow && (
+              <div className="space-y-3 pt-1">
+                {/* 3 Presets Rápidos */}
+                <div>
+                  <span className="text-[10px] font-medium text-slate-600 block mb-1.5">Presets Rápidos</span>
+                  <div className="grid grid-cols-3 gap-1">
+                    {[
+                      { id: 'soft' as const, label: 'Suave' },
+                      { id: 'deep' as const, label: '3D' },
+                      { id: 'glow' as const, label: 'Glow' },
+                    ].map((preset) => {
+                      const isCur = (mindMap?.edgeShadowPreset || 'soft') === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => {
+                            let blur = 4;
+                            let offsetY = 2;
+                            let color = 'rgba(0,0,0,0.20)';
+                            if (preset.id === 'deep') {
+                              blur = 8;
+                              offsetY = 4;
+                              color = 'rgba(0,0,0,0.35)';
+                            } else if (preset.id === 'glow') {
+                              blur = 6;
+                              offsetY = 0;
+                              color = mindMap?.edgeColor || '#3b82f6';
+                            }
+                            onUpdateMapEdgeShadow &&
+                              onUpdateMapEdgeShadow({
+                                edgeShadow: true,
+                                edgeShadowPreset: preset.id,
+                                edgeShadowBlur: blur,
+                                edgeShadowOffsetY: offsetY,
+                                edgeShadowColor: color,
+                              });
+                          }}
+                          className={`py-1 px-1.5 rounded-lg text-[10px] font-semibold border transition-all cursor-pointer ${
+                            isCur
+                              ? 'border-blue-600 bg-blue-50/80 text-blue-700 shadow-2xs'
+                              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Slider de Desenfoque */}
+                <SliderInput
+                  label="Desenfoque (Blur)"
+                  value={
+                    mindMap?.edgeShadowBlur ??
+                    (mindMap?.edgeShadowPreset === 'deep'
+                      ? 8
+                      : mindMap?.edgeShadowPreset === 'glow'
+                      ? 6
+                      : 4)
+                  }
+                  min={1}
+                  max={20}
+                  unit="px"
+                  onChange={(blur) =>
+                    onUpdateMapEdgeShadow && onUpdateMapEdgeShadow({ edgeShadowBlur: blur })
+                  }
+                />
+
+                {/* Slider de Desplazamiento Y */}
+                <SliderInput
+                  label="Desplazamiento Vertical (Y)"
+                  value={
+                    mindMap?.edgeShadowOffsetY ??
+                    (mindMap?.edgeShadowPreset === 'deep'
+                      ? 4
+                      : mindMap?.edgeShadowPreset === 'glow'
+                      ? 0
+                      : 2)
+                  }
+                  min={0}
+                  max={16}
+                  unit="px"
+                  onChange={(y) =>
+                    onUpdateMapEdgeShadow && onUpdateMapEdgeShadow({ edgeShadowOffsetY: y })
+                  }
+                />
+
+                {/* Selector de Color de Sombra */}
+                <ColorPicker
+                  label="Color de Sombra / Resplandor"
+                  value={mindMap?.edgeShadowColor}
+                  onChange={(color) =>
+                    onUpdateMapEdgeShadow && onUpdateMapEdgeShadow({ edgeShadowColor: color })
+                  }
+                  onClear={() =>
+                    onUpdateMapEdgeShadow && onUpdateMapEdgeShadow({ edgeShadowColor: undefined })
+                  }
+                />
+              </div>
+            )}
+          </div>
         </div>
       </CollapsibleSection>
 
@@ -616,6 +757,124 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
             unit="px"
             onChange={(v) => onUpdateMapGaps && onUpdateMapGaps({ vertical: v })}
           />
+        </div>
+      </CollapsibleSection>
+
+      {/* 6. Conexiones y Relaciones Libres */}
+      <CollapsibleSection
+        title="Conexiones Libres"
+        subtitle="Relaciones transversales entre nodos"
+        isOpen={sectionsOpen.connectors}
+        onToggle={() => toggleSection('connectors')}
+        icon={<Link className="w-3.5 h-3.5 text-blue-600" />}
+        badge={
+          <span className="text-[10px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/60 px-2 py-0.5 rounded-full">
+            {(mindMap?.connectors || []).length} { (mindMap?.connectors || []).length === 1 ? 'activa' : 'activas' }
+          </span>
+        }
+      >
+        <div className="space-y-3">
+          {/* Botón superior de Añadir Conexión */}
+          <button
+            type="button"
+            onClick={() => onOpenConnectorModal && onOpenConnectorModal()}
+            className="w-full py-2 px-3 rounded-xl border border-dashed border-blue-400/80 dark:border-blue-600/80 bg-blue-50/50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100/60 dark:hover:bg-blue-900/40 flex items-center justify-center gap-2 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Nueva Conexión / Relación
+          </button>
+
+          {/* Lista de Conectores Creados */}
+          {(!mindMap?.connectors || mindMap.connectors.length === 0) ? (
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-center space-y-1">
+              <Link className="w-5 h-5 mx-auto text-slate-400 dark:text-slate-500 opacity-60 mb-1" />
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                No hay conexiones libres
+              </p>
+              <p className="text-[10.5px] text-slate-500 dark:text-slate-400">
+                Enlaza dos nodos independientemente de la jerarquía del árbol.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {mindMap.connectors.map((conn, index) => {
+                const fromNode = mindMap.nodes[conn.fromId];
+                const toNode = mindMap.nodes[conn.toId];
+                const fromTitle = fromNode?.text || '(Nodo origen)';
+                const toTitle = toNode?.text || '(Nodo destino)';
+                const strokeColor = conn.color || '#3b82f6';
+
+                return (
+                  <div
+                    key={conn.id || index}
+                    className="p-2.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-blue-300 dark:hover:border-blue-700 shadow-2xs transition-all space-y-2"
+                  >
+                    {/* Fila superior: Indicador de color y Nombres */}
+                    <div className="flex items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0 border border-black/10 dark:border-white/10"
+                          style={{ backgroundColor: strokeColor }}
+                          title={`Color: ${strokeColor}`}
+                        />
+                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
+                          {fromTitle}
+                        </span>
+                        {conn.arrow === 'both' ? (
+                          <ArrowLeftRight className="w-3 h-3 shrink-0 text-slate-400" />
+                        ) : (
+                          <ArrowRight className="w-3 h-3 shrink-0 text-slate-400" />
+                        )}
+                        <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
+                          {toTitle}
+                        </span>
+                      </div>
+
+                      {/* Botones de acción */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => onEditConnector && onEditConnector(conn)}
+                          className="p-1 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
+                          title="Editar Conector"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDeleteConnector && onDeleteConnector(conn.id)}
+                          className="p-1 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+                          title="Eliminar Conector"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Fila inferior: Etiquetas y metadatos */}
+                    <div className="flex flex-wrap items-center gap-1 text-[10px]">
+                      {conn.label && (
+                        <span className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-semibold border border-blue-200 dark:border-blue-800/60 truncate max-w-[140px]">
+                          «{conn.label}»
+                        </span>
+                      )}
+                      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 capitalize">
+                        {conn.style || 'dashed'}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        {conn.layer === 'below' ? 'Detrás' : 'Frente'}
+                      </span>
+                      {conn.shadow && (
+                        <span className="px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-medium border border-amber-200 dark:border-amber-800/60">
+                          Sombra {conn.shadowPreset || 'soft'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </CollapsibleSection>
     </div>

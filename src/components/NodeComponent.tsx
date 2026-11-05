@@ -4,6 +4,7 @@ import { MindNode, CalculatedNodeLayout, MindMapTheme } from '../types/mindmap';
 import {
   getNodeShapeStyles,
   isDarkNodeBackground,
+  computeNodeShadowStyle,
   NodeSvgPolygonBackground,
   NodeBubbleTail,
 } from './molecules/node/NodeBackgroundRenderer';
@@ -94,6 +95,15 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const isDarkBg = isDarkNodeBackground(node.color, isRoot);
 
   const shapeStyles = getNodeShapeStyles(node, theme, branchColor, isRoot);
+  const nodeShadowStyle = computeNodeShadowStyle(node, isSvgShape);
+
+  // If node has custom shadow and shape is fork, apply drop-shadow to the fork underline
+  const effectiveForkFilter =
+    isSelected && shape === 'fork'
+      ? 'drop-shadow(0 2px 4px rgba(59,130,246,0.8))'
+      : shape === 'fork' && node.nodeShadow
+      ? (nodeShadowStyle.filter || `drop-shadow(0 2px 4px ${node.nodeShadowColor || 'rgba(0,0,0,0.2)'})`)
+      : undefined;
 
   return (
     <div
@@ -104,18 +114,23 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         width: `${layout.width}px`,
         minHeight: `${layout.height}px`,
         ...shapeStyles,
-        ...(isSelected && shape === 'fork' ? { filter: 'drop-shadow(0 2px 4px rgba(59,130,246,0.8))' } : {}),
+        ...nodeShadowStyle,
+        ...(effectiveForkFilter ? { filter: effectiveForkFilter } : {}),
       }}
       className={`absolute select-none flex flex-col justify-center transition-all duration-150 group cursor-pointer ${
-        isSvgShape || shape === 'fork' ? 'px-0 py-0 shadow-none' : 'px-2 py-1 shadow-xs'
+        isSvgShape || shape === 'fork' ? 'px-0 py-0 shadow-none' : node.nodeShadow ? 'px-2 py-1' : 'px-2 py-1 shadow-xs'
       } ${
         isStaged
           ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-slate-950 shadow-[0_0_35px_rgba(59,130,246,0.9)] scale-[1.03] z-50 animate-pulse'
           : isSelected
           ? isSvgShape || shape === 'fork'
             ? 'z-30'
+            : node.nodeShadow
+            ? 'ring-3 ring-blue-500 ring-offset-2 ring-offset-slate-50 z-30'
             : 'ring-3 ring-blue-500 ring-offset-2 ring-offset-slate-50 shadow-md z-30'
           : isSvgShape || shape === 'fork'
+          ? 'z-10'
+          : node.nodeShadow
           ? 'z-10'
           : 'hover:shadow-md z-10'
       } ${isMatch ? (isSvgShape ? 'brightness-125' : 'ring-2 ring-amber-400 bg-amber-50/90') : ''}`}

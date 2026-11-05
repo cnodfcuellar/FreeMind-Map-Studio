@@ -3,6 +3,7 @@ import { MindNode } from '../../../types/mindmap';
 import { CollapsibleSection } from '../../atoms/CollapsibleSection';
 import { ColorPicker } from '../../atoms/ColorPicker';
 import { SliderInput } from '../../atoms/SliderInput';
+import { Switch } from '../../atoms/Switch';
 import { ToggleButtonGroup } from '../../atoms/ToggleButtonGroup';
 import { FontFormatToolbar } from '../../molecules/FontFormatToolbar';
 import { TagManager } from '../../molecules/TagManager';
@@ -131,6 +132,102 @@ export const ContentTab: React.FC<ContentTabProps> = ({
             onChange={(s) => onUpdateNode(selectedNode.id, { fontSize: s })}
             onReset={() => onUpdateNode(selectedNode.id, { fontSize: undefined })}
           />
+
+          {/* Subpanel Sombra de Texto */}
+          <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800">
+            <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-2.5 space-y-2.5">
+              <Switch
+                label="Sombra de Texto"
+                description="Relieve tipográfico y contraste"
+                checked={!!selectedNode.textShadow}
+                onChange={(enabled) =>
+                  onUpdateNode(selectedNode.id, {
+                    textShadow: enabled,
+                    textShadowPreset: enabled ? (selectedNode.textShadowPreset || 'soft') : undefined,
+                  })
+                }
+              />
+
+              {selectedNode.textShadow && (
+                <div className="space-y-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
+                  {/* Selector de Presets */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      Preset de Sombra
+                    </span>
+                    <div className="grid grid-cols-4 gap-1">
+                      {[
+                        { id: 'soft', label: 'Suave' },
+                        { id: 'medium', label: 'Media' },
+                        { id: 'deep', label: 'Fuerte' },
+                        { id: 'glow', label: 'Glow' },
+                      ].map((p) => {
+                        const active = (selectedNode.textShadowPreset || 'soft') === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() =>
+                              onUpdateNode(selectedNode.id, {
+                                textShadowPreset: p.id as any,
+                              })
+                            }
+                            className={`px-1.5 py-1 text-[10.5px] rounded-lg font-medium transition-all cursor-pointer ${
+                              active
+                                ? 'bg-blue-600 text-white font-semibold shadow-2xs'
+                                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750'
+                            }`}
+                          >
+                            {p.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Slider de Desenfoque */}
+                  <SliderInput
+                    label="Desenfoque (Blur)"
+                    value={
+                      selectedNode.textShadowBlur ??
+                      (selectedNode.textShadowPreset === 'glow'
+                        ? 8
+                        : selectedNode.textShadowPreset === 'deep'
+                        ? 6
+                        : selectedNode.textShadowPreset === 'medium'
+                        ? 4
+                        : 3)
+                    }
+                    min={1}
+                    max={16}
+                    unit="px"
+                    onChange={(b) => onUpdateNode(selectedNode.id, { textShadowBlur: b })}
+                    onReset={() => onUpdateNode(selectedNode.id, { textShadowBlur: undefined })}
+                  />
+
+                  {/* Color de Sombra */}
+                  <ColorPicker
+                    label="Color de la Sombra"
+                    value={selectedNode.textShadowColor || (selectedNode.textShadowPreset === 'glow' ? '#38bdf8' : 'rgba(0,0,0,0.65)')}
+                    onChange={(c) => onUpdateNode(selectedNode.id, { textShadowColor: c })}
+                    onClear={() => onUpdateNode(selectedNode.id, { textShadowColor: undefined })}
+                  />
+
+                  {/* Switch secundario: aplicar también al cuerpo */}
+                  <div className="pt-1 border-t border-slate-200/50 dark:border-slate-800/50">
+                    <Switch
+                      size="sm"
+                      label={<span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">Aplicar al cuerpo / subtexto</span>}
+                      checked={!!selectedNode.applyTextShadowToBody}
+                      onChange={(checked) =>
+                        onUpdateNode(selectedNode.id, { applyTextShadowToBody: checked })
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </CollapsibleSection>
 
@@ -333,6 +430,90 @@ export const ContentTab: React.FC<ContentTabProps> = ({
                 unit="px"
                 onChange={(w) => onUpdateNode(selectedNode.id, { imageWidth: w })}
               />
+
+              {/* Subpanel Sombra de Imagen */}
+              <div className="pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800 rounded-xl p-2.5 space-y-2.5">
+                  <Switch
+                    label="Sombra en Imagen"
+                    description="Relieve de marco fotográfico flotante"
+                    checked={!!selectedNode.imageShadow}
+                    onChange={(enabled) =>
+                      onUpdateNode(selectedNode.id, {
+                        imageShadow: enabled,
+                        imageShadowPreset: enabled ? (selectedNode.imageShadowPreset || 'soft') : undefined,
+                      })
+                    }
+                  />
+
+                  {selectedNode.imageShadow && (
+                    <div className="space-y-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
+                      {/* Selector de Presets */}
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Preset de Sombra
+                        </span>
+                        <div className="grid grid-cols-4 gap-1">
+                          {[
+                            { id: 'soft', label: 'Suave' },
+                            { id: 'medium', label: 'Media' },
+                            { id: 'deep', label: '3D' },
+                            { id: 'glow', label: 'Glow' },
+                          ].map((p) => {
+                            const active = (selectedNode.imageShadowPreset || 'soft') === p.id;
+                            return (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() =>
+                                  onUpdateNode(selectedNode.id, {
+                                    imageShadowPreset: p.id as any,
+                                  })
+                                }
+                                className={`px-1.5 py-1 text-[10.5px] rounded-lg font-medium transition-all cursor-pointer ${
+                                  active
+                                    ? 'bg-blue-600 text-white font-semibold shadow-2xs'
+                                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750'
+                                }`}
+                              >
+                                {p.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Slider de Desenfoque */}
+                      <SliderInput
+                        label="Desenfoque (Blur)"
+                        value={
+                          selectedNode.imageShadowBlur ??
+                          (selectedNode.imageShadowPreset === 'glow'
+                            ? 12
+                            : selectedNode.imageShadowPreset === 'deep'
+                            ? 14
+                            : selectedNode.imageShadowPreset === 'medium'
+                            ? 8
+                            : 4)
+                        }
+                        min={2}
+                        max={24}
+                        unit="px"
+                        onChange={(b) => onUpdateNode(selectedNode.id, { imageShadowBlur: b })}
+                        onReset={() => onUpdateNode(selectedNode.id, { imageShadowBlur: undefined })}
+                      />
+
+                      {/* Color de Sombra */}
+                      <ColorPicker
+                        label="Color de la Sombra"
+                        value={selectedNode.imageShadowColor || (selectedNode.imageShadowPreset === 'glow' ? '#38bdf8' : 'rgba(0,0,0,0.35)')}
+                        onChange={(c) => onUpdateNode(selectedNode.id, { imageShadowColor: c })}
+                        onClear={() => onUpdateNode(selectedNode.id, { imageShadowColor: undefined })}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
