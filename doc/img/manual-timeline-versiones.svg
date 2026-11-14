@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Filtros de Sombra -->
+    <filter id="shadow-modal" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#000000" flood-opacity="0.6" />
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+    <filter id="shadow-card" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+    <filter id="glow-current" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#6366f1" flood-opacity="0.8" />
+    </filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="grad-modal-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="bg-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo Lienzo -->
+  <rect width="1200" height="800" fill="#090d16" />
+  <rect width="1200" height="800" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera Superior -->
+  <rect x="30" y="20" width="1140" height="52" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+  <circle cx="55" cy="46" r="11" fill="#6366f1" />
+  <text x="55" y="50" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">⏳</text>
+  <text x="78" y="44" font-size="15" font-weight="700" fill="#ffffff">Línea de Tiempo del Historial de Versiones (Timeline Modal — Ctrl + Shift + H)</text>
+  <text x="78" y="60" font-size="11.5" fill="#94a3b8">Navegación temporal de hasta 40 snapshots, analizador semántico de diferencias y bifurcación no-destructiva</text>
+
+  <!-- ======================================================== -->
+  <!-- MODAL DE HISTORIAL COMPLETO (Ventana Flotante Centrada) -->
+  <!-- ======================================================== -->
+  <g transform="translate(60, 95)" filter="url(#shadow-modal)">
+    <!-- Contenedor del Modal -->
+    <rect x="0" y="0" width="1080" height="600" rx="14" fill="url(#grad-modal-bg)" stroke="#334155" stroke-width="1.5" />
+
+    <!-- Barra de Título del Modal -->
+    <rect x="0" y="0" width="1080" height="50" rx="14 14 0 0" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <circle cx="28" cy="25" r="10" fill="#4f46e5" />
+    <text x="28" y="29" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">⏳</text>
+    <text x="48" y="29" font-size="14" font-weight="700" fill="#ffffff">Historial de Versiones del Mapa</text>
+    <rect x="290" y="14" width="75" height="22" rx="11" fill="#312e81" stroke="#6366f1" stroke-width="1" />
+    <text x="327" y="29" font-size="10.5" font-weight="700" fill="#c7d2fe" text-anchor="middle">14 Pasos</text>
+    <text x="1045" y="30" font-size="14" font-weight="700" fill="#94a3b8" text-anchor="middle">✕</text>
+
+    <!-- Barra de Filtros y Búsqueda -->
+    <rect x="0" y="50" width="1080" height="46" fill="#141c2e" stroke="#334155" stroke-width="1" />
+    <!-- Input de búsqueda -->
+    <rect x="20" y="59" width="340" height="28" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+    <text x="32" y="77" font-size="11" fill="#94a3b8">🔍 Buscar versión (ej: Stripe, color, nube)...</text>
+    <!-- Filtros segmentados -->
+    <g transform="translate(380, 59)">
+      <rect x="0" y="0" width="80" height="28" rx="6" fill="#312e81" stroke="#4f46e5" stroke-width="1" />
+      <text x="40" y="18" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">Todos (14)</text>
+      
+      <rect x="88" y="0" width="95" height="28" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="135" y="18" font-size="10.5" font-weight="600" fill="#94a3b8" text-anchor="middle">Pasados (10)</text>
+
+      <rect x="191" y="0" width="90" height="28" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="236" y="18" font-size="10.5" font-weight="600" fill="#94a3b8" text-anchor="middle">Futuros (3)</text>
+    </g>
+    <text x="1000" y="78" font-size="10.5" fill="#64748b" text-anchor="end">Atajo: Flechas ↑ ↓ para navegar · Enter para restaurar</text>
+
+    <!-- ======================================================== -->
+    <!-- COLUMNA IZQUIERDA: LÍNEA CRONOLÓGICA DE PASOS (440px) -->
+    <!-- ======================================================== -->
+    <g transform="translate(20, 110)">
+      <text x="0" y="0" font-size="11.5" font-weight="700" fill="#94a3b8">SECUENCIA DE SNAPSHOTS (Recientes primero)</text>
+
+      <!-- Línea vertical conectora -->
+      <line x1="24" y1="20" x2="24" y2="440" stroke="#334155" stroke-width="2" />
+
+      <!-- PASO #12: Futuro (Redo disponible) -->
+      <g transform="translate(0, 15)">
+        <circle cx="24" cy="20" r="8" fill="#1e293b" stroke="#64748b" stroke-width="1.5" />
+        <text x="24" y="24" font-size="9" fill="#94a3b8" text-anchor="middle">↷</text>
+        <rect x="44" y="5" width="370" height="32" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+        <text x="56" y="25" font-size="11" fill="#94a3b8">Paso #12: Conector transversal añadido</text>
+        <rect x="345" y="11" width="55" height="18" rx="3" fill="#1e293b" />
+        <text x="372" y="24" font-size="8.5" fill="#64748b" text-anchor="middle">FUTURO</text>
+      </g>
+
+      <!-- PASO #11: Futuro -->
+      <g transform="translate(0, 60)">
+        <circle cx="24" cy="20" r="8" fill="#1e293b" stroke="#64748b" stroke-width="1.5" />
+        <text x="24" y="24" font-size="9" fill="#94a3b8" text-anchor="middle">↷</text>
+        <rect x="44" y="5" width="370" height="32" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+        <text x="56" y="25" font-size="11" fill="#94a3b8">Paso #11: Sombra neón en aristas activada</text>
+        <rect x="345" y="11" width="55" height="18" rx="3" fill="#1e293b" />
+        <text x="372" y="24" font-size="8.5" fill="#64748b" text-anchor="middle">FUTURO</text>
+      </g>
+
+      <!-- PASO #10: 📍 ACTUAL (Estado Activo del Lienzo) -->
+      <g transform="translate(0, 105)">
+        <circle cx="24" cy="24" r="11" fill="#6366f1" filter="url(#glow-current)" />
+        <text x="24" y="28" font-size="10" font-weight="800" fill="#ffffff" text-anchor="middle">●</text>
+        <rect x="44" y="5" width="370" height="38" rx="6" fill="#312e81" stroke="#818cf8" stroke-width="1.8" />
+        <text x="56" y="28" font-size="11.5" font-weight="700" fill="#ffffff">Paso #10: 📍 ESTADO ACTUAL (En Vivo)</text>
+        <rect x="335" y="13" width="65" height="20" rx="4" fill="#4f46e5" />
+        <text x="367" y="27" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">ACTUAL</text>
+      </g>
+
+      <!-- PASO #9: Pasado (Texto editado) -->
+      <g transform="translate(0, 155)">
+        <circle cx="24" cy="20" r="8" fill="#10b981" />
+        <text x="24" y="24" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+        <rect x="44" y="5" width="370" height="32" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+        <text x="56" y="25" font-size="11" fill="#cbd5e1">Paso #9: Texto: "Ventas" → "Marketing &amp; Growth"</text>
+      </g>
+
+      <!-- PASO #8: Pasado SELECCIONADO PARA INSPECCIÓN -->
+      <g transform="translate(0, 200)">
+        <circle cx="24" cy="24" r="10" fill="#f59e0b" />
+        <text x="24" y="28" font-size="10" font-weight="800" fill="#ffffff" text-anchor="middle">👁️</text>
+        <rect x="44" y="5" width="370" height="38" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.8" />
+        <text x="56" y="28" font-size="11.5" font-weight="700" fill="#fbbf24">Paso #8: Nodo añadido: "Pasarela Stripe"</text>
+        <rect x="325" y="13" width="75" height="20" rx="4" fill="#78350f" />
+        <text x="362" y="27" font-size="8.5" font-weight="700" fill="#fde68a" text-anchor="middle">INSPECCIONANDO</text>
+      </g>
+
+      <!-- PASO #7: Pasado -->
+      <g transform="translate(0, 250)">
+        <circle cx="24" cy="20" r="8" fill="#334155" />
+        <text x="24" y="24" font-size="9" fill="#94a3b8" text-anchor="middle">7</text>
+        <rect x="44" y="5" width="370" height="32" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+        <text x="56" y="25" font-size="11" fill="#94a3b8">Paso #7: Nube de agrupación 'Sprint Mkt' creada</text>
+      </g>
+
+      <!-- PASO #6: Pasado -->
+      <g transform="translate(0, 295)">
+        <circle cx="24" cy="20" r="8" fill="#334155" />
+        <text x="24" y="24" font-size="9" fill="#94a3b8" text-anchor="middle">6</text>
+        <rect x="44" y="5" width="370" height="32" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+        <text x="56" y="25" font-size="11" fill="#94a3b8">Paso #6: Rama 'Riesgos Legales' plegada</text>
+      </g>
+
+      <!-- PASO #1: Raíz inicial -->
+      <g transform="translate(0, 340)">
+        <circle cx="24" cy="20" r="8" fill="#334155" />
+        <text x="24" y="24" font-size="9" fill="#94a3b8" text-anchor="middle">1</text>
+        <rect x="44" y="5" width="370" height="32" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+        <text x="56" y="25" font-size="11" fill="#64748b">Paso #1: Creación del mapa mental</text>
+      </g>
+    </g>
+
+    <!-- DIVISOR VERTICAL -->
+    <line x1="470" y1="105" x2="470" y2="580" stroke="#334155" stroke-width="1" />
+
+    <!-- ======================================================== -->
+    <!-- COLUMNA DERECHA: INSPECCIÓN DETALLADA DE LA VERSIÓN (560px) -->
+    <!-- ======================================================== -->
+    <g transform="translate(500, 110)">
+      <text x="0" y="0" font-size="11.5" font-weight="700" fill="#38bdf8">FICHA DE AUDITORÍA Y DIFERENCIAS SEMÁNTICAS</text>
+
+      <!-- Header del Snapshot -->
+      <g transform="translate(0, 15)">
+        <rect x="0" y="0" width="540" height="80" rx="8" fill="#141c2e" stroke="#1e3a5f" stroke-width="1" />
+        <text x="20" y="28" font-size="15" font-weight="700" fill="#ffffff">Versión Seleccionada: Paso #8</text>
+        <text x="20" y="46" font-size="11" fill="#94a3b8">Snapshot capturado hace 3 minutos · Estado anterior (-2 pasos del actual)</text>
+        <rect x="410" y="16" width="110" height="24" rx="12" fill="#1e3a5f" />
+        <text x="465" y="32" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle">↺ Reversible</text>
+        <line x1="20" y1="56" x2="520" y2="56" stroke="#1e293b" stroke-width="1" />
+        <text x="20" y="70" font-size="10" fill="#64748b">Tema: Océano Pastel · Layout: Bilateral · Nodos: 24 (vs 25 actuales)</text>
+      </g>
+
+      <!-- TARJETA SEMÁNTICA DE CAMBIO (Diff Analítico) -->
+      <g transform="translate(0, 110)">
+        <rect x="0" y="0" width="540" height="150" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+        <rect x="15" y="15" width="28" height="28" rx="6" fill="#065f46" />
+        <text x="29" y="34" font-size="14" font-weight="800" fill="#34d399" text-anchor="middle">＋</text>
+        
+        <text x="52" y="28" font-size="13" font-weight="700" fill="#34d399">Mutación: Nodo añadido</text>
+        <text x="52" y="44" font-size="11" fill="#cbd5e1">Se creó el nodo hijo "Pasarela Stripe" bajo "Producto &amp; Backend"</text>
+
+        <!-- Detalle de atributos agregados -->
+        <rect x="20" y="60" width="500" height="75" rx="6" fill="#141c2e" />
+        <text x="35" y="80" font-size="10.5" font-weight="600" fill="#94a3b8">Propiedades del nodo incorporadas en este paso:</text>
+        <text x="35" y="98" font-size="10" fill="#cbd5e1">• Etiquetas asignadas: <tspan fill="#f59e0b" font-weight="700">#urgente</tspan>, <tspan fill="#38bdf8" font-weight="700">#dev</tspan></text>
+        <text x="35" y="114" font-size="10" fill="#cbd5e1">• Barra de progreso inicializada en: <tspan fill="#10b981" font-weight="700">90%</tspan></text>
+        <text x="35" y="128" font-size="10" fill="#cbd5e1">• Documentación Markdown agregada con checklist técnico.</text>
+      </g>
+
+      <!-- BOTONES DE ACCIÓN PRINCIPAL -->
+      <g transform="translate(0, 280)">
+        <!-- Botón Restaurar (Primario) -->
+        <rect x="0" y="0" width="260" height="44" rx="8" fill="#4f46e5" stroke="#6366f1" stroke-width="1" />
+        <text x="130" y="27" font-size="12.5" font-weight="700" fill="#ffffff" text-anchor="middle">↺ Restaurar a esta Versión</text>
+
+        <!-- Botón Guardar Copia (Secundario) -->
+        <rect x="275" y="0" width="265" height="44" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
+        <text x="407" y="27" font-size="12" font-weight="600" fill="#cbd5e1" text-anchor="middle">📋 Guardar como Nuevo Mapa</text>
+      </g>
+
+      <!-- Mensaje Tranquilizador de No-Destructividad -->
+      <g transform="translate(0, 345)">
+        <rect x="0" y="0" width="540" height="70" rx="8" fill="#1e1b4b" stroke="#4338ca" stroke-width="1" />
+        <text x="20" y="24" font-size="11" font-weight="700" fill="#a5b4fc">🛡️ Restauración 100% Segura y No Destructiva:</text>
+        <text x="20" y="42" font-size="9.5" fill="#c7d2fe">Al saltar al Paso #8, tus cambios posteriores (#9 a #12) NO se borran.</text>
+        <text x="20" y="56" font-size="9.5" fill="#c7d2fe">Pasan a la pila de rehacer (Redo), permitiéndote volver al presente cuando quieras.</text>
+      </g>
+    </g>
+  </g>
+</svg>

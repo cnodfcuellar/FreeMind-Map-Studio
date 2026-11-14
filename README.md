@@ -347,6 +347,7 @@ freemind-map-studio/
 │       └── 📂 __tests__/              # Pruebas unitarias de utilidades matemáticas y convertidores
 │
 ├── 📂 doc/                            # DOCUMENTACIÓN
+│   ├── MANUAL_DE_USUARIO.md           # Manual de usuario completo paso a paso (todas las funciones y atajos)
 │   ├── PROJECT_ARCHITECTURE.md        # Arquitectura v4.0 verificada contra código + cookbook + guía GitHub
 │   ├── DESIGN.md                      # Sistema de diseño verificado (tokens, componentes, reglas)
 │   ├── INTERFACE_SPEC.md              # Especificación de interfaz

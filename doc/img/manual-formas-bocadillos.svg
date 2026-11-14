@@ -1,0 +1,251 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Filtros de Sombra -->
+    <filter id="shadow-card" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+    <filter id="shadow-shape" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+    
+    <!-- Gradientes -->
+    <linearGradient id="grad-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="grad-accent-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+    <linearGradient id="grad-accent-indigo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+
+    <!-- Patrón de fondo -->
+    <pattern id="bg-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo General -->
+  <rect width="1200" height="820" fill="#090d16" />
+  <rect width="1200" height="820" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera -->
+  <rect x="30" y="20" width="1140" height="56" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+  <circle cx="55" cy="48" r="12" fill="#3b82f6" />
+  <text x="55" y="53" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">🎨</text>
+  <text x="78" y="44" font-size="16" font-weight="700" fill="#ffffff">Guía Visual de Formas Geométricas y Anatomía de Bocadillos (Bubble)</text>
+  <text x="78" y="62" font-size="11.5" fill="#94a3b8">Catálogo de las 10 formas de nodo admitidas y opciones de configuración milimétrica de colita de diálogo</text>
+
+  <!-- ======================================================== -->
+  <!-- SECCIÓN 1: LAS 10 FORMAS GEOMÉTRICAS DE NODO -->
+  <!-- ======================================================== -->
+  <g transform="translate(30, 95)">
+    <rect x="0" y="0" width="1140" height="315" rx="12" fill="url(#grad-card)" stroke="#1e293b" stroke-width="1" />
+    
+    <!-- Título de sección -->
+    <text x="24" y="32" font-size="14" font-weight="700" fill="#38bdf8">1. Catálogo de Formas de Nodo Disponibles (Shape Registry)</text>
+    <text x="24" y="48" font-size="11" fill="#64748b">Cualquier nodo puede adoptar una de las siguientes 10 morfologías vectoriales con un clic desde el ToolPanel</text>
+    <line x1="24" y1="60" x2="1116" y2="60" stroke="#334155" stroke-width="1" stroke-dasharray="4,4" />
+
+    <!-- FILA 1 (5 formas) -->
+    <!-- 1.1 Rounded -->
+    <g transform="translate(30, 80)">
+      <rect x="0" y="0" width="190" height="80" rx="10" fill="#1e3a5f" stroke="#38bdf8" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="36" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">1. rounded</text>
+      <text x="95" y="54" font-size="10" fill="#93c5fd" text-anchor="middle">Rectángulo Redondeado</text>
+      <text x="95" y="68" font-size="8.5" fill="#64748b" text-anchor="middle">Estándar versátil (rx=10)</text>
+    </g>
+
+    <!-- 1.2 Bubble -->
+    <g transform="translate(250, 80)">
+      <path d="M 10 0 L 180 0 Q 190 0 190 10 L 190 60 Q 190 70 180 70 L 115 70 L 95 86 L 85 70 L 10 70 Q 0 70 0 60 L 0 10 Q 0 0 10 0 Z"
+            fill="#064e3b" stroke="#34d399" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="32" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">2. bubble</text>
+      <text x="95" y="48" font-size="10" fill="#a7f3d0" text-anchor="middle">Bocadillo de Diálogo</text>
+      <text x="95" y="62" font-size="8.5" fill="#6ee7b7" text-anchor="middle">Colita orientable 360°</text>
+    </g>
+
+    <!-- 1.3 Pill -->
+    <g transform="translate(470, 80)">
+      <rect x="0" y="0" width="190" height="80" rx="40" fill="#312e81" stroke="#818cf8" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="36" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">3. pill</text>
+      <text x="95" y="54" font-size="10" fill="#c7d2fe" text-anchor="middle">Píldora / Cápsula</text>
+      <text x="95" y="68" font-size="8.5" fill="#a5b4fc" text-anchor="middle">Bordes radio 9999px</text>
+    </g>
+
+    <!-- 1.4 Fork (Underline Buzan) -->
+    <g transform="translate(690, 80)">
+      <rect x="0" y="0" width="190" height="80" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+      <line x1="20" y1="58" x2="170" y2="58" stroke="#f43f5e" stroke-width="3" stroke-linecap="round" />
+      <text x="95" y="36" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">4. fork</text>
+      <text x="95" y="50" font-size="10" fill="#fda4af" text-anchor="middle">Rama Subrayada</text>
+      <text x="95" y="72" font-size="8.5" fill="#f43f5e" text-anchor="middle">Estilo Freeplane / Buzan</text>
+    </g>
+
+    <!-- 1.5 Hexagon -->
+    <g transform="translate(910, 80)">
+      <polygon points="40,5 150,5 185,40 150,75 40,75 5,40" fill="#4c1d95" stroke="#a78bfa" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="34" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">5. hexagon</text>
+      <text x="95" y="50" font-size="10" fill="#ddd6fe" text-anchor="middle">Hexágono SVG</text>
+      <text x="95" y="64" font-size="8.5" fill="#c4b5fd" text-anchor="middle">Estructura celular</text>
+    </g>
+
+    <!-- FILA 2 (5 formas adicionales) -->
+    <!-- 1.6 Rectangle -->
+    <g transform="translate(30, 195)">
+      <rect x="0" y="0" width="190" height="75" rx="0" fill="#1e293b" stroke="#64748b" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="34" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">6. rectangle</text>
+      <text x="95" y="50" font-size="10" fill="#cbd5e1" text-anchor="middle">Rectángulo Puro</text>
+      <text x="95" y="64" font-size="8.5" fill="#94a3b8" text-anchor="middle">Bordes afilados 90°</text>
+    </g>
+
+    <!-- 1.7 Oval -->
+    <g transform="translate(250, 195)">
+      <ellipse cx="95" cy="38" rx="90" ry="36" fill="#78350f" stroke="#fbbf24" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="34" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">7. oval / ellipse</text>
+      <text x="95" y="50" font-size="10" fill="#fde68a" text-anchor="middle">Óvalo Continuo</text>
+      <text x="95" y="64" font-size="8.5" fill="#f59e0b" text-anchor="middle">Curvatura simétrica</text>
+    </g>
+
+    <!-- 1.8 Circle -->
+    <g transform="translate(470, 195)">
+      <circle cx="95" cy="38" r="36" fill="#14532d" stroke="#22c55e" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="34" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">8. circle</text>
+      <text x="95" y="48" font-size="9" fill="#86efac" text-anchor="middle">Círculo 1:1</text>
+      <text x="95" y="60" font-size="8" fill="#4ade80" text-anchor="middle">Para iconos y siglas</text>
+    </g>
+
+    <!-- 1.9 Square -->
+    <g transform="translate(690, 195)">
+      <rect x="58" y="3" width="74" height="70" rx="8" fill="#701a75" stroke="#f472b6" stroke-width="1.8" filter="url(#shadow-shape)" />
+      <text x="95" y="34" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">9. square</text>
+      <text x="95" y="48" font-size="9" fill="#fbcfe8" text-anchor="middle">Cuadrado</text>
+      <text x="95" y="60" font-size="8" fill="#f472b6" text-anchor="middle">Proporción 1:1</text>
+    </g>
+
+    <!-- 1.10 Star / Arrow -->
+    <g transform="translate(910, 195)">
+      <polygon points="95,5 110,28 136,28 115,44 123,70 95,52 67,70 75,44 54,28 80,28" fill="#b45309" stroke="#fcd34d" stroke-width="1.6" filter="url(#shadow-shape)" />
+      <text x="95" y="38" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">10. star</text>
+      <text x="95" y="58" font-size="8.5" font-weight="700" fill="#fef08a" text-anchor="middle">Metas &amp; Hitos</text>
+    </g>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- SECCIÓN 2: ANATOMÍA DE LA COLITA DE BOCADILLO (BUBBLE) -->
+  <!-- ======================================================== -->
+  <g transform="translate(30, 430)">
+    <rect x="0" y="0" width="1140" height="360" rx="12" fill="url(#grad-card)" stroke="#1e293b" stroke-width="1" />
+    
+    <!-- Título de sección -->
+    <text x="24" y="32" font-size="14" font-weight="700" fill="#a78bfa">2. Anatomía Configurable de la Colita de Bocadillo (NodeBubbleTail)</text>
+    <text x="24" y="48" font-size="11" fill="#64748b">Permite regular longitud, amplitud de base, punto cardinal y estilo visual para cada idea</text>
+    <line x1="24" y1="60" x2="1116" y2="60" stroke="#334155" stroke-width="1" stroke-dasharray="4,4" />
+
+    <!-- SUBBLOQUE A: LONGITUD Y ANCHO (Sliders) -->
+    <g transform="translate(30, 80)">
+      <rect x="0" y="0" width="340" height="250" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+      <text x="20" y="28" font-size="12" font-weight="700" fill="#ffffff">A. Longitud y Base (Largo y Ancho)</text>
+      <text x="20" y="44" font-size="10" fill="#94a3b8">Slidres tailLength (0-32px) y tailWidth (6-30px)</text>
+
+      <!-- Ejemplo Corta -->
+      <g transform="translate(25, 65)">
+        <path d="M 8 0 L 112 0 Q 120 0 120 8 L 120 38 Q 120 46 112 46 L 68 46 L 60 54 L 52 46 L 8 46 Q 0 46 0 38 L 0 8 Q 0 0 8 0 Z"
+              fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+        <text x="60" y="26" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Corta (8px)</text>
+        <text x="60" y="70" font-size="9" fill="#94a3b8" text-anchor="middle">Base: 12px · Punta: 8px</text>
+      </g>
+
+      <!-- Ejemplo Larga -->
+      <g transform="translate(180, 65)">
+        <path d="M 8 0 L 112 0 Q 120 0 120 8 L 120 38 Q 120 46 112 46 L 75 46 L 55 72 L 45 46 L 8 46 Q 0 46 0 38 L 0 8 Q 0 0 8 0 Z"
+              fill="#1e293b" stroke="#0ea5e9" stroke-width="1.5" />
+        <text x="60" y="26" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Larga (26px)</text>
+        <text x="60" y="88" font-size="9" fill="#38bdf8" text-anchor="middle">Base: 24px · Punta: 26px</text>
+      </g>
+
+      <!-- Nota de desactivación -->
+      <rect x="20" y="195" width="300" height="38" rx="6" fill="#1e293b" />
+      <text x="32" y="212" font-size="9.5" font-weight="600" fill="#fbbf24">💡 tailLength = 0px:</text>
+      <text x="32" y="224" font-size="9" fill="#cbd5e1">Oculta la colita convirtiéndolo en tarjeta limpia.</text>
+    </g>
+
+    <!-- SUBBLOQUE B: ORIENTACIÓN CARDINAL (Sides) -->
+    <g transform="translate(390, 80)">
+      <rect x="0" y="0" width="340" height="250" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+      <text x="20" y="28" font-size="12" font-weight="700" fill="#ffffff">B. Orientación Cardinal (tailSide)</text>
+      <text x="20" y="44" font-size="10" fill="#94a3b8">Alineación automática hacia el padre o forzada</text>
+
+      <!-- 4 mini bocadillos orientados -->
+      <!-- Abajo -->
+      <g transform="translate(30, 60)">
+        <path d="M 5 0 L 55 0 Q 60 0 60 5 L 60 25 Q 60 30 55 30 L 35 30 L 30 38 L 25 30 L 5 30 Q 0 30 0 25 L 0 5 Q 0 0 5 0 Z"
+              fill="#1e293b" stroke="#10b981" stroke-width="1.4" />
+        <text x="30" y="18" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">↓ Abajo</text>
+      </g>
+      <!-- Arriba -->
+      <g transform="translate(130, 60)">
+        <path d="M 5 8 L 25 8 L 30 0 L 35 8 L 55 8 Q 60 8 60 13 L 60 33 Q 60 38 55 38 L 5 38 Q 0 38 0 33 L 0 13 Q 0 8 5 8 Z"
+              fill="#1e293b" stroke="#10b981" stroke-width="1.4" />
+        <text x="30" y="26" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">↑ Arriba</text>
+      </g>
+      <!-- Izquierda -->
+      <g transform="translate(230, 60)">
+        <path d="M 8 5 L 8 13 L 0 18 L 8 23 L 8 33 Q 8 38 13 38 L 55 38 Q 60 38 60 33 L 60 5 Q 60 0 55 0 L 13 0 Q 8 0 8 5 Z"
+              fill="#1e293b" stroke="#10b981" stroke-width="1.4" />
+        <text x="34" y="22" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">← Izq</text>
+      </g>
+
+      <!-- Modo Auto (Explicación) -->
+      <rect x="20" y="130" width="300" height="100" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+      <text x="34" y="152" font-size="11" font-weight="700" fill="#34d399">Modo 'Auto' Inteligente:</text>
+      <text x="34" y="170" font-size="9.5" fill="#cbd5e1">Detecta el cuadrante donde se ubica el nodo:</text>
+      <text x="34" y="186" font-size="9" fill="#94a3b8">• Si el padre está a la derecha → colita apunta a la derecha.</text>
+      <text x="34" y="200" font-size="9" fill="#94a3b8">• Si el padre está arriba → colita apunta hacia arriba.</text>
+      <text x="34" y="214" font-size="9" fill="#94a3b8">• Si el mapa se reorganiza, la colita rota dinámicamente.</text>
+    </g>
+
+    <!-- SUBBLOQUE C: ESTILOS ANATÓMICOS (Recta, Curva, Pensamiento) -->
+    <g transform="translate(750, 80)">
+      <rect x="0" y="0" width="360" height="250" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+      <text x="20" y="28" font-size="12" font-weight="700" fill="#ffffff">C. Estilos Anatómicos (tailStyle)</text>
+      <text x="20" y="44" font-size="10" fill="#94a3b8">3 estéticas: recta formal, curva cómic y pensamiento</text>
+
+      <!-- 1. Recta -->
+      <g transform="translate(20, 60)">
+        <path d="M 6 0 L 84 0 Q 90 0 90 6 L 90 28 Q 90 34 84 34 L 52 34 L 45 46 L 38 34 L 6 34 Q 0 34 0 28 L 0 6 Q 0 0 6 0 Z"
+              fill="#312e81" stroke="#818cf8" stroke-width="1.5" />
+        <text x="45" y="20" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">▲ Recta</text>
+        <text x="45" y="60" font-size="8.5" fill="#c7d2fe" text-anchor="middle">Triángulo clásico</text>
+      </g>
+
+      <!-- 2. Curva -->
+      <g transform="translate(130, 60)">
+        <path d="M 6 0 L 84 0 Q 90 0 90 6 L 90 28 Q 90 34 84 34 L 52 34 C 48 42, 38 46, 26 50 C 36 46, 42 40, 40 34 L 6 34 Q 0 34 0 28 L 0 6 Q 0 0 6 0 Z"
+              fill="#4c1d95" stroke="#c084fc" stroke-width="1.5" />
+        <text x="45" y="20" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">~ Curva</text>
+        <text x="45" y="66" font-size="8.5" fill="#e9d5ff" text-anchor="middle">Bézier estilo cómic</text>
+      </g>
+
+      <!-- 3. Nube / Pensamiento -->
+      <g transform="translate(240, 60)">
+        <rect x="0" y="0" width="90" height="34" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="1.5" />
+        <circle cx="38" cy="40" r="3.5" fill="#34d399" />
+        <circle cx="32" cy="48" r="2.5" fill="#34d399" />
+        <circle cx="26" cy="54" r="1.5" fill="#34d399" />
+        <text x="45" y="20" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">○ Pensamiento</text>
+        <text x="45" y="70" font-size="8.5" fill="#a7f3d0" text-anchor="middle">Burbujas en hilera</text>
+      </g>
+
+      <!-- Resumen Práctico -->
+      <rect x="20" y="150" width="320" height="80" rx="8" fill="#1e293b" />
+      <text x="32" y="172" font-size="10.5" font-weight="700" fill="#f472b6">Usos Recomendados:</text>
+      <text x="32" y="190" font-size="9" fill="#cbd5e1">• ▲ Recta: Instrucciones técnicas, reuniones de negocio.</text>
+      <text x="32" y="204" font-size="9" fill="#cbd5e1">• ~ Curva: Diálogos de personajes, mapas creativos.</text>
+      <text x="32" y="218" font-size="9" fill="#cbd5e1">• ○ Pensamiento: Hipótesis, dudas pendientes o brainstorming.</text>
+    </g>
+  </g>
+</svg>

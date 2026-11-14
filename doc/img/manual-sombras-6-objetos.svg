@@ -1,0 +1,269 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" width="1200" height="820" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- FILTROS DE SOMBRA REALES DEMOSTRATIVOS -->
+    <!-- 1. Sombra de Texto Glow -->
+    <filter id="glow-text" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#38bdf8" flood-opacity="0.9" />
+    </filter>
+
+    <!-- 2. Sombra de Imagen Silueta (PNG Drop-Shadow) -->
+    <filter id="shadow-png-silhouette" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.6" />
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+
+    <!-- 3. Sombra de Nodo 3D Profunda -->
+    <filter id="shadow-node-3d" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6" />
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+
+    <!-- 4. Sombra Isla 3D para Nube -->
+    <filter id="shadow-cloud-island" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#6366f1" flood-opacity="0.3" />
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <!-- 5. Sombra de Arista / Glow Neón -->
+    <filter id="glow-neon-edge" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#10b981" flood-opacity="0.85" />
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+
+    <!-- 6. Sombra de Conector Libre -->
+    <filter id="shadow-free-connector" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#f43f5e" flood-opacity="0.6" />
+    </filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="grad-card-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="bg-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo General -->
+  <rect width="1200" height="820" fill="#090d16" />
+  <rect width="1200" height="820" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera -->
+  <rect x="30" y="20" width="1140" height="56" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+  <circle cx="55" cy="48" r="12" fill="#ec4899" />
+  <text x="55" y="53" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">💡</text>
+  <text x="78" y="44" font-size="16" font-weight="700" fill="#ffffff">Arquitectura de Iluminación y Sombras Modulares (6 Objetos Independientes)</text>
+  <text x="78" y="62" font-size="11.5" fill="#94a3b8">Control milimétrico mediante interruptores dedicados &lt;Switch /&gt; con cero sobrecosto de rendimiento (0% GPU por defecto)</text>
+
+  <!-- GRID DE LOS 6 OBJETOS (3 Columnas × 2 Filas) -->
+
+  <!-- ======================================================== -->
+  <!-- OBJETO 1: SOMBRA DE TEXTO -->
+  <!-- ======================================================== -->
+  <g transform="translate(30, 95)">
+    <rect x="0" y="0" width="360" height="340" rx="12" fill="url(#grad-card-bg)" stroke="#1e293b" stroke-width="1" />
+    <circle cx="28" cy="28" r="12" fill="#0284c7" />
+    <text x="28" y="32" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">1</text>
+    <text x="50" y="28" font-size="13" font-weight="700" fill="#ffffff">Sombra de Texto (Text Shadow)</text>
+    <text x="50" y="44" font-size="10" fill="#94a3b8">CSS text-shadow perimetral en títulos</text>
+    <line x1="20" y1="56" x2="340" y2="56" stroke="#334155" stroke-width="1" />
+
+    <!-- Demostración Visual -->
+    <g transform="translate(30, 75)">
+      <rect x="0" y="0" width="300" height="110" rx="10" fill="#0b1329" stroke="#1e293b" stroke-width="1" />
+      <text x="150" y="45" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle" filter="url(#glow-text)">
+        CREATIVIDAD RADICAL
+      </text>
+      <text x="150" y="70" font-size="11" font-weight="600" fill="#38bdf8" text-anchor="middle">
+        Preset Glow: Resplandor Neón
+      </text>
+      <text x="150" y="90" font-size="9.5" fill="#94a3b8" text-anchor="middle">
+        Legibilidad perfecta sobre fondos oscuros
+      </text>
+    </g>
+
+    <rect x="20" y="205" width="320" height="115" rx="8" fill="#0f172a" />
+    <text x="32" y="226" font-size="10.5" font-weight="700" fill="#38bdf8">Detalles Técnicos:</text>
+    <text x="32" y="244" font-size="9.5" fill="#cbd5e1">• Ubicación: ToolPanel &gt; Contenido &gt; Título</text>
+    <text x="32" y="260" font-size="9.5" fill="#cbd5e1">• Presets: Suave, Media, Fuerte, Glow Neón</text>
+    <text x="32" y="276" font-size="9.5" fill="#cbd5e1">• Ideal para mapas que se exponen en proyectores</text>
+    <text x="32" y="292" font-size="9.5" fill="#cbd5e1">• No afecta el renderizado del cuerpo o subtítulos</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- OBJETO 2: SOMBRA EN SILUETA DE IMAGEN PNG -->
+  <!-- ======================================================== -->
+  <g transform="translate(420, 95)">
+    <rect x="0" y="0" width="360" height="340" rx="12" fill="url(#grad-card-bg)" stroke="#1e293b" stroke-width="1" />
+    <circle cx="28" cy="28" r="12" fill="#10b981" />
+    <text x="28" y="32" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">2</text>
+    <text x="50" y="28" font-size="13" font-weight="700" fill="#ffffff">Sombra en Silueta PNG / SVG</text>
+    <text x="50" y="44" font-size="10" fill="#94a3b8">filter: drop-shadow() en canal alpha</text>
+    <line x1="20" y1="56" x2="340" y2="56" stroke="#334155" stroke-width="1" />
+
+    <!-- Demostración Visual: Silueta vs Caja cuadrada -->
+    <g transform="translate(30, 75)">
+      <rect x="0" y="0" width="300" height="110" rx="10" fill="#0b1329" stroke="#1e293b" stroke-width="1" />
+      
+      <!-- Icono silueta de cohete proyectando sombra exacta -->
+      <g transform="translate(50, 15)" filter="url(#shadow-png-silhouette)">
+        <!-- Cohete vectorial -->
+        <path d="M 35 10 C 35 10 50 25 50 45 L 42 55 L 28 55 L 20 45 C 20 25 35 10 35 10 Z" fill="#f43f5e" />
+        <polygon points="20,45 8,55 24,53" fill="#fb7185" />
+        <polygon points="50,45 62,55 46,53" fill="#fb7185" />
+        <circle cx="35" cy="32" r="5" fill="#ffffff" />
+        <polygon points="30,55 35,68 40,55" fill="#f59e0b" />
+      </g>
+
+      <text x="140" y="42" font-size="11.5" font-weight="700" fill="#10b981">Silueta Real Contorneada</text>
+      <text x="140" y="58" font-size="9.5" fill="#cbd5e1">No proyecta un marco cuadrado</text>
+      <text x="140" y="72" font-size="9" fill="#94a3b8">Bordea la transparencia del PNG</text>
+      <text x="140" y="86" font-size="8.5" fill="#6ee7b7">✓ Resuelve problemas de logos sin fondo</text>
+    </g>
+
+    <rect x="20" y="205" width="320" height="115" rx="8" fill="#0f172a" />
+    <text x="32" y="226" font-size="10.5" font-weight="700" fill="#10b981">Detalles Técnicos:</text>
+    <text x="32" y="244" font-size="9.5" fill="#cbd5e1">• Ubicación: ToolPanel &gt; Contenido &gt; Imagen</text>
+    <text x="32" y="260" font-size="9.5" fill="#cbd5e1">• Técnica: CSS filter: drop-shadow() acelerado</text>
+    <text x="32" y="276" font-size="9.5" fill="#cbd5e1">• Presets: Suave, Media, 3D Elevada, Glow Neón</text>
+    <text x="32" y="292" font-size="9.5" fill="#cbd5e1">• Totalmente compatible con SVG y PNG transparentes</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- OBJETO 3: SOMBRA DE CONTORNO DE NODO -->
+  <!-- ======================================================== -->
+  <g transform="translate(810, 95)">
+    <rect x="0" y="0" width="360" height="340" rx="12" fill="url(#grad-card-bg)" stroke="#1e293b" stroke-width="1" />
+    <circle cx="28" cy="28" r="12" fill="#f59e0b" />
+    <text x="28" y="32" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">3</text>
+    <text x="50" y="28" font-size="13" font-weight="700" fill="#ffffff">Sombra de Contorno de Nodo</text>
+    <text x="50" y="44" font-size="10" fill="#94a3b8">Elevación 3D para la tarjeta</text>
+    <line x1="20" y1="56" x2="340" y2="56" stroke="#334155" stroke-width="1" />
+
+    <!-- Demostración Visual: Nodo flotando en 3D -->
+    <g transform="translate(30, 75)">
+      <rect x="0" y="0" width="300" height="110" rx="10" fill="#0b1329" stroke="#1e293b" stroke-width="1" />
+      
+      <!-- Nodo 3D flotante con sombra real -->
+      <g transform="translate(45, 25)" filter="url(#shadow-node-3d)">
+        <rect x="0" y="0" width="210" height="52" rx="10" fill="#1e3a5f" stroke="#38bdf8" stroke-width="1.8" />
+        <text x="105" y="26" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">Efecto Flotación 3D</text>
+        <text x="105" y="42" font-size="9" fill="#93c5fd" text-anchor="middle">dy: 12px · Blur: 16px · Opacidad 60%</text>
+      </g>
+    </g>
+
+    <rect x="20" y="205" width="320" height="115" rx="8" fill="#0f172a" />
+    <text x="32" y="226" font-size="10.5" font-weight="700" fill="#fbbf24">Detalles Técnicos:</text>
+    <text x="32" y="244" font-size="9.5" fill="#cbd5e1">• Ubicación: ToolPanel &gt; Estilos &gt; Sombras</text>
+    <text x="32" y="260" font-size="9.5" fill="#cbd5e1">• Motor Híbrido: box-shadow (HTML) / filter (SVG)</text>
+    <text x="32" y="276" font-size="9.5" fill="#cbd5e1">• Modos: Suave, Media, 3D Elevada, Glow Neón</text>
+    <text x="32" y="292" font-size="9.5" fill="#cbd5e1">• Se propaga con "Aplicar Estilo a Hijos/Hermanos"</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- OBJETO 4: SOMBRA DE NUBE (EFECTO ISLA 3D) -->
+  <!-- ======================================================== -->
+  <g transform="translate(30, 455)">
+    <rect x="0" y="0" width="360" height="340" rx="12" fill="url(#grad-card-bg)" stroke="#1e293b" stroke-width="1" />
+    <circle cx="28" cy="28" r="12" fill="#6366f1" />
+    <text x="28" y="32" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">4</text>
+    <text x="50" y="28" font-size="13" font-weight="700" fill="#ffffff">Sombra de Nube (Efecto Isla 3D)</text>
+    <text x="50" y="44" font-size="10" fill="#94a3b8">Silueta subyacente que eleva el territorio</text>
+    <line x1="20" y1="56" x2="340" y2="56" stroke="#334155" stroke-width="1" />
+
+    <!-- Demostración Visual: Nube con Isla 3D -->
+    <g transform="translate(30, 75)">
+      <rect x="0" y="0" width="300" height="110" rx="10" fill="#0b1329" stroke="#1e293b" stroke-width="1" />
+      
+      <!-- Nube translúcida con sombra isla -->
+      <g transform="translate(25, 10)">
+        <!-- Capa de sombra isla 3D opaca -->
+        <rect x="10" y="8" width="230" height="70" rx="16" fill="#1e1b4b" filter="url(#shadow-cloud-island)" />
+        <!-- Capa frontal translúcida -->
+        <rect x="10" y="8" width="230" height="70" rx="16" fill="#6366f1" fill-opacity="0.15" stroke="#818cf8" stroke-width="1.6" stroke-dasharray="5,3" />
+        <text x="125" y="38" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">Territorio Estratégico</text>
+        <text x="125" y="55" font-size="9" fill="#c7d2fe" text-anchor="middle">Preserva color sin oscurecer el fondo</text>
+      </g>
+    </g>
+
+    <rect x="20" y="205" width="320" height="115" rx="8" fill="#0f172a" />
+    <text x="32" y="226" font-size="10.5" font-weight="700" fill="#818cf8">Detalles Técnicos:</text>
+    <text x="32" y="244" font-size="9.5" fill="#cbd5e1">• Ubicación: ToolPanel &gt; Nube &gt; Sombra</text>
+    <text x="32" y="260" font-size="9.5" fill="#cbd5e1">• Soluciona el problema de dilución en transparencias</text>
+    <text x="32" y="276" font-size="9.5" fill="#cbd5e1">• Presets: Suave, Isla 3D, Profunda, Glow</text>
+    <text x="32" y="292" font-size="9.5" fill="#cbd5e1">• Enmarca ramas completas con relieve flotante</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- OBJETO 5: SOMBRA DE ARISTAS / RAMAS (GLOW NEÓN) -->
+  <!-- ======================================================== -->
+  <g transform="translate(420, 455)">
+    <rect x="0" y="0" width="360" height="340" rx="12" fill="url(#grad-card-bg)" stroke="#1e293b" stroke-width="1" />
+    <circle cx="28" cy="28" r="12" fill="#10b981" />
+    <text x="28" y="32" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">5</text>
+    <text x="50" y="28" font-size="13" font-weight="700" fill="#ffffff">Sombra de Aristas / Ramas</text>
+    <text x="50" y="44" font-size="10" fill="#94a3b8">Filtro SVG en curvas Bézier del árbol</text>
+    <line x1="20" y1="56" x2="340" y2="56" stroke="#334155" stroke-width="1" />
+
+    <!-- Demostración Visual: Ramas con Glow Neón -->
+    <g transform="translate(30, 75)">
+      <rect x="0" y="0" width="300" height="110" rx="10" fill="#0b1329" stroke="#1e293b" stroke-width="1" />
+      
+      <!-- Curvas Bézier con Glow Neón Real -->
+      <g filter="url(#glow-neon-edge)">
+        <path d="M 30 55 C 100 55, 120 25, 200 25" stroke="#10b981" stroke-width="3" fill="none" />
+        <path d="M 30 55 C 100 55, 120 85, 200 85" stroke="#10b981" stroke-width="3" fill="none" />
+        <circle cx="200" cy="25" r="5" fill="#34d399" />
+        <circle cx="200" cy="85" r="5" fill="#34d399" />
+      </g>
+      <text x="235" y="29" font-size="10" font-weight="700" fill="#6ee7b7">Rama A</text>
+      <text x="235" y="89" font-size="10" font-weight="700" fill="#6ee7b7">Rama B</text>
+      <text x="150" y="102" font-size="9" fill="#a7f3d0" text-anchor="middle">Efecto Neón Vibrante en el Lienzo</text>
+    </g>
+
+    <rect x="20" y="205" width="320" height="115" rx="8" fill="#0f172a" />
+    <text x="32" y="226" font-size="10.5" font-weight="700" fill="#34d399">Detalles Técnicos:</text>
+    <text x="32" y="244" font-size="9.5" fill="#cbd5e1">• Dual: ToolPanel &gt; Tema (Global) o Estilos (Local)</text>
+    <text x="32" y="260" font-size="9.5" fill="#cbd5e1">• Renderizado: 1 solo pase GPU en grupo SVG (&lt;g&gt;)</text>
+    <text x="32" y="276" font-size="9.5" fill="#cbd5e1">• Presets: Suave, 3D Elevada, Glow Neón</text>
+    <text x="32" y="292" font-size="9.5" fill="#cbd5e1">• En modo Neón, brilla con el tono exacto de la rama</text>
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- OBJETO 6: SOMBRA DE CONECTORES LIBRES -->
+  <!-- ======================================================== -->
+  <g transform="translate(810, 455)">
+    <rect x="0" y="0" width="360" height="340" rx="12" fill="url(#grad-card-bg)" stroke="#1e293b" stroke-width="1" />
+    <circle cx="28" cy="28" r="12" fill="#f43f5e" />
+    <text x="28" y="32" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">6</text>
+    <text x="50" y="28" font-size="13" font-weight="700" fill="#ffffff">Sombra de Conector Transversal</text>
+    <text x="50" y="44" font-size="10" fill="#94a3b8">Filtro perimetral en curvas libres y etiquetas</text>
+    <line x1="20" y1="56" x2="340" y2="56" stroke="#334155" stroke-width="1" />
+
+    <!-- Demostración Visual: Conector flotante con etiqueta -->
+    <g transform="translate(30, 75)">
+      <rect x="0" y="0" width="300" height="110" rx="10" fill="#0b1329" stroke="#1e293b" stroke-width="1" />
+      
+      <!-- Curva conector con sombra perimetral -->
+      <g filter="url(#shadow-free-connector)">
+        <path d="M 30 75 C 90 20, 200 20, 270 75" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="6,4" fill="none" />
+      </g>
+      <!-- Etiqueta central con sombra -->
+      <g transform="translate(80, 24)" filter="url(#shadow-node-3d)">
+        <rect x="0" y="0" width="140" height="24" rx="12" fill="#1e1b4b" stroke="#f43f5e" stroke-width="1.5" />
+        <text x="70" y="16" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">🔗 Depende de API</text>
+      </g>
+      <text x="150" y="98" font-size="9" fill="#f43f5e" text-anchor="middle">Sensación de suspensión sobre el mapa</text>
+    </g>
+
+    <rect x="20" y="205" width="320" height="115" rx="8" fill="#0f172a" />
+    <text x="32" y="226" font-size="10.5" font-weight="700" fill="#fb7185">Detalles Técnicos:</text>
+    <text x="32" y="244" font-size="9.5" fill="#cbd5e1">• Ubicación: ConnectorModal (doble clic en curva)</text>
+    <text x="32" y="260" font-size="9.5" fill="#cbd5e1">• Aplica sombra a la línea, punta de flecha y píldora</text>
+    <text x="32" y="276" font-size="9.5" fill="#cbd5e1">• Presets: Suave, Profunda, Glow Neón</text>
+    <text x="32" y="292" font-size="9.5" fill="#cbd5e1">• Evita que la curva se confunda con las ramas del árbol</text>
+  </g>
+</svg>

@@ -2162,6 +2162,91 @@ Permite a los usuarios realizar consultas complejas, focalizadas y multinivel so
 - [x] `pnpm test:regression`: **40 suites de pruebas superadas, 231/231 pruebas unitarias exitosas (100%)**.
 - [x] `pnpm build`: Compilación de producción exitosa con Vite en 10.13s.
 
+---
+
+## 📖 [Documentación] — 2026-11-13: Creación del Manual de Usuario Exhaustivo
+
+### 🎯 Motivo
+Creación del documento maestro [doc/MANUAL_DE_USUARIO.md](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/doc/MANUAL_DE_USUARIO.md), una guía exhaustiva y detallada de 15 secciones que cubre todas las funcionalidades del sistema:
+- Filosofía 100% offline y privacidad de datos.
+- Arquitectura de la interfaz y herramientas.
+- Gestión de nodos, edición, atajos de teclado y anti-ciclos.
+- Metadatos (notas Markdown, subtexto, hipervínculos, imágenes en 6 modos, progreso, tags, iconoteca 520+).
+- Las 10 formas geométricas y anatomía de colitas de bocadillos (`NodeBubbleTail`).
+- Sistema modular de sombras en 6 objetos con `<Switch />`.
+- Nubes envolventes y conectores libres interactivos con curvas Bézier.
+- Los 9 layouts matemáticos y 8 temas cromáticos.
+- Búsqueda avanzada con filtros de metadatos y efecto Spotlight en el lienzo.
+- Línea de tiempo del historial con diferencias semánticas y restauración no destructiva.
+- Paleta de comandos rápida `Ctrl+K` / `⌘K` con prefijos `>` y `@`.
+- Los 3 modos de presentación cinematográfica (Dinámica, Clásica, Espacial 3D).
+- Motor de exportación profesional (PDF Vectorial póster/mural, HTML autónomo, XML Freeplane `.mm`, Markdown y JSON).
+- Biblioteca de mapas y catálogo de +20 plantillas profesionales.
+- Tabla maestra completa de atajos de teclado.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `doc/MANUAL_DE_USUARIO.md` | Nuevo manual exhaustivo de usuario en 15 secciones con diagramas ASCII, tablas de referencia y flujos de trabajo. |
+| `README.md` | Vinculación del manual en la sección de documentación del repositorio. |
+
+---
+
+## 🎨 [Documentación e Ilustración SVG] — 2026-11-13: Incorporación de Ejemplos Reales e Ilustraciones Vectoriales SVG en el Manual de Usuario
+
+### 🎯 Motivo
+Atender la solicitud del usuario para enriquecer el Manual de Usuario con ejemplos prácticos reales de uso continuo e ilustraciones vectoriales SVG profesionales que muestren la interfaz, componentes, anatomía visual y flujos de trabajo reales de la aplicación.
+
+### 🖼️ Ilustraciones Vectoriales SVG Creadas en `doc/img/`
+| Archivo | Propósito e Ilustración |
+|---------|-------------------------|
+| `doc/img/manual-arbol-ejemplo-real.svg` | Mapa mental real completo: *"Plan de Lanzamiento SaaS Q4"*, ilustrando el nodo raíz con badge, ramas funcionales con barras de progreso (0-100%), etiquetas semánticas (`#urgente`, `#marketing`), notas Markdown, enlaces web, nube envolvente festoneada y conector libre transversal con etiqueta y flecha. |
+| `doc/img/manual-formas-bocadillos.svg` | Catálogo visual de las 10 formas geométricas de nodo admitidas y diagrama anatómico de la colita de bocadillo (`NodeBubbleTail`): sliders de longitud/ancho, presets, 4 puntos cardinales + modo `Auto` inteligente, y los 3 estilos anatómicos (recta, curva y pensamiento). |
+| `doc/img/manual-sombras-6-objetos.svg` | Desglose visual de los 6 objetos de sombra con interruptores `<Switch />`: sombra de texto Glow, sombra en silueta de imagen transparente PNG/SVG (`filter: drop-shadow`), sombra de elevación 3D en tarjeta, sombra Isla 3D en nubes, resplandor neón adaptativo en aristas y sombra perimetral de conectores. |
+| `doc/img/manual-spotlight-filtros.svg` | Componente real `FilterBar` con panel drawer de metadatos expandido y demostración del efecto visual **Spotlight**: nodos coincidentes iluminados al 100% con halo ámbar brillante y ramas secundarias atenuadas al 22% de opacidad, preservando el árbol contextual del padre. |
+| `doc/img/manual-timeline-versiones.svg` | Modal de Línea de Tiempo (`Ctrl+Shift+H`) mostrando la secuencia cronológica de hasta 40 snapshots, el analizador de diferencias semánticas con desglose de mutaciones y la restauración no-destructiva con pila de rehacer. |
+| `doc/img/manual-pdf-mural-mosaico.svg` | Esquema del motor de exportación e impresión PDF en mosaico multipágina 2×2: división en 4 hojas A4/Carta, líneas guía de solapamiento de 15 mm, marcas de corte en escuadra (L) y guía paso a paso para ensamblar un mural gigante de 1 metro. |
+
+### 🌟 Casos Prácticos Reales Incorporados en `doc/MANUAL_DE_USUARIO.md`
+1. **Caso Práctico 1:** Construcción de un mapa mental de lanzamiento en 3 minutos únicamente con el teclado (`Tab`, `Enter`, `F2`, `Espacio`).
+2. **Caso Práctico 2:** Configuración de ficha técnica de nodo (`Pasarela Stripe`) con tags `#urgente` y `#dev`, barra de progreso al 90% y notas Markdown renderizadas en modo Inline en el lienzo.
+3. **Caso Práctico 3:** Personalización de bocadillo cómic (`bubble`) con colita arqueada dinámica y propagación en cascada a todos los nodos hijos.
+4. **Caso Práctico 4:** Configuración de iluminación editorial con elevación volumétrica 3D y resplandor Neón Glow en ramas para presentaciones.
+5. **Caso Práctico 5:** Creación de nube envolvente para un área temática y trazado de conector Bézier transversal entre ramas distantes con etiqueta de sincronización.
+6. **Caso Práctico 6:** Auditoría de tareas críticas mediante la barra de filtros (`Ctrl+F`) con aislamiento visual Spotlight.
+7. **Caso Práctico 7:** Recuperación de una rama eliminada por error navegando la línea de tiempo del historial con diferencias semánticas y restauración no-destructiva.
+8. **Caso Práctico 8:** Impresión y ensamblado de un mural gigante de pared de 1 metro usando hojas A4 estándar y el modo Mosaico Multipágina 2×2.
+
+### 🔍 Verificación
+- [x] Vector SVG: 6 gráficos vectoriales limpios y escalables creados en `doc/img/`.
+- [x] Manual: Integración completa de imágenes relativas y enlaces a archivos fuente en `doc/MANUAL_DE_USUARIO.md`.
+
+---
+
+## 📚 [Documentación Enciclopédica] — 2026-11-14: Expansión Exhaustiva del Manual de Usuario y Referencia Técnica Definitiva
+
+### 🎯 Motivo
+Atender la solicitud del usuario ("manual de usuario muy detallado") para transformar el manual en una guía enciclopédica definitiva (720+ líneas, 16 capítulos), integrando la totalidad de diagramas de arquitectura de la interfaz, medidas acotadas de paneles, especificaciones matemáticas de algoritmos de layout, desgloses exhaustivos de los menús y submenús, y guías de diagnóstico técnico.
+
+### ✏️ Cambios Realizados en [doc/MANUAL_DE_USUARIO.md](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/doc/MANUAL_DE_USUARIO.md)
+1. **Desglose Exhaustivo de la Interfaz (Capítulo 2):**
+   - Integración de los diagramas acotados de ingeniería vectorial: `wireframe-interfaz.svg`, `medidas-areas.svg`, `medidas-menubar.svg`, `medidas-toolbar.svg`, `medidas-filterbar.svg`, `medidas-toolpanel.svg`, `medidas-outline.svg`, `medidas-minimap.svg` y `medidas-statusbar.svg`.
+   - Documentación exhaustiva opción por opción de los 6 menús del `MenuBar` (Archivo, Editar, Insertar, Formato, Ver, Ayuda) con sus atajos y comportamientos internos.
+   - Documentación detallada de las 6 pestañas del `ToolPanel` (Contenido, Estilos, Notas, Iconos, Nube, Tema y Lienzo).
+2. **Profundización en Formas, Anatomía y Sombras (Capítulos 5 y 6):**
+   - Incorporación de `propuesta-anatomia-colita-burbuja.svg`, `mockup-sistema-sombras.svg` y `mockup-sombra-texto.svg`.
+   - Especificación métrica de las 10 formas geométricas y los 6 objetos de sombra con interruptores `<Switch />`.
+3. **Distribución Espacial y Layouts (Capítulo 8):**
+   - Incorporación de `layouts.svg` y `medidas-theme-tab.svg`.
+   - Explicación de los 9 algoritmos matemáticos de layout (bilateral, balanceado, derecho, izquierdo, organigrama descendente/ascendente, genealógico, radial 360° y circular concéntrico).
+4. **Modos de Presentación Cinematográficos (Capítulo 12):**
+   - Incorporación de los diagramas acotados `medidas-presentation-dynamic.svg`, `medidas-presentation-classic.svg` y `medidas-presentation-elaborate.svg`.
+5. **Capítulo 16 de Diagnóstico y FAQ:**
+   - Guía técnica sobre almacenamiento en `localStorage`, liberación de cuota, rendimiento con 300+ nodos a 60 FPS y pautas de impresión de murales.
+
+
+
+
 
 
 
