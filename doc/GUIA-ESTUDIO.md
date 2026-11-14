@@ -1427,7 +1427,7 @@ Comportamientos:
 - **ShortcutsModal** (lg): tabla de 16 atajos con `kbd`.
 - *(ComingSoonModal: **eliminado** 2026-10-17 — era un modal huérfano; ver `doc/DESIGN.md` §8.5.7)*
 
-## 5. Tests: cómo están organizados (34 archivos, 175 tests)
+## 5. Tests: cómo están organizados (34 archivos, 176 tests)
 
 ```
 src/**/__tests__/*.test.{ts,tsx}   ← junto al código que prueban

@@ -1707,6 +1707,13 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           rect.setAttribute('stroke', node.cloud.color || 'rgba(59, 130, 246, 0.2)');
           rect.setAttribute('stroke-width', '1.5');
           rect.setAttribute('stroke-dasharray', '4 4');
+          if (node.cloud.shadow) {
+            var cPreset = node.cloud.shadowPreset || 'island';
+            var cBlur = node.cloud.shadowBlur !== undefined ? node.cloud.shadowBlur : (cPreset === 'soft' ? 14 : cPreset === 'island' ? 24 : cPreset === 'deep' ? 36 : 18);
+            var cOffY = node.cloud.shadowOffsetY !== undefined ? node.cloud.shadowOffsetY : (cPreset === 'soft' ? 4 : cPreset === 'island' ? 10 : cPreset === 'deep' ? 16 : 0);
+            var cColor = node.cloud.shadowColor || (cPreset === 'glow' ? (node.cloud.borderColor || '#3b82f6') : '#0f172a');
+            rect.style.filter = 'drop-shadow(0 ' + cOffY + 'px ' + cBlur + 'px ' + cColor + ')';
+          }
           cloudsSvg.appendChild(rect);
         }
       });
@@ -1735,6 +1742,16 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         path.setAttribute('fill', 'none');
         if (effectiveDash === 'dashed') path.setAttribute('stroke-dasharray', String(Math.max(10, width * 3.5)) + ' ' + String(Math.max(7, width * 2.5)));
         else if (effectiveDash === 'dotted') path.setAttribute('stroke-dasharray', '0.1 ' + String(Math.max(8, width * 3.0)));
+
+        var edgeShadow = childNode.edgeShadow !== undefined ? childNode.edgeShadow : mapData.edgeShadow;
+        if (edgeShadow) {
+          var edgePreset = childNode.edgeShadowPreset || mapData.edgeShadowPreset || 'soft';
+          var edgeBlur = childNode.edgeShadowBlur ?? mapData.edgeShadowBlur ?? (edgePreset === 'glow' ? 6 : edgePreset === 'deep' ? 8 : 4);
+          var edgeOffY = childNode.edgeShadowOffsetY ?? mapData.edgeShadowOffsetY ?? (edgePreset === 'glow' ? 0 : edgePreset === 'deep' ? 4 : 2);
+          var edgeColor = childNode.edgeShadowColor || mapData.edgeShadowColor || (edgePreset === 'glow' ? branchColor : 'rgba(0,0,0,0.25)');
+          path.style.filter = 'drop-shadow(0 ' + edgeOffY + 'px ' + edgeBlur + 'px ' + edgeColor + ')';
+        }
+
         edgesSvg.appendChild(path);
       });
 
@@ -1767,6 +1784,15 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           }
           if (conn.style === 'dashed') path.setAttribute('stroke-dasharray', '6 4');
           else if (conn.style === 'dotted') path.setAttribute('stroke-dasharray', '2 3');
+
+          if (conn.shadow) {
+            var connPreset = conn.shadowPreset || 'soft';
+            var connBlur = conn.shadowBlur !== undefined ? conn.shadowBlur : (connPreset === 'glow' ? 8 : connPreset === 'deep' ? 10 : 4);
+            var connOffY = conn.shadowOffsetY !== undefined ? conn.shadowOffsetY : (connPreset === 'glow' ? 0 : connPreset === 'deep' ? 4 : 2);
+            var connColor = conn.shadowColor || (connPreset === 'glow' ? (conn.color || '#3b82f6') : (connPreset === 'deep' ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.20)'));
+            path.style.filter = 'drop-shadow(0 ' + connOffY + 'px ' + connBlur + 'px ' + connColor + ')';
+          }
+
           connectorsSvg.appendChild(path);
 
           if (conn.label) {
@@ -1829,6 +1855,22 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         div.style.borderWidth = (node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 2 : 1.5)) + 'px';
         div.style.borderStyle = node.borderDash || node.borderStyle || 'solid';
 
+        // Node Shadow (Sombra de contorno)
+        if (node.nodeShadow) {
+          var nPreset = node.nodeShadowPreset || 'soft';
+          var nBlur = node.nodeShadowBlur !== undefined ? node.nodeShadowBlur : (nPreset === 'soft' ? 8 : nPreset === 'medium' ? 14 : nPreset === 'deep' ? 24 : 16);
+          var nOffY = node.nodeShadowOffsetY !== undefined ? node.nodeShadowOffsetY : (nPreset === 'soft' ? 3 : nPreset === 'medium' ? 6 : nPreset === 'deep' ? 10 : 0);
+          var nColor = node.nodeShadowColor || (nPreset === 'glow' ? '#38bdf8' : nPreset === 'deep' ? 'rgba(0,0,0,0.35)' : nPreset === 'medium' ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.12)');
+          if (shape === 'hexagon' || shape === 'arrow' || shape === 'star') {
+            div.style.filter = 'drop-shadow(0 ' + nOffY + 'px ' + nBlur + 'px ' + nColor + ')';
+          } else {
+            var nSpread = nPreset === 'deep' ? '2px ' : '';
+            div.style.boxShadow = '0 ' + nOffY + 'px ' + nBlur + 'px ' + nSpread + nColor;
+          }
+        } else if (node.nodeShadow === false) {
+          div.style.boxShadow = 'none';
+        }
+
         // Content Wrapper
         var wrap = document.createElement('div');
         wrap.className = 'node-content-wrap';
@@ -1841,6 +1883,12 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           img.src = node.imageUrl;
           img.className = 'node-image';
           if (node.imageWidth) img.style.width = node.imageWidth + 'px';
+          if (node.imageShadow) {
+            var imgPreset = node.imageShadowPreset || 'soft';
+            var imgBlur = node.imageShadowBlur !== undefined ? node.imageShadowBlur : (imgPreset === 'glow' ? 12 : imgPreset === 'deep' ? 14 : imgPreset === 'medium' ? 8 : 4);
+            var imgColor = node.imageShadowColor || (imgPreset === 'glow' ? '#38bdf8' : 'rgba(0,0,0,0.35)');
+            img.style.filter = 'drop-shadow(0 2px ' + imgBlur + 'px ' + imgColor + ')';
+          }
           imgWrap.appendChild(img);
           wrap.appendChild(imgWrap);
         }
@@ -1856,6 +1904,12 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           imgL.className = 'node-image';
           imgL.style.width = (node.imageWidth || 40) + 'px';
           imgL.style.marginRight = '6px';
+          if (node.imageShadow) {
+            var imgPresetL = node.imageShadowPreset || 'soft';
+            var imgBlurL = node.imageShadowBlur !== undefined ? node.imageShadowBlur : (imgPresetL === 'glow' ? 12 : imgPresetL === 'deep' ? 14 : imgPresetL === 'medium' ? 8 : 4);
+            var imgColorL = node.imageShadowColor || (imgPresetL === 'glow' ? '#38bdf8' : 'rgba(0,0,0,0.35)');
+            imgL.style.filter = 'drop-shadow(0 2px ' + imgBlurL + 'px ' + imgColorL + ')';
+          }
           headerRow.appendChild(imgL);
         }
 
@@ -1881,6 +1935,14 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         if (node.bold) titleEl.style.fontWeight = '700';
         if (node.italic) titleEl.style.fontStyle = 'italic';
         if (node.textAlign) titleEl.style.textAlign = node.textAlign;
+        if (node.textShadow) {
+          var tPreset = node.textShadowPreset || 'soft';
+          var tBlur = node.textShadowBlur !== undefined ? node.textShadowBlur : (tPreset === 'glow' ? 8 : tPreset === 'deep' ? 6 : tPreset === 'medium' ? 4 : 3);
+          var tOffY = node.textShadowOffsetY !== undefined ? node.textShadowOffsetY : (tPreset === 'glow' ? 0 : tPreset === 'deep' ? 2 : 1);
+          var tOffX = node.textShadowOffsetX || 0;
+          var tColor = node.textShadowColor || (tPreset === 'glow' ? '#38bdf8' : tPreset === 'deep' ? 'rgba(0,0,0,0.85)' : tPreset === 'medium' ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.65)');
+          titleEl.style.textShadow = tOffX + 'px ' + tOffY + 'px ' + tBlur + 'px ' + tColor;
+        }
         headerRow.appendChild(titleEl);
 
         // Right Image
@@ -1890,6 +1952,12 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           imgR.className = 'node-image';
           imgR.style.width = (node.imageWidth || 40) + 'px';
           imgR.style.marginLeft = '6px';
+          if (node.imageShadow) {
+            var imgPresetR = node.imageShadowPreset || 'soft';
+            var imgBlurR = node.imageShadowBlur !== undefined ? node.imageShadowBlur : (imgPresetR === 'glow' ? 12 : imgPresetR === 'deep' ? 14 : imgPresetR === 'medium' ? 8 : 4);
+            var imgColorR = node.imageShadowColor || (imgPresetR === 'glow' ? '#38bdf8' : 'rgba(0,0,0,0.35)');
+            imgR.style.filter = 'drop-shadow(0 2px ' + imgBlurR + 'px ' + imgColorR + ')';
+          }
           headerRow.appendChild(imgR);
         }
 

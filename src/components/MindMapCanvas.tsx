@@ -13,7 +13,7 @@ import {
   generateRibbonEdgePath,
   computeCloudBounds,
 } from '../utils/layoutEngine';
-import { computeCloudShadowFilter, getCloudShadowConfig } from '../utils/cloudUtils';
+import { getCloudShadowConfig } from '../utils/cloudUtils';
 import { computeEdgeShadowFilter } from '../utils/edgeUtils';
 import { generateDefaultPresentationSlides } from '../utils/presentationGenerator';
 import { MarkdownView } from '../utils/markdownRenderer';
@@ -1016,11 +1016,6 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
 
           {/* Group 1: Clouds (rendered behind edges and nodes, outer clouds first) */}
           <g id="clouds-group">
-            {/* Filter for cloud drop shadow */}
-            <filter id="cloud-drop-shadow" x="-10%" y="-10%" width="120%" height="120%">
-              <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="#0f172a" floodOpacity="0.08" />
-            </filter>
-
             {(Object.values(mindMap.nodes) as MindNode[])
               .filter(node => Boolean(node.cloud?.enabled))
               .map(node => ({
@@ -1274,13 +1269,22 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                       <clipPath id={clipId}>
                         <path d={shapePath} />
                       </clipPath>
+
+                      {/* Mask para sombra exterior de nube (mantiene el interior translúcido 100% limpio) */}
+                      {cloudShadowConfig && (
+                        <mask id={`cloud-shadow-mask-${node.id}`}>
+                          <rect x="-10000" y="-10000" width="20000" height="20000" fill="white" />
+                          <path d={shapePath} fill="black" />
+                        </mask>
+                      )}
                     </defs>
 
-                    {/* Capa de Sombra de Silueta Sólida (Efecto Isla Conceptual nítido e intenso) */}
+                    {/* Capa de Sombra de Silueta Sólida (Efecto Isla Conceptual nítido e intenso con interior limpio) */}
                     {cloudShadowConfig && (
                       <path
                         d={shapePath}
                         fill={cloudShadowConfig.color}
+                        mask={`url(#cloud-shadow-mask-${node.id})`}
                         style={{
                           opacity: cloudShadowConfig.opacity,
                           filter: `blur(${Math.max(2, Math.round(cloudShadowConfig.blur / 2))}px)`,

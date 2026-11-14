@@ -145,7 +145,7 @@ Arquitectura modular donde cada objeto posee su propio subpanel e interruptor de
 ## 📊 3. Estado de Calidad Actual
 
 * **TypeScript (`pnpm lint`):** 0 errores.
-* **Cobertura de Pruebas (`pnpm test:regression`):** 34 archivos pasados, **179/179 tests exitosos (100%)**.
+* **Cobertura de Pruebas (`pnpm test:regression`):** 34 archivos pasados, **176/176 tests exitosos (100%)**.
 * **Compilación de Producción (`pnpm build`):** Exitosa con Vite.
 * **Servidor Dev:** Operativo en `http://localhost:3000/`.
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { MindNode, CalculatedNodeLayout, MindMapTheme } from '../../../types/mindmap';
+import { computeBubbleTailGeometry } from '../../../utils/bubbleTailUtils';
 
 export interface NodeBackgroundProps {
   node: MindNode;
@@ -224,7 +225,7 @@ export const getNodeShapeStyles = (
       paddingRight: '10px',
       paddingTop: '5px',
       paddingBottom: '5px',
-      boxShadow: '0 4px 14px -2px rgba(0,0,0,0.10), 0 2px 6px -1px rgba(0,0,0,0.06)',
+      boxShadow: node.nodeShadow === false ? 'none' : '0 4px 14px -2px rgba(0,0,0,0.10), 0 2px 6px -1px rgba(0,0,0,0.06)',
     };
   }
   if (shape === 'square') {
@@ -606,7 +607,7 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
         />
       )}
 
-      {/* Polígono principal con fondo y borde */}
+      {/* Polígono principal con fondo y borde (con sombra perimetral SVG) */}
       <polygon
         points={points}
         fill={fillAttr}
@@ -615,13 +616,14 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
         strokeDasharray={strokeDash}
         strokeLinejoin="round"
         strokeLinecap="round"
+        style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
       />
     </svg>
   );
 };
 
 /**
- * Speech bubble tail rendering with synchronized border styling
+ * Speech bubble tail rendering with synchronized border styling and shadow
  */
 export const NodeBubbleTail: React.FC<NodeBackgroundProps> = ({
   node,
@@ -633,7 +635,9 @@ export const NodeBubbleTail: React.FC<NodeBackgroundProps> = ({
   const shape = node.shape || 'bubble';
   if (shape !== 'bubble') return null;
 
-  const tailSide = layout.side === 'left' ? 'right' : 'left';
+  const geom = computeBubbleTailGeometry({ node, layoutSide: layout.side });
+  if (!geom) return null;
+
   const bgColor = isRoot ? (node.color || theme.rootBg) : (node.color || theme.nodeBg);
   const fillCol = node.color || bgColor || '#ffffff';
   const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
@@ -644,39 +648,62 @@ export const NodeBubbleTail: React.FC<NodeBackgroundProps> = ({
   const borderStyle = node.borderDash || node.borderStyle || 'solid';
   const strokeDash = borderStyle === 'dashed' ? '4 3' : borderStyle === 'dotted' ? '2 2' : undefined;
 
+  // Heredar sombra del nodo
+  const tailShadowFilter = node.nodeShadow
+    ? computeNodeShadowStyle(node, true).filter
+    : node.nodeShadow === false
+    ? undefined
+    : 'drop-shadow(0 2px 4px rgba(0,0,0,0.08))';
+
   return (
     <div
-      className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-0"
       style={{
-        [tailSide === 'left' ? 'left' : 'right']: '-10px',
-        width: '12px',
-        height: '16px',
+        ...geom.containerStyle,
+        filter: tailShadowFilter,
       }}
     >
       <svg
-        viewBox="0 0 12 16"
-        className="w-full h-full overflow-visible"
-        style={{
-          transform: tailSide === 'right' ? 'scaleX(-1)' : 'none',
-        }}
+        width={geom.svgWidth}
+        height={geom.svgHeight}
+        viewBox={geom.viewBox}
+        className="overflow-visible"
       >
-        <path
-          d="M 12 0 L 0 8 L 12 16 Z"
-          fill={fillCol}
-          stroke={borderCol}
-          strokeWidth={bWidth}
-          strokeDasharray={strokeDash}
-          strokeLinejoin="round"
-        />
-        {bWidth > 0 && (
-          <line
-            x1="12"
-            y1="1"
-            x2="12"
-            y2="15"
-            stroke={fillCol}
-            strokeWidth={bWidth + 2}
-          />
+        {geom.thoughtCircles ? (
+          geom.thoughtCircles.map((circle, idx) => (
+            <circle
+              key={idx}
+              cx={circle.cx}
+              cy={circle.cy}
+              r={circle.r}
+              fill={fillCol}
+              stroke={borderCol}
+              strokeWidth={bWidth}
+              strokeDasharray={strokeDash}
+            />
+          ))
+        ) : (
+          <>
+            {geom.pathD && (
+              <path
+                d={geom.pathD}
+                fill={fillCol}
+                stroke={borderCol}
+                strokeWidth={bWidth}
+                strokeDasharray={strokeDash}
+                strokeLinejoin="round"
+              />
+            )}
+            {bWidth > 0 && geom.coverLine && (
+              <line
+                x1={geom.coverLine.x1}
+                y1={geom.coverLine.y1}
+                x2={geom.coverLine.x2}
+                y2={geom.coverLine.y2}
+                stroke={fillCol}
+                strokeWidth={bWidth + 2}
+              />
+            )}
+          </>
         )}
       </svg>
     </div>

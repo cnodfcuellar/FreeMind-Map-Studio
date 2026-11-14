@@ -173,12 +173,25 @@ describe('useMindMapStore', () => {
     expect(state().historyPast.length).toBe(past);
   });
 
-  it('applyStyleToChildren propaga estilo sin tocar texto', () => {
-    state().updateNode('root', { color: '#ff0000', shape: 'pill' });
+  it('applyStyleToChildren propaga estilo y sombras sin tocar texto', () => {
+    state().updateNode('root', {
+      color: '#ff0000',
+      shape: 'pill',
+      textShadow: true,
+      textShadowPreset: 'glow',
+      imageShadow: true,
+      nodeShadow: true,
+      nodeShadowPreset: 'deep',
+    });
     state().handleApplyStyleToChildren('root');
     const s = state();
     expect(s.mindMap.nodes['node-1'].color).toBe('#ff0000');
     expect(s.mindMap.nodes['node-1'].shape).toBe('pill');
+    expect(s.mindMap.nodes['node-1'].textShadow).toBe(true);
+    expect(s.mindMap.nodes['node-1'].textShadowPreset).toBe('glow');
+    expect(s.mindMap.nodes['node-1'].imageShadow).toBe(true);
+    expect(s.mindMap.nodes['node-1'].nodeShadow).toBe(true);
+    expect(s.mindMap.nodes['node-1'].nodeShadowPreset).toBe('deep');
     expect(s.mindMap.nodes['node-1'].text).toBe('Rama Principal 1');
   });
 });

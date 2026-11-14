@@ -167,6 +167,25 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
     }
   });
 
+  it('renders bubble shape with boxShadow none when nodeShadow is explicitly false', () => {
+    const bubbleOff = createNode({
+      id: 'b-off',
+      text: 'Bubble Off',
+      shape: 'bubble',
+      nodeShadow: false,
+    });
+    const styles = getNodeShapeStyles(bubbleOff, mockTheme, '#3b82f6', false);
+    expect(styles.boxShadow).toBe('none');
+
+    const bubbleDefault = createNode({
+      id: 'b-def',
+      text: 'Bubble Default',
+      shape: 'bubble',
+    });
+    const defStyles = getNodeShapeStyles(bubbleDefault, mockTheme, '#3b82f6', false);
+    expect(defStyles.boxShadow).toContain('0 4px 14px');
+  });
+
   describe('computeNodeShadowStyle', () => {
     it('returns empty object when nodeShadow is undefined or false', () => {
       const nodeOff = createNode({ id: 'n1', text: 'Off' });

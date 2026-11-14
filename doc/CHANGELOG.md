@@ -2007,6 +2007,36 @@ Actualización exhaustiva de todos los documentos y guías del proyecto para ref
 | `doc/MEASURES.md` | Nuevas especificaciones en §13 para el átomo `Switch.tsx`, modal de conectores dual `ConnectorModal.tsx` y tarjetas de la sección "Conexiones Libres" de `ThemeTab.tsx`. |
 | `doc/GUIA-ESTUDIO.md` | Actualización del recuento de pruebas (34 archivos, 175 tests), resumen de nuevas utilidades (`Switch`, `bubbleTailUtils`, `cloudUtils`, `edgeUtils`, `connectorUtils`) y explicaciones pedagógicas. |
 
+---
+
+## 🛠️ [Sombras / Renderizado] — 2026-11-13: Corrección Integral de Inconsistencias en el Sistema de Sombras
+
+### 🎯 Motivo
+Auditoría y resolución exhaustiva de 6 inconsistencias técnicas detectadas en el Sistema Modular de Sombras (6 objetos), anatomía de colitas y exportadores:
+1. **Burbujas (`bubble`)**: `boxShadow` hardcodeado impedía desactivar la sombra cuando el switch de contorno estaba en OFF (`nodeShadow: false`).
+2. **Colita de Bocadillo (`NodeBubbleTail`)**: No consumía `computeBubbleTailGeometry` en el renderizador y no heredaba la sombra `drop-shadow` del nodo.
+3. **Polígonos SVG (`hexagon`, `arrow`, `star`)**: El filtro `drop-shadow` aplicado en el contenedor div oscurecía y desenfocaba el texto interior, badges y tags.
+4. **Nubes de Agrupación (`cloudShadow`)**: La silueta con blur manchaba el centro de nubes con fondo translúcido (8% de opacidad) por falta de máscara de exclusión interior.
+5. **Propagación y Reset**: `extractNodeStyleBundle` omitía `textShadow*` e `imageShadow*`, y `onResetFormat` no limpiaba las propiedades de sombra.
+6. **Exportación HTML Autónoma (`htmlExporter.ts`)**: Se omitía la inyección de sombras en nodos, imágenes, títulos, aristas, nubes y conectores.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Permite `boxShadow: 'none'` en burbujas cuando `nodeShadow === false`. En `NodeSvgPolygonBackground` aplica el filtro de sombra directamente en el elemento `<polygon>`. En `NodeBubbleTail` conecta `computeBubbleTailGeometry({ node, layoutSide })` con soporte para todos los estilos (recto, curvo, pensamiento) y herencia sincronizada de sombra `tailShadowFilter`. |
+| `src/components/NodeComponent.tsx` | En formas poligonales SVG, elimina el filtro del contenedor div para mantener el texto e iconos interiores 100% nítidos sin halos indeseados. |
+| `src/components/MindMapCanvas.tsx` | Añade máscara `<mask id="cloud-shadow-mask-${node.id}">` recortando el interior del `shapePath` para que la sombra de silueta sólida de la nube mantenga el centro translúcido completamente limpio. Elimina filtro huérfano e imports no utilizados. |
+| `src/hooks/useMindMapStore.ts` | Agrega `textShadow*` e `imageShadow*` a `extractNodeStyleBundle` para que las sombras de texto e imagen se propaguen a hijos y hermanos. |
+| `src/App.tsx` | En `onResetFormat` limpia todas las propiedades de sombra (`nodeShadow`, `textShadow`, `imageShadow`, `edgeShadow`) y parámetros de colita sin borrar el cuerpo del nodo. |
+| `src/utils/htmlExporter.ts` | Sincroniza la renderización de sombras para nodos, imágenes, títulos, nubes, aristas y conectores en el mapa standalone exportado. |
+| `src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts` | Añadida prueba para verificar `boxShadow: 'none'` en forma de burbuja con `nodeShadow: false`. |
+| `src/hooks/__tests__/useMindMapStore.test.ts` | Añadida verificación de propagación de `textShadow` e `imageShadow` a nodos hijos. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm test:regression`: **34 suites de pruebas superadas, 176/176 pruebas unitarias exitosas (100%)**.
+- [x] Servidor Vite dev activo en `http://localhost:3000/`.
+
 
 
 

@@ -105,6 +105,12 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       ? (nodeShadowStyle.filter || `drop-shadow(0 2px 4px ${node.nodeShadowColor || 'rgba(0,0,0,0.2)'})`)
       : undefined;
 
+  // Para formas SVG poligonales (hexagon, arrow, star), la sombra ya se aplica
+  // directamente sobre el <polygon> en NodeSvgPolygonBackground para no ensuciar el texto interior con drop-shadow
+  const containerShadowStyle = isSvgShape
+    ? (nodeShadowStyle.boxShadow ? { boxShadow: nodeShadowStyle.boxShadow } : {})
+    : nodeShadowStyle;
+
   return (
     <div
       id={`node-${node.id}`}
@@ -114,7 +120,7 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         width: `${layout.width}px`,
         minHeight: `${layout.height}px`,
         ...shapeStyles,
-        ...nodeShadowStyle,
+        ...containerShadowStyle,
         ...(effectiveForkFilter ? { filter: effectiveForkFilter } : {}),
       }}
       className={`absolute select-none flex flex-col justify-center transition-all duration-150 group cursor-pointer ${
