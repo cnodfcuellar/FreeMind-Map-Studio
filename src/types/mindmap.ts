@@ -405,3 +405,33 @@ export interface HistoryState {
   present: MindMap;
   future: MindMap[];
 }
+
+export type HistoryActionCategory =
+  | 'initial'
+  | 'node-add'
+  | 'node-delete'
+  | 'node-text'
+  | 'node-style'
+  | 'node-move'
+  | 'connector'
+  | 'cloud'
+  | 'theme'
+  | 'layout'
+  | 'bulk'
+  | 'other';
+
+export interface HistoryTimelineEntry {
+  index: number;
+  isCurrent: boolean;
+  isPast: boolean;
+  isFuture: boolean;
+  map: MindMap;
+  title: string;
+  summary: string;
+  details: string;
+  category: HistoryActionCategory;
+  timestamp: number;
+  nodeCount: number;
+  connectorCount: number;
+  cloudCount: number;
+}

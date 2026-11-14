@@ -194,4 +194,37 @@ describe('useMindMapStore', () => {
     expect(s.mindMap.nodes['node-1'].nodeShadowPreset).toBe('deep');
     expect(s.mindMap.nodes['node-1'].text).toBe('Rama Principal 1');
   });
+
+  it('handleJumpToHistory salta de forma no destructiva a cualquier índice del timeline', () => {
+    // Estado inicial: 2 nodos hijos
+    // Paso 1: añadir hijo A
+    state().handleAddChild('root');
+    // Paso 2: añadir hijo B
+    state().handleAddChild('root');
+    // Paso 3: añadir hijo C
+    state().handleAddChild('root');
+
+    const s = state();
+    expect(s.historyPast.length).toBe(3);
+    expect(s.historyFuture.length).toBe(0);
+
+    // Total snapshots = 3 past + 1 current = 4 (índices 0, 1, 2, 3)
+    // Saltamos al índice 1 (tras el paso 1)
+    state().handleJumpToHistory(1);
+    const s1 = state();
+    expect(s1.historyPast.length).toBe(1);
+    expect(s1.historyFuture.length).toBe(2);
+
+    // Saltamos al futuro (índice 3, el más reciente)
+    state().handleJumpToHistory(3);
+    const s3 = state();
+    expect(s3.historyPast.length).toBe(3);
+    expect(s3.historyFuture.length).toBe(0);
+
+    // Saltos con índice fuera de rango o igual al actual no hacen nada
+    state().handleJumpToHistory(99);
+    expect(state().historyPast.length).toBe(3);
+    state().handleJumpToHistory(3);
+    expect(state().historyPast.length).toBe(3);
+  });
 });

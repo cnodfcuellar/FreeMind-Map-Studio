@@ -5,12 +5,14 @@ interface UseKeyboardShortcutsProps {
   isAnyModalOpen: boolean;
   onCloseModals: () => void;
   onToggleCommandPalette?: () => void;
+  onOpenHistoryTimeline?: () => void;
 }
 
 export function useKeyboardShortcuts({
   isAnyModalOpen,
   onCloseModals,
   onToggleCommandPalette,
+  onOpenHistoryTimeline,
 }: UseKeyboardShortcutsProps) {
   const {
     mindMap,
@@ -85,6 +87,13 @@ export function useKeyboardShortcuts({
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
         e.preventDefault();
         handleRedo();
+        return;
+      }
+
+      // History Timeline (Ctrl + Shift + H / Cmd + Shift + H)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        onOpenHistoryTimeline?.();
         return;
       }
 

@@ -40,6 +40,7 @@ import {
   Eye,
   FileText,
   RotateCcw,
+  History,
   Printer,
   Zap,
   CornerDownLeft,
@@ -100,6 +101,7 @@ export interface CommandPaletteModalProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onOpenHistoryTimeline?: () => void;
   onOpenTemplates: () => void;
   onOpenSavedMaps: () => void;
   onOpenExportModal: () => void;
@@ -163,6 +165,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   onRedo,
   canUndo,
   canRedo,
+  onOpenHistoryTimeline,
   onOpenTemplates,
   onOpenSavedMaps,
   onOpenExportModal,
@@ -893,6 +896,17 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         disabled: !canRedo,
         keywords: ['rehacer', 'redo', 'adelante'],
         action: onRedo,
+      },
+      {
+        id: 'history-timeline',
+        title: 'Línea de Tiempo del Historial de Versiones',
+        description: 'Explora y restaura cualquiera de los 40 niveles de cambios del mapa',
+        category: 'historial',
+        categoryLabel: 'Historial',
+        icon: <History className="w-4 h-4 text-indigo-500" />,
+        shortcut: 'Ctrl+Shift+H',
+        keywords: ['historial', 'versiones', 'timeline', 'cambios', 'restaurar', 'tiempo', 'undo', 'redo'],
+        action: () => onOpenHistoryTimeline?.(),
       },
     ];
 

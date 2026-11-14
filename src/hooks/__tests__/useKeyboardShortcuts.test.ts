@@ -124,4 +124,18 @@ describe('useKeyboardShortcuts', () => {
     expect(onTogglePalette).toHaveBeenCalledTimes(1);
     expect(document.activeElement).toBe(document.body);
   });
+
+  it('Ctrl+Shift+H llama onOpenHistoryTimeline', () => {
+    const onOpenHistory = vi.fn();
+    renderHook(() =>
+      useKeyboardShortcuts({
+        isAnyModalOpen: false,
+        onCloseModals: vi.fn(),
+        onOpenHistoryTimeline: onOpenHistory,
+      })
+    );
+
+    press('h', { ctrlKey: true, shiftKey: true });
+    expect(onOpenHistory).toHaveBeenCalledTimes(1);
+  });
 });

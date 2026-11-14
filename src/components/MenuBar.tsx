@@ -12,6 +12,7 @@ import {
   FileUp,
   Undo2,
   Redo2,
+  History,
   Trash2,
   ListTree,
   Presentation,
@@ -51,6 +52,7 @@ interface MenuBarProps {
   onOpenImportModal: () => void;
   onUndo: () => void;
   onRedo: () => void;
+  onOpenHistoryTimeline?: () => void;
   onAddChild: () => void;
   onAddSibling: () => void;
   onDeleteNode: () => void;
@@ -85,6 +87,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onOpenImportModal,
   onUndo,
   onRedo,
+  onOpenHistoryTimeline,
   onAddChild,
   onAddSibling,
   onDeleteNode,
@@ -241,6 +244,13 @@ export const MenuBar: React.FC<MenuBarProps> = ({
               >
                 <span className="flex items-center gap-2"><Redo2 className="w-3.5 h-3.5" /> Rehacer</span>
                 <kbd className="text-[10px] text-slate-400 font-mono">Ctrl+Y</kbd>
+              </button>
+              <button
+                onClick={() => { onOpenHistoryTimeline?.(); setOpenMenu(null); }}
+                className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/40"
+              >
+                <span className="flex items-center gap-2"><History className="w-3.5 h-3.5 text-indigo-500" /> Historial de Cambios...</span>
+                <kbd className="text-[10px] text-slate-400 font-mono">Ctrl+Shift+H</kbd>
               </button>
               <div className="my-1 border-t border-slate-100" />
               <button

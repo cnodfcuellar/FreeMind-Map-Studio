@@ -347,15 +347,17 @@ Puro, sin DOM: `estimateNodeSize(node)` + `computeMindMapLayout(map, center)` en
 
 ## 7. Infraestructura de Pruebas y Calidad de Código
 
-Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **201 tests / 37 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
+Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **219 tests / 39 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
 
 - `atoms/__tests__/Atoms.test.tsx` — Badge, Button (+loading), IconButton, Input onChange, ModalBackdrop cierre exterior.
 - `atoms/__tests__/Switch.test.tsx` — Switch conmutador accesible iOS-style con labels y aria-checked.
 - `templates/__tests__/MainEditorLayout.test.tsx` — slots y visibilidad condicional de paneles.
 - `Modals/__tests__/CommandPaletteModal.test.tsx` — Paleta spotlight con filtrado en tiempo real, búsqueda de nodos del mapa, categorías y navegación con flechas/Enter.
+- `Modals/__tests__/HistoryTimelineModal.test.tsx` — Línea de tiempo interactiva de historial con diferencias semánticas, filtrado de estados, restauración no destructiva y duplicación como mapa independiente.
 - `Modals/__tests__/PdfExportModal.test.tsx` — Exportador a PDF vectorial (póster y mosaico 2×2, 3×2, 3×3) con simulación de hoja y disparo de impresión.
 - `molecules/node/__tests__/NodeBackgroundRenderer.test.ts` — geometrías SVG, cálculo de luminancia y doble motor de sombras (`box-shadow` y `drop-shadow`).
 - `molecules/node/__tests__/NodeHeaderRow.test.ts` — renderizado de cabecera, imagen, iconos y sincronización de sombras de texto.
+- `utils/__tests__/historyDiff.test.ts` — Analizador semántico de diferencias entre estados del mapa, detección de acciones y formateador de timeline.
 - `utils/__tests__/pdfExporter.test.ts` — Cálculo de bounding box, paginación en mosaico, SVG vectorial de alta resolución y HTML de impresión.
 - `utils/__tests__/layoutEngine.test.ts` — dimensiones y bifurcado estándar (9 layouts).
 - `utils/__tests__/connectorUtils.test.ts` — Bézier, step, anclajes perimetrales y filtros drop-shadow.
@@ -363,8 +365,8 @@ Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con
 - `utils/__tests__/cloudUtils.test.ts` — Silueta sólida subyacente y sombras envolventes para nubes.
 - `utils/__tests__/edgeUtils.test.ts` — Jerarquía dual de sombras de aristas (global, local y resplandor neón adaptativo).
 - `utils/__tests__/freeplaneConverter.test.ts` — parseo `.mm` y round-trip sin pérdida.
-- `hooks/__tests__/useMindMapStore.test.ts` — 16 pruebas de CRUD, inmutabilidad y 40 pasos de historial.
-- `hooks/__tests__/useKeyboardShortcuts.test.ts` — 7 pruebas de atajos de teclado, navegación y apertura de paleta rápida (`Ctrl+K`).
+- `hooks/__tests__/useMindMapStore.test.ts` — 17 pruebas de CRUD, inmutabilidad, salto no destructivo en el timeline y 40 pasos de historial.
+- `hooks/__tests__/useKeyboardShortcuts.test.ts` — 8 pruebas de atajos de teclado, navegación, apertura de paleta rápida (`Ctrl+K`) y timeline (`Ctrl+Shift+H`).
 
 Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (ejecución robusta con `--pool=forks`) · `pnpm build` (Vite prod en ~7s).
 
@@ -386,13 +388,15 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (eje
 | `PresentationMode.tsx` | Organismo | Clásica en slides (8 temas) |
 | `Presentation/*` (3) | Organismo | Espacial 3D + tarjetas + modal detalle |
 | `MenuBar/ToolBar/FilterBar/StatusBar/OutlineView/MiniMap` | Organismo | Shell: menús, accesos, búsqueda, métricas, esquema, radar |
-| `Modals/*` (9) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` (incluye `PdfExportModal.tsx` póster/mosaico, `CommandPaletteModal.tsx` y `ConnectorModal.tsx`) |
+| `Modals/*` (10) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` (incluye `HistoryTimelineModal.tsx`, `PdfExportModal.tsx`, `CommandPaletteModal.tsx` y `ConnectorModal.tsx`) |
 | `atoms/*` (12) | Átomo | Button, IconButton, Input, Badge, ModalBackdrop, ErrorBoundary, CollapsibleSection, ColorPicker, SliderInput, Switch, ToggleButton(+Group) |
 | `molecules/*` (7) | Molécula | ModalHeader, SearchInput, HistoryControls, ZoomControls, FontFormatToolbar, ShapeSelector, TagManager |
-| `hooks/useMindMapStore.ts` | Store | CRUD, historial 40, clipboard con IDs nuevos, propagación estilos/iconos/sombras |
+| `hooks/useMindMapStore.ts` | Store | CRUD, historial 40, salto no destructivo a cualquier estado, clipboard con IDs nuevos, propagación estilos/iconos/sombras |
 | `hooks/useKeyboardShortcuts.ts` | Hook | Atajos globales (inactivos escribiendo/modal/presentación) |
 | `hooks/useSearchFilter.ts` | Hook | Filtro acumulativo → `Set<string> \| undefined` |
 | `utils/layoutEngine.ts` | Motor | 9 layouts, colisiones, aristas Bézier, nubes |
+| `utils/historyDiff.ts` | Motor | Analizador semántico de diferencias del mapa y ensamblador de timeline |
+| `utils/pdfExporter.ts` | Motor | Compilador SVG/HTML vectorial con directivas @page y cálculo de cuadrículas de corte |
 | `utils/connectorUtils.ts` | Motor | Conectores flotantes + geometría etiquetas + filtros de sombra |
 | `utils/bubbleTailUtils.ts` | Motor | Geometría anatómica de colita de burbuja (recta, curva, pensamiento) |
 | `utils/cloudUtils.ts` | Motor | Cálculo de siluetas sólidas y sombras para nubes envolventes |

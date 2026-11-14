@@ -2091,6 +2091,48 @@ Permite a los usuarios generar documentos PDF de calidad editorial sin pérdida 
 - [x] `pnpm test:regression`: **37 suites de pruebas superadas, 201/201 pruebas unitarias exitosas (100%)**.
 - [x] `pnpm build`: Compilación de producción exitosa en 8.98s.
 
+---
+
+## ⏳ [Historial / Versiones] — 2026-11-13: Línea de Tiempo del Historial de Versiones (Undo / Redo Timeline)
+
+### 🎯 Motivo
+Implementación de la funcionalidad de la Hoja de Ruta ([doc/mejoras.md](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/doc/mejoras.md)): **Historial Visual de Versiones (`Undo / Redo Timeline`)**.
+Permite a los usuarios:
+1. **Línea de Tiempo Cronológica Completa:** Visualizar de forma integrada todos los pasos registrados en la pila de deshacer (`historyPast`), el estado activo (`mindMap`) y la pila de rehacer (`historyFuture`), hasta 40+ niveles de snapshots históricos.
+2. **Motor de Diferencias Semánticas Inteligente (`src/utils/historyDiff.ts`):** Analiza en tiempo real qué cambió entre dos versiones consecutivas del mapa y produce descripciones humanas (e.g. `Nodo añadido: "Objetivos Q4"`, `Texto editado: "Borrador" → "Final"`, `Color/Estilo modificado en "Estrategia"`, `Nube envolvente activada`, `Conector libre añadido`, `Tema cambiado a "dark"`, `Diseño cambiado a "tree-down"`).
+3. **Restauración No Destructiva con un Clic:** Saltar directamente a cualquier punto del tiempo (`handleJumpToHistory`). Al restaurar una versión intermedia, las versiones posteriores no se destruyen: se reubican en `historyFuture` para poder volver a avanzar o inspeccionar sin pérdida de trabajo.
+4. **Guardar Copia como Mapa Independiente:** Opción para bifurcar o clonar cualquier versión histórica como un nuevo mapa mental independiente en la biblioteca local (`localStorage`).
+5. **Panel de Inspección y Previsualización Esquemática:** Despliega métricas clave de cada versión (cantidad de nodos, conectores, nubes, tema, distribución y fecha/hora exacta con timestamps relativos amigables) y un esquema interactivo de la jerarquía principal de ramas con los colores reales de los nodos.
+6. **Descubribilidad Completa en la UI:**
+   - Botón dedicado en `ToolBar` con icono `History` y contador numérico dinámico de pasos disponibles.
+   - Opción en menú superior `MenuBar` > *"Editar"* > *"Historial de Cambios..."* (`Ctrl+Shift+H`).
+   - Comando integrado en la `CommandPaletteModal` (`Ctrl+K`).
+   - Atajo de teclado global `Ctrl + Shift + H` / `Cmd + Shift + H`.
+   - Navegación por teclado completa dentro del modal (`↑` / `↓` para recorrer, `Enter` para restaurar, `Esc` para salir).
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Definidos los tipos `HistoryActionCategory` y `HistoryTimelineEntry`. |
+| `src/utils/historyDiff.ts` | Nuevo módulo con funciones `describeMapDiff` (analizador de diferencias semánticas), `buildHistoryTimeline` (ensamblador de la línea de tiempo completa) y `formatHistoryTimestamp` (formateador de fechas y tiempos relativos en español). |
+| `src/utils/__tests__/historyDiff.test.ts` | Nueva suite de 9 pruebas unitarias verificando estados iniciales, adiciones/eliminaciones de nodos, cambios de texto/notas, estilos/sombras, conectores, temas, layouts y cálculo de timeline. |
+| `src/hooks/useMindMapStore.ts` | Nueva acción `handleJumpToHistory(targetIndex)` para restaurar cualquier estado del historial de forma reversible y segura para el nodo seleccionado. |
+| `src/hooks/__tests__/useMindMapStore.test.ts` | Nueva prueba unitaria verificando el salto no destructivo a cualquier índice del timeline y resiliencia ante índices fuera de rango. |
+| `src/components/Modals/HistoryTimelineModal.tsx` | Nuevo componente modal con listado de versiones en timeline vertical con conectores, iconos y badges por categoría de acción, buscador en tiempo real, filtros segmentados (Todos, Pasados, Futuros), panel lateral de inspección de snapshot, previsualización de estructura de ramas, botón de restauración y función para clonar snapshot como nuevo mapa. |
+| `src/components/Modals/__tests__/HistoryTimelineModal.test.tsx` | Nueva suite de 7 pruebas unitarias para renderizado, filtrado por búsqueda, filtrado por pestañas, restauración con `onJumpToHistory`, guardado de copia independiente y salida con Escape. |
+| `src/components/ToolBar.tsx` | Agregado botón con icono `History` y badge con el conteo de pasos históricos junto a los botones de Deshacer y Rehacer. |
+| `src/components/MenuBar.tsx` | Agregada entrada "Historial de Cambios... (Ctrl+Shift+H)" en el menú desplegable "Editar". |
+| `src/components/Modals/CommandPaletteModal.tsx` | Agregado el comando "Línea de Tiempo del Historial de Versiones" en la categoría Historial con atajo `Ctrl+Shift+H`. |
+| `src/hooks/useKeyboardShortcuts.ts` | Agregado el atajo global de teclado `Ctrl + Shift + H` / `Cmd + Shift + H` para abrir la línea de tiempo desde cualquier vista. |
+| `src/hooks/__tests__/useKeyboardShortcuts.test.ts` | Nueva prueba unitaria verificando que `Ctrl+Shift+H` dispara `onOpenHistoryTimeline`. |
+| `src/App.tsx` | Estado `isHistoryModalOpen`, extracción de `handleJumpToHistory`, conexión a `useKeyboardShortcuts`, `MenuBar`, `ToolBar`, `CommandPaletteModal` y montaje del componente `HistoryTimelineModal`. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado.
+- [x] `pnpm test:regression`: **39 suites de pruebas superadas, 219/219 pruebas unitarias exitosas (100%)**.
+- [x] `pnpm build`: Compilación de producción exitosa con Vite en 12.42s.
+
+
 
 
 

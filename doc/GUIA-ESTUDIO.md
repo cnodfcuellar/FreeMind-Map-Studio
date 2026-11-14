@@ -354,6 +354,7 @@ interface MindMapStore {
   pushHistory: (map: MindMap) => void; // foto al pasado + limpia futuro
   handleUndo: () => void;
   handleRedo: () => void;
+  handleJumpToHistory: (targetIndex: number) => void; // salto no destructivo a cualquier versión de la timeline
 
   updateNode: (nodeId: string, updates: Partial<MindNode>) => void; // fusión parcial
   handleAddChild: (parentId?: string) => void;    // Tab: balancea left/right en raíz,

@@ -12,6 +12,7 @@ import {
   Italic,
   Undo2,
   Redo2,
+  History,
   Sliders,
   ListTree,
   Presentation,
@@ -49,8 +50,9 @@ interface ToolBarProps {
   onToggleItalic?: () => void;
   onChangeShape?: (shape: NodeShape) => void;
   onUndo: () => void;
-
   onRedo: () => void;
+  onOpenHistoryTimeline?: () => void;
+  historyCount?: number;
   onToggleOutline: () => void;
   onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
   onToggleFilterBar: () => void;
@@ -81,6 +83,8 @@ export const ToolBar: React.FC<ToolBarProps> = ({
   onChangeShape,
   onUndo,
   onRedo,
+  onOpenHistoryTimeline,
+  historyCount,
   onToggleOutline,
   onStartPresentation,
   onToggleFilterBar,
@@ -145,6 +149,20 @@ export const ToolBar: React.FC<ToolBarProps> = ({
           >
             <Redo2 className="w-4 h-4" />
           </button>
+          {onOpenHistoryTimeline && (
+            <button
+              title="Línea de Tiempo del Historial (Ctrl+Shift+H)"
+              onClick={onOpenHistoryTimeline}
+              className="p-1.5 rounded-lg text-[var(--sp-text)] hover:bg-[var(--sp-hover)] transition-colors min-w-[30px] min-h-[30px] flex items-center justify-center relative ml-0.5"
+            >
+              <History className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+              {typeof historyCount === 'number' && historyCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 px-1 min-w-[14px] h-3.5 bg-indigo-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">
+                  {historyCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         <div className="w-px h-5 bg-slate-200 mx-0.5 sm:mx-1 shrink-0" />

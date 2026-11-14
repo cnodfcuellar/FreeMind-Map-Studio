@@ -50,6 +50,7 @@ interface MindMapStore {
   pushHistory: (map: MindMap) => void;
   handleUndo: () => void;
   handleRedo: () => void;
+  handleJumpToHistory: (targetIndex: number) => void;
 
   // CRUD y Mutaciones de nodos
   updateNode: (nodeId: string, updates: Partial<MindNode>) => void;
@@ -213,6 +214,32 @@ export const useMindMapStore = create<MindMapStore>((set, get) => {
         mindMap: next,
       }));
       saveCurrentMap(next);
+    },
+
+    handleJumpToHistory: (targetIndex: number) => {
+      const { historyPast, historyFuture, mindMap, selectedNodeId } = get();
+      const allMaps = [...historyPast, mindMap, ...historyFuture];
+      if (targetIndex < 0 || targetIndex >= allMaps.length) return;
+      const currentIdx = historyPast.length;
+      if (targetIndex === currentIdx) return;
+
+      const targetMap = allMaps[targetIndex];
+      const newPast = allMaps.slice(0, targetIndex);
+      const newFuture = allMaps.slice(targetIndex + 1);
+
+      let newSelectedId = selectedNodeId;
+      if (!newSelectedId || !targetMap.nodes[newSelectedId]) {
+        newSelectedId = targetMap.rootId;
+      }
+
+      set({
+        mindMap: targetMap,
+        historyPast: newPast,
+        historyFuture: newFuture,
+        selectedNodeId: newSelectedId,
+        editingNodeId: null,
+      });
+      saveCurrentMap(targetMap);
     },
 
     updateNode: (nodeId, updates) => {

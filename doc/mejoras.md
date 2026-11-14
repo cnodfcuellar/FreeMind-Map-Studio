@@ -166,19 +166,38 @@ Arquitectura modular donde cada objeto posee su propio subpanel e interruptor de
 
 ---
 
+### 1.6. ⏳ Historial Visual de Versiones (Undo / Redo Timeline) (Completado)
+* **Ubicación:** Botón dedicado con contador dinámico en `ToolBar`, menú *"Editar"* > *"Historial de Cambios..."* (`Ctrl+Shift+H`), comando en `CommandPaletteModal.tsx` (`Ctrl+K`) y modal dedicado `HistoryTimelineModal.tsx`.
+* **Capacidades Principales:**
+  - **Línea de Tiempo Cronológica Completa (40+ pasos):** Muestra todos los estados disponibles en una sola vista vertical conectada: snapshots pasados (`historyPast`), versión activa actual (`📍 Versión Actual`) y pasos futuros rehechos (`historyFuture`).
+  - **Motor de Diferencias Semánticas Inteligente (`src/utils/historyDiff.ts`):** Compara automáticamente dos estados consecutivos del mapa y explica detalladamente la acción efectuada:
+    - Nodos agregados o eliminados (con mención del título y nodo padre).
+    - Edición de texto y notas/cuerpos (`"Antes" → "Ahora"`).
+    - Reparenting y reubicación de ramas.
+    - Plegado y desplegado de ramas.
+    - Cambios de estilo, color, formas geométricas o anatomía de colitas de bocadillos.
+    - Cambios en nubes envolventes y sombras.
+    - Conectores libres y relaciones añadidas o removidas.
+    - Cambios en el tema cromático (`themeId`) o distribución del mapa (`layout`).
+  - **Restauración No Destructiva e Instantánea:** Salto a cualquier versión (`handleJumpToHistory`). Al regresar a una versión pasada, no se descarta el trabajo posterior, sino que se desplaza a la pila de rehacer.
+  - **Guardar Copia como Nuevo Mapa:** Permite duplicar o bifurcar cualquier snapshot del historial como un mapa mental independiente en la biblioteca local sin alterar el mapa activo.
+  - **Panel de Inspección y Previsualización Esquemática:** Despliega métricas precisas (nodos, conectores, nubes, tema, distribución y fecha/hora con timestamps relativos como *"Hace 2 min"*), tarjeta con la explicación del cambio y un mini-árbol esquemático con las ramas principales y sus colores de acento.
+  - **Búsqueda y Filtros de Timeline:** Buscador en vivo para localizar cambios por texto de nodo o acción, y botones segmentados `[ Todos ]`, `[ Pasados ]` y `[ Futuros ]`.
+  - **Navegación 100% por Teclado:** Flechas `↑` y `↓` para recorrer versiones, `Enter` para restaurar y `Esc` para salir.
+
+---
+
 ## 💡 2. Otras Mejoras Planificadas para el Editor
 
-1. **Historial Visual de Versiones**:
-   - Visualización gráfica de los 40 pasos del historial de `undo/redo` con miniaturas de restauración previa.
-2. **Filtros Avanzados por Metadatos**:
-   - Filtrar el mapa por fecha de modificación, porcentaje de avance (`progress`) o combinación booleana de `#tags`.
+1. **Filtros Avanzados por Metadatos**:
+   - Filtrar el mapa por fecha de modificación, porcentaje de avance (`progress` 0-100%) o combinación booleana de `#tags`.
 
 ---
 
 ## 📊 3. Estado de Calidad Actual
 
 * **TypeScript (`pnpm lint`):** 0 errores (`tsc --noEmit`).
-* **Cobertura de Pruebas (`pnpm test:regression`):** 37 archivos pasados, **201/201 tests exitosos (100%)**.
-* **Compilación de Producción (`pnpm build`):** Exitosa con Vite.
+* **Cobertura de Pruebas (`pnpm test:regression`):** 39 archivos pasados, **219/219 tests exitosos (100%)**.
+* **Compilación de Producción (`pnpm build`):** Exitosa con Vite (12.42s).
 * **Servidor Dev:** Operativo en `http://localhost:3000/`.
 

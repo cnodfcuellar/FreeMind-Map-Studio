@@ -44,6 +44,7 @@ import { ConnectorModal } from './components/Modals/ConnectorModal';
 import { IconPackModal } from './components/Modals/IconPackModal';
 import { CommandPaletteModal } from './components/Modals/CommandPaletteModal';
 import { PdfExportModal } from './components/Modals/PdfExportModal';
+import { HistoryTimelineModal } from './components/Modals/HistoryTimelineModal';
 import { ElaboratePresentationSystem } from './components/Presentation/ElaboratePresentationSystem';
 
 export default function App() {
@@ -72,6 +73,7 @@ export default function App() {
     pushHistory,
     handleUndo,
     handleRedo,
+    handleJumpToHistory,
     updateNode,
     handleAddChild,
     handleAddSibling,
@@ -100,6 +102,7 @@ export default function App() {
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
   const [editingConnector, setEditingConnector] = useState<Connector | null>(null);
   const [presentationType, setPresentationType] = useState<'classic' | 'dynamic' | 'elaborate'>('dynamic');
@@ -114,6 +117,7 @@ export default function App() {
   const isAnyModalOpen = Boolean(
     isExportModalOpen ||
       isPdfModalOpen ||
+      isHistoryModalOpen ||
       isShortcutsModalOpen ||
       isTemplatesModalOpen ||
       isSavedMapsModalOpen ||
@@ -126,6 +130,7 @@ export default function App() {
   const handleCloseModals = () => {
     setIsExportModalOpen(false);
     setIsPdfModalOpen(false);
+    setIsHistoryModalOpen(false);
     setIsShortcutsModalOpen(false);
     setIsTemplatesModalOpen(false);
     setIsSavedMapsModalOpen(false);
@@ -140,6 +145,7 @@ export default function App() {
     isAnyModalOpen,
     onCloseModals: handleCloseModals,
     onToggleCommandPalette: () => setIsCommandPaletteOpen((prev) => !prev),
+    onOpenHistoryTimeline: () => setIsHistoryModalOpen(true),
   });
 
   // Tema activo y Filtro
@@ -235,6 +241,7 @@ export default function App() {
           onOpenImportModal={() => setIsExportModalOpen(true)}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          onOpenHistoryTimeline={() => setIsHistoryModalOpen(true)}
           onAddChild={() => handleAddChild()}
           onAddSibling={() => handleAddSibling()}
           onDeleteNode={() => handleDeleteNode()}
@@ -307,6 +314,8 @@ export default function App() {
           isFilterBarOpen={isFilterBarOpen}
           onUndo={handleUndo}
           onRedo={handleRedo}
+          onOpenHistoryTimeline={() => setIsHistoryModalOpen(true)}
+          historyCount={historyPast.length + historyFuture.length}
           onAddChild={() => handleAddChild()}
           onAddSibling={() => handleAddSibling()}
           onDeleteNode={() => handleDeleteNode()}
@@ -809,6 +818,7 @@ export default function App() {
             }}
             onUndo={handleUndo}
             onRedo={handleRedo}
+            onOpenHistoryTimeline={() => setIsHistoryModalOpen(true)}
             canUndo={historyPast.length > 0}
             canRedo={historyFuture.length > 0}
             onOpenTemplates={() => setIsTemplatesModalOpen(true)}
@@ -906,6 +916,15 @@ export default function App() {
             mindMap={mindMap}
             isOpen={isPdfModalOpen}
             onClose={() => setIsPdfModalOpen(false)}
+          />
+
+          <HistoryTimelineModal
+            isOpen={isHistoryModalOpen}
+            onClose={() => setIsHistoryModalOpen(false)}
+            historyPast={historyPast}
+            historyFuture={historyFuture}
+            currentMindMap={mindMap}
+            onJumpToHistory={handleJumpToHistory}
           />
         </>
       }
