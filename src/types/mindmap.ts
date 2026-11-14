@@ -91,6 +91,8 @@ export interface MindNode {
   children: string[];
   folded?: boolean;
   side?: NodeSide;
+  createdAt?: number;
+  updatedAt?: number;
   
   // Visual Styles
   shape?: NodeShape;
@@ -389,15 +391,29 @@ export interface CalculatedNodeLayout {
   };
 }
 
+export type ProgressFilterMode = 'all' | 'unstarted' | 'in_progress' | 'completed' | 'custom';
+export type TagsMatchMode = 'AND' | 'OR';
+export type DateFilterMode = 'all' | 'today' | 'week' | 'month';
+
 export interface FilterOptions {
   query: string;
   tag?: string;
+  tags?: string[];
+  tagsMatchMode?: TagsMatchMode;
   icon?: string;
+  progressMode?: ProgressFilterMode;
+  minProgress?: number;
+  maxProgress?: number;
   hasNote?: boolean;
   hasLink?: boolean;
-  minProgress?: number;
+  hasImage?: boolean;
+  hasCloud?: boolean;
+  hasIcon?: boolean;
+  dateFilter?: DateFilterMode;
   showAncestors: boolean;
   showDescendants: boolean;
+  includeAncestors?: boolean;
+  includeDescendants?: boolean;
 }
 
 export interface HistoryState {

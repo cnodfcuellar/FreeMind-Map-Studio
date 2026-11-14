@@ -2132,6 +2132,37 @@ Permite a los usuarios:
 - [x] `pnpm test:regression`: **39 suites de pruebas superadas, 219/219 pruebas unitarias exitosas (100%)**.
 - [x] `pnpm build`: Compilación de producción exitosa con Vite en 12.42s.
 
+---
+
+## 🔍 [Filtros / Metadatos] — 2026-11-13: Filtros Avanzados por Metadatos y Spotlight en el Lienzo
+
+### 🎯 Motivo
+Implementación de la funcionalidad de la Hoja de Ruta ([doc/mejoras.md](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/doc/mejoras.md)): **Filtros Avanzados por Metadatos**.
+Permite a los usuarios realizar consultas complejas, focalizadas y multinivel sobre el mapa mental con atenuación dinámica (Spotlight):
+1. **Búsqueda Textual Integral:** Ahora busca en título, notas enriquecidas (`note`), cuerpo/subtexto (`body`) y `#etiquetas`.
+2. **Multi-Etiquetas con Lógica Booleana:** Filtrado por múltiples tags con modos `AND` (debe contener todas) y `OR` (al menos una).
+3. **Filtros de Progreso Multinivel:** Presets directos (`Sin Iniciar 0%`, `En Curso 1-99%`, `Completado 100%`) y umbrales mínimos (`≥ 25%`, `≥ 50%`, `≥ 75%`).
+4. **Filtros por Presencia de Metadatos y Contenido:** Botones pills interactivos para filtrar nodos con notas, hipervínculos externos (`link`), imágenes adjuntas (`imageUrl`), nubes conceptuales envolventes (`cloud`) e iconos vectoriales (`icons`).
+5. **Filtro Temporal por Fecha:** Filtrado de nodos creados o modificados en las últimas 24 horas (`today`), última semana (`week`) o último mes (`month`).
+6. **Preservación de Contexto Jerárquico (`includeAncestors` & `includeDescendants`):** Opción "Árbol Contextual" para mantener visible la ruta de padres hasta la raíz y/o sub-ramas hijas.
+7. **Efecto Visual Spotlight en el Lienzo (`MindMapCanvas.tsx`):** Los nodos que no coinciden con el filtro y sus aristas se atenúan suavemente al 20% de opacidad (`opacity: 0.22`), mientras que los nodos que coinciden se destacan con resplandor dorado y nitidez máxima.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/types/mindmap.ts` | Añadidos `createdAt` y `updatedAt` opcionales en `MindNode`; ampliadas `FilterOptions` con `tags`, `tagsMatchMode`, `progressMode`, `maxProgress`, `hasImage`, `hasCloud`, `hasIcon`, `dateFilter`, `includeAncestors` e `includeDescendants`. |
+| `src/hooks/useSearchFilter.ts` | Reescrito el motor de filtrado con función auxiliar `isFilterActive`, evaluación booleana de multi-tags, rangos de progreso, presencia de metadatos, cálculo de fechas y expansión jerárquica con ancestros/descendientes. |
+| `src/hooks/__tests__/useSearchFilter.test.ts` | 4 nuevas pruebas unitarias para multi-tags AND/OR, modos de progreso, presencia de contenido e inclusión de ancestros (10/10 pasando). |
+| `src/components/FilterBar.tsx` | Rediseñada la barra de filtros con selector de progreso multinivel, botón desplegable "+ Metadatos", botones pills de contenido (Notas, Links, Imágenes, Nubes, Iconos), selector de fechas y botón de "Árbol Contextual". |
+| `src/components/__tests__/FilterBar.test.tsx` | Nueva suite de 8 pruebas unitarias con cobertura de renderizado, búsqueda, tags, progreso, panel de metadatos, contador y botón limpiar/cerrar. |
+| `src/components/MindMapCanvas.tsx` | Implementada atenuación visual dinámica (Spotlight) en nodos no coincidentes y sus aristas SVG conectadas (`opacity: 0.22`). |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado.
+- [x] `pnpm test:regression`: **40 suites de pruebas superadas, 231/231 pruebas unitarias exitosas (100%)**.
+- [x] `pnpm build`: Compilación de producción exitosa con Vite en 10.13s.
+
+
 
 
 

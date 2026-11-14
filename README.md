@@ -197,12 +197,16 @@ Evolución de la forma `bubble` a un sistema anatómico vectorial totalmente con
 - Rellenos sólidos, degradados, tramas y colores translúcidos con opacidad configurable.
 - Sombra envolvente de alta definición con slider de opacidad dedicado.
 
-## 🔍 Búsqueda y Filtrado Acumulativo
+## 🔍 Búsqueda y Filtrado Avanzado con Spotlight
 
 Filtros reactivos en tiempo real (`Ctrl+F`):
-- Búsqueda por texto libre (**título y notas**).
-- Filtrado por etiquetas (tags) exactas.
-- Progreso: solo 100% completados, ≥50% o "con progreso activo".
+- Búsqueda textual integral (**título, cuerpo/subtexto, notas Markdown y #etiquetas**).
+- Filtrado por etiquetas exactas o multi-tag con lógica booleana (`AND` / `OR`).
+- Progreso multinivel: `Sin Iniciar (0%)`, `En Curso (1-99%)`, `Completado (100%)` o umbrales (`≥ 25%`, `≥ 50%`, `≥ 75%`).
+- Filtros de contenido: nodos con notas (`📝`), enlaces (`🔗`), imágenes (`🖼️`), nubes (`☁️`) o iconos (`⭐`).
+- Filtros por fecha: creados o editados hoy, en los últimos 7 días o en el último mes.
+- Modo **Árbol Contextual**: mantiene visible la ruta de ramas padre hasta la raíz.
+- **Efecto Spotlight en el lienzo**: atenuación automática al 20% de opacidad para nodos y aristas no coincidentes.
 
 ## 📤 Exportar e Importar
 

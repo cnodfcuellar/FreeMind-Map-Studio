@@ -1437,6 +1437,13 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                 }
               }
 
+              const isEdgeDimmed = searchMatches !== undefined && (!searchMatches.has(childNode.id) || !searchMatches.has(childNode.parentId || ''));
+              const combinedEdgeStyle: React.CSSProperties = {
+                ...edgeShadowStyle,
+                opacity: isEdgeDimmed ? 0.2 : undefined,
+                transition: 'opacity 300ms ease-in-out',
+              };
+
               return (
                 <path
                   key={`edge-${childNode.parentId}-${childNode.id}`}
@@ -1446,7 +1453,7 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   strokeDasharray={strokeDasharray}
                   fill="none"
                   strokeLinecap="round"
-                  style={edgeShadowStyle}
+                  style={combinedEdgeStyle}
                 />
               );
             })}
@@ -1467,18 +1474,21 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
             const isSelected = selectedNodeId === node.id;
             const isEditing = editingNodeId === node.id;
             const isMatch = searchMatches ? searchMatches.has(node.id) : false;
+            const isDimmedByFilter = searchMatches !== undefined && !isMatch;
             const branchColor = getBranchColor(layout);
 
             const isHighlighted = !isPresentationMode || isOverviewActive || activeHighlightedNodeIds.has(node.id);
             const hasSlideFrame = isPresentationMode && presMode === 'editor' && slides.some((s) => s.nodeId === node.id);
             const isStaged = hasSlideFrame || stagedNodeIds.has(node.id);
 
+            const nodeOpacity = !isHighlighted ? 0.18 : (isDimmedByFilter ? 0.22 : 1);
+
             return (
               <div
                 key={node.id}
                 style={{
-                  opacity: isHighlighted ? 1 : 0.18,
-                  transition: 'opacity 400ms ease-in-out',
+                  opacity: nodeOpacity,
+                  transition: 'opacity 300ms ease-in-out',
                 }}
               >
                 <NodeComponent

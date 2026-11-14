@@ -187,17 +187,32 @@ Arquitectura modular donde cada objeto posee su propio subpanel e interruptor de
 
 ---
 
-## 💡 2. Otras Mejoras Planificadas para el Editor
-
-1. **Filtros Avanzados por Metadatos**:
-   - Filtrar el mapa por fecha de modificación, porcentaje de avance (`progress` 0-100%) o combinación booleana de `#tags`.
+### 1.7. 🔍 Filtros Avanzados por Metadatos y Spotlight en el Lienzo (Completado)
+* **Ubicación:** Barra superior de búsqueda y filtrado (`FilterBar.tsx`), accesible mediante `Ctrl + F`, botón interactivo en `ToolBar` y comando en `CommandPaletteModal.tsx`.
+* **Capacidades Principales:**
+  - **Búsqueda Textual Exhaustiva:** Búsqueda en vivo sobre títulos de nodo, notas enriquecidas (`note`), cuerpo/subtexto descriptivo (`body`) y `#etiquetas`.
+  - **Multi-Tags con Lógica Booleana:** Selector de etiquetas con soporte para combinaciones lógicas `AND` (debe contener todas las etiquetas especificadas) y `OR` (al menos una de ellas).
+  - **Filtros de Progreso Multinivel:**
+    - Presets semánticos: `Sin Iniciar (0%)`, `En Curso (1% - 99%)` y `Completado (100%)`.
+    - Umbrales porcentuales mínimos: `Progreso ≥ 25%`, `Progreso ≥ 50%` y `Progreso ≥ 75%`.
+  - **Filtros por Presencia de Metadatos y Contenido:** Panel desplegable `[+ Metadatos]` con botones interactivos:
+    - 📝 **Con Notas:** Nodos con texto explicativo o notas extensas en Markdown.
+    - 🔗 **Con Enlaces:** Nodos con URLs o hipervínculos externos.
+    - 🖼️ **Con Imágenes:** Nodos con imágenes o ilustraciones adjuntas.
+    - ☁️ **En Nube:** Nodos agrupados dentro de una nube conceptual envolvente.
+    - ⭐ **Con Iconos:** Nodos con insignias o iconos vectoriales asignados.
+  - **Filtros Temporales por Fecha:** Filtrado de nodos creados o editados hoy (`today`), en los últimos 7 días (`week`) o en el último mes (`month`).
+  - **Árbol Contextual Jerárquico (`includeAncestors`):** Conmutador para mantener visibles todos los nodos padre hasta la raíz, permitiendo situar exactamente en qué rama se encuentra cada coincidencia sin ver nodos flotantes aislados.
+  - **Efecto Visual Spotlight en el Lienzo (`MindMapCanvas.tsx`):**
+    - Los nodos que coinciden directamente se iluminan y destacan con un anillo resplandeciente ámbar.
+    - Los nodos no coincidentes y sus líneas conectoras se atenúan suavemente al 20% de opacidad (`opacity: 0.22`), creando un efecto de enfoque profesional.
 
 ---
 
-## 📊 3. Estado de Calidad Actual
+## 📊 2. Estado de Calidad Actual
 
 * **TypeScript (`pnpm lint`):** 0 errores (`tsc --noEmit`).
-* **Cobertura de Pruebas (`pnpm test:regression`):** 39 archivos pasados, **219/219 tests exitosos (100%)**.
-* **Compilación de Producción (`pnpm build`):** Exitosa con Vite (12.42s).
+* **Cobertura de Pruebas (`pnpm test:regression`):** 40 archivos pasados, **231/231 tests exitosos (100%)**.
+* **Compilación de Producción (`pnpm build`):** Exitosa con Vite (10.13s).
 * **Servidor Dev:** Operativo en `http://localhost:3000/`.
 

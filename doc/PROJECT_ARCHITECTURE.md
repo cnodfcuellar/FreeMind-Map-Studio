@@ -347,11 +347,12 @@ Puro, sin DOM: `estimateNodeSize(node)` + `computeMindMapLayout(map, center)` en
 
 ## 7. Infraestructura de Pruebas y Calidad de Código
 
-Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **219 tests / 39 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
+Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **231 tests / 40 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
 
 - `atoms/__tests__/Atoms.test.tsx` — Badge, Button (+loading), IconButton, Input onChange, ModalBackdrop cierre exterior.
 - `atoms/__tests__/Switch.test.tsx` — Switch conmutador accesible iOS-style con labels y aria-checked.
 - `templates/__tests__/MainEditorLayout.test.tsx` — slots y visibilidad condicional de paneles.
+- `components/__tests__/FilterBar.test.tsx` — Barra de filtros avanzados con búsqueda, tags, progreso multinivel, panel de metadatos, árbol contextual y atajos.
 - `Modals/__tests__/CommandPaletteModal.test.tsx` — Paleta spotlight con filtrado en tiempo real, búsqueda de nodos del mapa, categorías y navegación con flechas/Enter.
 - `Modals/__tests__/HistoryTimelineModal.test.tsx` — Línea de tiempo interactiva de historial con diferencias semánticas, filtrado de estados, restauración no destructiva y duplicación como mapa independiente.
 - `Modals/__tests__/PdfExportModal.test.tsx` — Exportador a PDF vectorial (póster y mosaico 2×2, 3×2, 3×3) con simulación de hoja y disparo de impresión.
@@ -367,6 +368,7 @@ Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con
 - `utils/__tests__/freeplaneConverter.test.ts` — parseo `.mm` y round-trip sin pérdida.
 - `hooks/__tests__/useMindMapStore.test.ts` — 17 pruebas de CRUD, inmutabilidad, salto no destructivo en el timeline y 40 pasos de historial.
 - `hooks/__tests__/useKeyboardShortcuts.test.ts` — 8 pruebas de atajos de teclado, navegación, apertura de paleta rápida (`Ctrl+K`) y timeline (`Ctrl+Shift+H`).
+- `hooks/__tests__/useSearchFilter.test.ts` — 10 pruebas de filtrado multi-tag AND/OR, modos de progreso, presencia de contenido y árbol contextual.
 
 Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (ejecución robusta con `--pool=forks`) · `pnpm build` (Vite prod en ~7s).
 
@@ -393,7 +395,7 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (eje
 | `molecules/*` (7) | Molécula | ModalHeader, SearchInput, HistoryControls, ZoomControls, FontFormatToolbar, ShapeSelector, TagManager |
 | `hooks/useMindMapStore.ts` | Store | CRUD, historial 40, salto no destructivo a cualquier estado, clipboard con IDs nuevos, propagación estilos/iconos/sombras |
 | `hooks/useKeyboardShortcuts.ts` | Hook | Atajos globales (inactivos escribiendo/modal/presentación) |
-| `hooks/useSearchFilter.ts` | Hook | Filtro acumulativo → `Set<string> \| undefined` |
+| `hooks/useSearchFilter.ts` | Hook | Filtro avanzado acumulativo (texto/nota/cuerpo, multi-tags AND/OR, progreso, presencia de metadatos, fecha, árbol contextual) → `Set<string> \| undefined` |
 | `utils/layoutEngine.ts` | Motor | 9 layouts, colisiones, aristas Bézier, nubes |
 | `utils/historyDiff.ts` | Motor | Analizador semántico de diferencias del mapa y ensamblador de timeline |
 | `utils/pdfExporter.ts` | Motor | Compilador SVG/HTML vectorial con directivas @page y cálculo de cuadrículas de corte |
