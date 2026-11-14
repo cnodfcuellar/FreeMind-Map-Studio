@@ -8,6 +8,7 @@ import {
   NodeSvgPolygonBackground,
   NodeBubbleTail,
 } from './molecules/node/NodeBackgroundRenderer';
+import { NodeForkHooks } from './molecules/node/NodeForkHooks';
 import { NodeHeaderRow } from './molecules/node/NodeHeaderRow';
 import { NodeBadgesBar } from './molecules/node/NodeBadgesBar';
 import { NodeActionButtons } from './molecules/node/NodeActionButtons';
@@ -170,6 +171,15 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
 
       {/* 2. Visible Speech Bubble Pointy Tail */}
       <NodeBubbleTail
+        node={node}
+        layout={layout}
+        theme={theme}
+        branchColor={branchColor}
+        isRoot={isRoot}
+      />
+
+      {/* 2b. Visible Fork Shape Hooks (Ganchos anatómicos de horquilla) */}
+      <NodeForkHooks
         node={node}
         layout={layout}
         theme={theme}

@@ -13,6 +13,10 @@ export type NodeShape =
 export type BubbleTailSide = 'auto' | 'bottom' | 'top' | 'left' | 'right';
 export type BubbleTailStyle = 'straight' | 'curved' | 'thought';
 
+export type ForkHooksSide = 'both' | 'parent' | 'children' | 'none';
+export type ForkCornerStyle = 'sharp' | 'rounded' | 'bevel';
+export type ForkPreset = 'classic' | 'organic' | 'flat';
+
 export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden';
 
 export type EdgeProfile = 'uniform' | 'tapered' | 'spindle' | 'hourglass';
@@ -105,6 +109,12 @@ export interface MindNode {
   tailSide?: BubbleTailSide;
   tailOffset?: number;
   tailStyle?: BubbleTailStyle;
+
+  // Fork Shape Customization (Cualidades anatómicas de la horquilla)
+  forkHooks?: ForkHooksSide;
+  forkHookHeight?: number;
+  forkCornerStyle?: ForkCornerStyle;
+  forkPreset?: ForkPreset;
   color?: string; // background fill or accent
   bgType?: NodeBackgroundType;
   gradientColor1?: string;

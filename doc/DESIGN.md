@@ -25,7 +25,7 @@ Stack: Tailwind CSS v4 (`@import "tailwindcss"`, sin `tailwind.config`, sin toke
 - Controles pequeños (chips, tags, contadores): `rounded-md` / `rounded-full` (píldoras: progreso, contadores, badges de conteo).
 - Botones/inputs: `rounded-lg` (`sm/md`), `rounded-xl` (`md/lg`, cards de opción, inputs con icono).
 - Contenedores (modales, paneles, minimapa, tooltips): `rounded-2xl`.
-- Nodos: `bubble` 24px raíz / 16px; `pill`/`circle` 9999px; `oval` 50%; `square/rectangle` 0px; `fork` sin fondo ni radio (solo `border-bottom 2.5px`, siempre visible).
+- Nodos: `bubble` 24px raíz / 16px (con anatomía de colita de bocadillo opcional); `pill`/`circle` 9999px; `oval` 50%; `square/rectangle` 0px; `fork` subrayado vectorial con cualidades anatómicas personalizables (ganchos `both`, `parent`, `children`, `none`, altura en px y codos `sharp` 90°, `rounded` o `bevel` 45°).
 - Hexágono: contenido ceñido al polígono (texto al 68% centrado, imágenes topadas a 96px fijos, tags/enlace/nota acotados; la caja se deriva del contenido acotado y crece con él, +1 fila si hay tags).
 
 ### Sombras

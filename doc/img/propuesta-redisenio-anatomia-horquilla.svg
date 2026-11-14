@@ -1,0 +1,493 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960" width="1440" height="960" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Filtros de Sombra -->
+    <filter id="shadow-panel" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+    <filter id="shadow-card" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="bg-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo Principal -->
+  <rect width="1440" height="960" fill="#090d16" />
+  <rect width="1440" height="960" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera Principal -->
+  <rect x="40" y="24" width="1360" height="66" rx="12" fill="url(#grad-header)" stroke="#1e293b" stroke-width="1.5" />
+  <circle cx="72" cy="57" r="17" fill="#f59e0b" />
+  <text x="72" y="63" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle">⑂</text>
+  <text x="104" y="51" font-size="17" font-weight="700" fill="#ffffff">Propuestas de Rediseño — Cualidades Anatómicas de Horquilla (Fork Shape)</text>
+  <text x="104" y="72" font-size="12" fill="#94a3b8">Análisis de la propuesta capturada vs. 3 alternativas compactas para eliminar redundancias y optimizar altura</text>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 1: DISEÑO DE LA CAPTURA (ANÁLISIS & DIAGNÓSTICO)                  -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 110)">
+    <!-- Marco del Panel (Estilo Sepia de la Captura) -->
+    <rect x="0" y="0" width="320" height="810" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#fefce8" stroke="#fef08a" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#d97706" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">!</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#854d0e">Diseño de la Captura (~320px)</text>
+    <rect x="220" y="10" width="85" height="22" rx="11" fill="#fef3c7" />
+    <text x="262" y="24.5" font-size="9" font-weight="700" fill="#b45309" text-anchor="middle">REFERENCIA</text>
+
+    <!-- Contenido fiel a la captura enviada por el usuario -->
+    <g transform="translate(14, 52)">
+      <!-- Tarjeta sepia idéntica a la imagen -->
+      <rect x="0" y="0" width="292" height="340" rx="12" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5" />
+      
+      <!-- Título de la tarjeta -->
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#92400e">Cualidades Anatómicas de Horquilla</text>
+
+      <!-- 1. Altura ganchos -->
+      <g transform="translate(12, 38)">
+        <text x="0" y="12" font-size="10.5" font-weight="600" fill="#78350f">Altura ganchos</text>
+        <!-- Slider simulado -->
+        <rect x="95" y="6" width="100" height="4" rx="2" fill="#d6d3d1" />
+        <rect x="95" y="6" width="75" height="4" rx="2" fill="#b45309" />
+        <circle cx="170" cy="8" r="6" fill="#b45309" stroke="#fffbeb" stroke-width="1.5" />
+        <!-- Badge valor -->
+        <rect x="204" y="-2" width="36" height="18" rx="4" fill="#fef3c7" />
+        <text x="222" y="10" font-size="9" font-weight="700" fill="#92400e" text-anchor="middle">24px</text>
+
+        <!-- 4 etiquetas de texto bajo el slider -->
+        <g transform="translate(0, 24)">
+          <text x="12" y="0" font-size="8.5" fill="#a8a29e" text-anchor="middle">Plano</text>
+          <text x="12" y="9" font-size="7.5" fill="#a8a29e" text-anchor="middle">(0px)</text>
+
+          <text x="75" y="0" font-size="8.5" fill="#a8a29e" text-anchor="middle">Sutil</text>
+          <text x="75" y="9" font-size="7.5" fill="#a8a29e" text-anchor="middle">(4px)</text>
+
+          <text x="142" y="0" font-size="8.5" fill="#a8a29e" text-anchor="middle">Estándar</text>
+          <text x="142" y="9" font-size="7.5" fill="#a8a29e" text-anchor="middle">(6px)</text>
+
+          <text x="210" y="0" font-size="8.5" fill="#a8a29e" text-anchor="middle">Alto</text>
+          <text x="210" y="9" font-size="7.5" fill="#a8a29e" text-anchor="middle">(14px)</text>
+        </g>
+      </g>
+
+      <!-- 2. Ganchos laterales -->
+      <g transform="translate(12, 92)">
+        <text x="0" y="12" font-size="10.5" font-weight="600" fill="#78350f">Ganchos laterales</text>
+        <g transform="translate(0, 18)">
+          <!-- Ambos (Activo) -->
+          <rect x="0" y="0" width="62" height="42" rx="8" fill="#fde68a" stroke="#d97706" stroke-width="1.5" />
+          <path d="M 23 12 L 23 20 L 39 20 L 39 12" fill="none" stroke="#92400e" stroke-width="2" />
+          <text x="31" y="34" font-size="9" font-weight="700" fill="#92400e" text-anchor="middle">Ambos</text>
+
+          <!-- Padre -->
+          <rect x="68" y="0" width="62" height="42" rx="8" fill="#fffbeb" stroke="#fde68a" />
+          <path d="M 23 12 L 23 20 L 39 20" fill="none" stroke="#78350f" stroke-width="1.8" transform="translate(68, 0)" />
+          <text x="99" y="34" font-size="9" fill="#78350f" text-anchor="middle">Padre</text>
+
+          <!-- Hijos -->
+          <rect x="136" y="0" width="62" height="42" rx="8" fill="#fffbeb" stroke="#fde68a" />
+          <path d="M 23 20 L 39 20 L 39 12" fill="none" stroke="#78350f" stroke-width="1.8" transform="translate(136, 0)" />
+          <text x="167" y="34" font-size="9" fill="#78350f" text-anchor="middle">Hijos</text>
+
+          <!-- Ninguno -->
+          <rect x="204" y="0" width="62" height="42" rx="8" fill="#fffbeb" stroke="#fde68a" />
+          <line x1="222" y1="20" x2="248" y2="20" stroke="#78350f" stroke-width="1.8" />
+          <text x="235" y="34" font-size="9" fill="#78350f" text-anchor="middle">Ninguno</text>
+        </g>
+      </g>
+
+      <!-- 3. Terminación de esquinas -->
+      <g transform="translate(12, 172)">
+        <text x="0" y="12" font-size="10.5" font-weight="600" fill="#78350f">Terminación de esquinas</text>
+        <g transform="translate(0, 18)">
+          <!-- Redondeada (Activo) -->
+          <rect x="0" y="0" width="128" height="40" rx="8" fill="#fde68a" stroke="#d97706" stroke-width="1.5" />
+          <path d="M 54 11 Q 54 18 61 18 L 74 18" fill="none" stroke="#92400e" stroke-width="2" />
+          <text x="64" y="32" font-size="9.5" font-weight="700" fill="#92400e" text-anchor="middle">Redondeada</text>
+
+          <!-- Plana / Recta -->
+          <rect x="136" y="0" width="128" height="40" rx="8" fill="#fffbeb" stroke="#fde68a" />
+          <path d="M 190 11 L 190 18 L 204 18" fill="none" stroke="#78350f" stroke-width="1.8" />
+          <text x="200" y="32" font-size="9.5" fill="#78350f" text-anchor="middle">Plana / Recta</text>
+        </g>
+      </g>
+
+      <!-- 4. Codos / Esquinas de ganchos -->
+      <g transform="translate(12, 248)">
+        <text x="0" y="12" font-size="10.5" font-weight="600" fill="#78350f">Codos / Esquinas de ganchos</text>
+        <g transform="translate(0, 18)">
+          <!-- Recta 90° -->
+          <rect x="0" y="0" width="84" height="42" rx="8" fill="#fffbeb" stroke="#fde68a" />
+          <path d="M 36 12 L 36 19 L 48 19" fill="none" stroke="#78350f" stroke-width="1.8" />
+          <text x="42" y="34" font-size="9" fill="#78350f" text-anchor="middle">Recta 90°</text>
+
+          <!-- Redonda -->
+          <rect x="91" y="0" width="84" height="42" rx="8" fill="#fffbeb" stroke="#fde68a" />
+          <path d="M 126 12 Q 126 19 133 19 L 140 19" fill="none" stroke="#78350f" stroke-width="1.8" />
+          <text x="133" y="34" font-size="9" fill="#78350f" text-anchor="middle">Redonda</text>
+
+          <!-- 45° Bisel (Activo) -->
+          <rect x="182" y="0" width="84" height="42" rx="8" fill="#fde68a" stroke="#d97706" stroke-width="1.5" />
+          <path d="M 218 12 L 218 16 L 222 19 L 230 19" fill="none" stroke="#92400e" stroke-width="2" />
+          <text x="224" y="34" font-size="9" font-weight="700" fill="#92400e" text-anchor="middle">45° Bisel</text>
+        </g>
+      </g>
+
+      <!-- Panel de Diagnóstico -->
+      <g transform="translate(0, 360)">
+        <rect x="0" y="0" width="292" height="380" rx="10" fill="#fef2f2" stroke="#fecaca" />
+        <text x="14" y="24" font-size="11" font-weight="700" fill="#991b1b">🔍 Diagnóstico de UX y Usabilidad:</text>
+        
+        <text x="14" y="52" font-size="10" font-weight="700" fill="#15803d">✅ Aspectos Positivos:</text>
+        <text x="14" y="70" font-size="9.5" fill="#334155">• Muy completo: cubre ganchos, altura y codos.</text>
+        <text x="14" y="88" font-size="9.5" fill="#334155">• Iconos claros que ilustran cada variante.</text>
+
+        <text x="14" y="118" font-size="10" font-weight="700" fill="#b91c1c">⚠️ Problemas Detectados:</text>
+        
+        <text x="14" y="138" font-size="9.5" font-weight="600" fill="#991b1b">1. Redundancia entre 3 y 4:</text>
+        <text x="22" y="154" font-size="9" fill="#7f1d1d">"Terminación de esquinas" (Redondeada / Plana)</text>
+        <text x="22" y="168" font-size="9" fill="#7f1d1d">se solapa con "Codos" (Recta 90° vs Redonda).</text>
+        <text x="22" y="182" font-size="9" fill="#7f1d1d">Confunde al usuario tener dos selectores similares.</text>
+
+        <text x="14" y="206" font-size="9.5" font-weight="600" fill="#991b1b">2. Altura vertical excesiva (~340px):</text>
+        <text x="22" y="222" font-size="9" fill="#7f1d1d">Ocupa casi medio panel solo para la horquilla,</text>
+        <text x="22" y="236" font-size="9" fill="#7f1d1d">obligando a hacer scroll constante en el ToolPanel.</text>
+
+        <text x="14" y="260" font-size="9.5" font-weight="600" fill="#991b1b">3. Slider desconectado de presets:</text>
+        <text x="22" y="276" font-size="9" fill="#7f1d1d">Pone textos estáticos "0px, 4px, 6px, 14px", pero</text>
+        <text x="22" y="290" font-size="9" fill="#7f1d1d">no son botones cliqueables directos.</text>
+
+        <text x="14" y="316" font-size="9.5" font-weight="700" fill="#1e40af">💡 Solución:</text>
+        <text x="22" y="332" font-size="9" fill="#1e3a8a">Unificar codos en 1 solo selector, crear presets</text>
+        <text x="22" y="346" font-size="9" fill="#1e3a8a">de 1 clic (como el bocadillo) y usar fila compacta.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 2: ALTERNATIVA A — PRESETS 1-CLIC + COMPACTO (RECOMENDADA)        -->
+  <!-- ========================================================================= -->
+  <g transform="translate(380, 110)">
+    <!-- Marco de la Alternativa A -->
+    <rect x="0" y="0" width="320" height="810" rx="14" fill="#ffffff" stroke="#22c55e" stroke-width="2" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="12 12 0 0" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#22c55e" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#14532d">Alternativa A (Presets 1 Clic)</text>
+    <rect x="210" y="10" width="98" height="22" rx="11" fill="#22c55e" />
+    <text x="259" y="24.5" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">RECOMENDADA</text>
+
+    <!-- Contenido Alternativa A -->
+    <g transform="translate(14, 52)">
+      <!-- Cabecera de bloque -->
+      <div className="flex items-center justify-between">
+        <text x="0" y="14" font-size="11" font-weight="700" fill="#1e293b">Anatomía de Horquilla (Fork)</text>
+        <rect x="236" y="0" width="56" height="18" rx="9" fill="#dcfce7" />
+        <text x="264" y="12" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">1 Clic</text>
+      </div>
+
+      <!-- 3 PRESETS VISUALES DE 1 CLIC (FILA 1) -->
+      <g transform="translate(0, 26)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">ESTILOS PREDETERMINADOS:</text>
+        
+        <g transform="translate(0, 16)">
+          <!-- Preset 1: Clásica Freeplane -->
+          <rect x="0" y="0" width="92" height="52" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8" />
+          <path d="M 34 16 L 34 26 L 58 26 L 58 16" fill="none" stroke="#2563eb" stroke-width="2" />
+          <text x="46" y="38" font-size="10" font-weight="700" fill="#1e40af" text-anchor="middle">⊔ Clásica</text>
+          <text x="46" y="47" font-size="7.5" fill="#60a5fa" text-anchor="middle">Recta 90°</text>
+
+          <!-- Preset 2: Orgánica / Curva Moderna -->
+          <rect x="100" y="0" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <path d="M 134 16 Q 134 26 142 26 L 150 26 Q 158 26 158 16" fill="none" stroke="#64748b" stroke-width="2" />
+          <text x="146" y="38" font-size="10" font-weight="600" fill="#334155" text-anchor="middle">╰ Orgánica</text>
+          <text x="146" y="47" font-size="7.5" fill="#94a3b8" text-anchor="middle">Curva suave</text>
+
+          <!-- Preset 3: Subrayado Minimalista -->
+          <rect x="200" y="0" width="92" height="52" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <line x1="226" y1="23" x2="266" y2="23" stroke="#64748b" stroke-width="2" />
+          <text x="246" y="38" font-size="10" font-weight="600" fill="#334155" text-anchor="middle">─ Plana</text>
+          <text x="246" y="47" font-size="7.5" fill="#94a3b8" text-anchor="middle">Sin ganchos</text>
+        </g>
+      </g>
+
+      <!-- CONTROL DE GANCHOS LATERALES (FILA 2: SEGMENTED PILL) -->
+      <g transform="translate(0, 106)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">DISTRIBUCIÓN DE GANCHOS:</text>
+        
+        <g transform="translate(0, 16)">
+          <rect x="0" y="0" width="292" height="28" rx="7" fill="#f1f5f9" stroke="#e2e8f0" />
+          
+          <!-- Ambos (Activo) -->
+          <rect x="2" y="2" width="70" height="24" rx="5" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="37" y="18" font-size="9.5" font-weight="700" fill="#2563eb" text-anchor="middle">⊔ Ambos</text>
+
+          <!-- Padre -->
+          <text x="110" y="18" font-size="9.5" font-weight="500" fill="#64748b" text-anchor="middle">└ Padre</text>
+
+          <!-- Hijos -->
+          <text x="182" y="18" font-size="9.5" font-weight="500" fill="#64748b" text-anchor="middle">┘ Hijos</text>
+
+          <!-- Ninguno -->
+          <text x="254" y="18" font-size="9.5" font-weight="500" fill="#64748b" text-anchor="middle">─ Ninguno</text>
+        </g>
+      </g>
+
+      <!-- AJUSTES AVANZADOS PLEGABLES (FILA 3: ACORDEÓN CERRADO POR DEFECTO) -->
+      <g transform="translate(0, 162)">
+        <rect x="0" y="0" width="292" height="28" rx="6" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="10" y="18" font-size="9.5" font-weight="600" fill="#475569">⚙️ Ajustes milimétricos avanzados</text>
+        <text x="274" y="18" font-size="9" fill="#94a3b8">▾</text>
+      </g>
+
+      <!-- SIMULACIÓN DE AJUSTES DESPLEGADOS -->
+      <g transform="translate(0, 198)">
+        <rect x="0" y="0" width="292" height="108" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-dasharray="3,3" />
+        <text x="10" y="18" font-size="9" font-weight="700" fill="#3b82f6">(Vista al abrir "Ajustes milimétricos"):</text>
+        
+        <!-- Altura con stepper y slider compacto -->
+        <g transform="translate(10, 28)">
+          <text x="0" y="12" font-size="9.5" fill="#334155">Altura del gancho: 6px</text>
+          <!-- Stepper compacto [- 6px +] -->
+          <rect x="186" y="0" width="86" height="20" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="198" y="14" font-size="11" font-weight="700" fill="#64748b" text-anchor="middle">−</text>
+          <text x="229" y="14" font-size="9.5" font-weight="700" fill="#1e293b" text-anchor="middle">6px</text>
+          <text x="260" y="14" font-size="11" font-weight="700" fill="#64748b" text-anchor="middle">+</text>
+        </g>
+
+        <!-- Terminación de esquinas unificada en 3 píldoras -->
+        <g transform="translate(10, 60)">
+          <text x="0" y="12" font-size="9.5" fill="#334155">Estilo de codo / esquina:</text>
+          <g transform="translate(0, 18)">
+            <rect x="0" y="0" width="86" height="20" rx="4" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+            <text x="43" y="14" font-size="8.5" font-weight="700" fill="#2563eb" text-anchor="middle">└ Recta 90°</text>
+
+            <rect x="92" y="0" width="86" height="20" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="135" y="14" font-size="8.5" fill="#475569" text-anchor="middle">╰ Redonda</text>
+
+            <rect x="184" y="0" width="86" height="20" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="227" y="14" font-size="8.5" fill="#475569" text-anchor="middle">⌞ 45° Bisel</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Cartela de Ahorro y Ventajas -->
+      <g transform="translate(0, 318)">
+        <rect x="0" y="0" width="292" height="74" rx="8" fill="#f0fdf4" stroke="#86efac" />
+        <text x="146" y="24" font-size="11" font-weight="800" fill="#166534" text-anchor="middle">ALTURA NORMAL: ~95px (AHORRO 72%)</text>
+        <text x="14" y="44" font-size="9.5" fill="#15803d">• 1 Clic para cambiar entre Clásica, Curva y Plana.</text>
+        <text x="14" y="60" font-size="9.5" fill="#15803d">• Mismo lenguaje visual que el Bocadillo y Texto.</text>
+      </g>
+
+      <!-- Resumen Beneficios -->
+      <g transform="translate(0, 402)">
+        <rect x="0" y="0" width="292" height="340" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="14" y="24" font-size="10.5" font-weight="700" fill="#0f172a">🟢 Por qué es la mejor opción:</text>
+        
+        <text x="14" y="48" font-size="9.5" fill="#334155">1. <tspan font-weight="700">Coherencia con la App:</tspan> Sigue exactamente</text>
+        <text x="28" y="64" font-size="9" fill="#64748b">el mismo patrón exitoso de los 3 botones de bocadillo</text>
+        <text x="28" y="78" font-size="9" fill="#64748b">(▲ Clásico, ~ Cómic, ○ Pensar).</text>
+
+        <text x="14" y="102" font-size="9.5" fill="#334155">2. <tspan font-weight="700">Elimina la Redundancia:</tspan> Unifica "Terminación"</text>
+        <text x="28" y="118" font-size="9" fill="#64748b">y "Codos" en un solo concepto claro de esquinas</text>
+        <text x="28" y="132" font-size="9" fill="#64748b">(Recta 90°, Redonda, 45° Bisel).</text>
+
+        <text x="14" y="156" font-size="9.5" fill="#334155">3. <tspan font-weight="700">Ganchos en 1 Fila:</tspan> Control segmentado continuo</text>
+        <text x="28" y="172" font-size="9" fill="#64748b">[Ambos | Padre | Hijos | Ninguno] en lugar de 4 tarjetas.</text>
+
+        <text x="14" y="196" font-size="9.5" fill="#334155">4. <tspan font-weight="700">Ahorro Extremo de Scroll:</tspan> Ocupa menos de 100px</text>
+        <text x="28" y="212" font-size="9" fill="#64748b">dejando visible el color de fondo, aristas y bordes.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 3: ALTERNATIVA B — INSPECTOR DE 2 FILAS                           -->
+  <!-- ========================================================================= -->
+  <g transform="translate(720, 110)">
+    <!-- Marco de la Alternativa B -->
+    <rect x="0" y="0" width="320" height="810" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#3b82f6" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">B</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#1e40af">Alternativa B (Inspector 2 Filas)</text>
+    <rect x="220" y="10" width="85" height="22" rx="11" fill="#dbeafe" />
+    <text x="262" y="24.5" font-size="9" font-weight="700" fill="#1d4ed8" text-anchor="middle">CONDENSADA</text>
+
+    <!-- Contenido Alternativa B -->
+    <g transform="translate(14, 52)">
+      <text x="0" y="14" font-size="11" font-weight="700" fill="#1e293b">Anatomía de Horquilla</text>
+
+      <!-- Fila 1: Ganchos laterales + Stepper de altura en la misma línea -->
+      <g transform="translate(0, 28)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">GANCHOS Y ALTURA:</text>
+        <g transform="translate(0, 16)">
+          <!-- Segmented ganchos (180px) -->
+          <rect x="0" y="0" width="180" height="26" rx="5" fill="#f1f5f9" stroke="#cbd5e1" />
+          <rect x="1" y="1" width="44" height="24" rx="4" fill="#ffffff" stroke="#2563eb" />
+          <text x="23" y="16" font-size="9.5" font-weight="700" fill="#2563eb" text-anchor="middle">⊔ Ambos</text>
+          <text x="67" y="16" font-size="9" fill="#64748b" text-anchor="middle">└ Padre</text>
+          <text x="111" y="16" font-size="9" fill="#64748b" text-anchor="middle">┘ Hijos</text>
+          <text x="155" y="16" font-size="9" fill="#64748b" text-anchor="middle">─ Off</text>
+
+          <!-- Stepper de altura (104px) -->
+          <g transform="translate(188, 0)">
+            <rect x="0" y="0" width="104" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="12" y="17" font-size="11" font-weight="700" fill="#64748b" text-anchor="middle">−</text>
+            <text x="52" y="16" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle">Alt: 6px</text>
+            <text x="92" y="17" font-size="11" font-weight="700" fill="#64748b" text-anchor="middle">+</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Fila 2: Terminación de esquinas / codos -->
+      <g transform="translate(0, 86)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">FORMA DEL CODO / ESQUINA:</text>
+        <g transform="translate(0, 16)">
+          <div className="grid grid-cols-3 gap-1.5">
+            <rect x="0" y="0" width="92" height="28" rx="6" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" />
+            <text x="46" y="18" font-size="9.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">└ Recta 90°</text>
+
+            <rect x="100" y="0" width="92" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="146" y="18" font-size="9.5" fill="#475569" text-anchor="middle">╰ Redonda</text>
+
+            <rect x="200" y="0" width="92" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="246" y="18" font-size="9.5" fill="#475569" text-anchor="middle">⌞ 45° Bisel</text>
+          </div>
+        </g>
+      </g>
+
+      <!-- Resumen y altura -->
+      <g transform="translate(0, 150)">
+        <rect x="0" y="0" width="292" height="70" rx="8" fill="#eff6ff" stroke="#bfdbfe" />
+        <text x="146" y="24" font-size="11" font-weight="800" fill="#1e40af" text-anchor="middle">ALTURA TOTAL: ~115px (AHORRO 65%)</text>
+        <text x="14" y="44" font-size="9.5" fill="#1e3a8a">• Todos los controles visibles sin desplegar menús.</text>
+        <text x="14" y="58" font-size="9.5" fill="#1e3a8a">• Muy directo para usuarios que ajustan píxeles.</text>
+      </g>
+
+      <g transform="translate(0, 235)">
+        <rect x="0" y="0" width="292" height="505" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="14" y="24" font-size="10.5" font-weight="700" fill="#0f172a">ℹ️ Características:</text>
+        <text x="14" y="48" font-size="9.5" fill="#334155">Ideal si prefieres NO usar presets de 1 clic</text>
+        <text x="14" y="64" font-size="9.5" fill="#334155">y quieres ver los controles milimétricos siempre</text>
+        <text x="14" y="80" font-size="9.5" fill="#334155">abiertos sin usar acordeones.</text>
+        
+        <text x="14" y="112" font-size="9.5" font-weight="700" fill="#1e40af">Ventaja frente al diseño de la captura:</text>
+        <text x="14" y="132" font-size="9" fill="#64748b">• Reduce 4 filas a solo 2 filas limpias.</text>
+        <text x="14" y="148" font-size="9" fill="#64748b">• Stepper rápido en vez de slider largo.</text>
+        <text x="14" y="164" font-size="9" fill="#64748b">• Ahorro de más de 200px de scroll.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 4: ALTERNATIVA C — PREVIEW EN VIVO Y CARDS VISUALES               -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1060, 110)">
+    <!-- Marco de la Alternativa C -->
+    <rect x="0" y="0" width="320" height="810" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#8b5cf6" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">C</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#581c87">Alternativa C (Preview en Vivo)</text>
+    <rect x="220" y="10" width="85" height="22" rx="11" fill="#ede9fe" />
+    <text x="262" y="24.5" font-size="9" font-weight="700" fill="#6d28d9" text-anchor="middle">VISUAL</text>
+
+    <!-- Contenido Alternativa C -->
+    <g transform="translate(14, 52)">
+      <text x="0" y="14" font-size="11" font-weight="700" fill="#1e293b">Previsualización Interactiva</text>
+
+      <!-- Mini-Lienzo de Previsualización en Vivo -->
+      <g transform="translate(0, 24)">
+        <rect x="0" y="0" width="292" height="74" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+        
+        <!-- Nodo de ejemplo con horquilla real -->
+        <g transform="translate(46, 16)">
+          <text x="100" y="18" font-size="12" font-weight="700" fill="#1e293b" text-anchor="middle">Idea Principal</text>
+          <!-- Trazo de horquilla activa con ganchos -->
+          <path d="M 30 14 L 30 26 L 170 26 L 170 14" fill="none" stroke="#2563eb" stroke-width="2.5" />
+        </g>
+        <text x="146" y="66" font-size="8" fill="#94a3b8" text-anchor="middle">Se actualiza al instante según tus ajustes</text>
+      </g>
+
+      <!-- Tarjetas de Selección Rápida con Ilustraciones -->
+      <g transform="translate(0, 110)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">MODOS DE HORQUILLA:</text>
+        
+        <g transform="translate(0, 16)">
+          <div className="grid grid-cols-2 gap-2">
+            <!-- Card 1 -->
+            <rect x="0" y="0" width="140" height="48" rx="6" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" />
+            <path d="M 20 16 L 20 28 L 50 28 L 50 16" fill="none" stroke="#2563eb" stroke-width="2" />
+            <text x="60" y="24" font-size="9.5" font-weight="700" fill="#1e40af">Clásica</text>
+            <text x="60" y="36" font-size="8" fill="#3b82f6">Freeplane</text>
+
+            <!-- Card 2 -->
+            <rect x="150" y="0" width="140" height="48" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <path d="M 170 16 Q 170 28 180 28 L 195 28 Q 205 28 205 16" fill="none" stroke="#64748b" stroke-width="2" />
+            <text x="212" y="24" font-size="9.5" font-weight="600" fill="#334155">Curva</text>
+            <text x="212" y="36" font-size="8" fill="#94a3b8">Moderna</text>
+
+            <!-- Card 3 -->
+            <rect x="0" y="56" width="140" height="48" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <path d="M 20 80 L 50 80 L 50 68" fill="none" stroke="#64748b" stroke-width="2" />
+            <text x="60" y="80" font-size="9.5" font-weight="600" fill="#334155">Solo Hijos</text>
+            <text x="60" y="92" font-size="8" fill="#94a3b8">Bifurcación</text>
+
+            <!-- Card 4 -->
+            <rect x="150" y="56" width="140" height="48" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+            <line x1="170" y1="80" x2="200" y2="80" stroke="#64748b" stroke-width="2" />
+            <text x="212" y="80" font-size="9.5" font-weight="600" fill="#334155">Línea Pura</text>
+            <text x="212" y="92" font-size="8" fill="#94a3b8">Subrayado</text>
+          </div>
+        </g>
+      </g>
+
+      <!-- Cartela informativa -->
+      <g transform="translate(0, 230)">
+        <rect x="0" y="0" width="292" height="70" rx="8" fill="#faf5ff" stroke="#e9d5ff" />
+        <text x="146" y="24" font-size="11" font-weight="800" fill="#6d28d9" text-anchor="middle">ALTURA TOTAL: ~150px (AHORRO 55%)</text>
+        <text x="14" y="44" font-size="9.5" fill="#581c87">• Visualización previa del nodo en tiempo real.</text>
+        <text x="14" y="58" font-size="9.5" fill="#581c87">• Selección por tarjetas con ejemplos gráficos.</text>
+      </g>
+
+      <g transform="translate(0, 315)">
+        <rect x="0" y="0" width="292" height="425" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="14" y="24" font-size="10.5" font-weight="700" fill="#0f172a">ℹ️ Características:</text>
+        <text x="14" y="48" font-size="9.5" fill="#334155">Ideal para usuarios visuales que quieren ver</text>
+        <text x="14" y="64" font-size="9.5" fill="#334155">cómo lucirá la horquilla antes de volver al mapa.</text>
+        <text x="14" y="96" font-size="9.5" font-weight="700" fill="#7c3aed">Ahorro de espacio: 55%</text>
+        <text x="14" y="116" font-size="9" fill="#64748b">Ocupa un poco más que A (~150px), pero añade</text>
+        <text x="14" y="130" font-size="9" fill="#64748b">la previsualización gráfica inmediata.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- BARRA INFERIOR DE CONCLUSIONES Y COMPARATIVA                             -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 930)">
+    <rect x="0" y="0" width="1360" height="24" rx="6" fill="#0f172a" stroke="#1e293b" />
+    <text x="680" y="16" font-size="10.5" font-weight="700" fill="#94a3b8" text-anchor="middle">
+      Recomendación: Alternativa A unifica la experiencia con los presets de Bocadillo (3 botones en 1 fila) y reduce el scroll en más del 70%.
+    </text>
+  </g>
+</svg>

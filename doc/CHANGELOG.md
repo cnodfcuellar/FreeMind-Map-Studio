@@ -2269,29 +2269,30 @@ Atender la solicitud del usuario ("no me gusta que se puede hacer" tras enviar c
 
 ---
 
-## ⚡ [Rediseño UI & Optimización] — 2026-11-14: Tipografía Compacta Unificada y Sombra Inteligente (ContentTab: Título y Cuerpo)
+## ⚡ [Anatomía de Horquilla] — 2026-11-14: Implementación de la Alternativa A (Presets 1 Clic + Fila Compacta)
 
 ### 🎯 Motivo
-Atender la solicitud del usuario ("muestrame alternativas de svg" y posterior confirmación "ok procede , para titulo como para cuerpo ,") para resolver la severa saturación vertical de la pestaña **Texto** (`ContentTab`), la cual alcanzaba ~580px de altura y provocaba scroll excesivo:
-- **Doble paleta de 16 colores fija (32 botones):** Se mostraban paletas completas tanto para color de texto como para color de sombra, consumiendo casi 150px de altura vertical fija.
-- **Sliders y controles desarticulados:** Sliders de carril completo para tamaño de fuente y desenfoque (blur) dispersos en múltiples líneas con badges redundantes.
-- **Tarjeta de sombra sobredimensionada:** Ocupaba ~295px de forma aislada.
-- **Alineación con Título y Cuerpo:** El usuario solicitó unificar y aplicar este diseño ergonómico de estilo "Figma Studio" tanto al **Título del Nodo** como a la sección de **Cuerpo / Subtexto**.
+Atender la solicitud del usuario ("que te parece , muestrame svg de alternativas" y posterior confirmación "ok la A") tras compartir captura de "Cualidades Anatómicas de Horquilla":
+- **Eliminación de redundancias:** Se unificó el solapamiento entre "Terminación de esquinas" y "Codos / Esquinas de ganchos" en un único selector de codo (`sharp` Recta 90°, `rounded` Redonda y `bevel` 45° Bisel).
+- **Ahorro masivo de scroll (72% de reducción):** Se redujo la sección de ~340px a ~95px plegada, integrando 3 presets rápidos de 1 solo clic en una fila (`[⊔ Clásica]`, `[╰ Orgánica]` y `[─ Plana]`), exactamente con el mismo patrón ergonómico del bocadillo.
+- **Distribución de ganchos en píldora segmentada:** Opciones `[⊔ Ambos | └ Padre | ┘ Hijos | ─ Ninguno]` dispuestas en 1 sola fila continua.
+- **Renderizado vectorial de alta precisión (`NodeForkHooks`):** La forma `fork` ahora proyecta sobre el nodo ganchos vectoriales que se adaptan al lado del mapa (`left` / `right`) y dibujan las esquinas a 90°, arcos suaves con curvatura o biseles en diagonal a 45°.
 
 ### ✏️ Cambios Realizados
 | Archivo | Nivel Atomic | Qué cambió |
 |---------|--------------|-----------|
-| `src/components/molecules/CompactTextToolbar.tsx` | Molécula | Nueva barra tipográfica unificada en 1 sola fila: botones de estilo (`B`, `I`), alineación (`Izquierda`, `Centro`, `Derecha`), stepper numérico de tamaño (`[−] 16px [+]` con reset automático si difiere del default) y swatch de color interactivo con desplegable/popover integrado bajo demanda (paleta de 16 colores presets, selector nativo y botón reset). Cierre automático al hacer clic fuera. |
-| `src/components/molecules/CompactTextShadowControl.tsx` | Molécula | Nuevo control de sombra de texto ultracompacto: fila principal con segmented control de 4 estados (`[ Off \| Suave \| Media \| Glow ]`), micro-ajustes cuando está activa (swatch de color con popover flotante, stepper de blur milimétrico `[−] 3px [+]` y switch inline "En cuerpo" para `applyTextShadowToBody`). |
-| `src/components/organisms/toolpanel/ContentTab.tsx` | Organismo | Reemplazado el JSX fragmentado de `FontFormatToolbar`, `ColorPicker` estático y `SliderInput` tanto en la sección de **Título del Nodo** como en la de **Cuerpo / Subtexto** por instancias reutilizables de `CompactTextToolbar`. Integrado `CompactTextShadowControl` reduciendo el alto del panel de ~580px a menos de ~200px (ahorro superior al 65%). |
-| `src/components/molecules/__tests__/CompactTextToolbar.test.tsx` | Tests | Suite de 6 pruebas unitarias verificando estilos (bold, italic), alineación, incrementos/decrementos del stepper de tamaño, reset y apertura/cierre de la paleta con selección de color. |
-| `src/components/molecules/__tests__/CompactTextShadowControl.test.tsx` | Tests | Suite de 3 pruebas unitarias validando la conmutación de presets, el apagado de sombra, la calibración de blur y la selección de color de sombra. |
-| `doc/img/propuesta-redisenio-panel-texto.svg` | Docs / Gráficos | Infografía vectorial SVG comparando el estado anterior frente a las 3 propuestas de solución visual (A: Figma Studio recomendada, B: Paleta Esencial, C: Sub-pestañas). |
+| `src/types/mindmap.ts` | Tipos | Añadidos tipos `ForkHooksSide` (`'both' \| 'parent' \| 'children' \| 'none'`), `ForkCornerStyle` (`'sharp' \| 'rounded' \| 'bevel'`), `ForkPreset` (`'classic' \| 'organic' \| 'flat'`) y sus propiedades en la interfaz `MindNode` (`forkHooks`, `forkHookHeight`, `forkCornerStyle`, `forkPreset`). |
+| `src/components/molecules/node/NodeForkHooks.tsx` | Molécula | Componente SVG overlay para el nodo con forma `fork` que calcula la geometría del subrayado y de los ganchos verticales según el lado del padre/hijos (`layout.side`), aplicando el radio o chaflán exacto sin artefactos. |
+| `src/components/NodeComponent.tsx` | Molécula | Integrado `<NodeForkHooks ... />` en el nodo. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Añadida la sección "Anatomía de Horquilla" (Alternativa A) cuando `selectedNode.shape === 'fork'`: 3 presets rápidos en 1 fila, selector segmentado de ganchos y acordeón plegable para ajustes milimétricos (`showAdvancedFork`). |
+| `src/components/molecules/node/__tests__/NodeForkHooks.test.tsx` | Tests | Suite de 6 pruebas unitarias verificando ganchos both/parent/children/none, esquinas sharp/rounded/bevel y orientación cardinal izquierda/derecha. |
+| `doc/img/propuesta-redisenio-anatomia-horquilla.svg` | Docs / Gráficos | Infografía vectorial SVG comparando el diseño de referencia (~340px) frente a las 3 alternativas (A: Presets 1 Clic recomendada, B: Inspector 2 filas, C: Previsualización en vivo). |
+| `doc/DESIGN.md` | Docs | Actualizada la especificación de diseño visual de la forma `fork` con sus cualidades anatómicas. |
 
 ### 🔍 Verificación
 - [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
-- [x] `pnpm test:regression`: **42/42 suites de prueba superadas (240/240 pruebas unitarias exitosas, 100%)**.
-- [x] Cero advertencias de sintaxis o tests rotos.
+- [x] `pnpm test:regression`: **43/43 suites de prueba superadas (246/246 pruebas unitarias exitosas, 100%)**.
+
 
 
 
