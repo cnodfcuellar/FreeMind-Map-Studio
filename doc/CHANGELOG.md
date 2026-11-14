@@ -2293,6 +2293,57 @@ Atender la solicitud del usuario ("que te parece , muestrame svg de alternativas
 - [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
 - [x] `pnpm test:regression`: **43/43 suites de prueba superadas (246/246 pruebas unitarias exitosas, 100%)**.
 
+---
+
+## ⚡ [Cualidades de Rectángulo y Cuadrado] — 2026-11-14: Implementación de la Alternativa A (Presets 1 Clic + Micro-Asimetría)
+
+### 🎯 Motivo
+Atender la solicitud del usuario ("es para solo cuadrado, rectangulo que te parece , muestrame svg de alternativas" y posterior confirmación "ok la A") tras compartir captura de "Cualidades del Rectángulo":
+- **Ahorro masivo de espacio vertical (68% de reducción):** Se redujo la sección de ~280px a ~95px plegada, integrando 3 presets rápidos de 1 solo clic en una fila (`[▢ Recto]`, `[▢ Suave]` y `[⬡ Bisel]`), siguiendo el mismo patrón ergonómico establecido para el bocadillo y la horquilla.
+- **Tipos de esquina versátiles:** Selector segmentado con 4 cortes (`sharp` Recta 90°, `rounded` Redonda, `bevel` 45° Bisel y `concave` Cóncava).
+- **Asimetría ergonómica estilo Figma:** Acordeón de calibración que incluye slider/stepper de Radio/Bisel y un cuadrante matricial 2x2 visual (`[⌜ Sup-Izq]`, `[⌝ Sup-Der]`, `[⌞ Inf-Izq]`, `[⌟ Inf-Der]`) para activar o desactivar esquinas individuales y crear tarjetas asimétricas, pestañas o cupones.
+- **Renderizado híbrido ultra-eficiente:** Esquinas rectas y redondeadas procesadas de forma nativa en CSS con `borderRadius`, mientras que las esquinas biseladas y cóncavas son renderizadas con geometría vectorial SVG en `NodeSvgPolygonBackground` con soporte de bordes, degradados, tramas y sombras.
+
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos | Añadidos tipos `RectangleCornerStyle` (`'sharp' \| 'rounded' \| 'bevel' \| 'concave'`), `RectanglePreset` (`'sharp' \| 'smooth' \| 'bevel'`) y propiedades en `MindNode` (`rectCornerStyle`, `rectRadius`, `rectPreset`, `rectCornerTopLeft`, `rectCornerTopRight`, `rectCornerBottomRight`, `rectCornerBottomLeft`). |
+| `src/utils/rectangleCornerUtils.ts` | Utilidad | Motor de cálculo geométrico: resolución de defaults de esquinas, detección de formas SVG (`isRectangleSvgShape`), cálculo de `borderRadius` CSS para asimetría y generación de trazado SVG (`computeRectangleSvgPath`) con chaflanes a 45° y arcos cóncavos. |
+| `src/utils/__tests__/rectangleCornerUtils.test.ts` | Tests | Suite de 13 pruebas unitarias validando resolución de configuración, cálculo de `borderRadius` con asimetría, trazados SVG de bisel y cóncavo y acotación de radio a dimensiones del nodo. |
+| `src/components/molecules/RectangleCornerControl.tsx` | Molécula | Componente UI modular para el inspector: 3 presets de 1 clic, selector segmentado de corte, acordeón plegable con stepper/slider y matriz 2x2 de asimetría. |
+| `src/components/molecules/__tests__/RectangleCornerControl.test.tsx` | Tests | Suite de 7 pruebas unitarias verificando render de presets, títulos dinámicos (Rectángulo vs Cuadrado), selección de corte, apertura de acordeón, stepper y toggles de esquinas activas. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Integrado renderizado de esquinas para `rectangle` y `square`: CSS `borderRadius` para `rounded`/`sharp` y trazado vectorial SVG `<path>` para `bevel`/`concave` con soporte de selección perimetral. |
+| `src/components/NodeComponent.tsx` | Molécula | Incluidas esquinas biseladas y cóncavas en la condición `isSvgShape`. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Integrado `<RectangleCornerControl ... />` condicionado a `shape === 'rectangle' \|\| shape === 'square'`. |
+| `src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts` | Tests | Añadidos casos de prueba verificando esquinas sharp, rounded, asimetría, bevel y concave. |
+| `doc/img/propuesta-redisenio-cualidades-rectangulo.svg` | Docs / Gráficos | Infografía vectorial SVG comparando la captura original (~280px) con las alternativas A, B y C. |
+| `doc/DESIGN.md` | Docs | Actualizada la especificación visual de nodos rectangulares y cuadrados con sus cualidades anatómicas. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm test:regression`: **45/45 suites de prueba superadas (268/268 pruebas unitarias exitosas, 100%)**.
+
+---
+
+## ⚡ [Cualidades de Rectángulo y Cuadrado] — 2026-11-14: Desduplicación y Unificación en Fila Única de 4 Cortes
+
+### 🎯 Motivo
+Atender la observación del usuario ("por que se repite"):
+- Se identificó redundancia entre la fila superior de 3 presets (`Recto`, `Suave`, `Bisel`) y la fila inferior segmentada de tipos de esquina (`Recta`, `Redonda`, `Bisel`, `Cóncava`), que duplicaba la misma decisión estética.
+- Se unificaron ambas filas en una **única fila limpia de 4 botones de 1 Clic**: `[▢ Recta (0px)]`, `[▢ Redonda (8px)]`, `[⬡ Bisel (6px)]` y `[▢ Cóncava (10px)]`.
+- Cada botón aplica inmediatamente el corte geométrico y su radio recomendado, resolviendo la redundancia al 100%, incorporando a `Cóncava` en primer nivel y reduciendo otros ~35px de altura vertical en el panel.
+
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/molecules/RectangleCornerControl.tsx` | Molécula | Eliminada la segunda fila segmentada y unificados los 4 cortes en un único grid de 4 botones con indicador de radio por defecto, estado activo inequívoco y acción directa de 1 clic. |
+| `src/components/molecules/__tests__/RectangleCornerControl.test.tsx` | Tests | Actualizada suite a 8 pruebas unitarias validando la fila unificada de 4 opciones (`sharp`, `rounded`, `bevel`, `concave`), el acordeón de calibración y la asimetría 2x2. |
+| `doc/DESIGN.md` | Docs | Actualizada la especificación para reflejar la fila única no redundante de 4 esquinas. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm test:regression`: **45/45 suites de prueba superadas (268/268 pruebas unitarias exitosas, 100%)**.
+
 
 
 

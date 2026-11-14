@@ -25,7 +25,7 @@ Stack: Tailwind CSS v4 (`@import "tailwindcss"`, sin `tailwind.config`, sin toke
 - Controles pequeños (chips, tags, contadores): `rounded-md` / `rounded-full` (píldoras: progreso, contadores, badges de conteo).
 - Botones/inputs: `rounded-lg` (`sm/md`), `rounded-xl` (`md/lg`, cards de opción, inputs con icono).
 - Contenedores (modales, paneles, minimapa, tooltips): `rounded-2xl`.
-- Nodos: `bubble` 24px raíz / 16px (con anatomía de colita de bocadillo opcional); `pill`/`circle` 9999px; `oval` 50%; `square/rectangle` 0px; `fork` subrayado vectorial con cualidades anatómicas personalizables (ganchos `both`, `parent`, `children`, `none`, altura en px y codos `sharp` 90°, `rounded` o `bevel` 45°).
+- Nodos: `bubble` 24px raíz / 16px (con anatomía de colita de bocadillo opcional); `pill`/`circle` 9999px; `oval` 50%; `square/rectangle` 0px por defecto, con cualidades avanzadas de esquinas (`rectCornerStyle`: `sharp` 90°, `rounded` suave, `bevel` 45° chaflán técnico y `concave` arco invertido, radio en px y matriz 2x2 de asimetría por esquina); `fork` subrayado vectorial con cualidades anatómicas personalizables (ganchos `both`, `parent`, `children`, `none`, altura en px y codos `sharp` 90°, `rounded` o `bevel` 45°).
 - Hexágono: contenido ceñido al polígono (texto al 68% centrado, imágenes topadas a 96px fijos, tags/enlace/nota acotados; la caja se deriva del contenido acotado y crece con él, +1 fila si hay tags).
 
 ### Sombras
@@ -308,6 +308,16 @@ Verificado en `FormatTab.tsx:97-141` y `ShapeSelector.tsx`.
   1. *"Ancho personalizado"* — `customWidth` **0–500 step 10**, `unit="px"`; `badge` = `{n}px` si hay valor o **"Automático"** si es 0/`undefined` (prop `badge` de `SliderInput` para no mostrar "0px"); `onChange` escribe `w > 0 ? w : undefined` — **llegar a 0 borra el valor** (= auto) —; `onReset` → `undefined`; `description` "0 = Ajuste automático al contenido".
   2. *"Alto personalizado"* — `customHeight` **0–300 step 5**, idéntico patrón (`h > 0 ? h : undefined`).
 - **Enlace con §6 (sizing):** `undefined`/0 en ambos → `estimateNodeSize` calcula el tamaño (caja 4:3 o lado mínimo en square/circle); cualquier valor >0 **manda el usuario** sobre el cálculo (§6: "Con ancho y alto personalizados manda el usuario"). `onUpdateNode` directo: la regla común de edición en vivo de este §8 aplica aquí también.
+
+- **Cualidades de Rectángulo y Cuadrado (`RectangleCornerControl`)**:
+  Aparece condicionalmente cuando `selectedNode.shape === 'rectangle' || selectedNode.shape === 'square'`.
+  1. **Fila única de 4 cortes de 1 Clic (sin redundancias)**: `[▢ Recta (0px)]`, `[▢ Redonda (8px)]`, `[⬡ Bisel (6px)]`, `[▢ Cóncava (10px)]`. Cada botón aplica directamente el estilo geométrico y su radio idóneo recomendado.
+  2. **Calibración avanzada y asimetría**: Acordeón plegable con:
+     * Stepper y slider numérico de Radio/Bisel (0–32px con Reset a 8px).
+     * Cuadrante matricial 2x2 estilo Figma (`[⌜ Sup-Izq]`, `[⌝ Sup-Der]`, `[⌞ Inf-Izq]`, `[⌟ Inf-Der]`) para activar o desactivar esquinas individuales en modo asimétrico (tarjetas, badges o cupones), con botón *"Activar todas (4)"*.
+  3. **Motor de renderizado híbrido**:
+     * `sharp` y `rounded`: Procesados directamente en CSS vía `borderRadius` (`${tl}px ${tr}px ${br}px ${bl}px`), manteniendo aceleración por hardware y bordes nativos.
+     * `bevel` y `concave`: Procesados vectorialmente en SVG vía `computeRectangleSvgPath` en `NodeSvgPolygonBackground`, trazando segmentos diagonales o arcos circulares cóncavos con soporte íntegro de tramas, degradados, imágenes, bordes discontinuos y resplandor perimetral de selección.
 
 ### Contrato funcional de "Fondo y Relleno" (FormatTab, sección 2)
 

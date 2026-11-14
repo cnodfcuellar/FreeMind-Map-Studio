@@ -20,6 +20,7 @@ import { SliderInput } from '../../atoms/SliderInput';
 import { ToggleButtonGroup } from '../../atoms/ToggleButtonGroup';
 import { Switch } from '../../atoms/Switch';
 import { ShapeSelector } from '../../molecules/ShapeSelector';
+import { RectangleCornerControl } from '../../molecules/RectangleCornerControl';
 import {
   Square,
   Sparkles,
@@ -532,6 +533,14 @@ export const FormatTab: React.FC<FormatTabProps> = ({
               )}
             </div>
           </div>
+        )}
+
+        {/* Cualidades del Rectángulo y Cuadrado (Alternativa A: Presets 1 Clic + Micro-Asimetría) */}
+        {(selectedNode.shape === 'rectangle' || selectedNode.shape === 'square') && (
+          <RectangleCornerControl
+            node={selectedNode}
+            onUpdateNode={onUpdateNode}
+          />
         )}
       </CollapsibleSection>
 

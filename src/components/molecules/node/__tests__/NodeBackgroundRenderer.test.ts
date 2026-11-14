@@ -186,6 +186,39 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
     expect(defStyles.boxShadow).toContain('0 4px 14px');
   });
 
+  it('renders rectangle and square with custom corners (sharp, rounded, bevel, concave)', () => {
+    // Sharp rectangle
+    const sharpRect = createNode({ id: 'r1', text: 'Sharp', shape: 'rectangle', rectCornerStyle: 'sharp' });
+    expect(getNodeShapeStyles(sharpRect, mockTheme, '#3b82f6', false).borderRadius).toBe('0px');
+
+    // Rounded rectangle
+    const roundedRect = createNode({ id: 'r2', text: 'Rounded', shape: 'rectangle', rectCornerStyle: 'rounded', rectRadius: 10 });
+    expect(getNodeShapeStyles(roundedRect, mockTheme, '#3b82f6', false).borderRadius).toBe('10px 10px 10px 10px');
+
+    // Asymmetric rounded square
+    const asymSquare = createNode({
+      id: 's1',
+      text: 'Asym Square',
+      shape: 'square',
+      rectCornerStyle: 'rounded',
+      rectRadius: 12,
+      rectCornerTopRight: false,
+      rectCornerBottomLeft: false,
+    });
+    expect(getNodeShapeStyles(asymSquare, mockTheme, '#3b82f6', false).borderRadius).toBe('12px 0px 12px 0px');
+
+    // Bevel & concave (delegates to SVG path, clear CSS box borders)
+    const bevelRect = createNode({ id: 'r3', text: 'Bevel', shape: 'rectangle', rectCornerStyle: 'bevel' });
+    const bevelStyles = getNodeShapeStyles(bevelRect, mockTheme, '#3b82f6', false);
+    expect(bevelStyles.border).toBe('none');
+    expect(bevelStyles.background).toBe('transparent');
+
+    const concaveSquare = createNode({ id: 's2', text: 'Concave', shape: 'square', rectCornerStyle: 'concave' });
+    const concaveStyles = getNodeShapeStyles(concaveSquare, mockTheme, '#3b82f6', false);
+    expect(concaveStyles.border).toBe('none');
+    expect(concaveStyles.background).toBe('transparent');
+  });
+
   describe('computeNodeShadowStyle', () => {
     it('returns empty object when nodeShadow is undefined or false', () => {
       const nodeOff = createNode({ id: 'n1', text: 'Off' });

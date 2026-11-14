@@ -1,6 +1,11 @@
 import React from 'react';
 import { MindNode, CalculatedNodeLayout, MindMapTheme } from '../../../types/mindmap';
 import { computeBubbleTailGeometry } from '../../../utils/bubbleTailUtils';
+import {
+  isRectangleSvgShape,
+  computeRectangleSvgPath,
+  computeRectangleBorderRadius,
+} from '../../../utils/rectangleCornerUtils';
 
 export interface NodeBackgroundProps {
   node: MindNode;
@@ -228,10 +233,24 @@ export const getNodeShapeStyles = (
       boxShadow: node.nodeShadow === false ? 'none' : '0 4px 14px -2px rgba(0,0,0,0.10), 0 2px 6px -1px rgba(0,0,0,0.06)',
     };
   }
-  if (shape === 'square') {
+  if (shape === 'square' || shape === 'rectangle') {
+    if (isRectangleSvgShape(node)) {
+      return {
+        background: 'transparent',
+        backgroundColor: 'transparent',
+        backgroundImage: 'none',
+        border: 'none',
+        boxShadow: 'none',
+        borderRadius: '0px',
+        paddingLeft: '14px',
+        paddingRight: '14px',
+        paddingTop: '6px',
+        paddingBottom: '6px',
+      };
+    }
     return {
       ...baseStyle,
-      borderRadius: '0px',
+      borderRadius: computeRectangleBorderRadius(node),
     };
   }
   if (shape === 'circle') {
@@ -254,12 +273,6 @@ export const getNodeShapeStyles = (
       borderRadius: '50%',
       paddingLeft: '20px',
       paddingRight: '20px',
-    };
-  }
-  if (shape === 'rectangle') {
-    return {
-      ...baseStyle,
-      borderRadius: '0px',
     };
   }
   if (shape === 'hexagon') {
@@ -357,7 +370,8 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   isSelected,
 }) => {
   const shape = node.shape || 'bubble';
-  const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star';
+  const isRectSvg = isRectangleSvgShape(node);
+  const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star' || isRectSvg;
   if (!isSvgShape) return null;
 
   const w = layout.width;
@@ -390,8 +404,11 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   }
 
   let points = '';
+  let pathD: string | null = null;
 
-  if (shape === 'hexagon') {
+  if (isRectSvg) {
+    pathD = computeRectangleSvgPath(w, h, node, effectiveBorderWidth);
+  } else if (shape === 'hexagon') {
     const inset = Math.min(w * 0.28, Math.max(28, h * 0.58));
     const pad = Math.max(effectiveBorderWidth / 2, 1);
     points = `${inset},${pad} ${w - inset},${pad} ${w - pad},${h / 2} ${w - inset},${h - pad} ${inset},${h - pad} ${pad},${h / 2}`;
@@ -592,32 +609,59 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
         )}
       </defs>
 
-      {/* Resplandor exterior de selección que sigue la geometría del polígono */}
+      {/* Resplandor exterior de selección que sigue la geometría del polígono / trazado */}
       {isSelected && (
-        <polygon
-          points={points}
-          fill="none"
-          stroke="#3b82f6"
-          strokeWidth={Math.max(effectiveBorderWidth + 3.5, 4)}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          style={{
-            filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.85))',
-          }}
-        />
+        pathD ? (
+          <path
+            d={pathD}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth={Math.max(effectiveBorderWidth + 3.5, 4)}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            style={{
+              filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.85))',
+            }}
+          />
+        ) : (
+          <polygon
+            points={points}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth={Math.max(effectiveBorderWidth + 3.5, 4)}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            style={{
+              filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.85))',
+            }}
+          />
+        )
       )}
 
-      {/* Polígono principal con fondo y borde (con sombra perimetral SVG) */}
-      <polygon
-        points={points}
-        fill={fillAttr}
-        stroke={effectiveBorderColor}
-        strokeWidth={effectiveBorderWidth}
-        strokeDasharray={strokeDash}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
-      />
+      {/* Forma principal con fondo y borde (con sombra perimetral SVG) */}
+      {pathD ? (
+        <path
+          d={pathD}
+          fill={fillAttr}
+          stroke={effectiveBorderColor}
+          strokeWidth={effectiveBorderWidth}
+          strokeDasharray={strokeDash}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+        />
+      ) : (
+        <polygon
+          points={points}
+          fill={fillAttr}
+          stroke={effectiveBorderColor}
+          strokeWidth={effectiveBorderWidth}
+          strokeDasharray={strokeDash}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+        />
+      )}
     </svg>
   );
 };

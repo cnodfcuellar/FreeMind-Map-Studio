@@ -17,6 +17,9 @@ export type ForkHooksSide = 'both' | 'parent' | 'children' | 'none';
 export type ForkCornerStyle = 'sharp' | 'rounded' | 'bevel';
 export type ForkPreset = 'classic' | 'organic' | 'flat';
 
+export type RectangleCornerStyle = 'sharp' | 'rounded' | 'bevel' | 'concave';
+export type RectanglePreset = 'sharp' | 'smooth' | 'bevel';
+
 export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden';
 
 export type EdgeProfile = 'uniform' | 'tapered' | 'spindle' | 'hourglass';
@@ -115,6 +118,15 @@ export interface MindNode {
   forkHookHeight?: number;
   forkCornerStyle?: ForkCornerStyle;
   forkPreset?: ForkPreset;
+
+  // Rectangle and Square Shape Customization (Cualidades del rectángulo y cuadrado)
+  rectCornerStyle?: RectangleCornerStyle;
+  rectRadius?: number;
+  rectPreset?: RectanglePreset;
+  rectCornerTopLeft?: boolean;
+  rectCornerTopRight?: boolean;
+  rectCornerBottomRight?: boolean;
+  rectCornerBottomLeft?: boolean;
   color?: string; // background fill or accent
   bgType?: NodeBackgroundType;
   gradientColor1?: string;
