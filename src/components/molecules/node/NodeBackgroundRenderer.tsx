@@ -11,6 +11,10 @@ import {
   computeOvalPadding,
   computeOvalSvgTransform,
 } from '../../../utils/ovalShapeUtils';
+import {
+  computeArrowPolygonPoints,
+  computeArrowContentPadding,
+} from '../../../utils/arrowShapeUtils';
 
 export interface NodeBackgroundProps {
   node: MindNode;
@@ -303,12 +307,12 @@ export const getNodeShapeStyles = (
     };
   }
   if (shape === 'arrow') {
+    const arrowPadding = computeArrowContentPadding(node);
     return {
       background: 'transparent',
       border: 'none',
       boxShadow: 'none',
-      paddingLeft: '24px',
-      paddingRight: '36px',
+      ...arrowPadding,
     };
   }
   if (shape === 'star') {
@@ -432,10 +436,7 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
     const pad = Math.max(effectiveBorderWidth / 2, 1);
     points = `${inset},${pad} ${w - inset},${pad} ${w - pad},${h / 2} ${w - inset},${h - pad} ${inset},${h - pad} ${pad},${h / 2}`;
   } else if (shape === 'arrow') {
-    const arrowTip = Math.min(w * 0.32, Math.max(32, h * 0.70));
-    const notch = Math.min(w * 0.16, Math.max(16, h * 0.40));
-    const pad = Math.max(effectiveBorderWidth / 2, 1);
-    points = `${pad},${pad} ${w - arrowTip},${pad} ${w - pad},${h / 2} ${w - arrowTip},${h - pad} ${pad},${h - pad} ${notch},${h / 2}`;
+    points = computeArrowPolygonPoints(w, h, node, effectiveBorderWidth);
   } else if (shape === 'star') {
     const pad = Math.max(effectiveBorderWidth / 2, 1);
     const cx = w / 2;

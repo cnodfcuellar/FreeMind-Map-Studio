@@ -22,6 +22,7 @@ import { Switch } from '../../atoms/Switch';
 import { ShapeSelector } from '../../molecules/ShapeSelector';
 import { RectangleCornerControl } from '../../molecules/RectangleCornerControl';
 import { OvalQualitiesControl } from '../../molecules/OvalQualitiesControl';
+import { ArrowQualitiesControl } from '../../molecules/ArrowQualitiesControl';
 import {
   Square,
   Sparkles,
@@ -547,6 +548,14 @@ export const FormatTab: React.FC<FormatTabProps> = ({
         {/* Cualidades del Óvalo / Elipse (Alternativa A: Presets 1 Clic + Texto Recto) */}
         {selectedNode.shape === 'oval' && (
           <OvalQualitiesControl
+            node={selectedNode}
+            onUpdateNode={onUpdateNode}
+          />
+        )}
+
+        {/* Cualidades de la Flecha (Alternativa A: Dirección 1 Clic + Smart Auto + Calibración) */}
+        {selectedNode.shape === 'arrow' && (
+          <ArrowQualitiesControl
             node={selectedNode}
             onUpdateNode={onUpdateNode}
           />

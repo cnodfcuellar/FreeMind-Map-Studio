@@ -950,8 +950,14 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         width = node.customWidth || (width + 48);
         height = node.customHeight || Math.max(height, 42);
       } else if (node.shape === 'arrow') {
-        width = node.customWidth || (width + 52);
-        height = node.customHeight || Math.max(height, 42);
+        var isVertical = node.arrowDirection === 'up' || node.arrowDirection === 'down';
+        if (isVertical) {
+          width = node.customWidth || Math.max(width + 24, 60);
+          height = node.customHeight || Math.max(height + 48, 56);
+        } else {
+          width = node.customWidth || (width + 52);
+          height = node.customHeight || Math.max(height, 42);
+        }
       }
 
       return { width: width, height: height };

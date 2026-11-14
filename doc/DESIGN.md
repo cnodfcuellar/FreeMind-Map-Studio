@@ -331,6 +331,18 @@ Verificado en `FormatTab.tsx:97-141` y `ShapeSelector.tsx`.
      * Cuando `ovalRotation !== 0` y `ovalKeepTextHorizontal` está activo: El contenedor DOM es transparente con padding adaptativo y el óvalo se dibuja vectorialmente en SVG vía `<ellipse>` con rotación centrada `rotate(${deg} cx cy)`, manteniendo el texto horizontal, legible y editable.
      * Si el usuario desactiva *"Texto siempre horizontal"*, el nodo completo rota con CSS `transform: rotate(...)`.
 
+- **Cualidades de la Flecha (`ArrowQualitiesControl`)**:
+  Aparece condicionalmente cuando `selectedNode.shape === 'arrow'`.
+  1. **Fila de 4 direcciones rápidas de 1 Clic**: `[→ Derecha]` (flujo estándar), `[← Izq.]` (retorno/retroalimentación), `[↑ Arriba]` (ascenso/origen), `[↓ Abajo]` (jerarquía/descenso).
+  2. **Switch Inteligente de Auto-orientación según rama**: Conmuta automáticamente la orientación horizontal según el lado del árbol (`side === 'left'` apunta a la izquierda `←`; `side === 'right'` a la derecha `→`). Al pulsar manualmente un botón de dirección, desactiva la auto-orientación para priorizar la selección explícita del usuario.
+  3. **Calibración anatómica de punta y cola (Acordeón desplegable)**:
+     * *Estilo de cola trasera / Modo*: `[❮ Con muesca]` (chevron clásico), `[| Plana]` (estilo señal/bloque), `[↔ Doble punta]` (nodo bidireccional para tradeoffs o flujos recíprocos).
+     * *Proporción de punta (agudeza)*: Slider numérico de 15% a 50% (default 32%) con botón Restablecer.
+  4. **Motor geométrico adaptativo**:
+     * Calculado vectorialmente en SVG vía `computeArrowPolygonPoints` en `NodeSvgPolygonBackground` para todas las combinaciones de dirección, cola y doble punta.
+     * Inyecta padding interior asimétrico (`computeArrowContentPadding`) garantizando que el texto y las etiquetas no colisionen con las puntas agudas.
+     * Dimensionamiento automático adaptativo para flechas verticales (`up`/`down`) en `layoutEngine.ts` y `htmlExporter.ts`.
+
 ### Contrato funcional de "Fondo y Relleno" (FormatTab, sección 2)
 
 Verificado en `FormatTab.tsx:144-383` y render en `NodeBackgroundRenderer.tsx:40-177`.

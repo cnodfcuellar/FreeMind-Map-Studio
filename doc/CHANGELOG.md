@@ -2374,19 +2374,37 @@ Atender la solicitud del usuario ("que te parece esta propuesta para ovalos, mue
 - [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
 - [x] `pnpm test:regression`: **47/47 suites de prueba superadas (281/281 pruebas unitarias exitosas, 100%)**.
 
+---
 
+## ⚡ [Cualidades de la Flecha] — 2026-11-14: Implementación de la Alternativa A (Dirección 1 Clic + Smart Auto-orientación según rama + Calibración de cola y punta)
 
+### 🎯 Motivo
+Atender la solicitud del usuario ("quiero añadir opciones de direccion de la flechas , dame alternativas en svg" y confirmación "A"):
+- **Superación de la limitación unidireccional derecha (→):** Históricamente en `NodeBackgroundRenderer.tsx`, el nodo flecha estaba codificado de forma estática para apuntar únicamente hacia la derecha. Esto producía una incoherencia de lectura en los mapas mentales cuando un nodo pertenecía a la rama izquierda (`node.side === 'left'`), donde la jerarquía visual se expande hacia la izquierda pero la flecha apuntaba hacia adentro/derecha.
+- **Fila rápida de 4 direcciones de 1 Clic:** Presets directos para las 4 direcciones cardinales (`[ → Derecha ]`, `[ ← Izq. ]`, `[ ↑ Arriba ]`, `[ ↓ Abajo ]`) integrados armoniosamente en la UI del panel de formato.
+- **Auto-orientación inteligente según rama:** Switch que adapta automáticamente el sentido horizontal de la flecha: apunta a la izquierda si el nodo está en la rama izquierda (`side === 'left'`), y a la derecha si está en la derecha, sin necesidad de ajustes manuales al mover o reorganizar ramas.
+- **Calibración anatómica de cola y agudeza:** Acordeón desplegable para elegir entre cola con muesca en V (`notch`), cola plana estilo señal (`flat`) o flecha bidireccional de doble punta (`↔ Doble punta`), además de control deslizante para la proporción/agudeza de la punta (15% a 50%, por defecto 32%).
+- **Cálculo geométrico adaptativo y protección de texto:** `arrowShapeUtils.ts` genera la geometría vectorial SVG precisa para todas las combinaciones de dirección, cola y doble punta, e inyecta padding interior asimétrico en `NodeBackgroundRenderer.tsx` para que el texto nunca choque con las puntas de flecha. Adaptado también el dimensionamiento de nodos verticales en `layoutEngine.ts` y `htmlExporter.ts`.
 
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos | Añadidos tipos `ArrowDirection` (`'right' \| 'left' \| 'up' \| 'down'`), `ArrowTailStyle` (`'notch' \| 'flat'`) y propiedades opcionales en `MindNode` (`arrowDirection`, `arrowAutoOrient`, `arrowTailStyle`, `arrowBidirectional`, `arrowTipRatio`). |
+| `src/utils/arrowShapeUtils.ts` | Utilidad | Motor geométrico para la flecha: `resolveArrowConfig` (resuelve dirección efectiva y auto-orientación), `computeArrowPolygonPoints` (polígonos SVG para 4 direcciones, muesca, cola plana y doble punta) y `computeArrowContentPadding` (padding asimétrico para no solapar texto). |
+| `src/utils/__tests__/arrowShapeUtils.test.ts` | Tests | Suite de 13 pruebas unitarias exhaustivas validando resolución de configuración, smart auto-orientación, cálculos de polígonos y paddings. |
+| `src/components/molecules/ArrowQualitiesControl.tsx` | Molécula | Inspector de cualidades de flecha: 4 botones de dirección en 1 clic, switch de auto-orientación y acordeón de calibración (cola con muesca, plana, doble punta y slider de punta). |
+| `src/components/molecules/__tests__/ArrowQualitiesControl.test.tsx` | Tests | Suite de 6 pruebas unitarias verificando renderizado, cambio de direcciones, toggle auto-orientación, acordeón, cola y slider de punta. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Integrado `computeArrowContentPadding` en `getNodeShapeStyles` y `computeArrowPolygonPoints` en `NodeSvgPolygonBackground`. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Integrado `<ArrowQualitiesControl ... />` cuando `selectedNode.shape === 'arrow'`. |
+| `src/utils/layoutEngine.ts` | Utilidad | Añadido soporte para dimensionamiento adaptativo de flechas verticales (`up` / `down`) en el motor de layout. |
+| `src/utils/htmlExporter.ts` | Utilidad | Añadido soporte para dimensionamiento de flechas verticales en el exportador HTML autocontenido. |
+| `doc/img/propuesta-redisenio-cualidades-flecha.svg` | Docs / Gráficos | Diagrama comparativo vectorial SVG del estado anterior frente a las 3 alternativas. |
+| `doc/DESIGN.md` | Docs | Actualizada la especificación de diseño visual para la forma `arrow`. |
 
-
-
-
-
-
-
-
-
-
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm test:regression`: **49/49 suites de prueba superadas (300/300 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa (0 errores)** en 7.09s.
 
 
 

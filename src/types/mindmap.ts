@@ -23,6 +23,9 @@ export type RectanglePreset = 'sharp' | 'smooth' | 'bevel';
 export type OvalPreset = 'horizontal' | 'tilted' | 'vertical';
 export type OvalRatio = 'classic' | 'slender' | 'capsule';
 
+export type ArrowDirection = 'right' | 'left' | 'up' | 'down';
+export type ArrowTailStyle = 'notch' | 'flat';
+
 export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden';
 
 export type EdgeProfile = 'uniform' | 'tapered' | 'spindle' | 'hourglass';
@@ -136,6 +139,13 @@ export interface MindNode {
   ovalKeepTextHorizontal?: boolean;
   ovalPreset?: OvalPreset;
   ovalRatio?: OvalRatio;
+
+  // Arrow Shape Customization (Cualidades y dirección de la flecha)
+  arrowDirection?: ArrowDirection;
+  arrowAutoOrient?: boolean;
+  arrowTailStyle?: ArrowTailStyle;
+  arrowBidirectional?: boolean;
+  arrowTipRatio?: number; // proporción de la punta (0.15 a 0.50, default ~0.32)
   color?: string; // background fill or accent
   bgType?: NodeBackgroundType;
   gradientColor1?: string;
