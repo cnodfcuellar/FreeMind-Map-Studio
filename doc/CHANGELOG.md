@@ -2037,6 +2037,36 @@ Auditoría y resolución exhaustiva de 6 inconsistencias técnicas detectadas en
 - [x] `pnpm test:regression`: **34 suites de pruebas superadas, 176/176 pruebas unitarias exitosas (100%)**.
 - [x] Servidor Vite dev activo en `http://localhost:3000/`.
 
+---
+
+## 🚀 [Funcionalidad / UX] — 2026-11-13: Paleta de Comandos Rápida (Ctrl + K / Cmd + K)
+
+### 🎯 Motivo
+Implementación de la funcionalidad #1 del Roadmap ([doc/mejoras.md](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb/Freemind/doc/mejoras.md)): **Paleta de Comandos Rápida (`Ctrl + K` / `Cmd + K`)** para permitir un flujo de trabajo 100% asistido por teclado (Keyboard-First).
+Permite:
+1. **Búsqueda Instantánea y Salto a Nodos**: Buscar cualquier nodo del mapa por texto, notas o etiquetas (`#tag`), centrar suavemente la cámara del lienzo (`focusTarget`) y seleccionarlo.
+2. **Ejecución Instantánea de Comandos**: Crear hijos (`Tab`), hermanos (`Enter`), editar texto (`F2`), cambiar temas del mapa, cambiar layouts (bilateral, árbol, organigrama, radial, circular), alternar formas de nodo (bocadillo, píldora, hexágono, estrella, etc.), alternar sombras, cambiar vistas y exportar.
+3. **Navegación Fluida**: Filtros por pestañas de categoría, sintaxis de prefijos (`>` para comandos/acciones, `@` para nodos del mapa), navegación con flechas (`↑` / `↓`), ejecución con `Enter` y cierre con `ESC`.
+4. **Descubribilidad Visual**: Acceso mediante botón en `ToolBar` (con badge `⌘K`) y en el menú "Ver" de `MenuBar`.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/components/Modals/CommandPaletteModal.tsx` | Componente modal spotlight que indexa nodos y comandos en tiempo real, con scroll automático al elemento activo, soporte de prefijos (`>`, `@`), categorización en pestañas y tema visual adaptativo claro/oscuro. |
+| `src/hooks/useKeyboardShortcuts.ts` | Agregado atajo global `Ctrl + K` / `Cmd + K` con desenfoque automático de inputs/textareas activos (`activeEl.blur()`) y llamada a `onToggleCommandPalette`. |
+| `src/components/MenuBar.tsx` | Prop `onOpenCommandPalette` y botón con icono `Command` y atajo `Ctrl+K` en el menú "Ver". |
+| `src/components/ToolBar.tsx` | Prop `onOpenCommandPalette` y botón rápido con pill `⌘K` junto al buscador en la barra de herramientas. |
+| `src/components/Modals/ShortcutsModal.tsx` | Añadido el atajo `Ctrl + K / ⌘K` en la lista de atajos de navegación. |
+| `src/App.tsx` | Estado `isCommandPaletteOpen`, integración en `isAnyModalOpen` y `handleCloseModals`, conexión a `useKeyboardShortcuts`, `MenuBar`, `ToolBar` y renderizado de `CommandPaletteModal` con callbacks de enfoque y reset. |
+| `src/components/Modals/__tests__/CommandPaletteModal.test.tsx` | Nueva suite de 10 pruebas unitarias con cobertura de renderizado, búsqueda en tiempo real, categorías, navegación por teclado, prefijos `>` / `@` y comandos deshabilitados. |
+| `src/hooks/__tests__/useKeyboardShortcuts.test.ts` | Nueva prueba unitaria verificando `Ctrl+K` incluso cuando el foco está dentro de un elemento `<input>`. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm test:regression`: **35 suites de pruebas superadas, 187/187 pruebas unitarias exitosas (100%)**.
+- [x] `pnpm build`: Compilación de producción exitosa en 7.11s.
+
+
 
 
 

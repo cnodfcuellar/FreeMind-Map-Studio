@@ -34,7 +34,7 @@ FreeMind Map Studio es una suite de mapas mentales y presentaciones interactivas
 ### Comandos (fuente: `package.json`, manda sobre el README)
 - `pnpm install` / `pnpm dev` → http://localhost:3000 (`vite --port=3000 --host=0.0.0.0` fijado en `package.json`).
 - `pnpm lint` = `tsc --noEmit` (solo tipos, no hay ESLint). Verificado: exit 0.
-- `pnpm test` = `vitest run` (176 tests en 34 archivos). ⚠️ En Windows/OneDrive el pool de workers por defecto puede colgarse (timeout 60s, 0 tests); usar `pnpm test:regression` (`vitest run --pool=forks`). Un archivo: `pnpm vitest run src/utils/__tests__/<n>.test.ts`.
+- `pnpm test` = `vitest run` (187 tests en 35 archivos). ⚠️ En Windows/OneDrive el pool de workers por defecto puede colgarse (timeout 60s, 0 tests); usar `pnpm test:regression` (`vitest run --pool=forks`). Un archivo: `pnpm vitest run src/utils/__tests__/<n>.test.ts`.
 - `pnpm build` / `pnpm preview`. `pnpm clean` usa `rm -rf` → falla en PowerShell; borrar `dist/` a mano.
 - Alias `@/*` → raíz del repo (`./`), no `src/` (`tsconfig.json`, `vite.config.ts`). No tocar el bloque `DISABLE_HMR` de `vite.config.ts` (AI Studio lo usa durante ediciones de agentes).
 
@@ -347,11 +347,12 @@ Puro, sin DOM: `estimateNodeSize(node)` + `computeMindMapLayout(map, center)` en
 
 ## 7. Infraestructura de Pruebas y Calidad de Código
 
-Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **176 tests / 34 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
+Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **187 tests / 35 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
 
 - `atoms/__tests__/Atoms.test.tsx` — Badge, Button (+loading), IconButton, Input onChange, ModalBackdrop cierre exterior.
 - `atoms/__tests__/Switch.test.tsx` — Switch conmutador accesible iOS-style con labels y aria-checked.
 - `templates/__tests__/MainEditorLayout.test.tsx` — slots y visibilidad condicional de paneles.
+- `Modals/__tests__/CommandPaletteModal.test.tsx` — Paleta spotlight con filtrado en tiempo real, búsqueda de nodos del mapa, categorías y navegación con flechas/Enter.
 - `molecules/node/__tests__/NodeBackgroundRenderer.test.ts` — geometrías SVG, cálculo de luminancia y doble motor de sombras (`box-shadow` y `drop-shadow`).
 - `molecules/node/__tests__/NodeHeaderRow.test.ts` — renderizado de cabecera, imagen, iconos y sincronización de sombras de texto.
 - `utils/__tests__/layoutEngine.test.ts` — dimensiones y bifurcado estándar (9 layouts).
@@ -361,6 +362,7 @@ Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con
 - `utils/__tests__/edgeUtils.test.ts` — Jerarquía dual de sombras de aristas (global, local y resplandor neón adaptativo).
 - `utils/__tests__/freeplaneConverter.test.ts` — parseo `.mm` y round-trip sin pérdida.
 - `hooks/__tests__/useMindMapStore.test.ts` — 16 pruebas de CRUD, inmutabilidad y 40 pasos de historial.
+- `hooks/__tests__/useKeyboardShortcuts.test.ts` — 7 pruebas de atajos de teclado, navegación y apertura de paleta rápida (`Ctrl+K`).
 
 Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (ejecución robusta con `--pool=forks`) · `pnpm build` (Vite prod en ~7s).
 
@@ -382,7 +384,7 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (eje
 | `PresentationMode.tsx` | Organismo | Clásica en slides (8 temas) |
 | `Presentation/*` (3) | Organismo | Espacial 3D + tarjetas + modal detalle |
 | `MenuBar/ToolBar/FilterBar/StatusBar/OutlineView/MiniMap` | Organismo | Shell: menús, accesos, búsqueda, métricas, esquema, radar |
-| `Modals/*` (7) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` (incluye `ConnectorModal.tsx` dual Crear/Editar) |
+| `Modals/*` (8) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` (incluye `CommandPaletteModal.tsx` spotlight y `ConnectorModal.tsx` dual Crear/Editar) |
 | `atoms/*` (12) | Átomo | Button, IconButton, Input, Badge, ModalBackdrop, ErrorBoundary, CollapsibleSection, ColorPicker, SliderInput, Switch, ToggleButton(+Group) |
 | `molecules/*` (7) | Molécula | ModalHeader, SearchInput, HistoryControls, ZoomControls, FontFormatToolbar, ShapeSelector, TagManager |
 | `hooks/useMindMapStore.ts` | Store | CRUD, historial 40, clipboard con IDs nuevos, propagación estilos/iconos/sombras |

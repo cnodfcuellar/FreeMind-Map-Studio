@@ -129,23 +129,39 @@ Arquitectura modular donde cada objeto posee su propio subpanel e interruptor de
 
 ---
 
+### 1.4. ⌨️ Paleta de Comandos Rápida (`Ctrl + K` / `Cmd + K`) (Completado)
+* **Ubicación:** Accesible globalmente mediante el atajo de teclado `Ctrl + K` (Windows/Linux) o `Cmd + K` (macOS), así como mediante el botón interactivo con pill `⌘K` en la `ToolBar` y en el menú *"Ver"* de `MenuBar`.
+* **Capacidades Principales:**
+  - **Buscador Universal de Nodos en Tiempo Real:** Indexa de inmediato todos los nodos del mapa mental por título, cuerpo/nota explicativa o `#etiquetas`. Al seleccionar un nodo, el lienzo ejecuta un vuelo cinemático suave y centra la cámara sobre el nodo (`focusTarget`) seleccionándolo automáticamente.
+  - **Ejecución Instantánea de Comandos y Atajos:** Acceso directo a acciones de nodo (`Tab` para hijo, `Enter` para hermano, `F2` para editar texto, `Espacio` para plegar/desplegar, `Supr` para borrar, copiar/pegar rama, crear conectores flotantes, alternar nubes, selector de iconos, reseteo de formato y propagación de estilos).
+  - **Selector Rápido de Temas y Diseños:** Aplicación inmediata de los 8 temas del mapa (Clásico Azul, Arcoíris, Modo Oscuro, Bosque, etc.) y los 9 layouts de distribución (bilateral, equilibrado, árbol derecho/izquierdo, organigrama descendente/ascendente, radial 360° y circular).
+  - **Conmutación Rápida de Formas y Sombras:** Alternar formas de nodo (bocadillo, rectángulo, píldora, círculo, óvalo, hexágono, flecha, estrella, fork) y sombras en vivo.
+  - **Vistas y Modos de Presentación:** Lanzar presentación dinámica (`F5`), clásica o elaborada espacial; alternar panel de esquema (`Alt+O`), propiedades (`Alt+P`) o barra de filtros (`Ctrl+F`).
+  - **Gestión de Archivos y UI:** Guardar mapa, ver mapas guardados, plantillas, exportar, atajos de teclado y alternar tema de interfaz (claro, oscuro, sepia).
+* **Navegación Fluida por Teclado:**
+  - Flechas `↑` y `↓` para recorrer resultados con desplazamiento automático a la fila activa (`scrollIntoView`).
+  - `↵ Enter` para ejecutar el comando seleccionado y cerrar la paleta.
+  - `ESC` para cerrar instantáneamente.
+  - Pestañas de categoría (`Todos`, `Acciones`, `Nodos`, `Temas`, `Diseño`, `Formas`, `Sombras`, `Vistas`, `Archivo`).
+  - Sintaxis de prefijos: `>` para buscar únicamente acciones/comandos (excluyendo nodos) y `@` para buscar exclusivamente nodos del mapa.
+
+---
+
 ## 💡 2. Otras Mejoras Planificadas para el Editor
 
-1. **Paleta de Comandos Rápida (`Ctrl + K` / `Cmd + K`)**:
-   - Acceso instantáneo por teclado a todas las acciones: cambiar tema, alternar sombras, buscar nodos, exportar o cambiar layouts.
-2. **Exportación Mejorada a PDF Vectorial**:
-   - Renderizado directo a PDF con paginación inteligente de mapas gigantes.
-3. **Historial Visual de Versiones**:
-   - Visualización gráfica de los 40 pasos del historial de `undo/redo` con miniaturas de restauración.
-4. **Filtros Avanzados por Metadatos**:
+1. **Exportación Mejorada a PDF Vectorial**:
+   - Renderizado directo a PDF con paginación inteligente de mapas gigantes o formato póster de alta definición.
+2. **Historial Visual de Versiones**:
+   - Visualización gráfica de los 40 pasos del historial de `undo/redo` con miniaturas de restauración previa.
+3. **Filtros Avanzados por Metadatos**:
    - Filtrar el mapa por fecha de modificación, porcentaje de avance (`progress`) o combinación booleana de `#tags`.
 
 ---
 
 ## 📊 3. Estado de Calidad Actual
 
-* **TypeScript (`pnpm lint`):** 0 errores.
-* **Cobertura de Pruebas (`pnpm test:regression`):** 34 archivos pasados, **176/176 tests exitosos (100%)**.
+* **TypeScript (`pnpm lint`):** 0 errores (`tsc --noEmit`).
+* **Cobertura de Pruebas (`pnpm test:regression`):** 35 archivos pasados, **187/187 tests exitosos (100%)**.
 * **Compilación de Producción (`pnpm build`):** Exitosa con Vite.
 * **Servidor Dev:** Operativo en `http://localhost:3000/`.
 

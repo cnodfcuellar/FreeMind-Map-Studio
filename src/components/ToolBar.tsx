@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MindNode, NodeShape, MindMap, LayoutType, EdgeStyle, EdgeProfile } from '../types/mindmap';
 
 import {
+  Command,
   Plus,
   FolderPlus,
   Trash2,
@@ -53,6 +54,7 @@ interface ToolBarProps {
   onToggleOutline: () => void;
   onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
   onToggleFilterBar: () => void;
+  onOpenCommandPalette?: () => void;
   onToggleToolPanel: () => void;
   onOpenConnectorModal: () => void;
   onToggleCloud: () => void;
@@ -82,6 +84,7 @@ export const ToolBar: React.FC<ToolBarProps> = ({
   onToggleOutline,
   onStartPresentation,
   onToggleFilterBar,
+  onOpenCommandPalette,
   onToggleToolPanel,
   onOpenConnectorModal,
   onToggleCloud,
@@ -374,6 +377,21 @@ export const ToolBar: React.FC<ToolBarProps> = ({
 
       {/* Right group: Modes & Panels */}
       <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+        {/* Command Palette (Ctrl+K) */}
+        {onOpenCommandPalette && (
+          <button
+            title="Paleta de Comandos Rápida (Ctrl+K / ⌘K)"
+            onClick={onOpenCommandPalette}
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg font-semibold text-xs transition-colors shrink-0 text-[var(--sp-text)] hover:bg-[var(--sp-hover)] cursor-pointer"
+          >
+            <Command className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            <span className="hidden xl:inline">Comandos</span>
+            <kbd className="hidden sm:inline-block px-1 py-0.2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-[9px] font-mono text-slate-500">
+              ⌘K
+            </kbd>
+          </button>
+        )}
+
         {/* Search & Filter */}
         <button
           title="Buscar y Filtrar (Ctrl+F)"

@@ -42,6 +42,7 @@ import { TemplatesModal } from './components/Modals/TemplatesModal';
 import { SavedMapsModal } from './components/Modals/SavedMapsModal';
 import { ConnectorModal } from './components/Modals/ConnectorModal';
 import { IconPackModal } from './components/Modals/IconPackModal';
+import { CommandPaletteModal } from './components/Modals/CommandPaletteModal';
 import { ElaboratePresentationSystem } from './components/Presentation/ElaboratePresentationSystem';
 
 export default function App() {
@@ -96,6 +97,7 @@ export default function App() {
   const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
   const [isSavedMapsModalOpen, setIsSavedMapsModalOpen] = useState(false);
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
   const [editingConnector, setEditingConnector] = useState<Connector | null>(null);
   const [presentationType, setPresentationType] = useState<'classic' | 'dynamic' | 'elaborate'>('dynamic');
@@ -113,6 +115,7 @@ export default function App() {
       isTemplatesModalOpen ||
       isSavedMapsModalOpen ||
       isIconPackModalOpen ||
+      isCommandPaletteOpen ||
       connectorSourceId ||
       editingConnector
   );
@@ -123,6 +126,7 @@ export default function App() {
     setIsTemplatesModalOpen(false);
     setIsSavedMapsModalOpen(false);
     setIsIconPackModalOpen(false);
+    setIsCommandPaletteOpen(false);
     setConnectorSourceId(null);
     setEditingConnector(null);
   };
@@ -131,6 +135,7 @@ export default function App() {
   useKeyboardShortcuts({
     isAnyModalOpen,
     onCloseModals: handleCloseModals,
+    onToggleCommandPalette: () => setIsCommandPaletteOpen((prev) => !prev),
   });
 
   // Tema activo y Filtro
@@ -140,6 +145,59 @@ export default function App() {
 
   const { searchMatches, availableTags } = useSearchFilter(mindMap, filterOptions);
   const selectedNode = selectedNodeId ? mindMap.nodes[selectedNodeId] || null : null;
+
+  const handleResetNodeFormat = () => {
+    if (selectedNode) {
+      updateNode(selectedNode.id, {
+        shape: 'bubble',
+        color: undefined,
+        textColor: undefined,
+        borderColor: undefined,
+        borderWidth: undefined,
+        borderDash: undefined,
+        borderStyle: undefined,
+        bgType: undefined,
+        gradientColor1: undefined,
+        gradientColor2: undefined,
+        gradientDirection: undefined,
+        nodePattern: undefined,
+        nodePatternColor: undefined,
+        nodePatternSize: undefined,
+        nodePatternOpacity: undefined,
+        nodeShadow: false,
+        nodeShadowPreset: undefined,
+        nodeShadowBlur: undefined,
+        nodeShadowOffsetY: undefined,
+        nodeShadowColor: undefined,
+        textShadow: false,
+        textShadowPreset: undefined,
+        textShadowColor: undefined,
+        textShadowBlur: undefined,
+        textShadowOffsetX: undefined,
+        textShadowOffsetY: undefined,
+        applyTextShadowToBody: undefined,
+        imageShadow: undefined,
+        imageShadowPreset: undefined,
+        imageShadowBlur: undefined,
+        imageShadowColor: undefined,
+        edgeShadow: undefined,
+        edgeShadowPreset: undefined,
+        edgeShadowBlur: undefined,
+        edgeShadowOffsetY: undefined,
+        edgeShadowColor: undefined,
+        tailLength: undefined,
+        tailWidth: undefined,
+        tailSide: undefined,
+        tailOffset: undefined,
+        tailStyle: undefined,
+        bodyFontSize: 13,
+        bodyBold: false,
+        bodyItalic: false,
+        bodyColor: undefined,
+        bodyAlign: 'left',
+      });
+    }
+  };
 
   return (
     <ErrorBoundary fallbackTitle="Error en el Editor de Mapas Mentales">
@@ -187,6 +245,7 @@ export default function App() {
             setIsPresentationMode(true);
           }}
           onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onToggleFullscreen={() => {
             if (!document.fullscreenElement) {
               document.documentElement.requestFullscreen();
@@ -230,68 +289,7 @@ export default function App() {
           onChangeShape={(shape) => {
             if (selectedNode) updateNode(selectedNode.id, { shape });
           }}
-          onResetFormat={() => {
-            if (selectedNode) {
-              updateNode(selectedNode.id, {
-                shape: 'bubble',
-                color: undefined,
-                textColor: undefined,
-                borderColor: undefined,
-                borderWidth: undefined,
-                borderDash: undefined,
-                borderStyle: undefined,
-                bgType: 'color',
-                gradientColor1: undefined,
-                gradientColor2: undefined,
-                gradientDirection: undefined,
-                nodePattern: undefined,
-                nodePatternColor: undefined,
-                nodePatternSize: undefined,
-                nodePatternOpacity: undefined,
-                bold: false,
-                italic: false,
-                fontSize: 14,
-                fontFamily: undefined,
-                textAlign: 'center',
-                // Sombra de contorno
-                nodeShadow: undefined,
-                nodeShadowPreset: undefined,
-                nodeShadowBlur: undefined,
-                nodeShadowOffsetY: undefined,
-                nodeShadowColor: undefined,
-                // Sombra de texto
-                textShadow: undefined,
-                textShadowPreset: undefined,
-                textShadowColor: undefined,
-                textShadowBlur: undefined,
-                textShadowOffsetX: undefined,
-                textShadowOffsetY: undefined,
-                applyTextShadowToBody: undefined,
-                // Sombra de imagen
-                imageShadow: undefined,
-                imageShadowPreset: undefined,
-                imageShadowBlur: undefined,
-                imageShadowColor: undefined,
-                // Sombra de arista local
-                edgeShadow: undefined,
-                edgeShadowPreset: undefined,
-                edgeShadowBlur: undefined,
-                edgeShadowOffsetY: undefined,
-                edgeShadowColor: undefined,
-                // Colita anatómica
-                tailLength: undefined,
-                tailWidth: undefined,
-                tailSide: undefined,
-                tailOffset: undefined,
-                tailStyle: undefined,
-                bodyFontSize: 13,
-                bodyBold: false,
-                bodyItalic: false,
-                bodyColor: undefined,
-                bodyAlign: 'left',
-              });
-            }
-          }}
+          onResetFormat={handleResetNodeFormat}
         />
       }
       toolBar={
@@ -310,6 +308,7 @@ export default function App() {
           onToggleOutline={() => setIsOutlineOpen((o) => !o)}
           onToggleToolPanel={() => setIsToolPanelOpen((t) => !t)}
           onToggleFilterBar={() => setIsFilterBarOpen((f) => !f)}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onToggleGlobalVisibility={(key: 'hideAllBodies' | 'hideAllImages' | 'hideAllTags' | 'hideAllIcons' | 'hideAllLinks') => {
             pushHistory(mindMap);
             setMindMap((m) => ({ ...m, [key]: !m[key], updatedAt: Date.now() }));
@@ -770,6 +769,130 @@ export default function App() {
                 updatedAt: Date.now(),
               }));
             }}
+          />
+
+          <CommandPaletteModal
+            isOpen={isCommandPaletteOpen}
+            onClose={() => setIsCommandPaletteOpen(false)}
+            mindMap={mindMap}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={(nodeId) => setSelectedNodeId(nodeId)}
+            onFocusNode={(nodeId) => setFocusTarget({ nodeId, timestamp: Date.now() })}
+            onAddChild={() => handleAddChild()}
+            onAddSibling={() => handleAddSibling()}
+            onDeleteNode={() => handleDeleteNode()}
+            onToggleFold={() => handleToggleFold()}
+            onFoldAll={handleFoldAll}
+            onUnfoldAll={handleUnfoldAll}
+            onEditNode={(nodeId) => {
+              if (nodeId) setSelectedNodeId(nodeId);
+              setEditingNodeId(nodeId || selectedNodeId || mindMap.rootId);
+            }}
+            onToggleOutline={() => setIsOutlineOpen((o) => !o)}
+            onToggleToolPanel={() => setIsToolPanelOpen((t) => !t)}
+            onToggleFilterBar={() => setIsFilterBarOpen((f) => !f)}
+            onStartPresentation={(mode) => {
+              if (mode === 'elaborate') {
+                setPresentationType('elaborate');
+              } else if (mode === 'classic') {
+                setPresentationType('classic');
+              } else {
+                setPresentationType('dynamic');
+              }
+              setIsPresentationMode(true);
+            }}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            canUndo={historyPast.length > 0}
+            canRedo={historyFuture.length > 0}
+            onOpenTemplates={() => setIsTemplatesModalOpen(true)}
+            onOpenSavedMaps={() => setIsSavedMapsModalOpen(true)}
+            onOpenExportModal={() => setIsExportModalOpen(true)}
+            onOpenImportModal={() => setIsExportModalOpen(true)}
+            onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
+            onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
+            onOpenIconPackModal={() => setIsIconPackModalOpen(true)}
+            onUpdateMapTheme={(themeId) => {
+              pushHistory(mindMap);
+              setMindMap((m) => ({ ...m, themeId, updatedAt: Date.now() }));
+            }}
+            onUpdateMapLayout={(layout) => {
+              pushHistory(mindMap);
+              setMindMap((m) => ({ ...m, layout, updatedAt: Date.now() }));
+            }}
+            onChangeShape={(shape) => {
+              if (selectedNode) updateNode(selectedNode.id, { shape });
+            }}
+            onToggleCloud={() => {
+              if (selectedNodeId) {
+                const curr = mindMap.nodes[selectedNodeId];
+                updateNode(selectedNodeId, {
+                  cloud: curr?.cloud?.enabled
+                    ? undefined
+                    : {
+                        enabled: true,
+                        color: '#3b82f6',
+                        shape: 'cloud-scallop',
+                        opacity: 0.08,
+                        bgType: 'color',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1.5,
+                        borderDash: 'dashed',
+                        shadow: true,
+                      },
+                });
+              }
+            }}
+            onToggleFullscreen={() => {
+              if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+              } else {
+                document.exitFullscreen();
+              }
+            }}
+            onResetFormat={handleResetNodeFormat}
+            uiTheme={uiTheme}
+            onChangeUiTheme={(theme) => setUiTheme(theme)}
+            onToggleGlobalVisibility={(key) => {
+              pushHistory(mindMap);
+              setMindMap((m) => ({ ...m, [key]: !m[key], updatedAt: Date.now() }));
+            }}
+            onToggleNodeShadow={() => {
+              if (selectedNodeId) {
+                const curr = mindMap.nodes[selectedNodeId];
+                const next = !curr.nodeShadow;
+                updateNode(selectedNodeId, {
+                  nodeShadow: next,
+                  nodeShadowPreset: next ? curr.nodeShadowPreset || 'soft' : undefined,
+                });
+              }
+            }}
+            onToggleEdgeShadow={() => {
+              pushHistory(mindMap);
+              setMindMap((m) => ({
+                ...m,
+                edgeShadow: !m.edgeShadow,
+                edgeShadowPreset: !m.edgeShadow ? m.edgeShadowPreset || 'soft' : undefined,
+                updatedAt: Date.now(),
+              }));
+            }}
+            onSaveMap={() => saveCurrentMap(mindMap)}
+            onNewMap={() => {
+              pushHistory(mindMap);
+              setMindMap({
+                ...BLANK_MAP,
+                id: `map-${Date.now()}`,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+              });
+              setSelectedNodeId('root');
+            }}
+            onCopyNode={handleCopyNode}
+            onCutNode={handleCutNode}
+            onPasteNode={handlePasteNode}
+            onRandomizeColors={handleRandomizeEdgeColors}
+            onApplyStyleToChildren={() => selectedNodeId && handleApplyStyleToChildren(selectedNodeId)}
+            onApplyStyleToSiblings={() => selectedNodeId && handleApplyStyleToSiblings(selectedNodeId)}
           />
         </>
       }

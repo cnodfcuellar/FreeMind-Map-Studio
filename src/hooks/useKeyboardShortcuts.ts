@@ -4,9 +4,14 @@ import { useMindMapStore } from './useMindMapStore';
 interface UseKeyboardShortcutsProps {
   isAnyModalOpen: boolean;
   onCloseModals: () => void;
+  onToggleCommandPalette?: () => void;
 }
 
-export function useKeyboardShortcuts({ isAnyModalOpen, onCloseModals }: UseKeyboardShortcutsProps) {
+export function useKeyboardShortcuts({
+  isAnyModalOpen,
+  onCloseModals,
+  onToggleCommandPalette,
+}: UseKeyboardShortcutsProps) {
   const {
     mindMap,
     selectedNodeId,
@@ -32,6 +37,17 @@ export function useKeyboardShortcuts({ isAnyModalOpen, onCloseModals }: UseKeybo
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeEl = document.activeElement;
       const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+      // Command Palette (Ctrl + K / Cmd + K)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (isTyping) {
+          (activeEl as HTMLElement).blur();
+          setEditingNodeId(null);
+        }
+        onToggleCommandPalette?.();
+        return;
+      }
 
       if (isTyping) {
         if (e.key === 'Escape') {
@@ -202,6 +218,7 @@ export function useKeyboardShortcuts({ isAnyModalOpen, onCloseModals }: UseKeybo
     isPresentationMode,
     isAnyModalOpen,
     onCloseModals,
+    onToggleCommandPalette,
     handleAddChild,
     handleAddSibling,
     handleDeleteNode,

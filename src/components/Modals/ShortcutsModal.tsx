@@ -22,6 +22,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
     { key: 'Ctrl + Z', desc: 'Deshacer la última acción', cat: 'Historial' },
     { key: 'Ctrl + Y', desc: 'Rehacer la acción deshecha', cat: 'Historial' },
     { key: 'Ctrl + C / X / V', desc: 'Copiar, cortar y pegar ramas completas', cat: 'Portapapeles' },
+    { key: 'Ctrl + K / ⌘K', desc: 'Abrir paleta de comandos rápida y búsqueda de nodos', cat: 'Navegación' },
     { key: 'Ctrl + F', desc: 'Abrir la barra de búsqueda y filtrado', cat: 'Vistas' },
     { key: 'Alt + O', desc: 'Mostrar u ocultar el panel lateral de esquema', cat: 'Vistas' },
     { key: 'Alt + P', desc: 'Mostrar u ocultar el panel de propiedades', cat: 'Vistas' },

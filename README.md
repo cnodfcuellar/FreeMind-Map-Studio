@@ -9,7 +9,7 @@
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Zustand](https://img.shields.io/badge/Zustand-5-433D37?style=for-the-badge)](https://zustand-demo.pmnd.rs/)
-[![Vitest](https://img.shields.io/badge/Tests-176%2F176%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
+[![Vitest](https://img.shields.io/badge/Tests-187%2F187%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
 [![Motion](https://img.shields.io/badge/Motion-12-ea580c?style=for-the-badge&logo=framer&logoColor=white)](https://motion.dev)
 [![Antigravity IDE](https://img.shields.io/badge/Antigravity%20IDE-2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
@@ -312,6 +312,7 @@ freemind-map-studio/
 │   │   └── StatusBar.tsx              # Barra de estado inferior con métricas en tiempo real
 │   │
 │   ├── 📂 Modals/                     # MODALES ESTANDARIZADOS (con ModalBackdrop + ModalHeader)
+│   │   ├── CommandPaletteModal.tsx    # Paleta de comandos spotlight (Ctrl+K) y buscador universal de nodos
 │   │   ├── ExportImportModal.tsx      # Exportación a 4 formatos e importación .mm/.json
 │   │   ├── ShortcutsModal.tsx         # Guía de atajos de teclado
 │   │   ├── TemplatesModal.tsx         # Galería con +20 plantillas profesionales
@@ -371,6 +372,7 @@ freemind-map-studio/
 
 | Atajo | Acción |
 |-------|--------|
+| `Ctrl+K` / `⌘K` | Abrir **paleta de comandos rápida** y buscador de nodos |
 | `Ctrl+F` | Abrir / Cerrar barra de búsqueda y filtrado |
 | `Alt+O` | Abrir / Cerrar vista de Esquema (`OutlineView`) |
 | `Alt+P` | Abrir / Cerrar panel de propiedades (`ToolPanel`) |

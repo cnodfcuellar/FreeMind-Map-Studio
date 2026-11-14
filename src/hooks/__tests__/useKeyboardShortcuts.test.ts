@@ -106,4 +106,22 @@ describe('useKeyboardShortcuts', () => {
     });
     expect(useMindMapStore.getState().selectedNodeId).toBe('node-1');
   });
+
+  it('Ctrl+K llama onToggleCommandPalette incluso si está enfocado en input', () => {
+    const onTogglePalette = vi.fn();
+    renderHook(() =>
+      useKeyboardShortcuts({
+        isAnyModalOpen: false,
+        onCloseModals: vi.fn(),
+        onToggleCommandPalette: onTogglePalette,
+      })
+    );
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+
+    press('k', { ctrlKey: true });
+    expect(onTogglePalette).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(document.body);
+  });
 });

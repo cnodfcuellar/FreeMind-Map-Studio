@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MindMap, NodeShape } from '../types/mindmap';
 import { UiTheme } from '../utils/uiTheme';
 import {
+  Command,
   FileText,
   Save,
   FolderOpen,
@@ -54,6 +55,7 @@ interface MenuBarProps {
   onToggleOutline: () => void;
   onStartPresentation: (mode?: 'classic' | 'dynamic' | 'elaborate') => void;
   onOpenShortcuts: () => void;
+  onOpenCommandPalette?: () => void;
   onToggleFullscreen: () => void;
   onFoldAll: () => void;
   onUnfoldAll: () => void;
@@ -86,6 +88,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onToggleOutline,
   onStartPresentation,
   onOpenShortcuts,
+  onOpenCommandPalette,
   onToggleFullscreen,
   onFoldAll,
   onUnfoldAll,
@@ -428,6 +431,18 @@ export const MenuBar: React.FC<MenuBarProps> = ({
           </button>
           {openMenu === 'view' && (
             <div className="absolute top-full left-0 mt-1 w-56 bg-[var(--sp-bg)] text-[var(--sp-text)] rounded-xl shadow-2xl border border-slate-200 py-1.5 z-50">
+              {onOpenCommandPalette && (
+                <>
+                  <button
+                    onClick={() => { onOpenCommandPalette(); setOpenMenu(null); }}
+                    className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600 font-medium"
+                  >
+                    <span className="flex items-center gap-2"><Command className="w-3.5 h-3.5 text-blue-600" /> Paleta de Comandos</span>
+                    <kbd className="text-[10px] text-slate-400 font-mono">Ctrl+K</kbd>
+                  </button>
+                  <div className="my-1 border-t border-slate-100" />
+                </>
+              )}
               <button
                 onClick={() => { onToggleOutline(); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center justify-between hover:bg-blue-50 hover:text-blue-600"

@@ -1424,16 +1424,19 @@ Comportamientos:
 - **IconPackModal** (5xl 90vh): sidebar 12 categorías con conteos,
   buscador + sugerencias, grid hasta 10 col, preview + copiar SVG/copiar ID,
   clic alterna icono del nodo.
-- **ShortcutsModal** (lg): tabla de 16 atajos con `kbd`.
+- **CommandPaletteModal** (2xl): paleta spotlight (Ctrl+K / ⌘K) con buscador universal en tiempo real de nodos del mapa, comandos, selector de temas/layouts/formas/sombras, categorías y prefijos (`>`, `@`).
+- **ShortcutsModal** (lg): tabla de atajos con `kbd`.
 - *(ComingSoonModal: **eliminado** 2026-10-17 — era un modal huérfano; ver `doc/DESIGN.md` §8.5.7)*
 
-## 5. Tests: cómo están organizados (34 archivos, 176 tests)
+## 5. Tests: cómo están organizados (35 archivos, 187 tests)
 
 ```
 src/**/__tests__/*.test.{ts,tsx}   ← junto al código que prueban
 src/test/setup.ts                  ← polyfills matchMedia + ResizeObserver
 ```
 - **Nuevas utilidades probadas**:
+  - `CommandPaletteModal.test.tsx`: 10 pruebas cubriendo buscador spotlight, navegación con flechas/Enter, filtrado de nodos con auto-centrado (`focusTarget`), categorías y prefijos `>` y `@`.
+  - `useKeyboardShortcuts.test.ts`: atajos globales, navegación, guards de modal y apertura de paleta con `Ctrl+K` incluso dentro de inputs.
   - `Switch.test.tsx`: verificación de renderizado accesible, teclado (Espacio/Enter), clases de tamaño y callback `onChange`.
   - `bubbleTailUtils.test.ts`: 12 especificaciones de geometría SVG, orientación cardinal (`bottom`, `top`, `left`, `right`), cálculo de anclaje relativo a padre (`auto`) y estilos (recto, curvo, pensamiento).
   - `cloudUtils.test.ts`: generación de siluetas `<path>` subyacentes con `drop-shadow` para nubes con fondos translúcidos.
@@ -1462,7 +1465,7 @@ index.html → main.tsx → App → MainEditorLayout (slots)
   ├── MindMapCanvas → layoutEngine + NodeComponent (átomos→moléculas)
   ├── ToolPanel (6 tabs) + OutlineView + MiniMap
   ├── PresentationMode / Elaborate / CanvasPresentation (3 modos)
-  └── Modales (7) + Store Zustand + localStorage
+  └── Modales (8) + Store Zustand + localStorage
 ```
 
 **Si solo recuerdas 5 cosas:** tipos centrales · store inmutable con
