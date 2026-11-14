@@ -33,7 +33,7 @@ Stack: Tailwind CSS v4 (`@import "tailwindcss"`, sin `tailwind.config`, sin toke
 - Flotantes: `shadow-lg` (ZoomControls), `shadow-xl` (ToolPanel lateral, Outline), `shadow-2xl` (modales, dropdowns, popovers, tooltips).
 - Canvas: nodo normal `shadow-xs`, `hover:shadow-md`; seleccionado `shadow-md`; forma `bubble` inline `0 4px 14px -2px rgba(0,0,0,0.10)`.
 - **Sistema Modular de Sombras (Switch ON/OFF granular)**:
-  * **Texto (`textShadow`)**: ToolPanel > Texto. Presets `soft` (`0 1px 3px rgba(0,0,0,0.65)`), `medium`, `deep`, `glow` (`#38bdf8`), slider de blur y color.
+  * **Texto (`textShadow`)**: ToolPanel > Texto. Control compacto con segmented control de 4 estados (`Off`, `Suave`, `Media`, `Glow`), stepper de blur milimétrico (`[−] 3px [+]`), swatch de color con popover flotante y toggle "En cuerpo".
   * **Imagen adjunta (`imageShadow`)**: ToolPanel > Texto > Imagen. CSS `filter: drop-shadow(...)` contorneando siluetas transparentes PNG.
   * **Contorno del Nodo (`nodeShadow`)**: ToolPanel > Estilos > Bordes y Contorno. `box-shadow` en nodos estándar curvos y `filter: drop-shadow(...)` en siluetas poligonales (`hexagon`, `arrow`, `star`). Presets: `Suave` (`0 3px 8px`), `Media` (`0 6px 14px`), `3D` (`0 10px 24px 2px`), `Glow` (`0 0 16px #38bdf8`), sliders de Blur (1-40px), OffsetY (0-30px) y selector de color.
   * **Nubes Envolventes (`cloudShadow`)**: ToolPanel > Nube > Borde y Sombra. Silueta sólida `<path>` subyacente con `filter: drop-shadow(...)` para efecto de "Isla Conceptual" transparente sin filtrado interior. Presets: `Suave` (`0 2px 8px`), `Isla 3D` (`0 8px 20px`), `Profunda` (`0 14px 28px`), `Glow` (`0 0 16px`), sliders de Opacidad (5-100%), Blur (2-30px), OffsetY (0-20px) y color.

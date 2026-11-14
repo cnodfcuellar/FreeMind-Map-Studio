@@ -1,0 +1,539 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 940" width="1440" height="940" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Filtros de Sombra -->
+    <filter id="shadow-panel" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+    <filter id="shadow-badge" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+    
+    <!-- Gradientes -->
+    <linearGradient id="grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="grad-card-current" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="bg-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo Principal -->
+  <rect width="1440" height="940" fill="#090d16" />
+  <rect width="1440" height="940" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera Principal -->
+  <rect x="40" y="24" width="1360" height="64" rx="12" fill="url(#grad-header)" stroke="#1e293b" stroke-width="1.5" />
+  <circle cx="70" cy="56" r="16" fill="#3b82f6" />
+  <text x="70" y="62" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle">🎨</text>
+  <text x="100" y="50" font-size="18" font-weight="700" fill="#ffffff">Propuestas de Rediseño de la Interfaz — Panel de Formas y Bocadillos (ToolPanel)</text>
+  <text x="100" y="70" font-size="12" fill="#94a3b8">Comparativa visual entre el diseño actual y 3 alternativas para eliminar textos truncados, redundancias y scroll excesivo</text>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 1: ESTADO ACTUAL (DIAGNÓSTICO DE PROBLEMAS)                      -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 110)">
+    <!-- Marco del Panel Actual -->
+    <rect x="0" y="0" width="310" height="800" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="310" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#ef4444" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">✕</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#1e293b">Estado Actual (Problemas)</text>
+    <rect x="220" y="10" width="75" height="20" rx="10" fill="#fee2e2" />
+    <text x="257" y="24" font-size="9" font-weight="700" fill="#dc2626" text-anchor="middle">SATURADO</text>
+
+    <!-- Grid de Formas Actual con Textos Truncados -->
+    <g transform="translate(15, 55)">
+      <text x="0" y="0" font-size="10" font-weight="700" fill="#64748b">1. GRID 5x2 (NOMBRES CORTADOS):</text>
+      
+      <!-- Fila 1 de formas -->
+      <g transform="translate(0, 10)">
+        <!-- Bur... -->
+        <rect x="0" y="0" width="52" height="48" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8" />
+        <rect x="18" y="8" width="16" height="12" rx="2" fill="none" stroke="#2563eb" stroke-width="1.5" />
+        <text x="26" y="38" font-size="9" font-weight="700" fill="#dc2626" text-anchor="middle">Bur...</text>
+
+        <!-- Hor... -->
+        <rect x="57" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <line x1="72" y1="16" x2="94" y2="16" stroke="#64748b" stroke-width="2" />
+        <text x="83" y="38" font-size="9" fill="#dc2626" text-anchor="middle">Hor...</text>
+
+        <!-- Rect... -->
+        <rect x="114" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <rect x="127" y="10" width="26" height="14" fill="none" stroke="#64748b" stroke-width="1.5" />
+        <text x="140" y="38" font-size="9" fill="#dc2626" text-anchor="middle">Rect...</text>
+
+        <!-- Cua... -->
+        <rect x="171" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <rect x="188" y="10" width="18" height="18" fill="none" stroke="#64748b" stroke-width="1.5" />
+        <text x="197" y="38" font-size="9" fill="#dc2626" text-anchor="middle">Cua...</text>
+
+        <!-- Ovalo -->
+        <rect x="228" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <ellipse cx="254" cy="19" rx="13" ry="8" fill="none" stroke="#64748b" stroke-width="1.5" />
+        <text x="254" y="38" font-size="9" fill="#64748b" text-anchor="middle">Ovalo</text>
+      </g>
+
+      <!-- Fila 2 de formas -->
+      <g transform="translate(0, 64)">
+        <rect x="0" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="26" y="38" font-size="9" fill="#dc2626" text-anchor="middle">Circ...</text>
+
+        <rect x="57" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="83" y="38" font-size="9" fill="#dc2626" text-anchor="middle">Pild...</text>
+
+        <rect x="114" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="140" y="38" font-size="9" fill="#dc2626" text-anchor="middle">Hex...</text>
+
+        <rect x="171" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="197" y="38" font-size="9" fill="#64748b" text-anchor="middle">Flecha</text>
+
+        <rect x="228" y="0" width="52" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <text x="254" y="38" font-size="9" fill="#dc2626" text-anchor="middle">Estre...</text>
+      </g>
+    </g>
+
+    <!-- Alerta de Texto Truncado -->
+    <g transform="translate(15, 185)">
+      <rect x="0" y="0" width="280" height="28" rx="6" fill="#fef2f2" stroke="#f87171" stroke-width="1" />
+      <text x="140" y="18" font-size="9" font-weight="700" fill="#b91c1c" text-anchor="middle">⚠️ 8 de 10 nombres cortados con "..."</text>
+    </g>
+
+    <!-- Sliders de Ancho y Alto Fijos (Roban Espacio) -->
+    <g transform="translate(15, 225)">
+      <text x="0" y="0" font-size="10.5" font-weight="700" fill="#334155">Ancho personalizado</text>
+      <text x="240" y="0" font-size="9" fill="#2563eb" font-weight="700">Auto</text>
+      <line x1="0" y1="12" x2="280" y2="12" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round" />
+      <circle cx="8" cy="12" r="5" fill="#2563eb" />
+      
+      <text x="0" y="34" font-size="10.5" font-weight="700" fill="#334155">Alto personalizado</text>
+      <text x="240" y="34" font-size="9" fill="#2563eb" font-weight="700">Auto</text>
+      <line x1="0" y1="46" x2="280" y2="46" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round" />
+      <circle cx="8" cy="46" r="5" fill="#2563eb" />
+    </g>
+
+    <!-- Anatomía de la Colita (Exceso de Sliders y Presets Repetidos) -->
+    <g transform="translate(15, 295)">
+      <line x1="0" y1="0" x2="280" y2="0" stroke="#e2e8f0" stroke-width="1" />
+      <text x="0" y="18" font-size="11" font-weight="700" fill="#1e293b">💬 Anatomía de la Colita</text>
+
+      <!-- Longitud: Slider + Presets -->
+      <g transform="translate(0, 30)">
+        <text x="0" y="0" font-size="10" font-weight="600" fill="#475569">Longitud (20px)</text>
+        <line x1="0" y1="10" x2="280" y2="10" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round" />
+        <circle cx="180" cy="10" r="5" fill="#2563eb" />
+        <rect x="0" y="20" width="65" height="22" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="32" y="34" font-size="8.5" fill="#64748b" text-anchor="middle">Ninguna</text>
+        <rect x="71" y="20" width="65" height="22" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="103" y="34" font-size="8.5" fill="#64748b" text-anchor="middle">Corta</text>
+        <rect x="142" y="20" width="65" height="22" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="174" y="34" font-size="8.5" fill="#64748b" text-anchor="middle">Media</text>
+        <rect x="213" y="20" width="67" height="22" rx="4" fill="#eff6ff" stroke="#3b82f6" />
+        <text x="246" y="34" font-size="8.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">Larga (20)</text>
+      </g>
+
+      <!-- Orientación 5 botones apiñados -->
+      <g transform="translate(0, 95)">
+        <text x="0" y="0" font-size="10" font-weight="600" fill="#475569">Orientación (5 botones apretados)</text>
+        <rect x="0" y="8" width="52" height="24" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="26" y="23" font-size="8.5" fill="#64748b" text-anchor="middle">Auto</text>
+        <rect x="56" y="8" width="52" height="24" rx="4" fill="#eff6ff" stroke="#3b82f6" />
+        <text x="82" y="23" font-size="8.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">↓ Abajo</text>
+        <rect x="112" y="8" width="52" height="24" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="138" y="23" font-size="8.5" fill="#64748b" text-anchor="middle">↑ Arr</text>
+        <rect x="168" y="8" width="52" height="24" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="194" y="23" font-size="8.5" fill="#64748b" text-anchor="middle">← Izq</text>
+        <rect x="224" y="8" width="56" height="24" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="252" y="23" font-size="8.5" fill="#64748b" text-anchor="middle">→ Der</text>
+      </g>
+
+      <!-- Posición %: Slider + Presets -->
+      <g transform="translate(0, 145)">
+        <text x="0" y="0" font-size="10" font-weight="600" fill="#475569">Posición borde (50%)</text>
+        <line x1="0" y1="10" x2="280" y2="10" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round" />
+        <circle cx="140" cy="10" r="5" fill="#2563eb" />
+        <rect x="0" y="20" width="88" height="22" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="44" y="34" font-size="8" fill="#64748b" text-anchor="middle">Inicio (20%)</text>
+        <rect x="94" y="20" width="92" height="22" rx="4" fill="#eff6ff" stroke="#3b82f6" />
+        <text x="140" y="34" font-size="8" font-weight="700" fill="#1d4ed8" text-anchor="middle">Centro (50%)</text>
+        <rect x="192" y="20" width="88" height="22" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="236" y="34" font-size="8" fill="#64748b" text-anchor="middle">Fin (80%)</text>
+      </g>
+
+      <!-- Estilo de Colita -->
+      <g transform="translate(0, 215)">
+        <text x="0" y="0" font-size="10" font-weight="600" fill="#475569">Estilo de Colita</text>
+        <rect x="0" y="8" width="88" height="34" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="44" y="23" font-size="9" font-weight="600" fill="#334155" text-anchor="middle">▲ Recta</text>
+        <rect x="94" y="8" width="92" height="34" rx="6" fill="#eff6ff" stroke="#3b82f6" />
+        <text x="140" y="23" font-size="9" font-weight="700" fill="#1d4ed8" text-anchor="middle">~ Curva</text>
+        <rect x="192" y="8" width="88" height="34" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="236" y="23" font-size="9" font-weight="600" fill="#334155" text-anchor="middle">○ Nube</text>
+      </g>
+
+      <!-- Indicador de Scroll Abusivo -->
+      <g transform="translate(0, 290)">
+        <rect x="0" y="0" width="280" height="42" rx="6" fill="#fff1f2" stroke="#fda4af" stroke-width="1" />
+        <text x="140" y="18" font-size="9" font-weight="700" fill="#e11d48" text-anchor="middle">⚠️ Mide &gt;620px de alto solo esta sección</text>
+        <text x="140" y="32" font-size="8" fill="#9f1239" text-anchor="middle">Desplaza fuera de pantalla colores, bordes y temas</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 2: ALTERNATIVA A — MODERNO & COMPACTO (RECOMENDADA)              -->
+  <!-- ========================================================================= -->
+  <g transform="translate(390, 110)">
+    <rect x="0" y="0" width="310" height="800" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="2" filter="url(#shadow-panel)" />
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="310" height="42" rx="14 14 0 0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#3b82f6" />
+    <text x="20" y="25" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">A</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#1e3a5f">Alternativa A: Moderno Compacto</text>
+    <rect x="225" y="10" width="70" height="20" rx="10" fill="#2563eb" />
+    <text x="260" y="24" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">★ SUGERIDA</text>
+
+    <!-- Grid de Formas Icon-First sin Texto Cortado -->
+    <g transform="translate(15, 55)">
+      <!-- Fila superior de forma activa -->
+      <div className="flex">
+        <text x="0" y="0" font-size="10" font-weight="700" fill="#64748b">FORMA:</text>
+        <rect x="50" y="-12" width="130" height="18" rx="4" fill="#dbeafe" />
+        <text x="115" y="1" font-size="9.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">💬 Bocadillo (Bubble)</text>
+      </div>
+
+      <!-- Iconos limpios en 5 columnas con gran tamaño y sin texto cortado -->
+      <g transform="translate(0, 14)">
+        <!-- Bubble -->
+        <rect x="0" y="0" width="52" height="38" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2" />
+        <path d="M 18 12 L 34 12 Q 38 12 38 16 L 38 24 Q 38 28 34 28 L 26 28 L 22 32 L 22 28 L 18 28 Q 14 28 14 24 L 14 16 Q 14 12 18 12 Z" fill="#2563eb" />
+
+        <!-- Fork -->
+        <rect x="57" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <line x1="72" y1="26" x2="94" y2="26" stroke="#475569" stroke-width="2.5" stroke-linecap="round" />
+
+        <!-- Rectangle -->
+        <rect x="114" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="126" y="12" width="28" height="16" fill="none" stroke="#475569" stroke-width="1.8" />
+
+        <!-- Square -->
+        <rect x="171" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="187" y="11" width="18" height="18" fill="none" stroke="#475569" stroke-width="1.8" />
+
+        <!-- Oval -->
+        <rect x="228" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <ellipse cx="254" cy="19" rx="14" ry="9" fill="none" stroke="#475569" stroke-width="1.8" />
+      </g>
+
+      <!-- Fila 2 -->
+      <g transform="translate(0, 58)">
+        <!-- Circle -->
+        <rect x="0" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <circle cx="26" cy="19" r="10" fill="none" stroke="#475569" stroke-width="1.8" />
+
+        <!-- Pill -->
+        <rect x="57" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <rect x="71" y="13" width="24" height="12" rx="6" fill="none" stroke="#475569" stroke-width="1.8" />
+
+        <!-- Hexagon -->
+        <rect x="114" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <polygon points="132,10 148,10 156,19 148,28 132,28 124,19" fill="none" stroke="#475569" stroke-width="1.8" />
+
+        <!-- Arrow -->
+        <rect x="171" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <path d="M 183 19 L 208 19 M 202 14 L 208 19 L 202 24" stroke="#475569" stroke-width="1.8" stroke-linecap="round" fill="none" />
+
+        <!-- Star -->
+        <rect x="228" y="0" width="52" height="38" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <polygon points="254,10 257,17 264,17 259,21 261,28 254,23 247,28 249,21 244,17 251,17" fill="none" stroke="#475569" stroke-width="1.5" />
+      </g>
+    </g>
+
+    <!-- Dimensiones Compactas en 1 Fila -->
+    <g transform="translate(15, 175)">
+      <rect x="0" y="0" width="280" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+      <text x="12" y="21" font-size="10" font-weight="600" fill="#475569">Dimensiones:</text>
+      
+      <!-- W auto -->
+      <rect x="90" y="6" width="75" height="22" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+      <text x="127" y="20" font-size="9" fill="#1e293b" text-anchor="middle">W: Auto</text>
+
+      <!-- H auto -->
+      <rect x="172" y="6" width="75" height="22" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+      <text x="209" y="20" font-size="9" fill="#1e293b" text-anchor="middle">H: Auto</text>
+
+      <circle cx="264" cy="17" r="6" fill="#e2e8f0" />
+      <text x="264" y="20" font-size="9" fill="#64748b" text-anchor="middle">🔒</text>
+    </g>
+
+    <!-- Bloque Bocadillo Rediseñado con 4 Presets de 1 Clic -->
+    <g transform="translate(15, 225)">
+      <rect x="0" y="0" width="280" height="220" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" />
+      
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#166534">💬 Estilo de Bocadillo (1 Clic)</text>
+      <rect x="210" y="10" width="60" height="18" rx="9" fill="#dcfce7" />
+      <text x="240" y="22" font-size="8.5" font-weight="700" fill="#15803d" text-anchor="middle">SMART</text>
+
+      <!-- 4 Presets Ilustrados -->
+      <g transform="translate(10, 34)">
+        <!-- 1. Clásico -->
+        <rect x="0" y="0" width="125" height="38" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="12" y="20" font-size="10" font-weight="700" fill="#1e293b">▲ Clásico</text>
+        <text x="12" y="30" font-size="7.5" fill="#64748b">Colita recta formal</text>
+
+        <!-- 2. Cómic Activo -->
+        <rect x="135" y="0" width="125" height="38" rx="6" fill="#22c55e" stroke="#16a34a" />
+        <text x="147" y="20" font-size="10" font-weight="800" fill="#ffffff">~ Cómic</text>
+        <text x="147" y="30" font-size="7.5" fill="#f0fdf4">Curva dinámica</text>
+
+        <!-- 3. Pensamiento -->
+        <rect x="0" y="44" width="125" height="38" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="12" y="64" font-size="10" font-weight="700" fill="#1e293b">○ Pensar</text>
+        <text x="12" y="74" font-size="7.5" fill="#64748b">Nube de ideas</text>
+
+        <!-- 4. Tarjeta Limpia -->
+        <rect x="135" y="44" width="125" height="38" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="147" y="64" font-size="10" font-weight="700" fill="#1e293b">◽ Sin Colita</text>
+        <text x="147" y="74" font-size="7.5" fill="#64748b">Tarjeta redondeada</text>
+      </g>
+
+      <!-- Controles Esenciales: Orientación con Segmented Control -->
+      <g transform="translate(10, 130)">
+        <text x="2" y="0" font-size="9.5" font-weight="700" fill="#166534">Hacia dónde apunta:</text>
+        <g transform="translate(0, 8)">
+          <rect x="0" y="0" width="260" height="26" rx="6" fill="#dcfce7" stroke="#bbf7d0" />
+          <!-- Auto -->
+          <rect x="2" y="2" width="60" height="22" rx="4" fill="#ffffff" filter="url(#shadow-badge)" />
+          <text x="32" y="16" font-size="9" font-weight="700" fill="#15803d" text-anchor="middle">🎯 Auto</text>
+          <!-- Flechas -->
+          <text x="90" y="16" font-size="10" fill="#166534" text-anchor="middle">↓</text>
+          <text x="140" y="16" font-size="10" fill="#166534" text-anchor="middle">↑</text>
+          <text x="190" y="16" font-size="10" fill="#166534" text-anchor="middle">←</text>
+          <text x="240" y="16" font-size="10" fill="#166534" text-anchor="middle">→</text>
+        </g>
+      </g>
+
+      <!-- Toggle Avanzado Plegable -->
+      <g transform="translate(10, 190)">
+        <rect x="0" y="0" width="260" height="22" rx="4" fill="#ffffff" stroke="#bbf7d0" />
+        <text x="130" y="15" font-size="9" font-weight="700" fill="#15803d" text-anchor="middle">⚙️ Más Ajustes (Base, Longitud px) ▾</text>
+      </g>
+    </g>
+
+    <!-- Beneficios Claros de la Alternativa A -->
+    <g transform="translate(15, 460)">
+      <rect x="0" y="0" width="280" height="150" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+      <text x="14" y="22" font-size="10.5" font-weight="800" fill="#0f172a">Ventajas de la Alternativa A:</text>
+      <text x="14" y="42" font-size="9.5" fill="#334155">✓ <tspan font-weight="700">Cero textos cortados:</tspan> Iconos nítidos con nombre activo visible en cabecera.</text>
+      <text x="14" y="66" font-size="9.5" fill="#334155">✓ <tspan font-weight="700">Ahorra 380px de altura:</tspan> Todo visible sin hacer scroll.</text>
+      <text x="14" y="90" font-size="9.5" fill="#334155">✓ <tspan font-weight="700">1 Clic para estilos:</tspan> Clásico, Cómic, Nube o Tarjeta sin calibrar milímetros.</text>
+      <text x="14" y="114" font-size="9.5" fill="#334155">✓ <tspan font-weight="700">Orientación limpia:</tspan> Modo Auto inteligente por defecto con flechas visuales.</text>
+      <text x="14" y="136" font-size="9" fill="#2563eb">✓ Opciones avanzadas disponibles si se necesitan.</text>
+    </g>
+
+    <g transform="translate(15, 625)">
+      <rect x="0" y="0" width="280" height="60" rx="8" fill="#eff6ff" stroke="#93c5fd" />
+      <text x="140" y="24" font-size="10.5" font-weight="700" fill="#1d4ed8" text-anchor="middle">Experiencia Rápida &amp; Limpia</text>
+      <text x="140" y="42" font-size="9" fill="#1e40af" text-anchor="middle">Ideal para flujos de trabajo profesionales</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 3: ALTERNATIVA B — ACORDEÓN MODULAR CON NOMBRES COMPLETOS        -->
+  <!-- ========================================================================= -->
+  <g transform="translate(740, 110)">
+    <rect x="0" y="0" width="310" height="800" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="310" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#8b5cf6" />
+    <text x="20" y="25" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">B</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#1e293b">Alternativa B: Lista en 2 Columnas</text>
+    <rect x="225" y="10" width="70" height="20" rx="10" fill="#ede9fe" />
+    <text x="260" y="24" font-size="9" font-weight="700" fill="#6d28d9" text-anchor="middle">TEXTUAL</text>
+
+    <!-- Formas en 2 Columnas (Nombres 100% Legibles) -->
+    <g transform="translate(15, 55)">
+      <text x="0" y="0" font-size="10" font-weight="700" fill="#64748b">FORMAS (NOMBRES COMPLETOS):</text>
+      
+      <!-- Fila 1 -->
+      <g transform="translate(0, 10)">
+        <rect x="0" y="0" width="135" height="34" rx="6" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.8" />
+        <text x="12" y="21" font-size="10" font-weight="700" fill="#6d28d9">💬 Burbuja</text>
+
+        <rect x="145" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="157" y="21" font-size="10" fill="#475569">― Horquilla</text>
+      </g>
+
+      <!-- Fila 2 -->
+      <g transform="translate(0, 48)">
+        <rect x="0" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="21" font-size="10" fill="#475569">▢ Rectángulo</text>
+
+        <rect x="145" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="157" y="21" font-size="10" fill="#475569">◻ Cuadrado</text>
+      </g>
+
+      <!-- Fila 3 -->
+      <g transform="translate(0, 86)">
+        <rect x="0" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="21" font-size="10" fill="#475569">⬭ Óvalo</text>
+
+        <rect x="145" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="157" y="21" font-size="10" fill="#475569">○ Círculo</text>
+      </g>
+
+      <!-- Fila 4 -->
+      <g transform="translate(0, 124)">
+        <rect x="0" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="21" font-size="10" fill="#475569">💊 Píldora</text>
+
+        <rect x="145" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="157" y="21" font-size="10" fill="#475569">⬡ Hexágono</text>
+      </g>
+
+      <!-- Fila 5 -->
+      <g transform="translate(0, 162)">
+        <rect x="0" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="21" font-size="10" fill="#475569">→ Flecha</text>
+
+        <rect x="145" y="0" width="135" height="34" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="157" y="21" font-size="10" fill="#475569">★ Estrella</text>
+      </g>
+    </g>
+
+    <!-- Sub-Acordeón 1: Dimensiones (Plegado) -->
+    <g transform="translate(15, 270)">
+      <rect x="0" y="0" width="280" height="36" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+      <text x="12" y="22" font-size="10.5" font-weight="600" fill="#334155">📐 Dimensiones fijas (Plegado)</text>
+      <text x="260" y="22" font-size="11" fill="#94a3b8">▸</text>
+    </g>
+
+    <!-- Sub-Acordeón 2: Bocadillo con Pestañas -->
+    <g transform="translate(15, 316)">
+      <rect x="0" y="0" width="280" height="200" rx="8" fill="#faf5ff" stroke="#d8b4fe" />
+      <text x="12" y="22" font-size="11" font-weight="700" fill="#581c87">💬 Opciones de Bocadillo</text>
+      
+      <!-- Pestañas internas -->
+      <g transform="translate(10, 32)">
+        <rect x="0" y="0" width="130" height="24" rx="4" fill="#8b5cf6" />
+        <text x="65" y="16" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">Rápido</text>
+
+        <rect x="135" y="0" width="125" height="24" rx="4" fill="#ede9fe" />
+        <text x="197" y="16" font-size="9" fill="#6d28d9" text-anchor="middle">Calibración</text>
+      </g>
+
+      <text x="12" y="80" font-size="9.5" fill="#475569">Tipo de Colita:</text>
+      <rect x="10" y="90" width="80" height="30" rx="4" fill="#ffffff" stroke="#8b5cf6" />
+      <text x="50" y="108" font-size="9" font-weight="700" fill="#6d28d9" text-anchor="middle">Recta</text>
+      <rect x="98" y="90" width="80" height="30" rx="4" fill="#f5f3ff" stroke="#cbd5e1" />
+      <text x="138" y="108" font-size="9" fill="#64748b" text-anchor="middle">Curva</text>
+      <rect x="186" y="90" width="84" height="30" rx="4" fill="#f5f3ff" stroke="#cbd5e1" />
+      <text x="228" y="108" font-size="9" fill="#64748b" text-anchor="middle">Nube</text>
+
+      <text x="12" y="145" font-size="9.5" fill="#475569">Longitud:</text>
+      <rect x="10" y="155" width="260" height="26" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+      <text x="140" y="172" font-size="9" fill="#334155" text-anchor="middle">Corta  ·  Media (Activa)  ·  Larga</text>
+    </g>
+
+    <!-- Diagnóstico Alternativa B -->
+    <g transform="translate(15, 530)">
+      <rect x="0" y="0" width="280" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+      <text x="12" y="20" font-size="10" font-weight="700" fill="#1e293b">Rasgos de la Alternativa B:</text>
+      <text x="12" y="38" font-size="9" fill="#475569">✓ Nombres 100% legibles sin truncamiento.</text>
+      <text x="12" y="56" font-size="9" fill="#475569">✓ Agrupa dimensiones en sub-acordeón plegado.</text>
+      <text x="12" y="74" font-size="9" fill="#475569">✗ Requiere más altura vertical para la lista de 10 formas.</text>
+      <text x="12" y="92" font-size="9" fill="#475569">✗ Menos compacto que la alternativa A.</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 4: ALTERNATIVA C — DROPDOWN MINIMALISTA                          -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1090, 110)">
+    <rect x="0" y="0" width="310" height="800" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="310" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#f59e0b" />
+    <text x="20" y="25" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">C</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#1e293b">Alternativa C: Dropdown Menú</text>
+    <rect x="230" y="10" width="65" height="20" rx="10" fill="#fef3c7" />
+    <text x="262" y="24" font-size="9" font-weight="700" fill="#b45309" text-anchor="middle">MINIMAL</text>
+
+    <!-- Selector de Forma tipo Dropdown Select -->
+    <g transform="translate(15, 60)">
+      <text x="0" y="0" font-size="10" font-weight="700" fill="#64748b">FORMA GEOMÉTRICA:</text>
+      
+      <!-- Dropdown button -->
+      <g transform="translate(0, 10)">
+        <rect x="0" y="0" width="280" height="42" rx="8" fill="#ffffff" stroke="#f59e0b" stroke-width="1.8" />
+        <rect x="12" y="11" width="22" height="18" rx="4" fill="#fef3c7" />
+        <text x="23" y="24" font-size="12" text-anchor="middle">💬</text>
+        <text x="44" y="25" font-size="11.5" font-weight="700" fill="#1e293b">Bocadillo de Diálogo (Bubble)</text>
+        <text x="260" y="25" font-size="11" fill="#94a3b8">▾</text>
+      </g>
+    </g>
+
+    <!-- Tarjeta Visual de Bocadillo Flotante -->
+    <g transform="translate(15, 135)">
+      <rect x="0" y="0" width="280" height="180" rx="10" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" />
+      <text x="14" y="22" font-size="11" font-weight="700" fill="#92400e">Previsualización y Estilo Rápido</text>
+
+      <!-- Mini Preview Interactivo -->
+      <g transform="translate(45, 38)">
+        <!-- Bocadillo de ejemplo -->
+        <path d="M 10 0 L 170 0 Q 180 0 180 10 L 180 40 Q 180 50 170 50 L 105 50 L 95 64 L 85 50 L 10 50 Q 0 50 0 40 L 0 10 Q 0 0 10 0 Z" fill="#ffffff" stroke="#f59e0b" stroke-width="2" />
+        <text x="90" y="28" font-size="11" font-weight="700" fill="#78350f" text-anchor="middle">Texto del Nodo</text>
+      </g>
+
+      <!-- Botones de estilo -->
+      <g transform="translate(15, 125)">
+        <rect x="0" y="0" width="78" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="39" y="18" font-size="9" fill="#78350f" text-anchor="middle">▲ Recta</text>
+        <rect x="85" y="0" width="80" height="28" rx="6" fill="#f59e0b" />
+        <text x="125" y="18" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">~ Cómic</text>
+        <rect x="172" y="0" width="78" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="211" y="18" font-size="9" fill="#78350f" text-anchor="middle">○ Nube</text>
+      </g>
+    </g>
+
+    <!-- Orientación en Tarjeta -->
+    <g transform="translate(15, 335)">
+      <text x="0" y="0" font-size="10" font-weight="600" fill="#475569">Orientación de Salida:</text>
+      <rect x="0" y="10" width="280" height="32" rx="6" fill="#f8fafc" stroke="#e2e8f0" />
+      <text x="140" y="30" font-size="9.5" fill="#334155" text-anchor="middle">Auto (Padre)  ·  ↓  ·  ↑  ·  ←  ·  →</text>
+    </g>
+
+    <!-- Diagnóstico Alternativa C -->
+    <g transform="translate(15, 395)">
+      <rect x="0" y="0" width="280" height="110" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+      <text x="12" y="20" font-size="10" font-weight="700" fill="#1e293b">Rasgos de la Alternativa C:</text>
+      <text x="12" y="38" font-size="9" fill="#475569">✓ El diseño más limpio y despejado a primera vista.</text>
+      <text x="12" y="56" font-size="9" fill="#475569">✓ Permite ver un preview real del bocadillo en la tarjeta.</text>
+      <text x="12" y="74" font-size="9" fill="#475569">✗ Requiere un clic extra para abrir el menú y ver las 10 formas.</text>
+      <text x="12" y="92" font-size="9" fill="#475569">✗ Menos rápido para alternar entre múltiples formas.</text>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- PIE INFORMATIVO Y RECOMENDACIÓN                                           -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 860)">
+    <rect x="0" y="0" width="1360" height="56" rx="10" fill="url(#grad-header)" stroke="#1e293b" stroke-width="1" />
+    <circle cx="28" cy="28" r="12" fill="#22c55e" />
+    <text x="28" y="33" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+    <text x="50" y="25" font-size="12" font-weight="700" fill="#ffffff">Recomendación de Diseño: Alternativa A (Moderno &amp; Compacto)</text>
+    <text x="50" y="42" font-size="10.5" fill="#94a3b8">Resuelve los 4 problemas principales: elimina el texto cortado ("Bur...", "Rect..."), reduce la altura en un 60%, agrupa dimensiones en una fila y ofrece presets de 1 clic.</text>
+  </g>
+</svg>

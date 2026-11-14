@@ -1,0 +1,622 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 980" width="1440" height="980" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Filtros de Sombra -->
+    <filter id="shadow-panel" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+    <filter id="shadow-badge" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+    <filter id="shadow-glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#3b82f6" flood-opacity="0.5" />
+    </filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="grad-card-rec" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#052e16" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="bg-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo Principal -->
+  <rect width="1440" height="980" fill="#090d16" />
+  <rect width="1440" height="980" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera Principal -->
+  <rect x="40" y="24" width="1360" height="66" rx="12" fill="url(#grad-header)" stroke="#1e293b" stroke-width="1.5" />
+  <circle cx="72" cy="57" r="17" fill="#3b82f6" />
+  <text x="72" y="63" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle">🔤</text>
+  <text x="104" y="51" font-size="17" font-weight="700" fill="#ffffff">Propuestas de Rediseño — Pestaña de Texto y Tipografía (ContentTab)</text>
+  <text x="104" y="72" font-size="12" fill="#94a3b8">Comparativa visual: Estado actual (580px con doble paleta fija de 16 colores) vs. 3 alternativas modernas y compactas</text>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 1: ESTADO ACTUAL (DIAGNÓSTICO DE PROBLEMAS)                      -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 110)">
+    <!-- Marco del Panel Actual -->
+    <rect x="0" y="0" width="320" height="830" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#ef4444" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">✕</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#1e293b">Estado Actual (~580px)</text>
+    <rect x="220" y="10" width="85" height="22" rx="11" fill="#fee2e2" />
+    <text x="262" y="24.5" font-size="9" font-weight="700" fill="#dc2626" text-anchor="middle">DESPERDICIO</text>
+
+    <!-- Contenido del Panel Actual -->
+    <g transform="translate(14, 52)">
+      <!-- Sección Título del Nodo -->
+      <rect x="0" y="0" width="292" height="30" rx="6" fill="#eff6ff" stroke="#bfdbfe" />
+      <text x="10" y="19" font-size="11" font-weight="700" fill="#1e40af">T  Título del Nodo</text>
+      <rect x="240" y="6" width="42" height="18" rx="9" fill="#dbeafe" />
+      <text x="261" y="18" font-size="9" font-weight="700" fill="#1e40af" text-anchor="middle">16px</text>
+
+      <!-- Textarea -->
+      <rect x="0" y="38" width="292" height="48" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+      <text x="10" y="58" font-size="11" font-weight="500" fill="#1e293b">Idea Central</text>
+      <path d="M 284 78 L 288 78 L 288 82 Z" fill="#94a3b8" />
+
+      <!-- Toolbar Negrita / Cursiva / Alineación -->
+      <g transform="translate(0, 96)">
+        <rect x="0" y="0" width="60" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <rect x="0" y="0" width="30" height="28" rx="6 0 0 6" fill="#dbeafe" />
+        <text x="15" y="18" font-size="11" font-weight="800" fill="#1d4ed8" text-anchor="middle">B</text>
+        <line x1="30" y1="0" x2="30" y2="28" stroke="#cbd5e1" />
+        <text x="45" y="18" font-size="11" font-style="italic" font-weight="600" fill="#64748b" text-anchor="middle">I</text>
+
+        <rect x="68" y="0" width="90" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="83" y="18" font-size="10" fill="#64748b" text-anchor="middle">≡</text>
+        <line x1="98" y1="0" x2="98" y2="28" stroke="#cbd5e1" />
+        <rect x="98" y="0" width="30" height="28" fill="#dbeafe" />
+        <text x="113" y="18" font-size="10" fill="#1d4ed8" text-anchor="middle">≡</text>
+        <line x1="128" y1="0" x2="128" y2="28" stroke="#cbd5e1" />
+        <text x="143" y="18" font-size="10" fill="#64748b" text-anchor="middle">≡</text>
+      </g>
+
+      <!-- Color del texto (Paleta 1) -->
+      <g transform="translate(0, 134)">
+        <text x="0" y="11" font-size="10.5" font-weight="600" fill="#334155">Color del Texto</text>
+        <rect x="180" y="0" width="70" height="18" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+        <rect x="184" y="4" width="10" height="10" fill="#ffffff" stroke="#94a3b8" />
+        <text x="222" y="12" font-size="8.5" font-family="monospace" fill="#64748b" text-anchor="middle">#FFFFFF</text>
+        <text x="268" y="12" font-size="9" fill="#94a3b8">Reset</text>
+
+        <!-- Grid 16 colores fijos ocupando 50px -->
+        <g transform="translate(0, 20)">
+          <!-- Fila 1 -->
+          <rect x="0" y="0" width="32" height="20" rx="4" fill="#ffffff" stroke="#3b82f6" stroke-width="2" />
+          <rect x="37" y="0" width="32" height="20" rx="4" fill="#f8fafc" stroke="#e2e8f0" />
+          <rect x="74" y="0" width="32" height="20" rx="4" fill="#eff6ff" stroke="#e2e8f0" />
+          <rect x="111" y="0" width="32" height="20" rx="4" fill="#f0fdf4" stroke="#e2e8f0" />
+          <rect x="148" y="0" width="32" height="20" rx="4" fill="#fefce8" stroke="#e2e8f0" />
+          <rect x="185" y="0" width="32" height="20" rx="4" fill="#fff7ed" stroke="#e2e8f0" />
+          <rect x="222" y="0" width="32" height="20" rx="4" fill="#faf5ff" stroke="#e2e8f0" />
+          <rect x="259" y="0" width="32" height="20" rx="4" fill="#ecfeff" stroke="#e2e8f0" />
+          <!-- Fila 2 -->
+          <rect x="0" y="24" width="32" height="20" rx="4" fill="#2563eb" />
+          <rect x="37" y="24" width="32" height="20" rx="4" fill="#059669" />
+          <rect x="74" y="24" width="32" height="20" rx="4" fill="#d97706" />
+          <rect x="111" y="24" width="32" height="20" rx="4" fill="#dc2626" />
+          <rect x="148" y="24" width="32" height="20" rx="4" fill="#7c3aed" />
+          <rect x="185" y="24" width="32" height="20" rx="4" fill="#0891b2" />
+          <rect x="222" y="24" width="32" height="20" rx="4" fill="#475569" />
+          <rect x="259" y="24" width="32" height="20" rx="4" fill="#0f172a" />
+        </g>
+      </g>
+
+      <!-- Slider Tamaño de Fuente -->
+      <g transform="translate(0, 212)">
+        <text x="0" y="11" font-size="10.5" font-weight="600" fill="#334155">Tamaño de Fuente</text>
+        <rect x="220" y="0" width="36" height="16" rx="4" fill="#eff6ff" />
+        <text x="238" y="12" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle">16px</text>
+        <text x="268" y="12" font-size="9" fill="#94a3b8">Reset</text>
+        <!-- Slider track -->
+        <rect x="0" y="20" width="292" height="5" rx="2.5" fill="#e2e8f0" />
+        <rect x="0" y="20" width="70" height="5" rx="2.5" fill="#3b82f6" />
+        <circle cx="70" cy="22.5" r="7" fill="#3b82f6" stroke="#ffffff" stroke-width="2" />
+      </g>
+
+      <!-- TARJETA SOMBRA DE TEXTO (GIGANTE) -->
+      <g transform="translate(0, 255)">
+        <rect x="0" y="0" width="292" height="295" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+        <!-- Switch de Sombra -->
+        <text x="12" y="20" font-size="11" font-weight="700" fill="#1e293b">Sombra de Texto</text>
+        <text x="12" y="32" font-size="9" fill="#64748b">Relieve tipográfico y contraste</text>
+        <rect x="240" y="13" width="38" height="20" rx="10" fill="#22c55e" />
+        <circle cx="267" cy="23" r="8" fill="#ffffff" />
+
+        <line x1="12" y1="44" x2="280" y2="44" stroke="#e2e8f0" />
+
+        <!-- Presets de sombra -->
+        <text x="12" y="58" font-size="9" font-weight="700" fill="#64748b">PRESET DE SOMBRA</text>
+        <g transform="translate(12, 66)">
+          <rect x="0" y="0" width="62" height="24" rx="6" fill="#2563eb" />
+          <text x="31" y="15" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">Suave</text>
+          
+          <rect x="68" y="0" width="62" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="99" y="15" font-size="9.5" fill="#475569" text-anchor="middle">Media</text>
+          
+          <rect x="136" y="0" width="62" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="167" y="15" font-size="9.5" fill="#475569" text-anchor="middle">Fuerte</text>
+          
+          <rect x="204" y="0" width="62" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="235" y="15" font-size="9.5" fill="#475569" text-anchor="middle">Glow</text>
+        </g>
+
+        <!-- Slider Blur -->
+        <g transform="translate(12, 102)">
+          <text x="0" y="11" font-size="10" font-weight="600" fill="#334155">Desenfoque (Blur)</text>
+          <rect x="200" y="0" width="30" height="15" rx="3" fill="#eff6ff" />
+          <text x="215" y="11" font-size="8.5" font-weight="700" fill="#2563eb" text-anchor="middle">3px</text>
+          <text x="242" y="11" font-size="9" fill="#94a3b8">Reset</text>
+          <rect x="0" y="18" width="268" height="4" rx="2" fill="#e2e8f0" />
+          <rect x="0" y="18" width="40" height="4" rx="2" fill="#3b82f6" />
+          <circle cx="40" cy="20" r="6" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5" />
+        </g>
+
+        <!-- Color de Sombra (PALETA 2 IDÉNTICA) -->
+        <g transform="translate(12, 140)">
+          <text x="0" y="11" font-size="10" font-weight="600" fill="#334155">Color de la Sombra</text>
+          <rect x="135" y="0" width="95" height="18" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+          <rect x="139" y="4" width="10" height="10" fill="#000000" opacity="0.65" stroke="#94a3b8" />
+          <text x="190" y="12" font-size="7.5" font-family="monospace" fill="#64748b" text-anchor="middle">RGBA(0,0,0,0.65)</text>
+          <text x="242" y="12" font-size="9" fill="#94a3b8">Reset</text>
+
+          <!-- Grid 16 colores repetido -->
+          <g transform="translate(0, 22)">
+            <!-- Fila 1 -->
+            <rect x="0" y="0" width="30" height="18" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+            <rect x="34" y="0" width="30" height="18" rx="3" fill="#f8fafc" stroke="#cbd5e1" />
+            <rect x="68" y="0" width="30" height="18" rx="3" fill="#eff6ff" stroke="#cbd5e1" />
+            <rect x="102" y="0" width="30" height="18" rx="3" fill="#f0fdf4" stroke="#cbd5e1" />
+            <rect x="136" y="0" width="30" height="18" rx="3" fill="#fefce8" stroke="#cbd5e1" />
+            <rect x="170" y="0" width="30" height="18" rx="3" fill="#fff7ed" stroke="#cbd5e1" />
+            <rect x="204" y="0" width="30" height="18" rx="3" fill="#faf5ff" stroke="#cbd5e1" />
+            <rect x="238" y="0" width="30" height="18" rx="3" fill="#ecfeff" stroke="#cbd5e1" />
+            <!-- Fila 2 -->
+            <rect x="0" y="22" width="30" height="18" rx="3" fill="#2563eb" />
+            <rect x="34" y="22" width="30" height="18" rx="3" fill="#059669" />
+            <rect x="68" y="22" width="30" height="18" rx="3" fill="#d97706" />
+            <rect x="102" y="22" width="30" height="18" rx="3" fill="#dc2626" />
+            <rect x="136" y="22" width="30" height="18" rx="3" fill="#7c3aed" />
+            <rect x="170" y="22" width="30" height="18" rx="3" fill="#0891b2" />
+            <rect x="204" y="22" width="30" height="18" rx="3" fill="#475569" />
+            <rect x="238" y="22" width="30" height="18" rx="3" fill="#0f172a" stroke="#3b82f6" stroke-width="2" />
+          </g>
+        </g>
+
+        <!-- Toggle Aplicar al cuerpo -->
+        <g transform="translate(12, 230)">
+          <line x1="0" y1="0" x2="268" y2="0" stroke="#e2e8f0" />
+          <text x="0" y="22" font-size="10" font-weight="500" fill="#334155">Aplicar al cuerpo / subtexto</text>
+          <rect x="232" y="10" width="36" height="18" rx="9" fill="#cbd5e1" />
+          <circle cx="242" cy="19" r="7" fill="#ffffff" />
+        </g>
+
+        <rect x="8" y="260" width="276" height="26" rx="6" fill="#fee2e2" stroke="#fca5a5" />
+        <text x="146" y="277" font-size="9" font-weight="700" fill="#b91c1c" text-anchor="middle">⚠️ Tarjeta de sombra ocupa 295px sola</text>
+      </g>
+
+      <!-- Cartela resumen de fallas -->
+      <g transform="translate(0, 565)">
+        <rect x="0" y="0" width="292" height="185" rx="8" fill="#fef2f2" stroke="#fecaca" />
+        <text x="14" y="22" font-size="10.5" font-weight="700" fill="#991b1b">🔴 Diagnóstico de Problemas:</text>
+        
+        <text x="14" y="46" font-size="9.5" fill="#b91c1c">• Doble paleta de 16 colores fija (32 botones)</text>
+        <text x="14" y="66" font-size="9.5" fill="#b91c1c">• Dos sliders de pista larga ocupan 120px</text>
+        <text x="14" y="86" font-size="9.5" fill="#b91c1c">• Controles de texto fragmentados en 4 niveles</text>
+        <text x="14" y="106" font-size="9.5" fill="#b91c1c">• Ocupa ~580px: expulsa Notas, Enlaces, Iconos,</text>
+        <text x="22" y="122" font-size="9.5" fill="#b91c1c">Imágenes y Progreso muy abajo con scroll</text>
+        <text x="14" y="146" font-size="9.5" font-weight="700" fill="#7f1d1d">• Solución: Barra compacta + Popover flotante</text>
+        <text x="22" y="162" font-size="9" fill="#991b1b">similar a suites de diseño modernas (Figma/Canva)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 2: ALTERNATIVA A — COMPACT STUDIO (RECOMENDADA)                  -->
+  <!-- ========================================================================= -->
+  <g transform="translate(380, 110)">
+    <!-- Marco de la Alternativa A -->
+    <rect x="0" y="0" width="320" height="830" rx="14" fill="#ffffff" stroke="#22c55e" stroke-width="2" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="12 12 0 0" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#22c55e" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#14532d">Alternativa A (Figma Studio)</text>
+    <rect x="210" y="10" width="98" height="22" rx="11" fill="#22c55e" />
+    <text x="259" y="24.5" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">RECOMENDADA</text>
+
+    <!-- Contenido Alternativa A -->
+    <g transform="translate(14, 52)">
+      <!-- Cabecera de sección compacta -->
+      <rect x="0" y="0" width="292" height="28" rx="6" fill="#eff6ff" stroke="#bfdbfe" />
+      <text x="10" y="18" font-size="11" font-weight="700" fill="#1e40af">T  Título del Nodo</text>
+      <rect x="244" y="5" width="40" height="18" rx="9" fill="#2563eb" />
+      <text x="264" y="17" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">16px</text>
+
+      <!-- Textarea Moderno -->
+      <rect x="0" y="34" width="292" height="44" rx="6" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+      <text x="10" y="54" font-size="11" font-weight="500" fill="#1e293b">Idea Central</text>
+      <line x1="72" y1="42" x2="72" y2="58" stroke="#3b82f6" stroke-width="1.5" />
+
+      <!-- BARRA UNIFICADA DE FORMATO (FILA 1: ESTILO + TAMAÑO + COLOR) -->
+      <g transform="translate(0, 86)">
+        <rect x="0" y="0" width="292" height="36" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        
+        <!-- B y I -->
+        <rect x="4" y="4" width="26" height="28" rx="5" fill="#dbeafe" />
+        <text x="17" y="22" font-size="11" font-weight="800" fill="#1d4ed8" text-anchor="middle">B</text>
+        <rect x="32" y="4" width="26" height="28" rx="5" fill="#ffffff" stroke="#e2e8f0" />
+        <text x="45" y="22" font-size="11" font-style="italic" font-weight="700" fill="#64748b" text-anchor="middle">I</text>
+
+        <!-- Separador -->
+        <line x1="62" y1="8" x2="62" y2="28" stroke="#cbd5e1" />
+
+        <!-- Alineación (dropdown o selector 3 en 1) -->
+        <rect x="66" y="4" width="28" height="28" rx="5" fill="#ffffff" stroke="#e2e8f0" />
+        <text x="80" y="21" font-size="11" fill="#1d4ed8" text-anchor="middle">≡</text>
+
+        <!-- Separador -->
+        <line x1="98" y1="8" x2="98" y2="28" stroke="#cbd5e1" />
+
+        <!-- Stepper de Tamaño [- 16 +] -->
+        <g transform="translate(104, 4)">
+          <rect x="0" y="0" width="88" height="28" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+          <!-- Botón Menos -->
+          <rect x="0" y="0" width="24" height="28" rx="5 0 0 5" fill="#f1f5f9" />
+          <text x="12" y="19" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">−</text>
+          <!-- Valor editable -->
+          <text x="44" y="18" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle">16px</text>
+          <!-- Botón Más -->
+          <rect x="64" y="0" width="24" height="28" rx="0 5 5 0" fill="#f1f5f9" />
+          <text x="76" y="19" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">+</text>
+        </g>
+
+        <!-- Swatch de Color Popover -->
+        <g transform="translate(200, 4)">
+          <rect x="0" y="0" width="88" height="28" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+          <circle cx="16" cy="14" r="7" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="44" y="18" font-size="9" font-family="monospace" font-weight="600" fill="#475569">#FFF</text>
+          <text x="74" y="18" font-size="9" fill="#94a3b8">▾</text>
+        </g>
+      </g>
+
+      <!-- BARRA DE SOMBRA COMPACTA (FILA 2: EN 1 SOLA LÍNEA) -->
+      <g transform="translate(0, 130)">
+        <rect x="0" y="0" width="292" height="66" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        
+        <!-- Línea superior: Label + Presets en píldora -->
+        <text x="10" y="20" font-size="10.5" font-weight="700" fill="#1e293b">Sombra:</text>
+        
+        <!-- Segmented Control de 4 estados -->
+        <g transform="translate(62, 7)">
+          <rect x="0" y="0" width="222" height="22" rx="6" fill="#e2e8f0" />
+          <rect x="1" y="1" width="54" height="20" rx="5" fill="#ffffff" />
+          <text x="28" y="15" font-size="9" font-weight="600" fill="#64748b" text-anchor="middle">Off</text>
+          
+          <rect x="56" y="1" width="54" height="20" rx="5" fill="#2563eb" />
+          <text x="83" y="15" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">Suave</text>
+          
+          <text x="138" y="15" font-size="9" font-weight="600" fill="#64748b" text-anchor="middle">Media</text>
+          <text x="193" y="15" font-size="9" font-weight="600" fill="#64748b" text-anchor="middle">Glow</text>
+        </g>
+
+        <!-- Línea inferior: Color de sombra + Blur + Checkbox subtexto -->
+        <g transform="translate(10, 36)">
+          <!-- Swatch color sombra -->
+          <rect x="0" y="2" width="20" height="20" rx="4" fill="#000000" opacity="0.65" stroke="#94a3b8" />
+          <text x="25" y="16" font-size="9" font-family="monospace" fill="#64748b">rgba(0,0,0,0.65)</text>
+
+          <!-- Blur badge compacto -->
+          <rect x="132" y="3" width="36" height="18" rx="4" fill="#eff6ff" />
+          <text x="150" y="15" font-size="8.5" font-weight="700" fill="#2563eb" text-anchor="middle">3px</text>
+
+          <!-- Toggle aplicar a subtexto -->
+          <circle cx="186" cy="12" r="6" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="198" y="15" font-size="8.5" fill="#475569">En cuerpo</text>
+        </g>
+      </g>
+
+      <!-- SIMULACIÓN DE POPOVER FLOTANTE (SE ABRE AL TOCAR COLOR) -->
+      <g transform="translate(20, 208)">
+        <rect x="0" y="0" width="250" height="110" rx="8" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow-panel)" />
+        <path d="M 210 0 L 218 -8 L 226 0 Z" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" />
+        <line x1="209" y1="0" x2="227" y2="0" stroke="#ffffff" stroke-width="2" />
+
+        <text x="12" y="18" font-size="10" font-weight="700" fill="#1e293b">Paleta Flotante (Bajo Demanda)</text>
+        <text x="220" y="18" font-size="10" fill="#94a3b8">✕</text>
+        
+        <!-- Grid 16 colores pero dentro de popover modal -->
+        <g transform="translate(12, 28)">
+          <!-- Fila 1 -->
+          <rect x="0" y="0" width="24" height="22" rx="4" fill="#ffffff" stroke="#3b82f6" stroke-width="2" />
+          <rect x="29" y="0" width="24" height="22" rx="4" fill="#f8fafc" stroke="#e2e8f0" />
+          <rect x="58" y="0" width="24" height="22" rx="4" fill="#eff6ff" stroke="#e2e8f0" />
+          <rect x="87" y="0" width="24" height="22" rx="4" fill="#f0fdf4" stroke="#e2e8f0" />
+          <rect x="116" y="0" width="24" height="22" rx="4" fill="#fefce8" stroke="#e2e8f0" />
+          <rect x="145" y="0" width="24" height="22" rx="4" fill="#fff7ed" stroke="#e2e8f0" />
+          <rect x="174" y="0" width="24" height="22" rx="4" fill="#faf5ff" stroke="#e2e8f0" />
+          <rect x="203" y="0" width="24" height="22" rx="4" fill="#ecfeff" stroke="#e2e8f0" />
+          <!-- Fila 2 -->
+          <rect x="0" y="27" width="24" height="22" rx="4" fill="#2563eb" />
+          <rect x="29" y="27" width="24" height="22" rx="4" fill="#059669" />
+          <rect x="58" y="27" width="24" height="22" rx="4" fill="#d97706" />
+          <rect x="87" y="27" width="24" height="22" rx="4" fill="#dc2626" />
+          <rect x="116" y="27" width="24" height="22" rx="4" fill="#7c3aed" />
+          <rect x="145" y="27" width="24" height="22" rx="4" fill="#0891b2" />
+          <rect x="174" y="27" width="24" height="22" rx="4" fill="#475569" />
+          <rect x="203" y="27" width="24" height="22" rx="4" fill="#0f172a" />
+        </g>
+
+        <!-- Input Hex + Cuentagotas -->
+        <g transform="translate(12, 84)">
+          <rect x="0" y="0" width="130" height="20" rx="4" fill="#f8fafc" stroke="#cbd5e1" />
+          <text x="8" y="14" font-size="9" font-family="monospace" fill="#334155">#FFFFFF</text>
+          <rect x="140" y="0" width="86" height="20" rx="4" fill="#eff6ff" stroke="#bfdbfe" />
+          <text x="183" y="14" font-size="9" font-weight="600" fill="#1e40af" text-anchor="middle">Restablecer</text>
+        </g>
+      </g>
+
+      <!-- LO QUE AHORA QUEDA VISIBLE SIN SCROLL -->
+      <g transform="translate(0, 335)">
+        <rect x="0" y="0" width="292" height="210" rx="8" fill="#f0fdf4" stroke="#86efac" />
+        <text x="12" y="20" font-size="10.5" font-weight="700" fill="#166534">✨ Gana Espacio para Secciones Clave:</text>
+        
+        <!-- Simulación de Cuerpo visible -->
+        <rect x="12" y="32" width="268" height="32" rx="6" fill="#ffffff" stroke="#bbf7d0" />
+        <text x="22" y="52" font-size="10" font-weight="600" fill="#15803d">📄 Cuerpo / Notas (Visible sin scroll)</text>
+        
+        <!-- Simulación de Enlaces -->
+        <rect x="12" y="72" width="268" height="32" rx="6" fill="#ffffff" stroke="#bbf7d0" />
+        <text x="22" y="92" font-size="10" font-weight="600" fill="#15803d">🔗 Enlaces Web y Referencias</text>
+
+        <!-- Simulación de Iconos y Tags -->
+        <rect x="12" y="112" width="268" height="32" rx="6" fill="#ffffff" stroke="#bbf7d0" />
+        <text x="22" y="132" font-size="10" font-weight="600" fill="#15803d">🏷️ Etiquetas y Progreso</text>
+
+        <rect x="12" y="156" width="268" height="42" rx="6" fill="#dcfce7" />
+        <text x="146" y="174" font-size="10" font-weight="800" fill="#166534" text-anchor="middle">ALTURA: ~195px (AHORRO 66%)</text>
+        <text x="146" y="188" font-size="8.5" fill="#15803d" text-anchor="middle">Todo el formato tipográfico en 2 filas compactas</text>
+      </g>
+
+      <!-- Resumen Beneficios -->
+      <g transform="translate(0, 560)">
+        <rect x="0" y="0" width="292" height="190" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="14" y="22" font-size="10.5" font-weight="700" fill="#0f172a">🟢 Por qué es la mejor opción:</text>
+        <text x="14" y="44" font-size="9.5" fill="#334155">1. <tspan font-weight="700">Barra Unificada:</tspan> Negrita, alineación,</text>
+        <text x="28" y="58" font-size="9" fill="#64748b">tamaño con stepper y color en 1 sola fila.</text>
+        
+        <text x="14" y="80" font-size="9.5" fill="#334155">2. <tspan font-weight="700">Paleta Flotante (Popover):</tspan> Los 16 colores</text>
+        <text x="28" y="94" font-size="9" fill="#64748b">se despliegan solo cuando el usuario los necesita.</text>
+
+        <text x="14" y="116" font-size="9.5" fill="#334155">3. <tspan font-weight="700">Sombra Segmentada:</tspan> Presets en píldora</text>
+        <text x="28" y="130" font-size="9" fill="#64748b">[Off | Suave | Media | Glow] en 1 sola línea.</text>
+
+        <text x="14" y="152" font-size="9.5" fill="#334155">4. <tspan font-weight="700">Cero Scroll Vertical:</tspan> Puedes editar texto</text>
+        <text x="28" y="166" font-size="9" fill="#64748b">y notas sin desplazarte continuamente.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 3: ALTERNATIVA B — MODULAR CON PALETA MINI                       -->
+  <!-- ========================================================================= -->
+  <g transform="translate(720, 110)">
+    <!-- Marco de la Alternativa B -->
+    <rect x="0" y="0" width="320" height="830" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#3b82f6" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">B</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#1e40af">Alternativa B (Paleta Esencial)</text>
+    <rect x="220" y="10" width="85" height="22" rx="11" fill="#dbeafe" />
+    <text x="262" y="24.5" font-size="9" font-weight="700" fill="#1d4ed8" text-anchor="middle">5 COLORES</text>
+
+    <!-- Contenido Alternativa B -->
+    <g transform="translate(14, 52)">
+      <rect x="0" y="0" width="292" height="28" rx="6" fill="#eff6ff" stroke="#bfdbfe" />
+      <text x="10" y="18" font-size="11" font-weight="700" fill="#1e40af">T  Título del Nodo</text>
+      <rect x="244" y="5" width="40" height="18" rx="9" fill="#2563eb" />
+      <text x="264" y="17" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">16px</text>
+
+      <rect x="0" y="34" width="292" height="44" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+      <text x="10" y="54" font-size="11" font-weight="500" fill="#1e293b">Idea Central</text>
+
+      <!-- Fila Formato + Paleta de 5 colores rápidos en la misma fila -->
+      <g transform="translate(0, 86)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">ESTILO Y COLORES FRECUENTES:</text>
+        
+        <!-- Fila de formato -->
+        <g transform="translate(0, 16)">
+          <rect x="0" y="0" width="48" height="26" rx="5" fill="#dbeafe" stroke="#bfdbfe" />
+          <text x="12" y="17" font-size="10" font-weight="800" fill="#1d4ed8" text-anchor="middle">B</text>
+          <text x="34" y="17" font-size="10" font-style="italic" fill="#64748b" text-anchor="middle">I</text>
+
+          <!-- 5 círculos de color + botón '+' para más -->
+          <circle cx="68" cy="13" r="9" fill="#ffffff" stroke="#2563eb" stroke-width="2" />
+          <circle cx="94" cy="13" r="9" fill="#2563eb" />
+          <circle cx="120" cy="13" r="9" fill="#059669" />
+          <circle cx="146" cy="13" r="9" fill="#dc2626" />
+          <circle cx="172" cy="13" r="9" fill="#0f172a" />
+          
+          <!-- Botón '+' selector completo -->
+          <rect x="194" y="1" width="24" height="24" rx="12" fill="#f1f5f9" stroke="#cbd5e1" />
+          <text x="206" y="16" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">+</text>
+
+          <!-- Stepper tamaño a la derecha -->
+          <rect x="226" y="1" width="66" height="24" rx="5" fill="#f8fafc" stroke="#cbd5e1" />
+          <text x="259" y="16" font-size="10" font-weight="700" fill="#1e293b" text-anchor="middle">16px</text>
+        </g>
+      </g>
+
+      <!-- Tarjeta Sombra Interactiva con Previsualización Real -->
+      <g transform="translate(0, 145)">
+        <rect x="0" y="0" width="292" height="96" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        
+        <text x="10" y="18" font-size="10.5" font-weight="700" fill="#1e293b">Sombra de Texto</text>
+        <rect x="240" y="8" width="38" height="18" rx="9" fill="#22c55e" />
+        <circle cx="267" cy="17" r="7" fill="#ffffff" />
+
+        <!-- Mini Preview Visual -->
+        <rect x="10" y="30" width="130" height="28" rx="5" fill="#ffffff" stroke="#e2e8f0" />
+        <text x="75" y="48" font-size="11" font-weight="700" fill="#1e293b" text-anchor="middle" filter="url(#shadow-glow-blue)">Preview Aa</text>
+
+        <!-- Presets como botones compactos -->
+        <g transform="translate(148, 30)">
+          <rect x="0" y="0" width="42" height="28" rx="4" fill="#2563eb" />
+          <text x="21" y="17" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">Suave</text>
+          <rect x="46" y="0" width="42" height="28" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="67" y="17" font-size="9" fill="#475569" text-anchor="middle">Media</text>
+          <rect x="92" y="0" width="42" height="28" rx="4" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="113" y="17" font-size="9" fill="#475569" text-anchor="middle">Glow</text>
+        </g>
+
+        <!-- Fila de ajuste fino opcional -->
+        <g transform="translate(10, 68)">
+          <text x="0" y="14" font-size="9" fill="#64748b">Desenfoque: 3px</text>
+          <circle cx="85" cy="10" r="7" fill="#000000" opacity="0.65" stroke="#94a3b8" />
+          <text x="98" y="14" font-size="8.5" fill="#64748b">Negro 65%</text>
+
+          <rect x="190" y="2" width="92" height="20" rx="4" fill="#eff6ff" stroke="#bfdbfe" />
+          <text x="236" y="15" font-size="8.5" font-weight="600" fill="#1e40af" text-anchor="middle">Calibrar Blur ▾</text>
+        </g>
+      </g>
+
+      <!-- Cartela informativa -->
+      <g transform="translate(0, 255)">
+        <rect x="0" y="0" width="292" height="85" rx="8" fill="#eff6ff" stroke="#bfdbfe" />
+        <text x="146" y="26" font-size="11" font-weight="800" fill="#1e40af" text-anchor="middle">ALTURA: ~250px (AHORRO 57%)</text>
+        <text x="14" y="48" font-size="9.5" fill="#1e3a8a">• 5 colores rápidos en pantalla sin abrir modales.</text>
+        <text x="14" y="66" font-size="9.5" fill="#1e3a8a">• Previsualización de sombra en vivo en el panel.</text>
+      </g>
+
+      <g transform="translate(0, 560)">
+        <rect x="0" y="0" width="292" height="190" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="14" y="22" font-size="10.5" font-weight="700" fill="#0f172a">ℹ️ Características:</text>
+        <text x="14" y="44" font-size="9.5" fill="#334155">Ideal si no quieres ventanas flotantes (popovers)</text>
+        <text x="14" y="60" font-size="9.5" fill="#334155">y prefieres tener acceso inmediato a los 5 colores</text>
+        <text x="14" y="76" font-size="9.5" fill="#334155">más usados con 1 solo clic.</text>
+        <text x="14" y="106" font-size="9.5" font-weight="700" fill="#1e40af">Ahorro de espacio: 57%</text>
+        <text x="14" y="126" font-size="9" fill="#64748b">Reduce los 32 botones a solo 5 círculos clave</text>
+        <text x="14" y="142" font-size="9" fill="#64748b">y condensa la sombra en una tarjeta de 96px.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 4: ALTERNATIVA C — SUB-PESTAÑAS SEGMENTADAS                      -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1060, 110)">
+    <!-- Marco de la Alternativa C -->
+    <rect x="0" y="0" width="320" height="830" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header del panel -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#8b5cf6" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">C</text>
+    <text x="36" y="25" font-size="11.5" font-weight="700" fill="#581c87">Alternativa C (Sub-Pestañas)</text>
+    <rect x="220" y="10" width="85" height="22" rx="11" fill="#ede9fe" />
+    <text x="262" y="24.5" font-size="9" font-weight="700" fill="#6d28d9" text-anchor="middle">ENFOQUE</text>
+
+    <!-- Contenido Alternativa C -->
+    <g transform="translate(14, 52)">
+      <!-- Textarea de título -->
+      <rect x="0" y="0" width="292" height="44" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+      <text x="10" y="24" font-size="11" font-weight="500" fill="#1e293b">Idea Central</text>
+
+      <!-- Selector de Sub-Pestañas: [ Tipografía ] [ Sombra y Efectos ] -->
+      <g transform="translate(0, 54)">
+        <rect x="0" y="0" width="292" height="30" rx="7" fill="#f1f5f9" stroke="#e2e8f0" />
+        <rect x="2" y="2" width="142" height="26" rx="6" fill="#ffffff" stroke="#cbd5e1" />
+        <text x="73" y="18" font-size="10" font-weight="700" fill="#7c3aed" text-anchor="middle">🔤 Tipografía y Color</text>
+        
+        <text x="216" y="18" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle">🌓 Sombra &amp; Relieve</text>
+      </g>
+
+      <!-- Vista Sub-pestaña Activa: Tipografía -->
+      <g transform="translate(0, 96)">
+        <rect x="0" y="0" width="292" height="115" rx="8" fill="#faf5ff" stroke="#e9d5ff" />
+        
+        <!-- Fila Formato -->
+        <g transform="translate(10, 10)">
+          <rect x="0" y="0" width="56" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="14" y="17" font-size="10.5" font-weight="800" fill="#7c3aed" text-anchor="middle">B</text>
+          <text x="42" y="17" font-size="10.5" font-style="italic" fill="#64748b" text-anchor="middle">I</text>
+
+          <rect x="66" y="0" width="84" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="80" y="17" font-size="10" fill="#64748b" text-anchor="middle">≡</text>
+          <text x="108" y="17" font-size="10" fill="#7c3aed" text-anchor="middle">≡</text>
+          <text x="136" y="17" font-size="10" fill="#64748b" text-anchor="middle">≡</text>
+
+          <!-- Stepper tamaño -->
+          <rect x="160" y="0" width="112" height="26" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="216" y="17" font-size="10.5" font-weight="700" fill="#1e293b" text-anchor="middle">16 px</text>
+        </g>
+
+        <!-- Selector de Color integrado con 8 presets seleccionados -->
+        <g transform="translate(10, 46)">
+          <text x="0" y="12" font-size="9" font-weight="700" fill="#64748b">COLOR DE FUENTE:</text>
+          <g transform="translate(0, 18)">
+            <rect x="0" y="0" width="28" height="22" rx="4" fill="#ffffff" stroke="#7c3aed" stroke-width="2" />
+            <rect x="34" y="0" width="28" height="22" rx="4" fill="#2563eb" />
+            <rect x="68" y="0" width="28" height="22" rx="4" fill="#059669" />
+            <rect x="102" y="0" width="28" height="22" rx="4" fill="#d97706" />
+            <rect x="136" y="0" width="28" height="22" rx="4" fill="#dc2626" />
+            <rect x="170" y="0" width="28" height="22" rx="4" fill="#7c3aed" />
+            <rect x="204" y="0" width="28" height="22" rx="4" fill="#475569" />
+            <rect x="238" y="0" width="28" height="22" rx="4" fill="#0f172a" />
+          </g>
+        </g>
+
+        <text x="146" y="104" font-size="8.5" fill="#7c3aed" text-anchor="middle">Al cambiar a "Sombra" solo se muestran controles de sombra</text>
+      </g>
+
+      <!-- Cartela informativa -->
+      <g transform="translate(0, 225)">
+        <rect x="0" y="0" width="292" height="85" rx="8" fill="#faf5ff" stroke="#e9d5ff" />
+        <text x="146" y="26" font-size="11" font-weight="800" fill="#6d28d9" text-anchor="middle">ALTURA: ~170px (AHORRO 70%)</text>
+        <text x="14" y="48" font-size="9.5" fill="#581c87">• Divide la complejidad en 2 vistas enfocadas.</text>
+        <text x="14" y="66" font-size="9.5" fill="#581c87">• Pantalla siempre despejada y sin desbordamiento.</text>
+      </g>
+
+      <g transform="translate(0, 560)">
+        <rect x="0" y="0" width="292" height="190" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="14" y="22" font-size="10.5" font-weight="700" fill="#0f172a">ℹ️ Características:</text>
+        <text x="14" y="44" font-size="9.5" fill="#334155">Ideal para usuarios que quieren mínima distracción:</text>
+        <text x="14" y="60" font-size="9.5" fill="#334155">si estás editando texto, la sombra no te molesta.</text>
+        <text x="14" y="76" font-size="9.5" fill="#334155">Si quieres efectos de sombra, pasas a la pestaña.</text>
+        <text x="14" y="106" font-size="9.5" font-weight="700" fill="#7c3aed">Ahorro de espacio: 70%</text>
+        <text x="14" y="126" font-size="9" fill="#64748b">Requiere 1 clic extra para alternar entre</text>
+        <text x="14" y="142" font-size="9" fill="#64748b">tipografía y sombra.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- BARRA INFERIOR DE CONCLUSIONES Y COMPARATIVA                             -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 915)">
+    <rect x="0" y="0" width="1360" height="48" rx="10" fill="#0f172a" stroke="#1e293b" />
+    <circle cx="24" cy="24" r="10" fill="#22c55e" />
+    <text x="24" y="28" font-size="10" font-weight="800" fill="#ffffff" text-anchor="middle">★</text>
+    <text x="46" y="24" font-size="12" font-weight="700" fill="#ffffff">Recomendación de Diseño: Alternativa A (Figma Studio)</text>
+    <text x="46" y="38" font-size="10" fill="#94a3b8">Unifica formato, stepper numérico y swatch interactivo en 1 fila. Compacta la sombra en una sola línea. Ahorra 380px de scroll vertical sin perder ninguna función.</text>
+    
+    <rect x="1200" y="10" width="145" height="28" rx="6" fill="#2563eb" />
+    <text x="1272" y="28" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">¿Cuál prefieres? A, B o C</text>
+  </g>
+</svg>

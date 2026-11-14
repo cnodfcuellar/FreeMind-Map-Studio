@@ -97,27 +97,41 @@ export const ShapeSelector: React.FC<ShapeSelectorProps> = ({
   currentShape = 'bubble',
   onSelectShape,
 }) => {
+  const activeShape = SHAPES.find((s) => s.id === currentShape) || SHAPES[0];
+
   return (
-    <div className="grid grid-cols-5 gap-1.5">
-      {SHAPES.map((s) => {
-        const isSelected = currentShape === s.id;
-        return (
-          <button
-            key={s.id}
-            type="button"
-            title={s.name}
-            onClick={() => onSelectShape(s.id)}
-            className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer select-none ${
-              isSelected
-                ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
-            }`}
-          >
-            {s.icon}
-            <span className="text-[10px] mt-1 text-center truncate w-full">{s.name}</span>
-          </button>
-        );
-      })}
+    <div className="space-y-1.5">
+      {/* Indicador de forma activa con nombre completo (cero truncamiento) */}
+      <div className="flex items-center justify-between px-0.5">
+        <span className="text-[10.5px] font-medium text-slate-500">Forma activa:</span>
+        <span className="text-[10px] font-bold text-blue-700 bg-blue-50/90 border border-blue-200/80 px-2 py-0.5 rounded-full flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
+          {activeShape.name}
+        </span>
+      </div>
+
+      {/* Grid de 10 iconos limpios y proporcionados con tooltip nativo */}
+      <div className="grid grid-cols-5 gap-1.5">
+        {SHAPES.map((s) => {
+          const isSelected = currentShape === s.id;
+          return (
+            <button
+              key={s.id}
+              type="button"
+              title={s.name}
+              aria-label={s.name}
+              onClick={() => onSelectShape(s.id)}
+              className={`h-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer select-none ${
+                isSelected
+                  ? 'border-blue-600 bg-blue-50/90 text-blue-700 shadow-xs ring-2 ring-blue-500/20'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800'
+              }`}
+            >
+              {s.icon}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

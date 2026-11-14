@@ -2244,6 +2244,58 @@ Atender la solicitud del usuario ("manual de usuario muy detallado") para transf
 5. **Capítulo 16 de Diagnóstico y FAQ:**
    - Guía técnica sobre almacenamiento en `localStorage`, liberación de cuota, rendimiento con 300+ nodos a 60 FPS y pautas de impresión de murales.
 
+---
+
+## 🎨 [Rediseño UI] — 2026-11-14: Rediseño Moderno Compacto del Panel de Formas y Bocadillos (ToolPanel)
+
+### 🎯 Motivo
+Atender la solicitud del usuario ("no me gusta que se puede hacer" tras enviar captura del panel de formatos) implementando la **Alternativa A (Moderno Compacto)** elegida por el usuario:
+- Resolver el truncamiento masivo de nombres en el selector de formas (`Bur...`, `Rect...`, `Cua...`, `Circ...`).
+- Reducir drásticamente la altura vertical innecesaria (>350px de scroll ahorrados).
+- Reemplazar sliders sobredimensionados de dimensiones por una fila compacta W / H estilo Figma/Linear.
+- Simplificar la anatomía de la colita de bocadillo con 4 presets de 1 solo clic (`▲ Clásico`, `~ Cómic`, `○ Pensamiento`, `◽ Sin Colita`), un selector segmentado de orientación con iconos limpios (`🎯 Auto`, `↓`, `↑`, `←`, `→`) y un desplegable de ajustes avanzados para evitar redundancias de controles.
+
+### ✏️ Cambios Realizados
+| Archivo | Qué cambió |
+|---------|-----------|
+| `src/components/molecules/ShapeSelector.tsx` | Eliminado el texto truncado de los 10 botones del grid; ahora presentan iconos centrados de 40px con tooltip nativo (`title` y `aria-label`). Se incorporó una cabecera con badge elegante que muestra el nombre completo sin cortes (`Forma activa: Burbuja`). |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Rediseñado el bloque de dimensiones personalizadas en una sola fila compacta W/H con reset automático. Sustituido el bloque saturado de colita por 4 presets de 1 clic, selector segmentado de orientación y acordeón plegable para ajustes milimétricos (`showAdvancedTail`). |
+| `doc/img/propuesta-redisenio-panel-formas.svg` | Gráfico vectorial comparativo del estado anterior frente a las 3 alternativas de solución (A: Moderno Compacto, B: 2 Columnas, C: Dropdown Minimalista). |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm test:regression`: **40/40 suites de prueba superadas (231/231 pruebas unitarias exitosas, 100%)**.
+- [x] Compatibilidad de tests moleculares (`Molecules.test.tsx`): 100% pasando sin romper la API existente.
+
+---
+
+## ⚡ [Rediseño UI & Optimización] — 2026-11-14: Tipografía Compacta Unificada y Sombra Inteligente (ContentTab: Título y Cuerpo)
+
+### 🎯 Motivo
+Atender la solicitud del usuario ("muestrame alternativas de svg" y posterior confirmación "ok procede , para titulo como para cuerpo ,") para resolver la severa saturación vertical de la pestaña **Texto** (`ContentTab`), la cual alcanzaba ~580px de altura y provocaba scroll excesivo:
+- **Doble paleta de 16 colores fija (32 botones):** Se mostraban paletas completas tanto para color de texto como para color de sombra, consumiendo casi 150px de altura vertical fija.
+- **Sliders y controles desarticulados:** Sliders de carril completo para tamaño de fuente y desenfoque (blur) dispersos en múltiples líneas con badges redundantes.
+- **Tarjeta de sombra sobredimensionada:** Ocupaba ~295px de forma aislada.
+- **Alineación con Título y Cuerpo:** El usuario solicitó unificar y aplicar este diseño ergonómico de estilo "Figma Studio" tanto al **Título del Nodo** como a la sección de **Cuerpo / Subtexto**.
+
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/molecules/CompactTextToolbar.tsx` | Molécula | Nueva barra tipográfica unificada en 1 sola fila: botones de estilo (`B`, `I`), alineación (`Izquierda`, `Centro`, `Derecha`), stepper numérico de tamaño (`[−] 16px [+]` con reset automático si difiere del default) y swatch de color interactivo con desplegable/popover integrado bajo demanda (paleta de 16 colores presets, selector nativo y botón reset). Cierre automático al hacer clic fuera. |
+| `src/components/molecules/CompactTextShadowControl.tsx` | Molécula | Nuevo control de sombra de texto ultracompacto: fila principal con segmented control de 4 estados (`[ Off \| Suave \| Media \| Glow ]`), micro-ajustes cuando está activa (swatch de color con popover flotante, stepper de blur milimétrico `[−] 3px [+]` y switch inline "En cuerpo" para `applyTextShadowToBody`). |
+| `src/components/organisms/toolpanel/ContentTab.tsx` | Organismo | Reemplazado el JSX fragmentado de `FontFormatToolbar`, `ColorPicker` estático y `SliderInput` tanto en la sección de **Título del Nodo** como en la de **Cuerpo / Subtexto** por instancias reutilizables de `CompactTextToolbar`. Integrado `CompactTextShadowControl` reduciendo el alto del panel de ~580px a menos de ~200px (ahorro superior al 65%). |
+| `src/components/molecules/__tests__/CompactTextToolbar.test.tsx` | Tests | Suite de 6 pruebas unitarias verificando estilos (bold, italic), alineación, incrementos/decrementos del stepper de tamaño, reset y apertura/cierre de la paleta con selección de color. |
+| `src/components/molecules/__tests__/CompactTextShadowControl.test.tsx` | Tests | Suite de 3 pruebas unitarias validando la conmutación de presets, el apagado de sombra, la calibración de blur y la selección de color de sombra. |
+| `doc/img/propuesta-redisenio-panel-texto.svg` | Docs / Gráficos | Infografía vectorial SVG comparando el estado anterior frente a las 3 propuestas de solución visual (A: Figma Studio recomendada, B: Paleta Esencial, C: Sub-pestañas). |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm test:regression`: **42/42 suites de prueba superadas (240/240 pruebas unitarias exitosas, 100%)**.
+- [x] Cero advertencias de sintaxis o tests rotos.
+
+
+
+
 
 
 
