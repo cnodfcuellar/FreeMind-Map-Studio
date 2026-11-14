@@ -66,4 +66,36 @@ describe('layoutEngine', () => {
     // Left child should have x < root.x
     expect(leftPos!.x).toBeLessThan(rootPos!.x);
   });
+
+  it('adjusts rotated square (rombo 45°) to an adaptive horizontal diamond (aspect ratio ~1.55) enclosing content', () => {
+    const normalSquare: MindNode = {
+      id: 'sq1',
+      parentId: null,
+      text: '¿Es viable?',
+      shape: 'square',
+      squareRotation: 0,
+      children: [],
+      fontSize: 14,
+    };
+
+    const diamondNode: MindNode = {
+      ...normalSquare,
+      id: 'sq2',
+      squareRotation: 45,
+    };
+
+    const normalSize = estimateNodeSize(normalSquare);
+    const diamondSize = estimateNodeSize(diamondNode);
+
+    // Standard square maintains 1:1 aspect ratio
+    expect(normalSize.width).toBe(normalSize.height);
+
+    // Rotated square adapts to a horizontal decision diamond (w > h, ~1.55 ratio)
+    expect(diamondSize.width).toBeGreaterThan(diamondSize.height);
+    expect(diamondSize.width / diamondSize.height).toBeCloseTo(1.55, 1);
+
+    // Bounding diamond safely encloses text with room to spare
+    expect(diamondSize.width).toBeGreaterThanOrEqual(normalSize.width);
+    expect(diamondSize.height).toBeGreaterThanOrEqual(48);
+  });
 });

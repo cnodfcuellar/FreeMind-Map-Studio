@@ -34,11 +34,19 @@ export const resolveRectangleCorners = (node: MindNode): RectangleCornerConfig =
 };
 
 /**
- * Returns true if the node is a rectangle or square requiring SVG path rendering (bevel or concave)
+ * Checks whether a square node is rotated 45 degrees into a decision diamond (rombo)
+ */
+export const isSquareRotated = (node: MindNode): boolean => {
+  return node.shape === 'square' && Boolean(node.squareRotation && Math.abs(node.squareRotation) === 45);
+};
+
+/**
+ * Returns true if the node is a rectangle or square requiring SVG path rendering (bevel, concave or rotated 45° diamond)
  */
 export const isRectangleSvgShape = (node: MindNode): boolean => {
   const shape = node.shape;
   if (shape !== 'rectangle' && shape !== 'square') return false;
+  if (shape === 'square' && isSquareRotated(node)) return true;
   const style = node.rectCornerStyle;
   return style === 'bevel' || style === 'concave';
 };
@@ -144,4 +152,71 @@ export const computeRectangleSvgPath = (
 
   d += ' Z';
   return d;
+};
+
+/**
+ * Computes SVG path 'd' string for a 45° decision rhombus (diamond)
+ * Supports sharp, rounded, bevel, and concave tip styles.
+ */
+export const computeRhombusSvgPath = (
+  w: number,
+  h: number,
+  node: MindNode,
+  borderWidth: number = 0
+): string => {
+  const pad = Math.max(borderWidth / 2, 0.5);
+  const cx = w / 2;
+  const cy = h / 2;
+  const x0 = pad;
+  const x1 = Math.max(x0, w - pad);
+  const y0 = pad;
+  const y1 = Math.max(y0, h - pad);
+
+  const config = resolveRectangleCorners(node);
+  const r = Math.min(config.radius, 14);
+
+  if (r === 0 || config.style === 'sharp') {
+    return `M ${+cx.toFixed(1)},${+y0.toFixed(1)} L ${+x1.toFixed(1)},${+cy.toFixed(1)} L ${+cx.toFixed(1)},${+y1.toFixed(1)} L ${+x0.toFixed(1)},${+cy.toFixed(1)} Z`;
+  }
+
+  const dx = Math.min(r * 1.0, (w / 2) * 0.3);
+  const dy = Math.min(r * 1.0, (h / 2) * 0.3);
+
+  if (config.style === 'bevel') {
+    return (
+      `M ${+(cx - dx).toFixed(1)},${+(y0 + dy).toFixed(1)} ` +
+      `L ${+(cx + dx).toFixed(1)},${+(y0 + dy).toFixed(1)} ` +
+      `L ${+(x1 - dx).toFixed(1)},${+(cy - dy).toFixed(1)} ` +
+      `L ${+(x1 - dx).toFixed(1)},${+(cy + dy).toFixed(1)} ` +
+      `L ${+(cx + dx).toFixed(1)},${+(y1 - dy).toFixed(1)} ` +
+      `L ${+(cx - dx).toFixed(1)},${+(y1 - dy).toFixed(1)} ` +
+      `L ${+(x0 + dx).toFixed(1)},${+(cy + dy).toFixed(1)} ` +
+      `L ${+(x0 + dx).toFixed(1)},${+(cy - dy).toFixed(1)} Z`
+    );
+  }
+
+  if (config.style === 'concave') {
+    return (
+      `M ${+(cx - dx).toFixed(1)},${+(y0 + dy).toFixed(1)} ` +
+      `A ${+dx.toFixed(1)},${+dy.toFixed(1)} 0 0,0 ${+(cx + dx).toFixed(1)},${+(y0 + dy).toFixed(1)} ` +
+      `L ${+(x1 - dx).toFixed(1)},${+(cy - dy).toFixed(1)} ` +
+      `A ${+dx.toFixed(1)},${+dy.toFixed(1)} 0 0,0 ${+(x1 - dx).toFixed(1)},${+(cy + dy).toFixed(1)} ` +
+      `L ${+(cx + dx).toFixed(1)},${+(y1 - dy).toFixed(1)} ` +
+      `A ${+dx.toFixed(1)},${+dy.toFixed(1)} 0 0,0 ${+(cx - dx).toFixed(1)},${+(y1 - dy).toFixed(1)} ` +
+      `L ${+(x0 + dx).toFixed(1)},${+(cy + dy).toFixed(1)} ` +
+      `A ${+dx.toFixed(1)},${+dy.toFixed(1)} 0 0,0 ${+(x0 + dx).toFixed(1)},${+(cy - dy).toFixed(1)} Z`
+    );
+  }
+
+  // Default: rounded tips
+  return (
+    `M ${+(cx - dx).toFixed(1)},${+(y0 + dy).toFixed(1)} ` +
+    `Q ${+cx.toFixed(1)},${+y0.toFixed(1)} ${+(cx + dx).toFixed(1)},${+(y0 + dy).toFixed(1)} ` +
+    `L ${+(x1 - dx).toFixed(1)},${+(cy - dy).toFixed(1)} ` +
+    `Q ${+x1.toFixed(1)},${+cy.toFixed(1)} ${+(x1 - dx).toFixed(1)},${+(cy + dy).toFixed(1)} ` +
+    `L ${+(cx + dx).toFixed(1)},${+(y1 - dy).toFixed(1)} ` +
+    `Q ${+cx.toFixed(1)},${+y1.toFixed(1)} ${+(cx - dx).toFixed(1)},${+(y1 - dy).toFixed(1)} ` +
+    `L ${+(x0 + dx).toFixed(1)},${+(cy + dy).toFixed(1)} ` +
+    `Q ${+x0.toFixed(1)},${+cy.toFixed(1)} ${+(x0 + dx).toFixed(1)},${+(cy - dy).toFixed(1)} Z`
+  );
 };

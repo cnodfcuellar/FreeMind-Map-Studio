@@ -3,7 +3,9 @@ import { MindNode, CalculatedNodeLayout, MindMapTheme } from '../../../types/min
 import { computeBubbleTailGeometry } from '../../../utils/bubbleTailUtils';
 import {
   isRectangleSvgShape,
+  isSquareRotated,
   computeRectangleSvgPath,
+  computeRhombusSvgPath,
   computeRectangleBorderRadius,
 } from '../../../utils/rectangleCornerUtils';
 import {
@@ -244,6 +246,7 @@ export const getNodeShapeStyles = (
   }
   if (shape === 'square' || shape === 'rectangle') {
     if (isRectangleSvgShape(node)) {
+      const isRotated = isSquareRotated(node);
       return {
         background: 'transparent',
         backgroundColor: 'transparent',
@@ -251,10 +254,11 @@ export const getNodeShapeStyles = (
         border: 'none',
         boxShadow: 'none',
         borderRadius: '0px',
-        paddingLeft: '14px',
-        paddingRight: '14px',
-        paddingTop: '6px',
-        paddingBottom: '6px',
+        paddingLeft: isRotated ? '0px' : '14px',
+        paddingRight: isRotated ? '0px' : '14px',
+        paddingTop: isRotated ? '0px' : '6px',
+        paddingBottom: isRotated ? '0px' : '6px',
+        textAlign: isRotated ? 'center' : undefined,
       };
     }
     return {
@@ -429,7 +433,9 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   let points = '';
   let pathD: string | null = null;
 
-  if (isRectSvg) {
+  if (isSquareRotated(node)) {
+    pathD = computeRhombusSvgPath(w, h, node, effectiveBorderWidth);
+  } else if (isRectSvg) {
     pathD = computeRectangleSvgPath(w, h, node, effectiveBorderWidth);
   } else if (shape === 'hexagon') {
     const inset = Math.min(w * 0.28, Math.max(28, h * 0.58));

@@ -15,6 +15,14 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const config = resolveRectangleCorners(node);
   const shapeName = node.shape === 'square' ? 'Cuadrado' : 'Rectángulo';
+  const isRotated45 = Boolean(node.squareRotation && Math.abs(node.squareRotation) === 45);
+
+  const handleSelectSquareRotation = (deg: 0 | 45) => {
+    onUpdateNode(node.id, {
+      squareRotation: deg,
+      squareKeepTextHorizontal: true,
+    });
+  };
 
   const isSharpActive = config.style === 'sharp' || config.radius === 0;
   const isRoundedActive = config.style === 'rounded' && config.radius > 0;
@@ -126,6 +134,69 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
           1 Clic
         </span>
       </div>
+
+      {/* 1. Selector de Orientación de 1 Clic (Solo para Cuadrado, sin vista previa) */}
+      {node.shape === 'square' && (
+        <div className="grid grid-cols-2 gap-1.5">
+          <button
+            type="button"
+            data-testid="preset-square-0"
+            onClick={() => handleSelectSquareRotation(0)}
+            className={`py-1.5 px-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+              !isRotated45
+                ? 'border-blue-600 bg-blue-50/90 shadow-xs ring-2 ring-blue-500/20'
+                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+            }`}
+          >
+            <span className="text-sm font-bold text-slate-700">▢</span>
+            <div>
+              <div
+                className={`text-[10.5px] font-bold ${
+                  !isRotated45 ? 'text-blue-700' : 'text-slate-700'
+                }`}
+              >
+                Cuadrado
+              </div>
+              <div
+                className={`text-[8.5px] ${
+                  !isRotated45 ? 'text-blue-600/80 font-medium' : 'text-slate-400'
+                }`}
+              >
+                0° estándar
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            data-testid="preset-square-45"
+            onClick={() => handleSelectSquareRotation(45)}
+            className={`py-1.5 px-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+              isRotated45
+                ? 'border-blue-600 bg-blue-50/90 shadow-xs ring-2 ring-blue-500/20'
+                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+            }`}
+          >
+            <span className="text-sm font-bold text-blue-600">◇</span>
+            <div>
+              <div
+                className={`text-[10.5px] font-bold ${
+                  isRotated45 ? 'text-blue-700' : 'text-slate-700'
+                }`}
+              >
+                Rombo
+              </div>
+              <div
+                className={`text-[8.5px] ${
+                  isRotated45 ? 'text-blue-600/80 font-medium' : 'text-slate-400'
+                }`}
+              >
+                45° decisión
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* Fila Única Unificada: 4 Tipos de Esquina de 1 Clic (Sin repetición) */}
       <div className="grid grid-cols-4 gap-1.5">

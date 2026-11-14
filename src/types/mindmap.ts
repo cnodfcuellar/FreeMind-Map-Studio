@@ -133,6 +133,8 @@ export interface MindNode {
   rectCornerTopRight?: boolean;
   rectCornerBottomRight?: boolean;
   rectCornerBottomLeft?: boolean;
+  squareRotation?: 0 | 45 | number; // 0 (cuadrado estándar) o 45 (rombo de decisión)
+  squareKeepTextHorizontal?: boolean;
 
   // Oval Shape Customization (Cualidades del óvalo / elipse)
   ovalRotation?: number;

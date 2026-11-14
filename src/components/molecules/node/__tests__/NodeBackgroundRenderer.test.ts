@@ -217,6 +217,13 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
     const concaveStyles = getNodeShapeStyles(concaveSquare, mockTheme, '#3b82f6', false);
     expect(concaveStyles.border).toBe('none');
     expect(concaveStyles.background).toBe('transparent');
+
+    // Rotated square (45° diamond) delegates to SVG path with transparent box and centered text
+    const diamondSquare = createNode({ id: 's3', text: 'Diamond Decision', shape: 'square', squareRotation: 45 });
+    const diamondStyles = getNodeShapeStyles(diamondSquare, mockTheme, '#3b82f6', false);
+    expect(diamondStyles.border).toBe('none');
+    expect(diamondStyles.background).toBe('transparent');
+    expect(diamondStyles.textAlign).toBe('center');
   });
 
   it('renders oval shape with custom rotation and ratio', () => {

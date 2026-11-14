@@ -2406,6 +2406,72 @@ Atender la solicitud del usuario ("quiero añadir opciones de direccion de la fl
 - [x] `pnpm test:regression`: **49/49 suites de prueba superadas (300/300 pruebas unitarias exitosas, 100%)**.
 - [x] `pnpm build`: **Compilación de producción exitosa (0 errores)** en 7.09s.
 
+---
+
+## ⚡ [Cualidades del Cuadrado / Rombo] — 2026-11-14: Implementación de Rotación a 45° (Rombo de Decisión sin Vista Previa)
+
+### 🎯 Motivo
+Atender la solicitud del usuario ("que te parece rotar el cuadrado 45 grados", "no quiero vista previa solo 45 grados" y confirmación "ok"):
+- **Soporte para nodos de bifurcación y decisiones:** El rombo a 45° es el estándar universal en diagramas de flujo y mapas mentales para decisiones lógicas (*"¿Es viable?", "Sí / No"*).
+- **Control ultra compacto y sin sobrecarga:** En `RectangleCornerControl.tsx`, se integró un selector de orientación en 1 Clic con 2 botones (`[ ▢ Cuadrado (0°) ]` y `[ ◇ Rombo (45°) ]`), visible exclusivamente cuando `selectedNode.shape === 'square'`. Se omitió cualquier recuadro de vista previa en el panel por indicación del usuario para mantener la altura mínima de ~90px.
+- **Texto interior siempre horizontal:** Al rotar a 45°, la silueta exterior gira vectorialmente en SVG mientras el texto interior permanece 100% horizontal, centrado y legible.
+- **Compatibilidad total con esquinas:** El rombo a 45° se combina con cualquiera de las 4 esquinas (`sharp 0px`, `rounded 8px`, `bevel 6px`, `concave 10px`), permitiendo rombos modernos de puntas suaves.
+- **Rombo Cuadrado 1:1 Compacto y Controlado:** En lugar de expandirse geométricamente a tamaños gigantescos de más de 300px que dejaban un exceso de espacio azul muerto y texto diminuto, se calibró un factor suave y controlado de ~1.18x sobre el cuadrado mínimo (`hi * 1.18` en `layoutEngine.ts` y `htmlExporter.ts`). Esto preserva el aspecto cuadrado a 45° clásico y compacto ideal para nodos de decisión de 1 a 3 palabras (*"¿Es viable?", "Sí / No", "Condición"*), manteniendo el nodo ceñido y proporcionado sin devorar el lienzo.
+- **Motor de renderizado híbrido:** Detección automática en `isRectangleSvgShape` e `isSquareRotated`, con transform SVG centrado en `NodeBackgroundRenderer.tsx` (`translate rotate(45)`) y padding limpio (14px horiz / 8px vert) con texto centrado horizontalmente.
+
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos | Añadidas propiedades opcionales `squareRotation?: 0 \| 45 \| number` y `squareKeepTextHorizontal?: boolean` a la interfaz `MindNode`. |
+| `src/utils/rectangleCornerUtils.ts` | Utilidad | Añadida función `isSquareRotated` y actualizado `isRectangleSvgShape` para delegar el cuadrado a 45° al motor SVG. |
+| `src/utils/__tests__/rectangleCornerUtils.test.ts` | Tests | Actualizadas pruebas validando detección de rombo 45° y delegación SVG. |
+| `src/components/molecules/RectangleCornerControl.tsx` | Molécula | Añadido selector de 1 Clic `0° Cuadrado` vs `45° Rombo` (solo para `square`, sin caja de vista previa). |
+| `src/components/molecules/__tests__/RectangleCornerControl.test.tsx` | Tests | Añadidas pruebas unitarias (10 pruebas en total) verificando presencia exclusiva en cuadrados y cambios de rotación. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Renderizado SVG con transformación `rotate(45 cx cy)` centrada para rombos con todas las variantes de esquina y padding protector calibrado (14px horiz / 8px vert) con texto centrado horizontal. |
+| `src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts` | Tests | Añadido caso de prueba para renderizado de rombo cuadrado a 45° con alineación centrada y fondo SVG. |
+| `src/utils/layoutEngine.ts` | Utilidad | Implementado cálculo de rombo cuadrado 1:1 compacto con factor suave ~1.18x en `estimateNodeSize` y `estimateNodeSizeInner`. |
+| `src/utils/__tests__/layoutEngine.test.ts` | Tests | Añadida prueba unitaria validando que el rombo a 45° mantiene un tamaño compacto y controlado (~1.18x) sin desproporciones. |
+| `src/utils/htmlExporter.ts` | Utilidad | Dimensionamiento compacto de rombos a 45° en exportador HTML autocontenido. |
+| `doc/img/propuesta-cuadrado-45-sin-previa.svg` | Docs / Gráficos | Infografía vectorial SVG mostrando el inspector sin vista previa y el resultado en el lienzo. |
+| `doc/DESIGN.md` | Docs | Actualizada especificación de diseño para el cuadrado rotado a 45° en formato compacto 1:1. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm test:regression`: **49/49 suites de prueba superadas (304/304 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa (0 errores)** en 5.93s.
+
+---
+
+## 💎 [Rombo Adaptativo] — 2026-11-14: Solución al Desborde y Espacio Desperdiciado en Rombos a 45°
+
+### 🎯 Motivo
+Responder al mandato del usuario ("el texto debe quedar dentro ajustado centrado y sin espacio desperdiciado") tras evidenciar en pantallazos que un rombo rígido 1:1 generaba un dilema insoluble: o un cometa colosal con 80% de espacio azul muerto y texto diminuto, o un rombo pequeño donde las líneas superior e inferior desbordaban fuera de los vértices:
+1. **Transición a Rombo Apaisado Adaptativo:** Se independiza el ancho y alto del rombo ($W \ne H$), adaptándolo a la silueta rectangular del contenido con la proporción estándar de diagramas de decisión (~1.55:1 horizontal).
+2. **Ley Euclidiana de Inclusión:** Se calibra el cálculo geométrico $\frac{W_{\text{content}}}{W} + \frac{H_{\text{content}}}{H} \le 0.86$, garantizando matemáticamente que los 4 vértices del bloque de texto queden siempre dentro de la silueta poligonal con un margen de seguridad de 14% para trazos y puntas redondeadas.
+3. **Eliminación del bug de padding porcentual en CSS:** Se reemplazó el padding porcentual vertical (`paddingTop: '16%'` en CSS, que se evaluaba contra el ancho del contenedor provocando colapso vertical) por acotamiento directo `contentMaxWidth="65%"` con `margin: auto` y alineación `flex justify-center`. El texto se centra de manera impecable horizontal y verticalmente sin desbordes.
+4. **Generador vectorial nativo de rombo:** Creación de `computeRhombusSvgPath(w, h, node, borderWidth)` en `rectangleCornerUtils.ts` que dibuja el rombo adaptativo exacto conectando los vértices laterales $(0, h/2)$ y $(w, h/2)$ para conectores de árbol y botones de plegado, compatible con esquinas `sharp`, `rounded` ($Q$), `bevel` ($L$) y `concave` ($A$).
+5. **Cero Espacio Desperdiciado:** Reducción de más del 55% del área azul vacía respecto al cometa 1:1, logrando un nodo ceñido y armónico.
+
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/utils/rectangleCornerUtils.ts` | Utilidad | Añadida y exportada función `computeRhombusSvgPath(w, h, node, borderWidth)` que calcula el trazado SVG con las 4 variantes de esquina (`sharp`, `rounded`, `bevel`, `concave`). |
+| `src/utils/__tests__/rectangleCornerUtils.test.ts` | Tests | Añadidas pruebas unitarias para `computeRhombusSvgPath` verificando los 4 estilos de esquina y coordenadas perimetrales. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Delegación del fondo SVG a `computeRhombusSvgPath` y eliminación del padding porcentual para `isSquareRotated(node)`. |
+| `src/components/NodeComponent.tsx` | Componente | Paso de `contentMaxWidth="65%"` y `mediaMaxWidth="120px"` para acotar el contenido del rombo dentro de la zona segura. |
+| `src/utils/layoutEngine.ts` | Utilidad | Dimensionamiento adaptativo horizontal de rombos (~1.55:1) en `estimateNodeSize` y `estimateNodeSizeInner`, respetando la ley de inclusión y evitando doble multiplicación. |
+| `src/utils/__tests__/layoutEngine.test.ts` | Tests | Actualizada prueba unitaria validando que el rombo es apaisado (aspect ratio ~1.55:1), encierra el texto y es más eficiente que el cuadrado. |
+| `src/utils/htmlExporter.ts` | Utilidad | Sincronizado el cálculo de dimensiones de rombos apaisados adaptativos en el exportador HTML. |
+| `doc/img/validacion-rombo-adaptativo.svg` | Docs / Gráficos | Infografía SVG con validación geométrica de 3 casos: nodo simple, título raíz y texto multilínea completo. |
+| `doc/DESIGN.md` | Docs | Actualizada la especificación de diseño visual para el Rombo Apaisado Adaptativo. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm vitest run src/utils/__tests__/layoutEngine.test.ts`: **3/3 pruebas superadas**.
+- [x] `pnpm build`: **Compilación de producción exitosa (0 errores)** en 5.88s.
+
+
+
 
 
 

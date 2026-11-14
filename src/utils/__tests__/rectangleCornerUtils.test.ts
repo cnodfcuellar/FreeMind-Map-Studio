@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   resolveRectangleCorners,
   isRectangleSvgShape,
+  isSquareRotated,
   computeRectangleBorderRadius,
   computeRectangleSvgPath,
 } from '../rectangleCornerUtils';
@@ -53,10 +54,22 @@ describe('rectangleCornerUtils', () => {
     });
   });
 
+  describe('isSquareRotated', () => {
+    it('detects rotated square when squareRotation is 45 or -45', () => {
+      expect(isSquareRotated(createNode({ shape: 'square', squareRotation: 45 }))).toBe(true);
+      expect(isSquareRotated(createNode({ shape: 'square', squareRotation: -45 }))).toBe(true);
+      expect(isSquareRotated(createNode({ shape: 'square', squareRotation: 0 }))).toBe(false);
+      expect(isSquareRotated(createNode({ shape: 'square' }))).toBe(false);
+      expect(isSquareRotated(createNode({ shape: 'rectangle', squareRotation: 45 }))).toBe(false);
+    });
+  });
+
   describe('isRectangleSvgShape', () => {
-    it('returns true only for rectangle or square with bevel or concave', () => {
+    it('returns true for bevel/concave corners or rotated square (45° diamond)', () => {
       expect(isRectangleSvgShape(createNode({ shape: 'rectangle', rectCornerStyle: 'bevel' }))).toBe(true);
       expect(isRectangleSvgShape(createNode({ shape: 'square', rectCornerStyle: 'concave' }))).toBe(true);
+      expect(isRectangleSvgShape(createNode({ shape: 'square', squareRotation: 45 }))).toBe(true);
+      expect(isRectangleSvgShape(createNode({ shape: 'square', squareRotation: 0, rectCornerStyle: 'rounded' }))).toBe(false);
       expect(isRectangleSvgShape(createNode({ shape: 'rectangle', rectCornerStyle: 'rounded' }))).toBe(false);
       expect(isRectangleSvgShape(createNode({ shape: 'rectangle', rectCornerStyle: 'sharp' }))).toBe(false);
       expect(isRectangleSvgShape(createNode({ shape: 'bubble', rectCornerStyle: 'bevel' }))).toBe(false);

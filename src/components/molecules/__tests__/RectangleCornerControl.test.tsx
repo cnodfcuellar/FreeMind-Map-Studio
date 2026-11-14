@@ -148,4 +148,42 @@ describe('RectangleCornerControl', () => {
       rectPreset: undefined,
     });
   });
+
+  it('muestra selector de orientación 0° y 45° solo para cuadrados y permite alternar a rombo', () => {
+    // 1. En rectángulo NO se muestra
+    const rectNode = createNode({ shape: 'rectangle' });
+    const onUpdateNodeRect = vi.fn();
+    const { unmount } = render(
+      <RectangleCornerControl node={rectNode} onUpdateNode={onUpdateNodeRect} />
+    );
+    expect(screen.queryByTestId('preset-square-0')).toBeNull();
+    expect(screen.queryByTestId('preset-square-45')).toBeNull();
+    unmount();
+
+    // 2. En cuadrado SÍ se muestra y permite activar 45° Rombo
+    const squareNode = createNode({ shape: 'square', squareRotation: 0 });
+    const onUpdateNodeSq = vi.fn();
+    render(<RectangleCornerControl node={squareNode} onUpdateNode={onUpdateNodeSq} />);
+
+    expect(screen.getByTestId('preset-square-0')).toBeDefined();
+    expect(screen.getByTestId('preset-square-45')).toBeDefined();
+
+    fireEvent.click(screen.getByTestId('preset-square-45'));
+    expect(onUpdateNodeSq).toHaveBeenCalledWith('node-1', {
+      squareRotation: 45,
+      squareKeepTextHorizontal: true,
+    });
+  });
+
+  it('permite regresar el rombo a cuadrado estándar de 0°', () => {
+    const squareNode = createNode({ shape: 'square', squareRotation: 45 });
+    const onUpdateNode = vi.fn();
+    render(<RectangleCornerControl node={squareNode} onUpdateNode={onUpdateNode} />);
+
+    fireEvent.click(screen.getByTestId('preset-square-0'));
+    expect(onUpdateNode).toHaveBeenCalledWith('node-1', {
+      squareRotation: 0,
+      squareKeepTextHorizontal: true,
+    });
+  });
 });

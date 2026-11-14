@@ -311,13 +311,15 @@ Verificado en `FormatTab.tsx:97-141` y `ShapeSelector.tsx`.
 
 - **Cualidades de Rectángulo y Cuadrado (`RectangleCornerControl`)**:
   Aparece condicionalmente cuando `selectedNode.shape === 'rectangle' || selectedNode.shape === 'square'`.
-  1. **Fila única de 4 cortes de 1 Clic (sin redundancias)**: `[▢ Recta (0px)]`, `[▢ Redonda (8px)]`, `[⬡ Bisel (6px)]`, `[▢ Cóncava (10px)]`. Cada botón aplica directamente el estilo geométrico y su radio idóneo recomendado.
-  2. **Calibración avanzada y asimetría**: Acordeón plegable con:
+  1. **Selector de Orientación (Solo para Cuadrado, 1 Clic, sin vista previa)**:
+     `[▢ Cuadrado (0°)]` clásico vs `[◇ Rombo (45°)]` decisión. Permite convertir el nodo cuadrado en un rombo de bifurcación manteniendo el texto interior horizontal, centrado y legible.
+  2. **Fila única de 4 cortes de 1 Clic (sin redundancias)**: `[▢ Recta (0px)]`, `[▢ Redonda (8px)]`, `[⬡ Bisel (6px)]`, `[▢ Cóncava (10px)]`. Cada botón aplica directamente el estilo geométrico y su radio idóneo recomendado, compatible al 100% tanto en 0° como en 45°.
+  3. **Calibración avanzada y asimetría**: Acordeón plegable con:
      * Stepper y slider numérico de Radio/Bisel (0–32px con Reset a 8px).
      * Cuadrante matricial 2x2 estilo Figma (`[⌜ Sup-Izq]`, `[⌝ Sup-Der]`, `[⌞ Inf-Izq]`, `[⌟ Inf-Der]`) para activar o desactivar esquinas individuales en modo asimétrico (tarjetas, badges o cupones), con botón *"Activar todas (4)"*.
-  3. **Motor de renderizado híbrido**:
-     * `sharp` y `rounded`: Procesados directamente en CSS vía `borderRadius` (`${tl}px ${tr}px ${br}px ${bl}px`), manteniendo aceleración por hardware y bordes nativos.
-     * `bevel` y `concave`: Procesados vectorialmente en SVG vía `computeRectangleSvgPath` en `NodeSvgPolygonBackground`, trazando segmentos diagonales o arcos circulares cóncavos con soporte íntegro de tramas, degradados, imágenes, bordes discontinuos y resplandor perimetral de selección.
+  4. **Motor de renderizado híbrido**:
+     * `square` a 0° con `sharp` y `rounded`: Procesados directamente en CSS vía `borderRadius` (`${tl}px ${tr}px ${br}px ${bl}px`), manteniendo aceleración por hardware y bordes nativos.
+     * `square` a 45° (Rombo) o con esquinas `bevel`/`concave`: Procesados vectorialmente en SVG vía `computeRhombusSvgPath` (para rombos a 45°) o `computeRectangleSvgPath` (para rectángulos a 0° con biseles) en `NodeSvgPolygonBackground`. En modo rombo a 45°, se abandona la restricción rígida 1:1 (que obligaba geométricamente a cometas colosales o causaba desbordes en textos multilínea) y se adopta un **Rombo Apaisado Adaptativo** con ancho y alto independientes calibrados a la proporción horizontal estándar de diagramas de decisión (~1.55:1). El motor de dimensionamiento `layoutEngine.ts` garantiza la ley euclidiana de inclusión (Wc / W + Hc / H <= 0.86), asegurando que el texto quede 100% dentro, ceñido, centrado vertical y horizontalmente, y sin espacio desperdiciado (reduciendo más del 50% de área respecto al cometa 1:1). Los conectores del árbol y los botones de plegado se anclan de forma exacta a los vértices laterales (0, H/2) y (W, H/2), con soporte total para esquinas `sharp`, `rounded`, `bevel` y `concave`.
 
 - **Cualidades del Óvalo / Elipse (`OvalQualitiesControl`)**:
   Aparece condicionalmente cuando `selectedNode.shape === 'oval'`.

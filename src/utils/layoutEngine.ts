@@ -1,4 +1,5 @@
 import { MindMap, MindNode, CalculatedNodeLayout, NodeSide, EdgeProfile } from '../types/mindmap';
+import { isSquareRotated } from './rectangleCornerUtils';
 
 const HORIZONTAL_GAP = 54;
 const VERTICAL_GAP = 14;
@@ -57,6 +58,14 @@ export function estimateNodeSize(
       width: Math.max(wrapped.width, Math.round(targetW / 0.68)),
       height: wrapped.height,
     };
+  }
+
+  // Rombo adaptativo (45°): ancho y alto adaptados al contenido en proporción ~1.55:1,
+  // garantizando que el texto quede 100% dentro, ceñido, centrado y sin espacio desperdiciado.
+  if (!hasCustomW && !hasCustomH && isSquareRotated(node)) {
+    const natural = estimateNodeSizeInner(node, mapOptions, undefined);
+    const targetW = Math.min(320, Math.max(90, Math.round(Math.sqrt(natural.width * natural.height * 1.1))));
+    return estimateNodeSizeInner(node, mapOptions, targetW);
   }
 
   // Square/circle automáticos: cuadrado MÍNIMO que encaja el contenido
@@ -180,7 +189,7 @@ function estimateNodeSizeInner(
   // Check if there is a specified custom width or symmetrical 1:1 shape
   // (forcedWidth re-envuelve el texto para el 4:3 compacto sin tocar el nodo)
   let customW = node.customWidth ?? forcedWidth;
-  if (node.shape === 'square' || node.shape === 'circle') {
+  if ((node.shape === 'square' && !isSquareRotated(node)) || node.shape === 'circle') {
     customW = Math.max(node.customWidth || 0, node.customHeight || 0, forcedWidth || 0);
   }
 
@@ -189,7 +198,10 @@ function estimateNodeSizeInner(
 
   if (customW && customW > 0) {
     // Width is constrained by user slider: wrap lines according to available width
-    const availTextWidth = Math.max(customW - (paddingX * 2 + extraWidth), 30);
+    const isRot = isSquareRotated(node);
+    const availTextWidth = isRot
+      ? Math.max(Math.round(customW * 0.65), 30)
+      : Math.max(customW - (paddingX * 2 + extraWidth), 30);
     const charsPerLine = Math.max(Math.floor(availTextWidth / charWidth), 1);
     let wrappedTitleLines = 0;
     for (const l of lines) {
@@ -213,7 +225,10 @@ function estimateNodeSizeInner(
     const bodyCharWidth = bodyFontSize * 0.56;
 
     if (customW && customW > 0) {
-      const availBodyWidth = Math.max(customW - (paddingX * 2), 30);
+      const isRot = isSquareRotated(node);
+      const availBodyWidth = isRot
+        ? Math.max(Math.round(customW * 0.65), 30)
+        : Math.max(customW - (paddingX * 2), 30);
       const bodyCharsPerLine = Math.max(Math.floor(availBodyWidth / bodyCharWidth), 1);
       let wrappedBodyLines = 0;
       for (const bl of bodyLines) {
@@ -271,9 +286,28 @@ function estimateNodeSizeInner(
     width = scale;
     height = node.customHeight || Math.round(scale * 0.75);
   } else if (node.shape === 'square' || node.shape === 'circle') {
-    const dim = Math.max(width, height, node.customWidth || 0, node.customHeight || 0, 48);
-    width = dim;
-    height = dim;
+    if (isSquareRotated(node)) {
+      const effW = Math.max(contentWidth + extraWidth, tagMinWidth, linkMinWidth, imageMinWidth, 36);
+      const effH = Math.max(contentHeight + extraHeight + iconExtraHeight + linkExtraHeight + imageExtraHeight, isRoot ? 32 : 20);
+      const R = 1.55;
+      const minW = (effW + R * effH) / 0.86 + 10;
+      const baseW = Math.max(76, Math.round(minW));
+      const baseH = Math.max(48, Math.round(baseW / R));
+      if (node.customWidth && !node.customHeight) {
+        width = node.customWidth;
+        height = Math.max(48, Math.round(node.customWidth / R));
+      } else if (!node.customWidth && node.customHeight) {
+        height = node.customHeight;
+        width = Math.max(76, Math.round(node.customHeight * R));
+      } else {
+        width = node.customWidth || baseW;
+        height = node.customHeight || baseH;
+      }
+    } else {
+      const dim = Math.max(width, height, node.customWidth || 0, node.customHeight || 0, 48);
+      width = dim;
+      height = dim;
+    }
   } else if (node.shape === 'star') {
     const baseW = Math.max(width + 48, 100);
     width = node.customWidth || baseW;

@@ -12,7 +12,7 @@ import { NodeForkHooks } from './molecules/node/NodeForkHooks';
 import { NodeHeaderRow } from './molecules/node/NodeHeaderRow';
 import { NodeBadgesBar } from './molecules/node/NodeBadgesBar';
 import { NodeActionButtons } from './molecules/node/NodeActionButtons';
-import { isRectangleSvgShape } from '../utils/rectangleCornerUtils';
+import { isRectangleSvgShape, isSquareRotated } from '../utils/rectangleCornerUtils';
 import { isOvalSvgShape } from '../utils/ovalShapeUtils';
 
 export interface NodeComponentProps {
@@ -212,8 +212,8 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         isBodyHidden={isBodyHidden}
         textColor={textColor}
         effectiveFontFamily={effectiveFontFamily}
-        contentMaxWidth={shape === 'hexagon' ? '68%' : undefined}
-        mediaMaxWidth={shape === 'hexagon' ? '96px' : undefined}
+        contentMaxWidth={shape === 'hexagon' ? '68%' : isSquareRotated(node) ? '65%' : undefined}
+        mediaMaxWidth={shape === 'hexagon' ? '96px' : isSquareRotated(node) ? '120px' : undefined}
       />
 
       {/* 4. Badges Bar (Right Image, Bottom Image, Note icon/inline, Prominent Link, Tags, Tooltip) */}
@@ -229,8 +229,8 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         side={layout.side}
         onOpenNote={onOpenNote}
         globalVisibility={globalVisibility}
-        contentMaxWidth={shape === 'hexagon' ? '68%' : undefined}
-        mediaMaxWidth={shape === 'hexagon' ? '96px' : undefined}
+        contentMaxWidth={shape === 'hexagon' ? '68%' : isSquareRotated(node) ? '65%' : undefined}
+        mediaMaxWidth={shape === 'hexagon' ? '96px' : isSquareRotated(node) ? '120px' : undefined}
       />
 
       {/* 5. Action Buttons (Fold/Unfold branch badge & Quick Add child button) */}

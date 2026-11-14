@@ -878,13 +878,16 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
       var titleWidth = 0;
       var titleHeight = 0;
 
+      var isRot = node.shape === 'square' && Boolean(node.squareRotation && Math.abs(node.squareRotation) === 45);
       var customW = node.customWidth;
-      if (node.shape === 'square' || node.shape === 'circle') {
+      if ((node.shape === 'square' && !isRot) || node.shape === 'circle') {
         customW = Math.max(node.customWidth || 0, node.customHeight || 0);
       }
 
       if (customW && customW > 0) {
-        var availTextWidth = Math.max(customW - (paddingX * 2 + extraWidth), 30);
+        var availTextWidth = isRot
+          ? Math.max(Math.round(customW * 0.65), 30)
+          : Math.max(customW - (paddingX * 2 + extraWidth), 30);
         var charsPerLine = Math.max(Math.floor(availTextWidth / charWidth), 1);
         var wrappedTitleLines = 0;
         for (var li = 0; li < lines.length; li++) {
@@ -906,7 +909,9 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         var bodyCharWidth = bodyFontSize * 0.56;
 
         if (customW && customW > 0) {
-          var availBodyWidth = Math.max(customW - (paddingX * 2), 30);
+          var availBodyWidth = isRot
+            ? Math.max(Math.round(customW * 0.65), 30)
+            : Math.max(customW - (paddingX * 2), 30);
           var bodyCharsPerLine = Math.max(Math.floor(availBodyWidth / bodyCharWidth), 1);
           var wrappedBodyLines = 0;
           for (var bi = 0; bi < bodyLines.length; bi++) {
@@ -936,9 +941,28 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         width = fitScale;
         height = node.customHeight || Math.round(fitScale * 0.75);
       } else if (node.shape === 'square' || node.shape === 'circle') {
-        var dim = Math.max(width, height, node.customWidth || 0, node.customHeight || 0, 48);
-        width = dim;
-        height = dim;
+        if (node.shape === 'square' && node.squareRotation && Math.abs(node.squareRotation) === 45) {
+          var effW = Math.max(contentWidth + extraWidth, tagMinWidth, linkMinWidth, 36);
+          var effH = Math.max(contentHeight + extraHeight + iconExtraHeight + linkExtraHeight, isRoot ? 32 : 20);
+          var R = 1.55;
+          var minW = (effW + R * effH) / 0.86 + 10;
+          var baseW = Math.max(76, Math.round(minW));
+          var baseH = Math.max(48, Math.round(baseW / R));
+          if (node.customWidth && !node.customHeight) {
+            width = node.customWidth;
+            height = Math.max(48, Math.round(node.customWidth / R));
+          } else if (!node.customWidth && node.customHeight) {
+            height = node.customHeight;
+            width = Math.max(76, Math.round(node.customHeight * R));
+          } else {
+            width = node.customWidth || baseW;
+            height = node.customHeight || baseH;
+          }
+        } else {
+          var dim = Math.max(width, height, node.customWidth || 0, node.customHeight || 0, 48);
+          width = dim;
+          height = dim;
+        }
       } else if (node.shape === 'star') {
         var baseW = Math.max(width + 48, 100);
         width = node.customWidth || baseW;

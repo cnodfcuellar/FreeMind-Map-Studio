@@ -1,0 +1,378 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 980" width="1440" height="980" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <!-- Filtros de Sombra -->
+    <filter id="shadow-panel" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.45" />
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+
+    <filter id="shadow-card" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.12" />
+    </filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <!-- Patrón de Fondo -->
+    <pattern id="bg-grid-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo Principal -->
+  <rect width="1440" height="980" fill="#090d16" />
+  <rect width="1440" height="980" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera Principal -->
+  <rect x="40" y="24" width="1360" height="70" rx="14" fill="url(#grad-header)" stroke="#1e293b" stroke-width="1.5" />
+  <circle cx="74" cy="59" r="18" fill="#3b82f6" />
+  <!-- Icono de rombo girado -->
+  <rect x="68" y="53" width="12" height="12" rx="2" fill="none" stroke="#ffffff" stroke-width="2.2" transform="rotate(45 74 59)" />
+  <text x="106" y="52" font-size="17" font-weight="700" fill="#ffffff">Propuesta Técnica: Rotar Cuadrado 45° (Rombo / Diamante de Decisión)</text>
+  <text x="106" y="74" font-size="12" fill="#94a3b8">Análisis de ergonomía, legibilidad del texto interior vs. 3 alternativas de implementación en FreeMind</text>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 1: DIAGNÓSTICO Y CONCEPTO CLAVE                                   -->
+  <!-- ========================================================================= -->
+  <g transform="translate(40, 114)">
+    <rect x="0" y="0" width="320" height="830" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header columna -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#64748b" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">i</text>
+    <text x="36" y="25" font-size="12" font-weight="700" fill="#1e293b">1. Concepto y Reto de Legibilidad</text>
+
+    <g transform="translate(14, 54)">
+      <!-- ¿Por qué rotar 45°? -->
+      <rect x="0" y="0" width="292" height="136" rx="10" fill="#eff6ff" stroke="#bfdbfe" />
+      <text x="12" y="22" font-size="11" font-weight="800" fill="#1e40af">¿Por qué 45°? El Rombo de Decisión</text>
+      <text x="12" y="42" font-size="9.5" fill="#334155">• En diagramas de flujo y mapas mentales,</text>
+      <text x="12" y="58" font-size="9.5" fill="#334155">  el <tspan font-weight="700" fill="#1d4ed8">rombo / diamante</tspan> es el estándar</text>
+      <text x="12" y="74" font-size="9.5" fill="#334155">  universal para <tspan font-weight="700">bifurcaciones y preguntas</tspan></text>
+      <text x="12" y="90" font-size="9.5" fill="#334155">  (ej: "¿Aprobado?", "Sí / No", condiciones).</text>
+      <text x="12" y="112" font-size="9.5" fill="#15803d" font-weight="700">✔ Matemáticamente: Cuadrado a 45° = Rombo</text>
+
+      <!-- El gran dilema visual: Dos formas de rotar -->
+      <g transform="translate(0, 150)">
+        <text x="0" y="12" font-size="10.5" font-weight="700" fill="#0f172a">El Dilema Ergonómico:</text>
+
+        <!-- Caso Malo: Rotar todo -->
+        <g transform="translate(0, 24)">
+          <rect x="0" y="0" width="292" height="165" rx="10" fill="#fef2f2" stroke="#fecaca" />
+          <text x="12" y="20" font-size="10" font-weight="700" fill="#991b1b">❌ Rotación ingenua (CSS rotate 45°)</text>
+          
+          <!-- Dibujo de cuadrado rotado con texto inclinado -->
+          <g transform="translate(146, 85)">
+            <rect x="-34" y="-34" width="68" height="68" rx="8" fill="#fee2e2" stroke="#ef4444" stroke-width="2" transform="rotate(45)" />
+            <text x="0" y="4" font-size="9" font-weight="700" fill="#b91c1c" text-anchor="middle" transform="rotate(45)">Texto torcido</text>
+          </g>
+          
+          <text x="146" y="148" font-size="8.5" fill="#7f1d1d" text-anchor="middle">Ilegible: obliga al usuario a torcer el cuello</text>
+        </g>
+
+        <!-- Caso Bueno: Silueta rombo + Texto horizontal -->
+        <g transform="translate(0, 204)">
+          <rect x="0" y="0" width="292" height="175" rx="10" fill="#f0fdf4" stroke="#bbf7d0" />
+          <text x="12" y="20" font-size="10" font-weight="700" fill="#166534">✔ Silueta Rombo + Texto Horizontal</text>
+          
+          <!-- Dibujo de rombo con texto horizontal -->
+          <g transform="translate(146, 88)">
+            <!-- Rombo exterior -->
+            <rect x="-36" y="-36" width="72" height="72" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="2" transform="rotate(45)" />
+            <!-- Texto perfectamente horizontal -->
+            <text x="0" y="0" font-size="9" font-weight="700" fill="#14532d" text-anchor="middle">¿Es viable?</text>
+            <text x="0" y="13" font-size="7.5" fill="#15803d" text-anchor="middle">(100% legible)</text>
+          </g>
+          
+          <text x="146" y="158" font-size="8.5" font-weight="600" fill="#15803d" text-anchor="middle">Profesional: compatible con esquinas suaves</text>
+        </g>
+      </g>
+
+      <!-- Conclusión -->
+      <g transform="translate(0, 560)">
+        <rect x="0" y="0" width="292" height="185" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="22" font-size="10" font-weight="700" fill="#334155">Conclusión de UX:</text>
+        <text x="12" y="42" font-size="9" fill="#475569">Rotar el cuadrado a 45° es una excelente</text>
+        <text x="12" y="58" font-size="9" fill="#475569">idea, pero <tspan font-weight="700">SIEMPRE manteniendo el texto</tspan></text>
+        <text x="12" y="74" font-size="9" fill="#475569"><tspan font-weight="700">horizontal</tspan> por defecto (igual que en el óvalo).</text>
+        <text x="12" y="98" font-size="9" fill="#475569">Además, con esquinas redondeadas (8px)</text>
+        <text x="12" y="114" font-size="9" fill="#475569">o biseladas (6px), el rombo adquiere un</text>
+        <text x="12" y="130" font-size="9" fill="#475569">estilo moderno de tarjeta de decisión.</text>
+        <text x="12" y="156" font-size="9.5" font-weight="700" fill="#2563eb">→ Veamos 3 alternativas de UI para ello:</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 2: ALTERNATIVA A (RECOMENDADA)                                     -->
+  <!-- ========================================================================= -->
+  <g transform="translate(380, 114)">
+    <rect x="0" y="0" width="320" height="830" rx="14" fill="#ffffff" stroke="#22c55e" stroke-width="2" filter="url(#shadow-panel)" />
+    
+    <!-- Header columna -->
+    <rect x="0" y="0" width="320" height="42" rx="12 12 0 0" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#22c55e" />
+    <text x="20" y="24.5" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+    <text x="36" y="25" font-size="12" font-weight="700" fill="#14532d">Alternativa A (Presets 1 Clic)</text>
+    <rect x="210" y="10" width="98" height="22" rx="11" fill="#22c55e" />
+    <text x="259" y="24.5" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">RECOMENDADA</text>
+
+    <!-- Contenido Alternativa A -->
+    <g transform="translate(14, 54)">
+      <text x="0" y="14" font-size="11" font-weight="700" fill="#1e293b">Cualidades del Cuadrado</text>
+      <rect x="236" y="0" width="56" height="18" rx="9" fill="#dcfce7" />
+      <text x="264" y="12" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">1 Clic</text>
+
+      <!-- 1. Presets de Orientación Rápida -->
+      <g transform="translate(0, 26)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">ORIENTACIÓN / MODO:</text>
+        <g transform="translate(0, 16)">
+          <div className="grid grid-cols-2 gap-2">
+            <!-- Normal 0° -->
+            <rect x="0" y="0" width="142" height="48" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+            <rect x="14" y="14" width="20" height="20" rx="3" fill="none" stroke="#64748b" stroke-width="1.8" />
+            <text x="44" y="24" font-size="10.5" font-weight="700" fill="#334155">▢ Cuadrado</text>
+            <text x="44" y="38" font-size="8.5" fill="#94a3b8">0° estándar</text>
+
+            <!-- Rombo 45° (Activo) -->
+            <rect x="150" y="0" width="142" height="48" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8" />
+            <rect x="162" y="16" width="16" height="16" rx="3" fill="none" stroke="#2563eb" stroke-width="1.8" transform="rotate(45 170 24)" />
+            <text x="194" y="24" font-size="10.5" font-weight="700" fill="#1e40af">◇ Rombo</text>
+            <text x="194" y="38" font-size="8.5" fill="#2563eb">45° decisión</text>
+          </div>
+        </g>
+      </g>
+
+      <!-- 2. Tipo de Esquina (las mismas 4 opciones se combinan con 45°) -->
+      <g transform="translate(0, 102)">
+        <text x="0" y="10" font-size="9" font-weight="700" fill="#64748b">TIPO DE ESQUINA (SE APLICA AL ROMBO):</text>
+        <g transform="translate(0, 16)">
+          <rect x="0" y="0" width="68" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="34" y="21" font-size="9.5" font-weight="600" fill="#334155" text-anchor="middle">▢ Recta</text>
+          <text x="34" y="33" font-size="8" fill="#94a3b8" text-anchor="middle">0px</text>
+
+          <rect x="74" y="0" width="68" height="42" rx="8" fill="#eff6ff" stroke="#3b82f6" />
+          <text x="108" y="21" font-size="9.5" font-weight="700" fill="#1e40af" text-anchor="middle">▢ Redonda</text>
+          <text x="108" y="33" font-size="8" fill="#3b82f6" text-anchor="middle">8px suave</text>
+
+          <rect x="148" y="0" width="68" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="182" y="21" font-size="9.5" font-weight="600" fill="#334155" text-anchor="middle">⬡ Bisel</text>
+          <text x="182" y="33" font-size="8" fill="#94a3b8" text-anchor="middle">6px</text>
+
+          <rect x="222" y="0" width="70" height="42" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="257" y="21" font-size="9.5" font-weight="600" fill="#334155" text-anchor="middle">▢ Cóncava</text>
+          <text x="257" y="33" font-size="8" fill="#94a3b8" text-anchor="middle">10px</text>
+        </g>
+      </g>
+
+      <!-- 3. Switch de Texto Horizontal -->
+      <g transform="translate(0, 172)">
+        <rect x="0" y="0" width="292" height="36" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="10" y="16" font-size="9.5" font-weight="600" fill="#334155">Texto siempre horizontal</text>
+        <text x="10" y="27" font-size="7.5" fill="#94a3b8">Mantiene el texto recto aunque el rombo esté a 45°</text>
+        
+        <rect x="246" y="9" width="36" height="18" rx="9" fill="#22c55e" />
+        <circle cx="271" cy="18" r="7" fill="#ffffff" />
+      </g>
+
+      <!-- 4. Vista previa en vivo -->
+      <g transform="translate(0, 222)">
+        <rect x="0" y="0" width="292" height="180" rx="10" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="146" y="22" font-size="10" font-weight="700" fill="#334155" text-anchor="middle">VISTA PREVIA EN EL NODO:</text>
+        
+        <!-- Rombo con esquinas redondeadas 8px y texto centrado -->
+        <g transform="translate(146, 102)">
+          <rect x="-42" y="-42" width="84" height="84" rx="14" fill="#3b82f6" fill-opacity="0.12" stroke="#2563eb" stroke-width="2" transform="rotate(45)" />
+          <text x="0" y="-3" font-size="11" font-weight="700" fill="#1e3a8a" text-anchor="middle">¿Aprobado?</text>
+          <text x="0" y="13" font-size="8.5" fill="#3b82f6" text-anchor="middle">Sí / No</text>
+        </g>
+        <text x="146" y="168" font-size="8" fill="#64748b" text-anchor="middle">Vértices suaves + espacio de lectura perfecto</text>
+      </g>
+
+      <!-- Ventajas Alternativa A -->
+      <g transform="translate(0, 416)">
+        <rect x="0" y="0" width="292" height="250" rx="10" fill="#f0fdf4" stroke="#86efac" />
+        <text x="14" y="24" font-size="11" font-weight="800" fill="#166534">Ventajas de la Alternativa A:</text>
+        <text x="14" y="46" font-size="9" fill="#15803d">1. <tspan font-weight="700">1 Clic para alternar:</tspan> Cambia entre Cuadrado</text>
+        <text x="24" y="60" font-size="9" fill="#15803d">   formal y Rombo de decisión al instante.</text>
+        <text x="14" y="82" font-size="9" fill="#15803d">2. <tspan font-weight="700">Reutiliza todo el trabajo:</tspan> Se combina</text>
+        <text x="24" y="96" font-size="9" fill="#15803d">   con las 4 esquinas (redonda, bisel, cóncava).</text>
+        <text x="14" y="118" font-size="9" fill="#15803d">3. <tspan font-weight="700">Idéntico al Óvalo:</tspan> Comparte el patrón</text>
+        <text x="24" y="132" font-size="9" fill="#15803d">   ya dominado por el usuario (Presets + Texto recto).</text>
+        <text x="14" y="154" font-size="9" fill="#15803d">4. <tspan font-weight="700">Cero sobrecarga de UI:</tspan> Ocupa solo 50px</text>
+        <text x="24" y="168" font-size="9" fill="#15803d">   adicionales en el inspector del Cuadrado.</text>
+        
+        <rect x="14" y="190" width="264" height="42" rx="6" fill="#ffffff" stroke="#bbf7d0" />
+        <text x="146" y="208" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">COMPATIBILIDAD CON MAPAS: 100%</text>
+        <text x="146" y="222" font-size="8" fill="#15803d" text-anchor="middle">Los conectores salientes parten de los 4 vértices del rombo.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 3: ALTERNATIVA B (ROTACIÓN LIBRE CON SLIDER)                       -->
+  <!-- ========================================================================= -->
+  <g transform="translate(720, 114)">
+    <rect x="0" y="0" width="320" height="830" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header columna -->
+    <rect x="0" y="0" width="320" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#6366f1" />
+    <text x="36" y="25" font-size="12" font-weight="700" fill="#1e293b">Alternativa B (Slider Rotación)</text>
+    <rect x="230" y="10" width="78" height="22" rx="11" fill="#e0e7ff" />
+    <text x="269" y="24.5" font-size="9" font-weight="700" fill="#4338ca" text-anchor="middle">FLEXIBLE</text>
+
+    <!-- Contenido Alternativa B -->
+    <g transform="translate(14, 54)">
+      <text x="0" y="14" font-size="11" font-weight="700" fill="#1e293b">Rotación Libre del Cuadrado</text>
+      <text x="0" y="30" font-size="8.5" fill="#64748b">Permite cualquier ángulo (-180° a +180°)</text>
+
+      <!-- Bloque de Slider -->
+      <g transform="translate(0, 42)">
+        <rect x="0" y="0" width="292" height="120" rx="10" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="22" font-size="10" font-weight="700" fill="#334155">Ángulo de Giro:</text>
+        <rect x="238" y="10" width="42" height="20" rx="4" fill="#e0e7ff" />
+        <text x="259" y="23" font-size="10" font-weight="800" fill="#3730a3" text-anchor="middle">45°</text>
+
+        <!-- Slider -->
+        <g transform="translate(12, 42)">
+          <rect x="0" y="6" width="268" height="4" rx="2" fill="#cbd5e1" />
+          <rect x="0" y="6" width="168" height="4" rx="2" fill="#6366f1" />
+          <circle cx="168" cy="8" r="7" fill="#4f46e5" />
+        </g>
+
+        <!-- Atajos rápidos de ángulo -->
+        <g transform="translate(12, 70)">
+          <text x="0" y="10" font-size="8.5" fill="#64748b">Atajos rápidos:</text>
+          <g transform="translate(0, 16)">
+            <rect x="0" y="0" width="58" height="22" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="29" y="14" font-size="9" fill="#334155" text-anchor="middle">0° Normal</text>
+
+            <rect x="64" y="0" width="66" height="22" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="97" y="14" font-size="9" fill="#334155" text-anchor="middle">15° Ladeado</text>
+
+            <rect x="136" y="0" width="66" height="22" rx="5" fill="#4f46e5" />
+            <text x="169" y="14" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle">45° Rombo</text>
+
+            <rect x="208" y="0" width="58" height="22" rx="5" fill="#ffffff" stroke="#cbd5e1" />
+            <text x="237" y="14" font-size="9" fill="#334155" text-anchor="middle">Reset</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- Vista previa -->
+      <g transform="translate(0, 178)">
+        <rect x="0" y="0" width="292" height="150" rx="10" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="146" y="20" font-size="10" font-weight="700" fill="#334155" text-anchor="middle">POSIBILIDADES ADICIONALES:</text>
+
+        <!-- Muestra de 15° estilo post-it -->
+        <g transform="translate(68, 75)">
+          <rect x="-24" y="-24" width="48" height="48" rx="6" fill="#fef08a" stroke="#ca8a04" transform="rotate(12)" />
+          <text x="0" y="3" font-size="7.5" font-weight="700" fill="#854d0e" text-anchor="middle">Post-it 12°</text>
+        </g>
+
+        <!-- Muestra de 45° rombo -->
+        <g transform="translate(210, 75)">
+          <rect x="-24" y="-24" width="48" height="48" rx="6" fill="#e0e7ff" stroke="#4f46e5" transform="rotate(45)" />
+          <text x="0" y="3" font-size="7.5" font-weight="700" fill="#3730a3" text-anchor="middle">Rombo 45°</text>
+        </g>
+        <text x="146" y="136" font-size="8" fill="#64748b" text-anchor="middle">Permite notas ladeadas estilo "nota adhesiva" además de rombos</text>
+      </g>
+
+      <!-- Evaluación Alternativa B -->
+      <g transform="translate(0, 342)">
+        <rect x="0" y="0" width="292" height="180" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="20" font-size="10" font-weight="700" fill="#4338ca">Evaluación Alternativa B:</text>
+        <text x="12" y="40" font-size="9" fill="#475569">✔ <tspan font-weight="700">Mayor versatilidad:</tspan> Permite ángulos</text>
+        <text x="22" y="54" font-size="9" fill="#475569">personalizados como 10° o 15° para notas.</text>
+        <text x="12" y="74" font-size="9" fill="#475569">⚠️ <tspan font-weight="700">Más complejo:</tspan> Un slider continuo para</text>
+        <text x="22" y="88" font-size="9" fill="#475569">llegar a 45° requiere más precisión manual,</text>
+        <text x="22" y="102" font-size="9" fill="#475569">a menos que se pulse el botón de atajo.</text>
+        <text x="12" y="122" font-size="9" fill="#475569">⚠️ Un cuadrado a 15° con texto horizontal</text>
+        <text x="22" y="136" font-size="9" fill="#475569">puede verse desalineado con las ramas.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA 4: ALTERNATIVA C (FORMA INDEPENDIENTE EN PALETA)                   -->
+  <!-- ========================================================================= -->
+  <g transform="translate(1060, 114)">
+    <rect x="0" y="0" width="340" height="830" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header columna -->
+    <rect x="0" y="0" width="340" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#f59e0b" />
+    <text x="36" y="25" font-size="12" font-weight="700" fill="#1e293b">Alternativa C (11ª Forma 'Rombo')</text>
+    <rect x="238" y="10" width="90" height="22" rx="11" fill="#fef3c7" />
+    <text x="283" y="24.5" font-size="9" font-weight="700" fill="#b45309" text-anchor="middle">NUEVA FORMA</text>
+
+    <!-- Contenido Alternativa C -->
+    <g transform="translate(14, 54)">
+      <text x="0" y="14" font-size="11" font-weight="700" fill="#1e293b">Rombo como Forma Nativa</text>
+      <text x="0" y="30" font-size="8.5" fill="#64748b">Añadir 'diamond' directamente a ShapeSelector</text>
+
+      <!-- Muestra del ShapeSelector con 11 formas -->
+      <g transform="translate(0, 42)">
+        <rect x="0" y="0" width="312" height="150" rx="10" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="18" font-size="9.5" font-weight="700" fill="#334155">Paleta de Formas ampliada (11 iconos):</text>
+        
+        <g transform="translate(10, 30)">
+          <!-- Iconos existentes simulados -->
+          <rect x="0" y="0" width="44" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+          <text x="22" y="22" font-size="12" text-anchor="middle">💬</text>
+
+          <rect x="49" y="0" width="44" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+          <text x="71" y="22" font-size="12" text-anchor="middle">⑂</text>
+
+          <rect x="98" y="0" width="44" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+          <text x="120" y="22" font-size="12" text-anchor="middle">▭</text>
+
+          <rect x="147" y="0" width="44" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+          <text x="169" y="22" font-size="12" text-anchor="middle">▢</text>
+
+          <rect x="196" y="0" width="44" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+          <text x="218" y="22" font-size="12" text-anchor="middle">⬯</text>
+
+          <rect x="245" y="0" width="44" height="34" rx="6" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8" />
+          <rect x="261" y="11" width="12" height="12" rx="2" fill="none" stroke="#2563eb" stroke-width="1.8" transform="rotate(45 267 17)" />
+        </g>
+
+        <text x="156" y="88" font-size="9" font-weight="700" fill="#2563eb" text-anchor="middle">↑ Nuevo icono ◇ 'Rombo' en la paleta</text>
+        <text x="12" y="112" font-size="8" fill="#64748b">• No modifica las opciones del cuadrado.</text>
+        <text x="12" y="126" font-size="8" fill="#64748b">• Aparece como una forma top-level como Estrella o Hexágono.</text>
+      </g>
+
+      <!-- Evaluación Alternativa C -->
+      <g transform="translate(0, 206)">
+        <rect x="0" y="0" width="312" height="230" rx="8" fill="#f8fafc" stroke="#e2e8f0" />
+        <text x="12" y="20" font-size="10" font-weight="700" fill="#b45309">Evaluación Alternativa C:</text>
+        <text x="12" y="40" font-size="9" fill="#475569">✔ <tspan font-weight="700">Semántica pura:</tspan> Para usuarios de diagramas</text>
+        <text x="22" y="54" font-size="9" fill="#475569">de flujo, "Rombo" es un tipo de nodo distinto.</text>
+        <text x="12" y="74" font-size="9" fill="#475569">⚠️ <tspan font-weight="700">Rompe la cuadrícula del ShapeSelector:</tspan></text>
+        <text x="22" y="88" font-size="9" fill="#475569">Actualmente hay exactamente 10 formas en</text>
+        <text x="22" y="102" font-size="9" fill="#475569">una rejilla simétrica de 5x2. Pasar a 11</text>
+        <text x="22" y="116" font-size="9" fill="#475569">deja una forma suelta en una tercera fila.</text>
+        <text x="12" y="136" font-size="9" fill="#475569">⚠️ <tspan font-weight="700">Redundancia matemática:</tspan> Un rombo no deja</text>
+        <text x="22" y="150" font-size="9" fill="#475569">de ser un cuadrado equilátero rotado 45°.</text>
+        <text x="22" y="164" font-size="9" fill="#475569">Tener dos formas separadas duplica controles.</text>
+      </g>
+
+      <!-- Resumen Comparativo -->
+      <g transform="translate(0, 450)">
+        <rect x="0" y="0" width="312" height="150" rx="8" fill="#eff6ff" stroke="#bfdbfe" />
+        <text x="156" y="24" font-size="10.5" font-weight="800" fill="#1e40af" text-anchor="middle">¿CUÁL ES LA MEJOR OPCIÓN?</text>
+        <text x="12" y="50" font-size="9" fill="#1e3a8a"><tspan font-weight="700">La Alternativa A es la más elegante:</tspan></text>
+        <text x="12" y="68" font-size="8.5" fill="#334155">• Mantiene la rejilla 5x2 limpia del selector.</text>
+        <text x="12" y="84" font-size="8.5" fill="#334155">• Permite que el rombo tenga esquinas</text>
+        <text x="20" y="98" font-size="8.5" fill="#334155">redondas (8px) o biseladas súper estéticas.</text>
+        <text x="12" y="114" font-size="8.5" fill="#334155">• 1 Clic para alternar sin pasos complicados.</text>
+        <text x="12" y="132" font-size="8.5" fill="#334155">• Texto siempre horizontal y perfectamente legible.</text>
+      </g>
+    </g>
+  </g>
+</svg>

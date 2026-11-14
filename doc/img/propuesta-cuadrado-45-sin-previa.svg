@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" width="1080" height="620" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow-panel" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.35" />
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+
+    <filter id="shadow-node" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#2563eb" flood-opacity="0.25" />
+    </filter>
+
+    <linearGradient id="grad-header" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <pattern id="bg-grid-dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#334155" opacity="0.35" />
+    </pattern>
+  </defs>
+
+  <!-- Fondo Principal -->
+  <rect width="1080" height="620" fill="#090d16" />
+  <rect width="1080" height="620" fill="url(#bg-grid-dots)" />
+
+  <!-- Cabecera -->
+  <rect x="30" y="20" width="1020" height="64" rx="12" fill="url(#grad-header)" stroke="#1e293b" stroke-width="1.5" />
+  <circle cx="62" cy="52" r="16" fill="#3b82f6" />
+  <rect x="56" y="46" width="12" height="12" rx="2" fill="none" stroke="#ffffff" stroke-width="2" transform="rotate(45 62 52)" />
+  <text x="94" y="46" font-size="16" font-weight="700" fill="#ffffff">Propuesta: Cuadrado 45° (Rombo de Decisión) — Sin Vista Previa en Panel</text>
+  <text x="94" y="66" font-size="11.5" fill="#94a3b8">Inspector ultra compacto en el ToolPanel + Representación directa en el lienzo del mapa mental</text>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA IZQUIERDA: EL PANEL DE HERRAMIENTAS (SIN VISTA PREVIA)           -->
+  <!-- ========================================================================= -->
+  <g transform="translate(30, 104)">
+    <rect x="0" y="0" width="360" height="486" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Header panel sepia/claro fiel a la app -->
+    <rect x="0" y="0" width="360" height="42" rx="14 14 0 0" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" />
+    <circle cx="20" cy="21" r="7" fill="#3b82f6" />
+    <text x="36" y="25" font-size="12" font-weight="700" fill="#1e293b">ToolPanel &gt; Formato &gt; Geometría</text>
+    <rect x="250" y="10" width="96" height="22" rx="11" fill="#eff6ff" />
+    <text x="298" y="24.5" font-size="9" font-weight="700" fill="#1d4ed8" text-anchor="middle">SOLO 45°</text>
+
+    <g transform="translate(16, 56)">
+      <!-- Cabecera de la sección Cualidades del Cuadrado -->
+      <div className="space-y-3">
+        <text x="0" y="14" font-size="12" font-weight="700" fill="#1e293b">Cualidades del Cuadrado</text>
+        <rect x="268" y="0" width="60" height="18" rx="9" fill="#dcfce7" />
+        <text x="298" y="12" font-size="9" font-weight="700" fill="#166534" text-anchor="middle">1 Clic</text>
+      </div>
+
+      <!-- 1. NUEVA FILA: ROTACIÓN / MODO 0° vs 45° -->
+      <g transform="translate(0, 30)">
+        <text x="0" y="10" font-size="9.5" font-weight="700" fill="#64748b">ORIENTACIÓN / MODO:</text>
+        
+        <g transform="translate(0, 18)">
+          <!-- Botón 0° Cuadrado -->
+          <rect x="0" y="0" width="160" height="48" rx="10" fill="#ffffff" stroke="#cbd5e1" />
+          <rect x="14" y="14" width="20" height="20" rx="3" fill="none" stroke="#64748b" stroke-width="1.8" />
+          <text x="44" y="25" font-size="11" font-weight="700" fill="#334155">▢ Cuadrado</text>
+          <text x="44" y="39" font-size="9" fill="#94a3b8">0° estándar</text>
+
+          <!-- Botón 45° Rombo (ACTIVO) -->
+          <rect x="168" y="0" width="160" height="48" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2" />
+          <rect x="180" y="16" width="16" height="16" rx="3" fill="none" stroke="#2563eb" stroke-width="2" transform="rotate(45 188 24)" />
+          <text x="212" y="25" font-size="11" font-weight="800" fill="#1e40af">◇ Rombo</text>
+          <text x="212" y="39" font-size="9" font-weight="600" fill="#2563eb">45° decisión</text>
+        </g>
+      </g>
+
+      <!-- 2. TIPO DE ESQUINA (SE APLICA AL ROMBO) -->
+      <g transform="translate(0, 114)">
+        <text x="0" y="10" font-size="9.5" font-weight="700" fill="#64748b">TIPO DE ESQUINA:</text>
+        
+        <g transform="translate(0, 18)">
+          <!-- Recta -->
+          <rect x="0" y="0" width="76" height="44" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="38" y="22" font-size="10" font-weight="600" fill="#334155" text-anchor="middle">▢ Recta</text>
+          <text x="38" y="35" font-size="8.5" fill="#94a3b8" text-anchor="middle">0px</text>
+
+          <!-- Redonda (Activa) -->
+          <rect x="84" y="0" width="76" height="44" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8" />
+          <text x="122" y="22" font-size="10" font-weight="700" fill="#1e40af" text-anchor="middle">▢ Redonda</text>
+          <text x="122" y="35" font-size="8.5" fill="#3b82f6" text-anchor="middle">8px</text>
+
+          <!-- Bisel -->
+          <rect x="168" y="0" width="76" height="44" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="206" y="22" font-size="10" font-weight="600" fill="#334155" text-anchor="middle">⬡ Bisel</text>
+          <text x="206" y="35" font-size="8.5" fill="#94a3b8" text-anchor="middle">6px</text>
+
+          <!-- Cóncava -->
+          <rect x="252" y="0" width="76" height="44" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="290" y="22" font-size="10" font-weight="600" fill="#334155" text-anchor="middle">▢ Cóncava</text>
+          <text x="290" y="35" font-size="8.5" fill="#94a3b8" text-anchor="middle">10px</text>
+        </g>
+      </g>
+
+      <!-- 3. CALIBRACIÓN PLEGABLE (SIN VISTA PREVIA) -->
+      <g transform="translate(0, 194)">
+        <rect x="0" y="0" width="328" height="32" rx="8" fill="#f8fafc" stroke="#cbd5e1" />
+        <text x="12" y="20" font-size="10" font-weight="600" fill="#475569">⚙️ Calibración de radio y asimetría</text>
+        <text x="306" y="20" font-size="10" fill="#94a3b8">▾</text>
+      </g>
+
+      <!-- Cero vista previa: Altura ultra compacta -->
+      <g transform="translate(0, 244)">
+        <rect x="0" y="0" width="328" height="154" rx="10" fill="#f0fdf4" stroke="#86efac" />
+        <text x="14" y="24" font-size="11" font-weight="800" fill="#166534">✔ SIN VISTA PREVIA: Cero Desperdicio</text>
+        <text x="14" y="46" font-size="9.5" fill="#15803d">• Altura total del bloque: <tspan font-weight="700">solo ~90px</tspan>.</text>
+        <text x="14" y="66" font-size="9.5" fill="#15803d">• 1 Clic para alternar entre Cuadrado y Rombo.</text>
+        <text x="14" y="86" font-size="9.5" fill="#15803d">• No ocupa espacio innecesario en el panel.</text>
+        <text x="14" y="106" font-size="9.5" fill="#15803d">• El resultado se ve directamente en el mapa mental.</text>
+
+        <rect x="14" y="120" width="300" height="24" rx="6" fill="#ffffff" stroke="#bbf7d0" />
+        <text x="164" y="136" font-size="9" font-weight="700" fill="#15803d" text-anchor="middle">Texto interior siempre recto y centrado</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- COLUMNA DERECHA: RESULTADO REAL EN EL LIENZO                              -->
+  <!-- ========================================================================= -->
+  <g transform="translate(420, 104)">
+    <rect x="0" y="0" width="630" height="486" rx="14" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" filter="url(#shadow-panel)" />
+    
+    <!-- Cabecera del lienzo -->
+    <rect x="0" y="0" width="630" height="42" rx="14 14 0 0" fill="#1e293b" />
+    <circle cx="20" cy="21" r="5" fill="#ef4444" />
+    <circle cx="36" cy="21" r="5" fill="#f59e0b" />
+    <circle cx="52" cy="21" r="5" fill="#10b981" />
+    <text x="76" y="26" font-size="12" font-weight="700" fill="#f8fafc">Lienzo del Mapa Mental: 0° vs 45°</text>
+
+    <!-- 1. Nodo Cuadrado Estándar (0°) -->
+    <g transform="translate(50, 90)">
+      <text x="70" y="0" font-size="11" font-weight="700" fill="#94a3b8" text-anchor="middle">Cuadrado Estándar (0°)</text>
+      
+      <!-- Cuadrado 0° -->
+      <rect x="10" y="20" width="120" height="120" rx="12" fill="#1e293b" stroke="#3b82f6" stroke-width="2" />
+      <text x="70" y="74" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Módulo Base</text>
+      <text x="70" y="92" font-size="10" fill="#93c5fd" text-anchor="middle">Etapa 01</text>
+      
+      <!-- Conector saliente -->
+      <path d="M 130 80 L 190 80" stroke="#3b82f6" stroke-width="2" stroke-dasharray="4,4" />
+      <polygon points="190,76 200,80 190,84" fill="#3b82f6" />
+    </g>
+
+    <!-- Flecha de transición entre ambos -->
+    <g transform="translate(250, 170)">
+      <circle cx="25" cy="0" r="16" fill="#334155" />
+      <text x="25" y="5" font-size="14" font-weight="800" fill="#38bdf8" text-anchor="middle">→</text>
+      <text x="25" y="30" font-size="9" font-weight="700" fill="#64748b" text-anchor="middle">1 Clic</text>
+    </g>
+
+    <!-- 2. Nodo Rombo de Decisión (45°) -->
+    <g transform="translate(370, 70)">
+      <text x="110" y="20" font-size="11" font-weight="700" fill="#38bdf8" text-anchor="middle">Rombo de Decisión (45°)</text>
+      
+      <!-- Silueta del rombo rotada 45° con esquinas redondeadas 14px -->
+      <g transform="translate(110, 110)">
+        <!-- Rombo -->
+        <rect x="-60" y="-60" width="120" height="120" rx="16" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5" transform="rotate(45)" filter="url(#shadow-node)" />
+        
+        <!-- Puntos de anclaje de conectores en los 4 vértices del rombo -->
+        <circle cx="0" cy="-85" r="4" fill="#38bdf8" />
+        <circle cx="85" cy="0" r="4" fill="#38bdf8" />
+        <circle cx="0" cy="85" r="4" fill="#38bdf8" />
+        <circle cx="-85" cy="0" r="4" fill="#38bdf8" />
+
+        <!-- Texto interior 100% horizontal -->
+        <text x="0" y="-8" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">¿Es viable?</text>
+        <text x="0" y="10" font-size="11" font-weight="700" fill="#38bdf8" text-anchor="middle">Sí / No</text>
+        <text x="0" y="26" font-size="9" fill="#94a3b8" text-anchor="middle">Condición</text>
+      </g>
+
+      <!-- Conectores salientes de las decisiones -->
+      <!-- Rama Arriba / Sí -->
+      <path d="M 220 180 L 250 180" stroke="#10b981" stroke-width="2" />
+      <polygon points="250,176 258,180 250,184" fill="#10b981" />
+      <text x="236" y="172" font-size="9" font-weight="800" fill="#34d399">SÍ</text>
+
+      <!-- Rama Abajo / No -->
+      <path d="M 110 280 L 110 300" stroke="#f43f5e" stroke-width="2" />
+      <polygon points="106,300 110,308 114,300" fill="#f43f5e" />
+      <text x="122" y="296" font-size="9" font-weight="800" fill="#fb7185">NO</text>
+    </g>
+
+    <!-- Cartela de características -->
+    <g transform="translate(40, 370)">
+      <rect x="0" y="0" width="550" height="90" rx="10" fill="#1e293b" stroke="#334155" />
+      <text x="20" y="26" font-size="11" font-weight="700" fill="#38bdf8">Beneficios en el mapa mental:</text>
+      <text x="20" y="48" font-size="9.5" fill="#cbd5e1">1. <tspan font-weight="700" fill="#ffffff">Bifurcaciones claras:</tspan> Permite modelar árboles lógicos con preguntas Sí / No.</text>
+      <text x="20" y="66" font-size="9.5" fill="#cbd5e1">2. <tspan font-weight="700" fill="#ffffff">Lectura cómoda:</tspan> La silueta rota pero el texto se mantiene completamente horizontal.</text>
+      <text x="20" y="82" font-size="9.5" fill="#cbd5e1">3. <tspan font-weight="700" fill="#ffffff">4 Vértices de conexión:</tspan> Conectores limpios por arriba, abajo, izquierda y derecha.</text>
+    </g>
+  </g>
+</svg>
