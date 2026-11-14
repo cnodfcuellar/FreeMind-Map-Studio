@@ -40,6 +40,7 @@ import {
   Eye,
   FileText,
   RotateCcw,
+  Printer,
   Zap,
   CornerDownLeft,
   Tag,
@@ -102,6 +103,7 @@ export interface CommandPaletteModalProps {
   onOpenTemplates: () => void;
   onOpenSavedMaps: () => void;
   onOpenExportModal: () => void;
+  onOpenPdfModal?: () => void;
   onOpenImportModal: () => void;
   onOpenShortcuts: () => void;
   onOpenConnectorModal: () => void;
@@ -164,6 +166,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   onOpenTemplates,
   onOpenSavedMaps,
   onOpenExportModal,
+  onOpenPdfModal,
   onOpenImportModal,
   onOpenShortcuts,
   onOpenConnectorModal,
@@ -815,6 +818,16 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         action: onOpenTemplates,
       },
       {
+        id: 'file-pdf-export',
+        title: 'Exportar a PDF Vectorial (Póster / Mosaico)',
+        description: 'Impresión vectorial de alta resolución en A4, A3, Letter o mosaico multipágina',
+        category: 'archivo',
+        categoryLabel: 'Archivo',
+        icon: <Printer className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
+        keywords: ['pdf', 'imprimir', 'vectorial', 'poster', 'mosaico', 'impresion', 'print'],
+        action: () => onOpenPdfModal?.(),
+      },
+      {
         id: 'file-export',
         title: 'Exportar Mapa (HTML, Freeplane .mm, PNG, SVG)',
         description: 'Descarga tu mapa como archivo interactivo o vectorial',
@@ -942,6 +955,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     onOpenSavedMaps,
     onOpenTemplates,
     onOpenExportModal,
+    onOpenPdfModal,
     onOpenImportModal,
     onOpenShortcuts,
     onNewMap,

@@ -3,6 +3,7 @@ import { MindMap, NodeShape } from '../types/mindmap';
 import { UiTheme } from '../utils/uiTheme';
 import {
   Command,
+  Printer,
   FileText,
   Save,
   FolderOpen,
@@ -46,6 +47,7 @@ interface MenuBarProps {
   onOpenSavedMaps: () => void;
   onSaveMap: () => void;
   onOpenExportModal: () => void;
+  onOpenPdfModal?: () => void;
   onOpenImportModal: () => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -79,6 +81,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onOpenSavedMaps,
   onSaveMap,
   onOpenExportModal,
+  onOpenPdfModal,
   onOpenImportModal,
   onUndo,
   onRedo,
@@ -186,6 +189,15 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                 <kbd className="text-[10px] text-slate-400 font-mono">Ctrl+S</kbd>
               </button>
               <div className="my-1 border-t border-slate-100" />
+              {onOpenPdfModal && (
+                <button
+                  onClick={() => { onOpenPdfModal(); setOpenMenu(null); }}
+                  className="w-full px-3 py-1.5 text-left flex items-center justify-between font-semibold text-purple-600 hover:bg-purple-50 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2"><Printer className="w-3.5 h-3.5 text-purple-600" /> Exportar PDF Vectorial...</span>
+                  <span className="text-[9px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.2 rounded-full">Póster</span>
+                </button>
+              )}
               <button
                 onClick={() => { onOpenExportModal(); setOpenMenu(null); }}
                 className="w-full px-3 py-1.5 text-left flex items-center justify-between font-semibold text-blue-600 hover:bg-blue-50"

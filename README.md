@@ -9,7 +9,7 @@
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Zustand](https://img.shields.io/badge/Zustand-5-433D37?style=for-the-badge)](https://zustand-demo.pmnd.rs/)
-[![Vitest](https://img.shields.io/badge/Tests-187%2F187%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
+[![Vitest](https://img.shields.io/badge/Tests-201%2F201%20Passing-22c55e?style=for-the-badge&logo=vitest&logoColor=white)](https://vitest.dev)
 [![Motion](https://img.shields.io/badge/Motion-12-ea580c?style=for-the-badge&logo=framer&logoColor=white)](https://motion.dev)
 [![Antigravity IDE](https://img.shields.io/badge/Antigravity%20IDE-2.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
@@ -313,6 +313,7 @@ freemind-map-studio/
 │   │
 │   ├── 📂 Modals/                     # MODALES ESTANDARIZADOS (con ModalBackdrop + ModalHeader)
 │   │   ├── CommandPaletteModal.tsx    # Paleta de comandos spotlight (Ctrl+K) y buscador universal de nodos
+│   │   ├── PdfExportModal.tsx         # Exportación a PDF vectorial profesional (póster o mosaico mural)
 │   │   ├── ExportImportModal.tsx      # Exportación a 4 formatos e importación .mm/.json
 │   │   ├── ShortcutsModal.tsx         # Guía de atajos de teclado
 │   │   ├── TemplatesModal.tsx         # Galería con +20 plantillas profesionales
@@ -322,6 +323,7 @@ freemind-map-studio/
 │   │
 │   └── 📂 utils/                      # UTILIDADES PURAS Y ALGORITMOS
 │       ├── layoutEngine.ts            # Motor matemático de layout (9 algoritmos)
+│       ├── pdfExporter.ts             # Motor de renderizado vectorial SVG/PDF con directivas @page
 │       ├── themes.ts                  # Definición de 8 temas y 12 fondos de lienzo
 │       ├── markdownRenderer.tsx       # Parser Markdown propio sin dependencias
 │       ├── connectorUtils.ts          # Cálculo geométrico de curvas Bézier y filtros de sombra

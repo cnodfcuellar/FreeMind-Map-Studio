@@ -147,13 +147,30 @@ Arquitectura modular donde cada objeto posee su propio subpanel e interruptor de
 
 ---
 
+---
+
+### 1.5. 🖨️ Exportación Mejorada a PDF Vectorial e Impresión Profesional (Completado)
+* **Ubicación:** Menú *"Archivo"* > *"Exportar PDF Vectorial..."*, acceso destacado en `ExportImportModal.tsx`, comando en `CommandPaletteModal.tsx` (`Ctrl+K`) y modal dedicado `PdfExportModal.tsx`.
+* **Capacidades Principales:**
+  - **Calidad Vectorial Pura 100% Nítida:** Genera documentos PDF a partir de SVG nativo compilado con directivas `@page`. Los textos son seleccionables y buscables, las líneas y curvas Bézier no se pixelan y se preservan todas las formas de nodo, colitas de bocadillos, sombras y conectores libres.
+  - **Formatos de Papel Estándar e Internacionales:** Soporta A4, A3, A2, Carta (Letter), Oficio (Legal), Tabloide y formato Póster Continuo.
+  - **Orientación:** Conmutador inmediato entre Horizontal (*Landscape*) y Vertical (*Portrait*).
+  - **Modos de Paginación Avanzada:**
+    - `1 Sola Hoja (Póster completo)`: Ajuste automático de escala para encajar el mapa íntegro en una página con márgenes simétricos.
+    - `Mosaicos Inteligentes (2×1, 2×2, 3×2, 3×3)`: Para mapas de gran tamaño, divide el mapa en una matriz de hojas (2, 4, 6 o 9 páginas) con marcas de corte en las esquinas (*crop marks*) y líneas guía de solapamiento de 15mm para imprimir y armar un mural en pared.
+  - **Opciones de Acabado para Imprenta:**
+    - Alternar fondo de lienzo o fondo blanco puro para ahorro de tinta en impresoras de oficina.
+    - Encabezado y pie técnico con título, fecha, autor y numeración de página.
+  - **Simulación Visual de la Hoja:** Vista previa interactiva con el aspect ratio real del papel seleccionado y división en cuadrícula en tiempo real.
+  - **Doble Salida:** Impresión/guardado directo en PDF mediante el motor nativo del navegador y descarga directa del archivo vectorial `.svg`.
+
+---
+
 ## 💡 2. Otras Mejoras Planificadas para el Editor
 
-1. **Exportación Mejorada a PDF Vectorial**:
-   - Renderizado directo a PDF con paginación inteligente de mapas gigantes o formato póster de alta definición.
-2. **Historial Visual de Versiones**:
+1. **Historial Visual de Versiones**:
    - Visualización gráfica de los 40 pasos del historial de `undo/redo` con miniaturas de restauración previa.
-3. **Filtros Avanzados por Metadatos**:
+2. **Filtros Avanzados por Metadatos**:
    - Filtrar el mapa por fecha de modificación, porcentaje de avance (`progress`) o combinación booleana de `#tags`.
 
 ---
@@ -161,7 +178,7 @@ Arquitectura modular donde cada objeto posee su propio subpanel e interruptor de
 ## 📊 3. Estado de Calidad Actual
 
 * **TypeScript (`pnpm lint`):** 0 errores (`tsc --noEmit`).
-* **Cobertura de Pruebas (`pnpm test:regression`):** 35 archivos pasados, **187/187 tests exitosos (100%)**.
+* **Cobertura de Pruebas (`pnpm test:regression`):** 37 archivos pasados, **201/201 tests exitosos (100%)**.
 * **Compilación de Producción (`pnpm build`):** Exitosa con Vite.
 * **Servidor Dev:** Operativo en `http://localhost:3000/`.
 

@@ -13,6 +13,7 @@ import {
   Upload,
   Download,
   Sparkles,
+  Printer,
 } from 'lucide-react';
 import { ModalBackdrop } from '../atoms/ModalBackdrop';
 import { ModalHeader } from '../molecules/ModalHeader';
@@ -22,6 +23,7 @@ interface ExportImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImportMap: (importedMap: MindMap) => void;
+  onOpenPdfModal?: () => void;
 }
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
@@ -29,6 +31,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   isOpen,
   onClose,
   onImportMap,
+  onOpenPdfModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
   const [importError, setImportError] = useState<string | null>(null);
@@ -138,6 +141,41 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
               Descarga tu mapa mental en formatos estándar para compartir, presentar o abrir en otros programas:
             </p>
+
+            {/* 0. PDF Vectorial */}
+            {onOpenPdfModal && (
+              <div className="p-4 rounded-xl border border-purple-200/90 bg-purple-50/50 dark:bg-purple-950/20 dark:border-purple-800/60 hover:bg-purple-50/80 transition-colors flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                    <Printer className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
+                        Documento PDF Vectorial & Mosaico
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-950/50 dark:text-purple-400 dark:border-purple-800">
+                        Póster / Mosaico
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Impresión vectorial sin pérdida en A4, A3, Letter o mosaico multipágina con marcas de corte.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenPdfModal();
+                  }}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shrink-0"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Configurar PDF...</span>
+                </button>
+              </div>
+            )}
 
             {/* 1. Freeplane .mm */}
             <div className="p-4 rounded-xl border border-amber-200/80 bg-amber-50/40 dark:bg-amber-950/20 dark:border-amber-800/60 hover:bg-amber-50/70 transition-colors flex items-center justify-between">

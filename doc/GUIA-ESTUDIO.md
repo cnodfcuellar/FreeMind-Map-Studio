@@ -1424,17 +1424,20 @@ Comportamientos:
 - **IconPackModal** (5xl 90vh): sidebar 12 categorías con conteos,
   buscador + sugerencias, grid hasta 10 col, preview + copiar SVG/copiar ID,
   clic alterna icono del nodo.
+- **PdfExportModal** (4xl): exportación profesional a PDF vectorial sin pérdida de resolución en póster (A4, A3, A2, Carta, Oficio, Tabloide) o mosaicos murales (2×1, 2×2, 3×2, 3×3) con marcas de corte y simulación de hoja.
 - **CommandPaletteModal** (2xl): paleta spotlight (Ctrl+K / ⌘K) con buscador universal en tiempo real de nodos del mapa, comandos, selector de temas/layouts/formas/sombras, categorías y prefijos (`>`, `@`).
 - **ShortcutsModal** (lg): tabla de atajos con `kbd`.
 - *(ComingSoonModal: **eliminado** 2026-10-17 — era un modal huérfano; ver `doc/DESIGN.md` §8.5.7)*
 
-## 5. Tests: cómo están organizados (35 archivos, 187 tests)
+## 5. Tests: cómo están organizados (37 archivos, 201 tests)
 
 ```
 src/**/__tests__/*.test.{ts,tsx}   ← junto al código que prueban
 src/test/setup.ts                  ← polyfills matchMedia + ResizeObserver
 ```
 - **Nuevas utilidades probadas**:
+  - `PdfExportModal.test.tsx`: 7 pruebas para configuración de tamaños de papel, orientación apaisada/retrato, mosaico 2×2, descarga SVG y disparo de impresión nativa.
+  - `pdfExporter.test.ts`: 7 pruebas de bounding box, cálculo de mosaicos por cuadrícula, renderizado SVG vectorial y compilación HTML con directivas `@page`.
   - `CommandPaletteModal.test.tsx`: 10 pruebas cubriendo buscador spotlight, navegación con flechas/Enter, filtrado de nodos con auto-centrado (`focusTarget`), categorías y prefijos `>` y `@`.
   - `useKeyboardShortcuts.test.ts`: atajos globales, navegación, guards de modal y apertura de paleta con `Ctrl+K` incluso dentro de inputs.
   - `Switch.test.tsx`: verificación de renderizado accesible, teclado (Espacio/Enter), clases de tamaño y callback `onChange`.
@@ -1465,7 +1468,7 @@ index.html → main.tsx → App → MainEditorLayout (slots)
   ├── MindMapCanvas → layoutEngine + NodeComponent (átomos→moléculas)
   ├── ToolPanel (6 tabs) + OutlineView + MiniMap
   ├── PresentationMode / Elaborate / CanvasPresentation (3 modos)
-  └── Modales (8) + Store Zustand + localStorage
+  └── Modales (9) + Store Zustand + localStorage
 ```
 
 **Si solo recuerdas 5 cosas:** tipos centrales · store inmutable con

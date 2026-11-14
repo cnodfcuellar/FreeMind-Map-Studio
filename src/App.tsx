@@ -43,6 +43,7 @@ import { SavedMapsModal } from './components/Modals/SavedMapsModal';
 import { ConnectorModal } from './components/Modals/ConnectorModal';
 import { IconPackModal } from './components/Modals/IconPackModal';
 import { CommandPaletteModal } from './components/Modals/CommandPaletteModal';
+import { PdfExportModal } from './components/Modals/PdfExportModal';
 import { ElaboratePresentationSystem } from './components/Presentation/ElaboratePresentationSystem';
 
 export default function App() {
@@ -98,6 +99,7 @@ export default function App() {
   const [isSavedMapsModalOpen, setIsSavedMapsModalOpen] = useState(false);
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
   const [editingConnector, setEditingConnector] = useState<Connector | null>(null);
   const [presentationType, setPresentationType] = useState<'classic' | 'dynamic' | 'elaborate'>('dynamic');
@@ -111,6 +113,7 @@ export default function App() {
 
   const isAnyModalOpen = Boolean(
     isExportModalOpen ||
+      isPdfModalOpen ||
       isShortcutsModalOpen ||
       isTemplatesModalOpen ||
       isSavedMapsModalOpen ||
@@ -122,6 +125,7 @@ export default function App() {
 
   const handleCloseModals = () => {
     setIsExportModalOpen(false);
+    setIsPdfModalOpen(false);
     setIsShortcutsModalOpen(false);
     setIsTemplatesModalOpen(false);
     setIsSavedMapsModalOpen(false);
@@ -227,6 +231,7 @@ export default function App() {
           onOpenSavedMaps={() => setIsSavedMapsModalOpen(true)}
           onSaveMap={() => saveCurrentMap(mindMap)}
           onOpenExportModal={() => setIsExportModalOpen(true)}
+          onOpenPdfModal={() => setIsPdfModalOpen(true)}
           onOpenImportModal={() => setIsExportModalOpen(true)}
           onUndo={handleUndo}
           onRedo={handleRedo}
@@ -695,6 +700,7 @@ export default function App() {
             mindMap={mindMap}
             isOpen={isExportModalOpen}
             onClose={() => setIsExportModalOpen(false)}
+            onOpenPdfModal={() => setIsPdfModalOpen(true)}
             onImportMap={(imported) => {
               pushHistory(mindMap);
               setMindMap(imported);
@@ -808,6 +814,7 @@ export default function App() {
             onOpenTemplates={() => setIsTemplatesModalOpen(true)}
             onOpenSavedMaps={() => setIsSavedMapsModalOpen(true)}
             onOpenExportModal={() => setIsExportModalOpen(true)}
+            onOpenPdfModal={() => setIsPdfModalOpen(true)}
             onOpenImportModal={() => setIsExportModalOpen(true)}
             onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
             onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
@@ -893,6 +900,12 @@ export default function App() {
             onRandomizeColors={handleRandomizeEdgeColors}
             onApplyStyleToChildren={() => selectedNodeId && handleApplyStyleToChildren(selectedNodeId)}
             onApplyStyleToSiblings={() => selectedNodeId && handleApplyStyleToSiblings(selectedNodeId)}
+          />
+
+          <PdfExportModal
+            mindMap={mindMap}
+            isOpen={isPdfModalOpen}
+            onClose={() => setIsPdfModalOpen(false)}
           />
         </>
       }

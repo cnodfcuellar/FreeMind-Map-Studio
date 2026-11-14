@@ -34,7 +34,7 @@ FreeMind Map Studio es una suite de mapas mentales y presentaciones interactivas
 ### Comandos (fuente: `package.json`, manda sobre el README)
 - `pnpm install` / `pnpm dev` → http://localhost:3000 (`vite --port=3000 --host=0.0.0.0` fijado en `package.json`).
 - `pnpm lint` = `tsc --noEmit` (solo tipos, no hay ESLint). Verificado: exit 0.
-- `pnpm test` = `vitest run` (187 tests en 35 archivos). ⚠️ En Windows/OneDrive el pool de workers por defecto puede colgarse (timeout 60s, 0 tests); usar `pnpm test:regression` (`vitest run --pool=forks`). Un archivo: `pnpm vitest run src/utils/__tests__/<n>.test.ts`.
+- `pnpm test` = `vitest run` (201 tests en 37 archivos). ⚠️ En Windows/OneDrive el pool de workers por defecto puede colgarse (timeout 60s, 0 tests); usar `pnpm test:regression` (`vitest run --pool=forks`). Un archivo: `pnpm vitest run src/utils/__tests__/<n>.test.ts`.
 - `pnpm build` / `pnpm preview`. `pnpm clean` usa `rm -rf` → falla en PowerShell; borrar `dist/` a mano.
 - Alias `@/*` → raíz del repo (`./`), no `src/` (`tsconfig.json`, `vite.config.ts`). No tocar el bloque `DISABLE_HMR` de `vite.config.ts` (AI Studio lo usa durante ediciones de agentes).
 
@@ -347,14 +347,16 @@ Puro, sin DOM: `estimateNodeSize(node)` + `computeMindMapLayout(map, center)` en
 
 ## 7. Infraestructura de Pruebas y Calidad de Código
 
-Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **187 tests / 35 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
+Vitest (`vite.config.ts`: `globals:true`, `jsdom`, setup `src/test/setup.ts` con polyfills `matchMedia`+`ResizeObserver`, `include: src/**/*.{test,spec}.{ts,tsx}`). **201 tests / 37 suites de archivos, 100% pasando** (verificado nov-2026 con `--pool=forks`):
 
 - `atoms/__tests__/Atoms.test.tsx` — Badge, Button (+loading), IconButton, Input onChange, ModalBackdrop cierre exterior.
 - `atoms/__tests__/Switch.test.tsx` — Switch conmutador accesible iOS-style con labels y aria-checked.
 - `templates/__tests__/MainEditorLayout.test.tsx` — slots y visibilidad condicional de paneles.
 - `Modals/__tests__/CommandPaletteModal.test.tsx` — Paleta spotlight con filtrado en tiempo real, búsqueda de nodos del mapa, categorías y navegación con flechas/Enter.
+- `Modals/__tests__/PdfExportModal.test.tsx` — Exportador a PDF vectorial (póster y mosaico 2×2, 3×2, 3×3) con simulación de hoja y disparo de impresión.
 - `molecules/node/__tests__/NodeBackgroundRenderer.test.ts` — geometrías SVG, cálculo de luminancia y doble motor de sombras (`box-shadow` y `drop-shadow`).
 - `molecules/node/__tests__/NodeHeaderRow.test.ts` — renderizado de cabecera, imagen, iconos y sincronización de sombras de texto.
+- `utils/__tests__/pdfExporter.test.ts` — Cálculo de bounding box, paginación en mosaico, SVG vectorial de alta resolución y HTML de impresión.
 - `utils/__tests__/layoutEngine.test.ts` — dimensiones y bifurcado estándar (9 layouts).
 - `utils/__tests__/connectorUtils.test.ts` — Bézier, step, anclajes perimetrales y filtros drop-shadow.
 - `utils/__tests__/bubbleTailUtils.test.ts` — Motor anatómico de colita de burbuja (4 cualidades: longitud, ancho base, cardinalidad, offset, estilos).
@@ -384,7 +386,7 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (eje
 | `PresentationMode.tsx` | Organismo | Clásica en slides (8 temas) |
 | `Presentation/*` (3) | Organismo | Espacial 3D + tarjetas + modal detalle |
 | `MenuBar/ToolBar/FilterBar/StatusBar/OutlineView/MiniMap` | Organismo | Shell: menús, accesos, búsqueda, métricas, esquema, radar |
-| `Modals/*` (8) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` (incluye `CommandPaletteModal.tsx` spotlight y `ConnectorModal.tsx` dual Crear/Editar) |
+| `Modals/*` (9) | Organismo | Sobre `ModalBackdrop`+`ModalHeader` (incluye `PdfExportModal.tsx` póster/mosaico, `CommandPaletteModal.tsx` y `ConnectorModal.tsx`) |
 | `atoms/*` (12) | Átomo | Button, IconButton, Input, Badge, ModalBackdrop, ErrorBoundary, CollapsibleSection, ColorPicker, SliderInput, Switch, ToggleButton(+Group) |
 | `molecules/*` (7) | Molécula | ModalHeader, SearchInput, HistoryControls, ZoomControls, FontFormatToolbar, ShapeSelector, TagManager |
 | `hooks/useMindMapStore.ts` | Store | CRUD, historial 40, clipboard con IDs nuevos, propagación estilos/iconos/sombras |
@@ -399,6 +401,7 @@ Comandos: `pnpm lint` (`tsc --noEmit`, 0 errores) · `pnpm test:regression` (eje
 | `utils/spatialPresentationGenerator.ts` | Generador | Tarjetas 720×440 (`spiral/constellation/grid`) |
 | `utils/freeplaneConverter.ts` | Conversor | `.mm` bidireccional + Markdown |
 | `utils/htmlExporter.ts` | Generador | HTML autónomo single-file |
+| `utils/pdfExporter.ts` | Generador | Motor vectorial SVG/PDF con directivas @page, bounding box y mosaicos |
 | `utils/markdownRenderer.tsx` | Parser | Markdown propio inline + bloques |
 | `utils/themes.ts` | Tokens | 8 temas + 12 fondos (+ usados por presentación) |
 | `utils/storage.ts` | Adaptador | `localStorage` con validación y fallback |

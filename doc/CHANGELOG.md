@@ -2066,6 +2066,32 @@ Permite:
 - [x] `pnpm test:regression`: **35 suites de pruebas superadas, 187/187 pruebas unitarias exitosas (100%)**.
 - [x] `pnpm build`: Compilación de producción exitosa en 7.11s.
 
+---
+
+## 🖨️ [Exportación / Vectorial] — 2026-11-13: Exportación Mejorada a PDF Vectorial e Impresión Profesional (Póster & Mosaico)
+
+### 🎯 Motivo
+Implementación de la funcionalidad #2 del Roadmap ([doc/mejoras.md](file:///d:/admin/OneDrive/Documents/IA-code/FreeplaneWeb\Freemind\doc\mejoras.md)): **Exportación Mejorada a PDF Vectorial e Impresión Profesional**.
+Permite a los usuarios generar documentos PDF de calidad editorial sin pérdida de resolución (100% vectorial, tipografía seleccionable y curvas SVG nativas), tanto en formato de **póster de una sola página** (A4, A3, A2, Carta, Oficio, Tabloide o Póster continuo) como en **mosaico inteligente multipágina** (2×1, 2×2, 3×2, 3×3) con marcas de corte (*crop marks*) y líneas guía de solapamiento de 15mm para ensamblar murales gigantes en pared.
+
+### ✏️ Cambios
+| Fichero | Qué cambió |
+|---------|-----------|
+| `src/utils/pdfExporter.ts` | Nuevo módulo para cálculo de bounding box global, cálculo de rejillas de paginación (*pagination grid*), renderizado SVG vectorial puro de nodos, ramas, colas de bocadillo, nubes y conectores, compilador de documento HTML de impresión con directivas CSS `@page` y utilidades de descarga SVG / disparo de impresión PDF nativa. |
+| `src/components/Modals/PdfExportModal.tsx` | Nuevo modal interactivo con selección de papel (A4, A3, A2, Letter, Legal, Tabloid, Poster), orientación (apaisada/retrato), modos de mosaico (1, 2, 4, 6 o 9 hojas), opciones de fondo limpio para ahorro de tinta, encabezado/pie técnico, marcas de corte y simulación visual en vivo de la hoja de papel físico. |
+| `src/components/Modals/ExportImportModal.tsx` | Añadida tarjeta destacada de acceso rápido a la configuración de PDF Vectorial. |
+| `src/components/Modals/CommandPaletteModal.tsx` | Registrado el comando "Exportar a PDF Vectorial (Póster / Mosaico)" en la categoría Archivo. |
+| `src/components/MenuBar.tsx` | Añadido botón "Exportar PDF Vectorial..." en el menú superior Archivo. |
+| `src/App.tsx` | Orquestación del estado `isPdfModalOpen`, integración en `isAnyModalOpen` y montaje del componente `PdfExportModal`. |
+| `src/utils/__tests__/pdfExporter.test.ts` | Nueva suite de 7 pruebas unitarias para bounding box, paginación individual/mosaico, renderizado SVG y compilación HTML. |
+| `src/components/Modals/__tests__/PdfExportModal.test.tsx` | Nueva suite de 7 pruebas unitarias para interacción de UI, conmutación de formatos de papel, mosaico 2×2, disparo de impresión y descarga SVG. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): 0 errores de tipado.
+- [x] `pnpm test:regression`: **37 suites de pruebas superadas, 201/201 pruebas unitarias exitosas (100%)**.
+- [x] `pnpm build`: Compilación de producción exitosa en 8.98s.
+
+
 
 
 
