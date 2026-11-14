@@ -20,6 +20,9 @@ export type ForkPreset = 'classic' | 'organic' | 'flat';
 export type RectangleCornerStyle = 'sharp' | 'rounded' | 'bevel' | 'concave';
 export type RectanglePreset = 'sharp' | 'smooth' | 'bevel';
 
+export type OvalPreset = 'horizontal' | 'tilted' | 'vertical';
+export type OvalRatio = 'classic' | 'slender' | 'capsule';
+
 export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden';
 
 export type EdgeProfile = 'uniform' | 'tapered' | 'spindle' | 'hourglass';
@@ -127,6 +130,12 @@ export interface MindNode {
   rectCornerTopRight?: boolean;
   rectCornerBottomRight?: boolean;
   rectCornerBottomLeft?: boolean;
+
+  // Oval Shape Customization (Cualidades del óvalo / elipse)
+  ovalRotation?: number;
+  ovalKeepTextHorizontal?: boolean;
+  ovalPreset?: OvalPreset;
+  ovalRatio?: OvalRatio;
   color?: string; // background fill or accent
   bgType?: NodeBackgroundType;
   gradientColor1?: string;

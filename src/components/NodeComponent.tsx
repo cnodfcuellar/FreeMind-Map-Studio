@@ -13,6 +13,7 @@ import { NodeHeaderRow } from './molecules/node/NodeHeaderRow';
 import { NodeBadgesBar } from './molecules/node/NodeBadgesBar';
 import { NodeActionButtons } from './molecules/node/NodeActionButtons';
 import { isRectangleSvgShape } from '../utils/rectangleCornerUtils';
+import { isOvalSvgShape } from '../utils/ovalShapeUtils';
 
 export interface NodeComponentProps {
   node: MindNode;
@@ -79,7 +80,12 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   const isRoot = !node.parentId;
   const shape = node.shape || (isRoot ? 'rounded' : 'rounded');
   const hasChildren = Boolean(node.children && node.children.length > 0);
-  const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star' || isRectangleSvgShape(node);
+  const isSvgShape =
+    shape === 'hexagon' ||
+    shape === 'arrow' ||
+    shape === 'star' ||
+    isRectangleSvgShape(node) ||
+    isOvalSvgShape(node);
 
   // Effective Visibility (combines node-level and map-level global toggles)
   const isBodyHidden = Boolean(node.hideBody || globalVisibility?.hideAllBodies);

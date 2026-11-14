@@ -6,6 +6,11 @@ import {
   computeRectangleSvgPath,
   computeRectangleBorderRadius,
 } from '../../../utils/rectangleCornerUtils';
+import {
+  isOvalSvgShape,
+  computeOvalPadding,
+  computeOvalSvgTransform,
+} from '../../../utils/ovalShapeUtils';
 
 export interface NodeBackgroundProps {
   node: MindNode;
@@ -268,11 +273,24 @@ export const getNodeShapeStyles = (
     };
   }
   if (shape === 'oval') {
+    const ovalPadding = computeOvalPadding(node);
+    if (isOvalSvgShape(node)) {
+      return {
+        background: 'transparent',
+        backgroundColor: 'transparent',
+        backgroundImage: 'none',
+        border: 'none',
+        boxShadow: 'none',
+        borderRadius: '0px',
+        ...ovalPadding,
+      };
+    }
+    const hasRotation = Boolean(node.ovalRotation && node.ovalRotation !== 0);
     return {
       ...baseStyle,
       borderRadius: '50%',
-      paddingLeft: '20px',
-      paddingRight: '20px',
+      ...ovalPadding,
+      ...(hasRotation && node.ovalKeepTextHorizontal === false ? { transform: `rotate(${node.ovalRotation}deg)` } : {}),
     };
   }
   if (shape === 'hexagon') {
@@ -371,7 +389,8 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
 }) => {
   const shape = node.shape || 'bubble';
   const isRectSvg = isRectangleSvgShape(node);
-  const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star' || isRectSvg;
+  const isOvalSvg = isOvalSvgShape(node);
+  const isSvgShape = shape === 'hexagon' || shape === 'arrow' || shape === 'star' || isRectSvg || isOvalSvg;
   if (!isSvgShape) return null;
 
   const w = layout.width;
@@ -609,9 +628,23 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
         )}
       </defs>
 
-      {/* Resplandor exterior de selección que sigue la geometría del polígono / trazado */}
+      {/* Resplandor exterior de selección que sigue la geometría del polígono / trazado / elipse */}
       {isSelected && (
-        pathD ? (
+        isOvalSvg ? (
+          <ellipse
+            cx={w / 2}
+            cy={h / 2}
+            rx={Math.max(2, (w - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2)}
+            ry={Math.max(2, (h - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2)}
+            transform={computeOvalSvgTransform(w, h, node.ovalRotation || 0)}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth={Math.max(effectiveBorderWidth + 3.5, 4)}
+            style={{
+              filter: 'drop-shadow(0 0 6px rgba(59,130,246,0.85))',
+            }}
+          />
+        ) : pathD ? (
           <path
             d={pathD}
             fill="none"
@@ -639,7 +672,20 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
       )}
 
       {/* Forma principal con fondo y borde (con sombra perimetral SVG) */}
-      {pathD ? (
+      {isOvalSvg ? (
+        <ellipse
+          cx={w / 2}
+          cy={h / 2}
+          rx={Math.max(2, (w - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2)}
+          ry={Math.max(2, (h - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2)}
+          transform={computeOvalSvgTransform(w, h, node.ovalRotation || 0)}
+          fill={fillAttr}
+          stroke={effectiveBorderColor}
+          strokeWidth={effectiveBorderWidth}
+          strokeDasharray={strokeDash}
+          style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+        />
+      ) : pathD ? (
         <path
           d={pathD}
           fill={fillAttr}

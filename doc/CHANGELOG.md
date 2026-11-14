@@ -2344,6 +2344,36 @@ Atender la observación del usuario ("por que se repite"):
 - [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
 - [x] `pnpm test:regression`: **45/45 suites de prueba superadas (268/268 pruebas unitarias exitosas, 100%)**.
 
+---
+
+## ⚡ [Cualidades del Óvalo / Elipse] — 2026-11-14: Implementación de la Alternativa A (Presets 1 Clic + Texto Recto Inteligente)
+
+### 🎯 Motivo
+Atender la solicitud del usuario ("que te parece esta propuesta para ovalos, muestrame svg de alternativas" y posterior confirmación "A"):
+- **Superación de las limitaciones del slider aislado:** Se reemplazó el control único e impreciso de rotación continua por 3 presets directos de 1 Clic (`[⬭ Horiz. (0°)]`, `[⬭ Inclinado (15°)]`, `[⬯ Vertical (90°)]`), en total coherencia con las demás formas anatómicas.
+- **Protección de legibilidad con toggle inteligente:** Se integró el interruptor *"Texto siempre horizontal"* (activo por defecto), que rota vectorialmente la silueta de la elipse sin girar el texto, garantizando que el nodo siga siendo perfectamente legible y editable sin torcer el cuello.
+- **Calibración avanzada y esbeltez:** Acordeón opcional que incluye stepper/slider de ángulo con botones de atajo rápido (-45°, -15°, 15°, 45°) y selector de proporción (`Clásico 3:2`, `Esbelto 2:1`, `Cápsula 3:1`).
+- **Renderizado híbrido CSS + SVG:** Óvalos estándar procesados en CSS con `borderRadius: '50%'`; al rotar con texto horizontal, el óvalo se traza vectorialmente en SVG mediante `<ellipse>` centrada con `transform="rotate(deg cx cy)"`, manteniendo soporte completo de tramas, degradados, imágenes, sombras y resplandor de selección.
+
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos | Añadidos tipos `OvalPreset` (`'horizontal' \| 'tilted' \| 'vertical'`), `OvalRatio` (`'classic' \| 'slender' \| 'capsule'`) y propiedades en `MindNode` (`ovalRotation`, `ovalKeepTextHorizontal`, `ovalPreset`, `ovalRatio`). |
+| `src/utils/ovalShapeUtils.ts` | Utilidad | Motor de cálculo para óvalos: resolución de defaults (`resolveOvalConfig`), detección de óvalos SVG (`isOvalSvgShape`), cálculo de padding según esbeltez (`computeOvalPadding`) y cálculo de transformación SVG (`computeOvalSvgTransform`). |
+| `src/utils/__tests__/ovalShapeUtils.test.ts` | Tests | Suite de 7 pruebas unitarias validando resolución de configuración, activación de SVG condicional, proporciones y transformaciones. |
+| `src/components/molecules/OvalQualitiesControl.tsx` | Molécula | Componente UI para el inspector con 3 presets de orientación, switch de texto horizontal y acordeón de calibración de ángulo y proporción. |
+| `src/components/molecules/__tests__/OvalQualitiesControl.test.tsx` | Tests | Suite de 5 pruebas unitarias verificando presets, toggle de texto, apertura de acordeón, stepper de ángulo y selección de proporción. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Integrado renderizado de óvalos rotados en `NodeSvgPolygonBackground` con `<ellipse>` SVG y padding dinámico según proporción. |
+| `src/components/NodeComponent.tsx` | Molécula | Incluido `isOvalSvgShape(node)` en la condición `isSvgShape`. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Integrado `<OvalQualitiesControl ... />` cuando `selectedNode.shape === 'oval'`. |
+| `src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts` | Tests | Añadidos casos de prueba verificando óvalos normales, rotados en SVG con texto horizontal, cajas inclinadas y proporciones esbelto/cápsula. |
+| `doc/img/propuesta-redisenio-cualidades-ovalo.svg` | Docs / Gráficos | Infografía vectorial SVG comparando la captura original frente a las alternativas A, B y C. |
+| `doc/DESIGN.md` | Docs | Actualizada la especificación de diseño visual para la forma `oval`. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm test:regression`: **47/47 suites de prueba superadas (281/281 pruebas unitarias exitosas, 100%)**.
+
 
 
 

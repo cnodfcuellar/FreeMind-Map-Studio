@@ -21,6 +21,7 @@ import { ToggleButtonGroup } from '../../atoms/ToggleButtonGroup';
 import { Switch } from '../../atoms/Switch';
 import { ShapeSelector } from '../../molecules/ShapeSelector';
 import { RectangleCornerControl } from '../../molecules/RectangleCornerControl';
+import { OvalQualitiesControl } from '../../molecules/OvalQualitiesControl';
 import {
   Square,
   Sparkles,
@@ -538,6 +539,14 @@ export const FormatTab: React.FC<FormatTabProps> = ({
         {/* Cualidades del Rectángulo y Cuadrado (Alternativa A: Presets 1 Clic + Micro-Asimetría) */}
         {(selectedNode.shape === 'rectangle' || selectedNode.shape === 'square') && (
           <RectangleCornerControl
+            node={selectedNode}
+            onUpdateNode={onUpdateNode}
+          />
+        )}
+
+        {/* Cualidades del Óvalo / Elipse (Alternativa A: Presets 1 Clic + Texto Recto) */}
+        {selectedNode.shape === 'oval' && (
+          <OvalQualitiesControl
             node={selectedNode}
             onUpdateNode={onUpdateNode}
           />

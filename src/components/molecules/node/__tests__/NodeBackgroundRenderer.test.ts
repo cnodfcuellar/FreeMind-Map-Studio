@@ -219,6 +219,32 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
     expect(concaveStyles.background).toBe('transparent');
   });
 
+  it('renders oval shape with custom rotation and ratio', () => {
+    // Normal horizontal oval (0 rotation)
+    const normalOval = createNode({ id: 'o1', text: 'Normal', shape: 'oval' });
+    const normalStyles = getNodeShapeStyles(normalOval, mockTheme, '#3b82f6', false);
+    expect(normalStyles.borderRadius).toBe('50%');
+    expect(normalStyles.paddingLeft).toBe('22px');
+
+    // Rotated oval with keepTextHorizontal true (delegates to SVG ellipse)
+    const svgOval = createNode({ id: 'o2', text: 'Rotated SVG', shape: 'oval', ovalRotation: 15, ovalKeepTextHorizontal: true });
+    const svgStyles = getNodeShapeStyles(svgOval, mockTheme, '#3b82f6', false);
+    expect(svgStyles.border).toBe('none');
+    expect(svgStyles.background).toBe('transparent');
+
+    // Rotated oval with keepTextHorizontal false (CSS transform rotate on box)
+    const tiltedBox = createNode({ id: 'o3', text: 'Tilted Box', shape: 'oval', ovalRotation: 45, ovalKeepTextHorizontal: false });
+    const tiltedStyles = getNodeShapeStyles(tiltedBox, mockTheme, '#3b82f6', false);
+    expect(tiltedStyles.transform).toBe('rotate(45deg)');
+
+    // Slender and capsule ratios
+    const slenderOval = createNode({ id: 'o4', text: 'Slender', shape: 'oval', ovalRatio: 'slender' });
+    expect(getNodeShapeStyles(slenderOval, mockTheme, '#3b82f6', false).paddingLeft).toBe('34px');
+
+    const capsuleOval = createNode({ id: 'o5', text: 'Capsule', shape: 'oval', ovalRatio: 'capsule' });
+    expect(getNodeShapeStyles(capsuleOval, mockTheme, '#3b82f6', false).paddingLeft).toBe('14px');
+  });
+
   describe('computeNodeShadowStyle', () => {
     it('returns empty object when nodeShadow is undefined or false', () => {
       const nodeOff = createNode({ id: 'n1', text: 'Off' });

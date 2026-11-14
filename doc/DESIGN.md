@@ -25,7 +25,7 @@ Stack: Tailwind CSS v4 (`@import "tailwindcss"`, sin `tailwind.config`, sin toke
 - Controles pequeños (chips, tags, contadores): `rounded-md` / `rounded-full` (píldoras: progreso, contadores, badges de conteo).
 - Botones/inputs: `rounded-lg` (`sm/md`), `rounded-xl` (`md/lg`, cards de opción, inputs con icono).
 - Contenedores (modales, paneles, minimapa, tooltips): `rounded-2xl`.
-- Nodos: `bubble` 24px raíz / 16px (con anatomía de colita de bocadillo opcional); `pill`/`circle` 9999px; `oval` 50%; `square/rectangle` 0px por defecto, con cualidades avanzadas de esquinas (`rectCornerStyle`: `sharp` 90°, `rounded` suave, `bevel` 45° chaflán técnico y `concave` arco invertido, radio en px y matriz 2x2 de asimetría por esquina); `fork` subrayado vectorial con cualidades anatómicas personalizables (ganchos `both`, `parent`, `children`, `none`, altura en px y codos `sharp` 90°, `rounded` o `bevel` 45°).
+- Nodos: `bubble` 24px raíz / 16px (con anatomía de colita de bocadillo opcional); `pill`/`circle` 9999px; `oval` 50% por defecto, con cualidades avanzadas de rotación (-180° a +180° con presets de 1 clic a 0°, 15° y 90°), toggle "Texto siempre horizontal" y esbeltez clásica 3:2, esbelta 2:1 o cápsula 3:1; `square/rectangle` 0px por defecto, con cualidades avanzadas de esquinas (`rectCornerStyle`: `sharp` 90°, `rounded` suave, `bevel` 45° chaflán técnico y `concave` arco invertido, radio en px y matriz 2x2 de asimetría por esquina); `fork` subrayado vectorial con cualidades anatómicas personalizables (ganchos `both`, `parent`, `children`, `none`, altura en px y codos `sharp` 90°, `rounded` o `bevel` 45°).
 - Hexágono: contenido ceñido al polígono (texto al 68% centrado, imágenes topadas a 96px fijos, tags/enlace/nota acotados; la caja se deriva del contenido acotado y crece con él, +1 fila si hay tags).
 
 ### Sombras
@@ -318,6 +318,18 @@ Verificado en `FormatTab.tsx:97-141` y `ShapeSelector.tsx`.
   3. **Motor de renderizado híbrido**:
      * `sharp` y `rounded`: Procesados directamente en CSS vía `borderRadius` (`${tl}px ${tr}px ${br}px ${bl}px`), manteniendo aceleración por hardware y bordes nativos.
      * `bevel` y `concave`: Procesados vectorialmente en SVG vía `computeRectangleSvgPath` en `NodeSvgPolygonBackground`, trazando segmentos diagonales o arcos circulares cóncavos con soporte íntegro de tramas, degradados, imágenes, bordes discontinuos y resplandor perimetral de selección.
+
+- **Cualidades del Óvalo / Elipse (`OvalQualitiesControl`)**:
+  Aparece condicionalmente cuando `selectedNode.shape === 'oval'`.
+  1. **Fila 1 (Presets de orientación de 1 Clic)**: `[⬭ Horiz. (0°)]` clásico horizontal, `[⬭ Inclinado (15°)]` dinámico sutil, `[⬯ Vertical (90°)]` estilo insignia vertical.
+  2. **Fila 2 (Toggle de legibilidad)**: Switch *"Texto siempre horizontal"* (activo por defecto). Permite rotar la silueta elíptica exterior sin inclinar el texto ni los iconos interiores.
+  3. **Fila 3 (Calibración avanzada y esbeltez)**: Acordeón plegable con:
+     * Stepper y slider numérico de ángulo (-90° a +90° o -180° a +180°) con atajos rápidos (-45°, -15°, 15°, 45°) y botón Reset a 0°.
+     * Selector de proporción/esbeltez: `Clásico (3:2)`, `Esbelto (2:1)`, `Cápsula (3:1)`.
+  4. **Motor de renderizado**:
+     * Cuando `ovalRotation` es 0 o no está rotado: Procesado con CSS nativo `borderRadius: '50%'` y padding según la proporción elegida.
+     * Cuando `ovalRotation !== 0` y `ovalKeepTextHorizontal` está activo: El contenedor DOM es transparente con padding adaptativo y el óvalo se dibuja vectorialmente en SVG vía `<ellipse>` con rotación centrada `rotate(${deg} cx cy)`, manteniendo el texto horizontal, legible y editable.
+     * Si el usuario desactiva *"Texto siempre horizontal"*, el nodo completo rota con CSS `transform: rotate(...)`.
 
 ### Contrato funcional de "Fondo y Relleno" (FormatTab, sección 2)
 
