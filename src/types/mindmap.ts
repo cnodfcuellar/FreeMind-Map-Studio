@@ -94,7 +94,19 @@ export interface NodeCloud {
 
 export type NodeBackgroundType = 'color' | 'transparent' | 'gradient' | 'pattern' | 'image';
 export type NodeGradientDirection = 'to-r' | 'to-b' | 'to-br' | 'radial';
-export type NodePatternStyle = 'dots' | 'lines' | 'squares' | 'stripes' | 'triangles' | 'hexagons' | 'cross';
+export type NodePatternStyle =
+  | 'dots'
+  | 'lines'
+  | 'stripes'
+  | 'squares'
+  | 'grid'
+  | 'triangles'
+  | 'isometric'
+  | 'diamonds'
+  | 'hexagons'
+  | 'honeycomb'
+  | 'cross'
+  | 'crosses';
 export type NodeBgImageMode = 'fit' | 'cover' | 'contain' | 'tile';
 
 export interface MindNode {

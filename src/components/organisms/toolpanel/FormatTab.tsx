@@ -50,14 +50,100 @@ interface FormatTabProps {
   onApplyStyleToSiblings?: (nodeId: string) => void;
 }
 
-const PATTERN_OPTIONS: { id: NodePatternStyle; label: string }[] = [
-  { id: 'dots', label: 'Puntos' },
-  { id: 'lines', label: 'Líneas' },
-  { id: 'stripes', label: 'Rayas' },
-  { id: 'squares', label: 'Cuadros' },
-  { id: 'triangles', label: 'Triángulos' },
-  { id: 'hexagons', label: 'Panal' },
-  { id: 'cross', label: 'Cruces' },
+const PATTERN_OPTIONS: {
+  id: NodePatternStyle;
+  label: string;
+  aliases?: NodePatternStyle[];
+  icon: React.ReactNode;
+}[] = [
+  {
+    id: 'dots',
+    label: 'Puntos',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" fill="currentColor">
+        <circle cx="5.5" cy="5.5" r="1.6" />
+        <circle cx="12.5" cy="5.5" r="1.6" />
+        <circle cx="5.5" cy="12.5" r="1.6" />
+        <circle cx="12.5" cy="12.5" r="1.6" />
+      </svg>
+    ),
+  },
+  {
+    id: 'lines',
+    label: 'Lineas',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" stroke="currentColor">
+        <line x1="3.5" y1="5.5" x2="14.5" y2="5.5" strokeWidth="1.6" strokeLinecap="round" />
+        <line x1="3.5" y1="9" x2="14.5" y2="9" strokeWidth="1.6" strokeLinecap="round" />
+        <line x1="3.5" y1="12.5" x2="14.5" y2="12.5" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: 'stripes',
+    label: 'Rayas',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" stroke="currentColor">
+        <line x1="4.5" y1="13.5" x2="11.5" y2="4.5" strokeWidth="1.6" strokeLinecap="round" />
+        <line x1="7.5" y1="13.5" x2="14.5" y2="4.5" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: 'grid',
+    label: 'Cuadros',
+    aliases: ['squares'],
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" fill="none" stroke="currentColor">
+        <rect x="3" y="3" width="12" height="12" rx="1.5" strokeWidth="1.5" />
+        <line x1="9" y1="3" x2="9" y2="15" strokeWidth="1.2" />
+        <line x1="3" y1="9" x2="15" y2="9" strokeWidth="1.2" />
+      </svg>
+    ),
+  },
+  {
+    id: 'isometric',
+    label: 'Isométrico',
+    aliases: ['triangles'],
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" stroke="currentColor">
+        <line x1="9" y1="2.5" x2="9" y2="15.5" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="3.5" y1="5.7" x2="14.5" y2="12.3" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="3.5" y1="12.3" x2="14.5" y2="5.7" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: 'diamonds',
+    label: 'Rombos',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" fill="none" stroke="currentColor">
+        <polygon points="9,2.5 15.5,9 9,15.5 2.5,9" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    id: 'honeycomb',
+    label: 'Panal',
+    aliases: ['hexagons'],
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" fill="none" stroke="currentColor">
+        <polygon points="5,4 12,4 15,9 12,14 5,14 2,9" strokeWidth="1.5" strokeLinejoin="round" />
+        <line x1="15" y1="9" x2="17" y2="9" strokeWidth="1.3" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: 'crosses',
+    label: 'Cruces',
+    aliases: ['cross'],
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" className="shrink-0" stroke="currentColor">
+        <line x1="9" y1="3.5" x2="9" y2="14.5" strokeWidth="1.8" strokeLinecap="round" />
+        <line x1="3.5" y1="9" x2="14.5" y2="9" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 export const FormatTab: React.FC<FormatTabProps> = ({
@@ -586,14 +672,14 @@ export const FormatTab: React.FC<FormatTabProps> = ({
                   key={opt.id}
                   type="button"
                   onClick={() => onUpdateNode(selectedNode.id, { bgType: opt.id })}
-                  className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer select-none ${
+                  className={`flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all cursor-pointer select-none ${
                     isSelected
                       ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
                       : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
                   }`}
                 >
                   {opt.icon}
-                  <span className="text-[10px] mt-1 text-center truncate w-full">{opt.label}</span>
+                  <span className="text-[9.5px] mt-1 text-center truncate w-full tracking-tight">{opt.label}</span>
                 </button>
               );
             })}
@@ -653,23 +739,29 @@ export const FormatTab: React.FC<FormatTabProps> = ({
             <div className="space-y-3">
               <span className="text-[11px] font-semibold text-slate-600 block">Estilo de Trama</span>
               <div className="grid grid-cols-4 gap-1.5">
-                {PATTERN_OPTIONS.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => onUpdateNode(selectedNode.id, { nodePattern: p.id })}
-                    className={`py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                      selectedNode.nodePattern === p.id
-                        ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
-                    }`}
-                  >
-                    <span className="text-xs">
-                      {p.id === 'dots' ? ':::' : p.id === 'lines' ? '≡' : p.id === 'stripes' ? '///' : p.id === 'squares' ? '⊞' : p.id === 'triangles' ? '▲' : p.id === 'hexagons' ? '⬡' : '✚'}
-                    </span>
-                    <span className="text-[10px] font-medium truncate w-full">{p.label}</span>
-                  </button>
-                ))}
+                {PATTERN_OPTIONS.map((p) => {
+                  const isSelected =
+                    selectedNode.nodePattern === p.id ||
+                    Boolean(p.aliases && selectedNode.nodePattern && p.aliases.includes(selectedNode.nodePattern)) ||
+                    (!selectedNode.nodePattern && p.id === 'dots');
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => onUpdateNode(selectedNode.id, { nodePattern: p.id })}
+                      className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                        isSelected
+                          ? 'border-amber-600 bg-amber-50/90 text-amber-800 dark:border-amber-500 dark:bg-amber-950/40 dark:text-amber-300 font-semibold shadow-2xs'
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 dark:bg-slate-800/60 dark:border-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      <div className="h-5 flex items-center justify-center">
+                        {p.icon}
+                      </div>
+                      <span className="text-[10px] font-medium truncate w-full text-center">{p.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="grid grid-cols-1 gap-2.5 pt-1">

@@ -1875,7 +1875,69 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         } else if (node.bgType === 'gradient') {
           var c1 = node.gradientColor1 || node.color || '#3b82f6';
           var c2 = node.gradientColor2 || '#8b5cf6';
-          div.style.background = 'linear-gradient(135deg, ' + c1 + ', ' + c2 + ')';
+          var gDir = node.gradientDirection || 'to-br';
+          var gCss = 'linear-gradient(135deg, ' + c1 + ', ' + c2 + ')';
+          if (gDir === 'to-r') gCss = 'linear-gradient(to right, ' + c1 + ', ' + c2 + ')';
+          else if (gDir === 'to-b') gCss = 'linear-gradient(to bottom, ' + c1 + ', ' + c2 + ')';
+          else if (gDir === 'radial') gCss = 'radial-gradient(circle, ' + c1 + ', ' + c2 + ')';
+          div.style.background = gCss;
+        } else if (node.bgType === 'pattern') {
+          var baseBg = node.color || (isRoot ? '#2563eb' : '#ffffff');
+          var patCol = node.nodePatternColor || '#475569';
+          var patOp = node.nodePatternOpacity !== undefined ? node.nodePatternOpacity : 0.4;
+          var patSz = node.nodePatternSize || 16;
+          var patSt = node.nodePattern || 'dots';
+          div.style.backgroundColor = baseBg;
+          if (patSt === 'lines') {
+            div.style.backgroundImage = 'linear-gradient(to bottom, transparent calc(50% - 0.75px), ' + patCol + ' calc(50% - 0.75px), ' + patCol + ' calc(50% + 0.75px), transparent calc(50% + 0.75px))';
+            div.style.backgroundSize = '100% ' + Math.max(6, Math.round(patSz * 0.75)) + 'px';
+          } else if (patSt === 'stripes') {
+            div.style.backgroundImage = 'repeating-linear-gradient(45deg, ' + patCol + ' 0px, ' + patCol + ' 1.5px, transparent 1.5px, transparent ' + patSz + 'px)';
+          } else if (patSt === 'isometric' || patSt === 'triangles') {
+            var wI = Math.round(patSz * 1.732 * 10) / 10;
+            var hI = patSz;
+            var xM = wI / 2;
+            var isoSvg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + wI + '" height="' + hI + '"><line x1="0" y1="0" x2="0" y2="' + hI + '" stroke="' + patCol + '" stroke-width="1.2" stroke-opacity="' + patOp + '"/><line x1="' + xM + '" y1="0" x2="' + xM + '" y2="' + hI + '" stroke="' + patCol + '" stroke-width="1.2" stroke-opacity="' + patOp + '"/><line x1="0" y1="0" x2="' + wI + '" y2="' + hI + '" stroke="' + patCol + '" stroke-width="1.2" stroke-opacity="' + patOp + '"/><line x1="0" y1="' + hI + '" x2="' + wI + '" y2="0" stroke="' + patCol + '" stroke-width="1.2" stroke-opacity="' + patOp + '"/></svg>');
+            div.style.backgroundImage = 'url("data:image/svg+xml,' + isoSvg + '")';
+            div.style.backgroundSize = wI + 'px ' + hI + 'px';
+          } else if (patSt === 'hexagons' || patSt === 'honeycomb') {
+            var sHex = Math.max(6, Math.round(patSz * 0.5));
+            var wHex = 3 * sHex;
+            var hHex = Number((sHex * Math.sqrt(3)).toFixed(2));
+            var hHalf = Number((hHex / 2).toFixed(2));
+            var s05 = Number((sHex * 0.5).toFixed(2));
+            var s15 = Number((sHex * 1.5).toFixed(2));
+            var s2 = 2 * sHex;
+            var hexSvg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + wHex + '" height="' + hHex + '"><path d="M ' + s05 + ',' + hHex + ' L 0,' + hHalf + ' L ' + s05 + ',0 L ' + s15 + ',0 L ' + s2 + ',' + hHalf + ' L ' + wHex + ',' + hHalf + ' M ' + s15 + ',' + hHex + ' L ' + s2 + ',' + hHalf + '" fill="none" stroke="' + patCol + '" stroke-width="1.2" stroke-opacity="' + patOp + '"/></svg>');
+            div.style.backgroundImage = 'url("data:image/svg+xml,' + hexSvg + '")';
+            div.style.backgroundSize = wHex + 'px ' + hHex + 'px';
+          } else if (patSt === 'diamonds') {
+            var wD = patSz;
+            var hD = Math.round(patSz * 1.732 * 10) / 10;
+            var diaSvg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + wD + '" height="' + hD + '"><polygon points="' + (wD / 2) + ',0 ' + wD + ',' + (hD / 2) + ' ' + (wD / 2) + ',' + hD + ' 0,' + (hD / 2) + '" fill="none" stroke="' + patCol + '" stroke-width="1.2" stroke-opacity="' + patOp + '"/></svg>');
+            div.style.backgroundImage = 'url("data:image/svg+xml,' + diaSvg + '")';
+            div.style.backgroundSize = wD + 'px ' + hD + 'px';
+          } else if (patSt === 'grid' || patSt === 'squares') {
+            var gridSvg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + patSz + '" height="' + patSz + '"><path d="M ' + patSz + ' 0 L 0 0 L 0 ' + patSz + '" fill="none" stroke="' + patCol + '" stroke-width="1.2" stroke-opacity="' + patOp + '"/></svg>');
+            div.style.backgroundImage = 'url("data:image/svg+xml,' + gridSvg + '")';
+            div.style.backgroundSize = patSz + 'px ' + patSz + 'px';
+          } else if (patSt === 'cross' || patSt === 'crosses') {
+            var arm = Math.max(2.5, Math.round(patSz * 0.28 * 10) / 10);
+            var cM = patSz / 2;
+            var crossSvg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + patSz + '" height="' + patSz + '"><line x1="' + (cM - arm) + '" y1="' + cM + '" x2="' + (cM + arm) + '" y2="' + cM + '" stroke="' + patCol + '" stroke-width="1.4" stroke-opacity="' + patOp + '" stroke-linecap="round"/><line x1="' + cM + '" y1="' + (cM - arm) + '" x2="' + cM + '" y2="' + (cM + arm) + '" stroke="' + patCol + '" stroke-width="1.4" stroke-opacity="' + patOp + '" stroke-linecap="round"/></svg>');
+            div.style.backgroundImage = 'url("data:image/svg+xml,' + crossSvg + '")';
+            div.style.backgroundSize = patSz + 'px ' + patSz + 'px';
+          } else {
+            var dotSvg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="' + patSz + '" height="' + patSz + '"><circle cx="' + (patSz * 0.25) + '" cy="' + (patSz * 0.25) + '" r="1.5" fill="' + patCol + '" opacity="' + patOp + '"/><circle cx="' + (patSz * 0.75) + '" cy="' + (patSz * 0.75) + '" r="1.5" fill="' + patCol + '" opacity="' + patOp + '"/></svg>');
+            div.style.backgroundImage = 'url("data:image/svg+xml,' + dotSvg + '")';
+            div.style.backgroundSize = patSz + 'px ' + patSz + 'px';
+          }
+        } else if (node.bgType === 'image' && node.bgImageUrl) {
+          div.style.backgroundColor = node.color || (isRoot ? '#2563eb' : '#ffffff');
+          div.style.backgroundImage = 'url("' + node.bgImageUrl + '")';
+          div.style.backgroundSize = node.bgImageMode === 'contain' || node.bgImageMode === 'fit' ? 'contain' : node.bgImageMode === 'tile' ? 'auto' : 'cover';
+          div.style.backgroundRepeat = node.bgImageMode === 'tile' ? 'repeat' : 'no-repeat';
+          div.style.backgroundPosition = 'center';
         } else {
           div.style.backgroundColor = node.color || (isRoot ? '#2563eb' : '#ffffff');
         }

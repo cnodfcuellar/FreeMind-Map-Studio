@@ -102,61 +102,90 @@ export const getNodeBackgroundStyles = (
     const patRgba = hexToRgba(patColor, opacity);
 
     if (pat === 'dots') {
+      const r = Math.max(1, Math.round(size * 0.08 * 10) / 10);
+      const dotSvg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><circle cx="${size * 0.25}" cy="${size * 0.25}" r="${r}" fill="${patColor}" opacity="${opacity}"/><circle cx="${size * 0.75}" cy="${size * 0.75}" r="${r}" fill="${patColor}" opacity="${opacity}"/></svg>`
+      );
       return {
         backgroundColor: baseColor,
-        backgroundImage: `radial-gradient(${patRgba} 1.5px, transparent 1.5px)`,
+        backgroundImage: `url("data:image/svg+xml,${dotSvg}")`,
         backgroundSize: `${size}px ${size}px`,
       };
     }
     if (pat === 'lines') {
       return {
         backgroundColor: baseColor,
-        backgroundImage: `linear-gradient(to bottom, ${patRgba} 1.5px, transparent 1.5px)`,
-        backgroundSize: `100% ${size}px`,
-      };
-    }
-    if (pat === 'squares') {
-      return {
-        backgroundColor: baseColor,
-        backgroundImage: `linear-gradient(to right, ${patRgba} 1.5px, transparent 1.5px), linear-gradient(to bottom, ${patRgba} 1.5px, transparent 1.5px)`,
-        backgroundSize: `${size}px ${size}px`,
+        backgroundImage: `linear-gradient(to bottom, transparent calc(50% - 0.75px), ${patRgba} calc(50% - 0.75px), ${patRgba} calc(50% + 0.75px), transparent calc(50% + 0.75px))`,
+        backgroundSize: `100% ${Math.max(6, Math.round(size * 0.75))}px`,
       };
     }
     if (pat === 'stripes') {
-      return {
-        backgroundColor: baseColor,
-        backgroundImage: `repeating-linear-gradient(45deg, ${patRgba} 0px, ${patRgba} 1.5px, transparent 1.5px, transparent ${size}px)`,
-      };
-    }
-    if (pat === 'triangles') {
-      const triW = size;
-      const triH = Math.max(8, Math.round(size * 0.866));
-      const triSvg = encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${triW}" height="${triH}" viewBox="0 0 ${triW} ${triH}"><polygon points="0,${triH} ${triW / 2},0 ${triW},${triH}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
+      const strSvg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><line x1="0" y1="${size}" x2="${size}" y2="0" stroke="${patColor}" stroke-width="1.5" stroke-opacity="${opacity}"/><line x1="${-size * 0.5}" y1="${size * 0.5}" x2="${size * 0.5}" y2="${-size * 0.5}" stroke="${patColor}" stroke-width="1.5" stroke-opacity="${opacity}"/><line x1="${size * 0.5}" y1="${size * 1.5}" x2="${size * 1.5}" y2="${size * 0.5}" stroke="${patColor}" stroke-width="1.5" stroke-opacity="${opacity}"/></svg>`
       );
       return {
         backgroundColor: baseColor,
-        backgroundImage: `url("data:image/svg+xml,${triSvg}")`,
-        backgroundSize: `${triW}px ${triH}px`,
+        backgroundImage: `url("data:image/svg+xml,${strSvg}")`,
+        backgroundSize: `${size}px ${size}px`,
       };
     }
-    if (pat === 'hexagons') {
-      const hexW = size;
-      const hexH = size;
+    if (pat === 'squares' || pat === 'grid') {
+      const gridSvg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><path d="M ${size} 0 L 0 0 L 0 ${size}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
+      );
+      return {
+        backgroundColor: baseColor,
+        backgroundImage: `url("data:image/svg+xml,${gridSvg}")`,
+        backgroundSize: `${size}px ${size}px`,
+      };
+    }
+    if (pat === 'triangles' || pat === 'isometric') {
+      const wIso = Math.round(size * Math.sqrt(3) * 10) / 10;
+      const hIso = size;
+      const xMid = Math.round((wIso / 2) * 10) / 10;
+      const isoSvg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${wIso}" height="${hIso}"><line x1="0" y1="0" x2="0" y2="${hIso}" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/><line x1="${xMid}" y1="0" x2="${xMid}" y2="${hIso}" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/><line x1="0" y1="0" x2="${wIso}" y2="${hIso}" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/><line x1="0" y1="${hIso}" x2="${wIso}" y2="0" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
+      );
+      return {
+        backgroundColor: baseColor,
+        backgroundImage: `url("data:image/svg+xml,${isoSvg}")`,
+        backgroundSize: `${wIso}px ${hIso}px`,
+      };
+    }
+    if (pat === 'diamonds') {
+      const wDia = size;
+      const hDia = Math.round(size * Math.sqrt(3) * 10) / 10;
+      const diaSvg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${wDia}" height="${hDia}"><polygon points="${wDia / 2},0 ${wDia},${hDia / 2} ${wDia / 2},${hDia} 0,${hDia / 2}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
+      );
+      return {
+        backgroundColor: baseColor,
+        backgroundImage: `url("data:image/svg+xml,${diaSvg}")`,
+        backgroundSize: `${wDia}px ${hDia}px`,
+      };
+    }
+    if (pat === 'hexagons' || pat === 'honeycomb') {
+      const sHex = Math.max(6, Math.round(size * 0.5));
+      const wHex = 3 * sHex;
+      const hHex = Number((sHex * Math.sqrt(3)).toFixed(2));
+      const hHalf = Number((hHex / 2).toFixed(2));
+      const s05 = Number((sHex * 0.5).toFixed(2));
+      const s15 = Number((sHex * 1.5).toFixed(2));
+      const s2 = 2 * sHex;
       const hexSvg = encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${hexW}" height="${hexH}" viewBox="0 0 ${hexW} ${hexH}"><polygon points="${hexW * 0.25},0 ${hexW * 0.75},0 ${hexW},${hexH * 0.5} ${hexW * 0.75},${hexH} ${hexW * 0.25},${hexH} 0,${hexH * 0.5}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${wHex}" height="${hHex}"><path d="M ${s05},${hHex} L 0,${hHalf} L ${s05},0 L ${s15},0 L ${s2},${hHalf} L ${wHex},${hHalf} M ${s15},${hHex} L ${s2},${hHalf}" fill="none" stroke="${patColor}" stroke-width="1.2" stroke-opacity="${opacity}"/></svg>`
       );
       return {
         backgroundColor: baseColor,
         backgroundImage: `url("data:image/svg+xml,${hexSvg}")`,
-        backgroundSize: `${hexW}px ${hexH}px`,
+        backgroundSize: `${wHex}px ${hHex}px`,
       };
     }
-    if (pat === 'cross') {
-      const cLen = Math.max(3, Math.round(size * 0.35));
+    if (pat === 'cross' || pat === 'crosses') {
+      const armLen = Math.max(2.5, Math.round(size * 0.28 * 10) / 10);
       const cMid = size / 2;
       const crossSvg = encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><line x1="${cMid - cLen}" y1="${cMid}" x2="${cMid + cLen}" y2="${cMid}" stroke="${patColor}" stroke-width="1.5" stroke-opacity="${opacity}" stroke-linecap="round"/><line x1="${cMid}" y1="${cMid - cLen}" x2="${cMid}" y2="${cMid + cLen}" stroke="${patColor}" stroke-width="1.5" stroke-opacity="${opacity}" stroke-linecap="round"/></svg>`
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><line x1="${cMid - armLen}" y1="${cMid}" x2="${cMid + armLen}" y2="${cMid}" stroke="${patColor}" stroke-width="1.4" stroke-opacity="${opacity}" stroke-linecap="round"/><line x1="${cMid}" y1="${cMid - armLen}" x2="${cMid}" y2="${cMid + armLen}" stroke="${patColor}" stroke-width="1.4" stroke-opacity="${opacity}" stroke-linecap="round"/></svg>`
       );
       return {
         backgroundColor: baseColor,
@@ -465,8 +494,24 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   const patColor = node.nodePatternColor || '#475569';
   const patOpacity = node.nodePatternOpacity ?? 0.4;
   const patStyle = node.nodePattern || 'dots';
-  const patMid = patSize / 2;
-  const patLen = Math.max(3, Math.round(patSize * 0.35));
+
+  // Dimensiones matemáticas exactas de teselación por familia (§6.3)
+  let patW = patSize;
+  let patH = patSize;
+  if (patStyle === 'lines') {
+    patW = patSize;
+    patH = Math.max(6, Math.round(patSize * 0.75));
+  } else if (patStyle === 'triangles' || patStyle === 'isometric') {
+    patW = Math.round(patSize * Math.sqrt(3) * 10) / 10;
+    patH = patSize;
+  } else if (patStyle === 'diamonds') {
+    patW = patSize;
+    patH = Math.round(patSize * Math.sqrt(3) * 10) / 10;
+  } else if (patStyle === 'hexagons' || patStyle === 'honeycomb') {
+    const sHex = Math.max(6, Math.round(patSize * 0.5));
+    patW = 3 * sHex;
+    patH = Number((sHex * Math.sqrt(3)).toFixed(2));
+  }
 
   return (
     <svg
@@ -480,15 +525,22 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
         {bgImg && (
           <pattern
             id={bgImgId}
-            width="100%"
-            height="100%"
-            patternContentUnits="objectBoundingBox"
+            width={node.bgImageMode === 'tile' ? `${Math.max(20, Math.round(w * 0.4))}px` : '100%'}
+            height={node.bgImageMode === 'tile' ? `${Math.max(20, Math.round(h * 0.4))}px` : '100%'}
+            patternUnits={node.bgImageMode === 'tile' ? 'userSpaceOnUse' : 'objectBoundingBox'}
+            patternContentUnits={node.bgImageMode === 'tile' ? 'userSpaceOnUse' : 'objectBoundingBox'}
           >
             <image
               href={bgImg}
-              width="1"
-              height="1"
-              preserveAspectRatio={node.bgImageMode === 'fit' || node.bgImageMode === 'contain' ? 'xMidYMid meet' : 'xMidYMid slice'}
+              width={node.bgImageMode === 'tile' ? Math.max(20, Math.round(w * 0.4)) : '1'}
+              height={node.bgImageMode === 'tile' ? Math.max(20, Math.round(h * 0.4)) : '1'}
+              preserveAspectRatio={
+                node.bgImageMode === 'fit' || node.bgImageMode === 'contain'
+                  ? 'xMidYMid meet'
+                  : node.bgImageMode === 'tile'
+                  ? 'none'
+                  : 'xMidYMid slice'
+              }
             />
           </pattern>
         )}
@@ -521,26 +573,35 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
         {bgType === 'pattern' && (
           <pattern
             id={patternId}
-            width={patSize}
-            height={patSize}
+            width={patW}
+            height={patH}
             patternUnits="userSpaceOnUse"
           >
             <rect width="100%" height="100%" fill={baseColor} />
             {patStyle === 'dots' && (
-              <circle
-                cx={patMid}
-                cy={patMid}
-                r={1.5}
-                fill={patColor}
-                opacity={patOpacity}
-              />
+              <>
+                <circle
+                  cx={patW * 0.25}
+                  cy={patH * 0.25}
+                  r={Math.max(1, Math.round(patSize * 0.08 * 10) / 10)}
+                  fill={patColor}
+                  opacity={patOpacity}
+                />
+                <circle
+                  cx={patW * 0.75}
+                  cy={patH * 0.75}
+                  r={Math.max(1, Math.round(patSize * 0.08 * 10) / 10)}
+                  fill={patColor}
+                  opacity={patOpacity}
+                />
+              </>
             )}
             {patStyle === 'lines' && (
               <line
                 x1="0"
-                y1={patMid}
-                x2={patSize}
-                y2={patMid}
+                y1={patH * 0.5}
+                x2={patW}
+                y2={patH * 0.5}
                 stroke={patColor}
                 strokeWidth="1.5"
                 strokeOpacity={patOpacity}
@@ -558,74 +619,122 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
                   strokeOpacity={patOpacity}
                 />
                 <line
-                  x1={-patSize / 2}
-                  y1={patSize / 2}
-                  x2={patSize / 2}
-                  y2={-patSize / 2}
+                  x1={-patSize * 0.5}
+                  y1={patSize * 0.5}
+                  x2={patSize * 0.5}
+                  y2={-patSize * 0.5}
                   stroke={patColor}
                   strokeWidth="1.5"
                   strokeOpacity={patOpacity}
                 />
                 <line
-                  x1={patSize / 2}
+                  x1={patSize * 0.5}
                   y1={patSize * 1.5}
                   x2={patSize * 1.5}
-                  y2={patSize / 2}
+                  y2={patSize * 0.5}
                   stroke={patColor}
                   strokeWidth="1.5"
                   strokeOpacity={patOpacity}
                 />
               </>
             )}
-            {patStyle === 'squares' && (
-              <rect
-                x="0.75"
-                y="0.75"
-                width={patSize - 1.5}
-                height={patSize - 1.5}
-                fill="none"
-                stroke={patColor}
-                strokeWidth="1.5"
-                strokeOpacity={patOpacity}
-              />
-            )}
-            {patStyle === 'triangles' && (
-              <polygon
-                points={`0,${patSize} ${patSize / 2},0 ${patSize},${patSize}`}
+            {(patStyle === 'squares' || patStyle === 'grid') && (
+              <path
+                d={`M ${patW} 0 L 0 0 L 0 ${patH}`}
                 fill="none"
                 stroke={patColor}
                 strokeWidth="1.2"
                 strokeOpacity={patOpacity}
               />
             )}
-            {patStyle === 'hexagons' && (
+            {(patStyle === 'triangles' || patStyle === 'isometric') && (
+              <>
+                {/* 1. Vertical en x = 0 */}
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2={patH}
+                  stroke={patColor}
+                  strokeWidth="1.2"
+                  strokeOpacity={patOpacity}
+                />
+                {/* 2. Vertical en x = patW / 2 */}
+                <line
+                  x1={patW / 2}
+                  y1="0"
+                  x2={patW / 2}
+                  y2={patH}
+                  stroke={patColor}
+                  strokeWidth="1.2"
+                  strokeOpacity={patOpacity}
+                />
+                {/* 3. Diagonal descendente de (0,0) a (patW, patH) a +30° */}
+                <line
+                  x1="0"
+                  y1="0"
+                  x2={patW}
+                  y2={patH}
+                  stroke={patColor}
+                  strokeWidth="1.2"
+                  strokeOpacity={patOpacity}
+                />
+                {/* 4. Diagonal ascendente de (0,patH) a (patW, 0) a -30° */}
+                <line
+                  x1="0"
+                  y1={patH}
+                  x2={patW}
+                  y2="0"
+                  stroke={patColor}
+                  strokeWidth="1.2"
+                  strokeOpacity={patOpacity}
+                />
+              </>
+            )}
+            {patStyle === 'diamonds' && (
               <polygon
-                points={`${patSize * 0.25},0 ${patSize * 0.75},0 ${patSize},${patSize * 0.5} ${patSize * 0.75},${patSize} ${patSize * 0.25},${patSize} 0,${patSize * 0.5}`}
+                points={`${patW / 2},0 ${patW},${patH / 2} ${patW / 2},${patH} 0,${patH / 2}`}
                 fill="none"
                 stroke={patColor}
                 strokeWidth="1.2"
                 strokeOpacity={patOpacity}
               />
             )}
-            {patStyle === 'cross' && (
+            {(patStyle === 'hexagons' || patStyle === 'honeycomb') && (() => {
+              const sHex = Math.max(6, Math.round(patSize * 0.5));
+              const hHalf = Number((patH / 2).toFixed(2));
+              const s05 = Number((sHex * 0.5).toFixed(2));
+              const s15 = Number((sHex * 1.5).toFixed(2));
+              const s2 = 2 * sHex;
+              return (
+                <path
+                  d={`M ${s05},${patH} L 0,${hHalf} L ${s05},0 L ${s15},0 L ${s2},${hHalf} L ${patW},${hHalf} M ${s15},${patH} L ${s2},${hHalf}`}
+                  fill="none"
+                  stroke={patColor}
+                  strokeWidth="1.2"
+                  strokeOpacity={patOpacity}
+                />
+              );
+            })()}
+            {(patStyle === 'cross' || patStyle === 'crosses') && (
               <>
                 <line
-                  x1={patMid - patLen}
-                  y1={patMid}
-                  x2={patMid + patLen}
-                  y2={patMid}
+                  x1={patW / 2 - Math.max(2.5, Math.round(patSize * 0.28 * 10) / 10)}
+                  y1={patH / 2}
+                  x2={patW / 2 + Math.max(2.5, Math.round(patSize * 0.28 * 10) / 10)}
+                  y2={patH / 2}
                   stroke={patColor}
-                  strokeWidth="1.5"
+                  strokeWidth="1.4"
                   strokeOpacity={patOpacity}
                   strokeLinecap="round"
                 />
                 <line
-                  x1={patMid}
-                  y1={patMid - patLen}
-                  x2={patMid}
-                  y2={patMid + patLen}
+                  x1={patW / 2}
+                  y1={patH / 2 - Math.max(2.5, Math.round(patSize * 0.28 * 10) / 10)}
+                  x2={patW / 2}
+                  y2={patH / 2 + Math.max(2.5, Math.round(patSize * 0.28 * 10) / 10)}
                   stroke={patColor}
-                  strokeWidth="1.5"
+                  strokeWidth="1.4"
                   strokeOpacity={patOpacity}
                   strokeLinecap="round"
                 />

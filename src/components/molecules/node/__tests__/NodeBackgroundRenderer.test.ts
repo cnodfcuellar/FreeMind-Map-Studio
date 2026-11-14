@@ -84,15 +84,33 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
     expect(radialStyles.background).toContain('radial-gradient(circle');
   });
 
-  it('generates all 7 pattern styles cleanly without unencoded hash characters', () => {
-    const patterns: Array<'dots' | 'lines' | 'stripes' | 'squares' | 'triangles' | 'hexagons' | 'cross'> = [
+  it('generates all 8 mathematical pattern styles and aliases cleanly without unencoded hash characters', () => {
+    const patterns: Array<
+      | 'dots'
+      | 'lines'
+      | 'stripes'
+      | 'squares'
+      | 'grid'
+      | 'triangles'
+      | 'isometric'
+      | 'diamonds'
+      | 'hexagons'
+      | 'honeycomb'
+      | 'cross'
+      | 'crosses'
+    > = [
       'dots',
       'lines',
       'stripes',
       'squares',
+      'grid',
       'triangles',
+      'isometric',
+      'diamonds',
       'hexagons',
+      'honeycomb',
       'cross',
+      'crosses',
     ];
 
     for (const pat of patterns) {
@@ -313,6 +331,31 @@ describe('NodeBackgroundRenderer - Backgrounds and Shapes', () => {
 
       const dropRes = computeNodeShadowStyle(customNode, true);
       expect(dropRes.filter).toBe('drop-shadow(0 8px 20px #f43f5e)');
+    });
+  });
+
+  describe('honeycomb (hexagons) regular pattern verification', () => {
+    it('generates exact 6-edge non-overlapping regular hexagonal tiling in getNodeBackgroundStyles', () => {
+      const node = createNode({
+        id: 'hex-1',
+        text: 'Panal Node',
+        bgType: 'pattern',
+        nodePattern: 'honeycomb',
+        nodePatternColor: '#2563eb',
+        nodePatternSize: 16,
+      });
+
+      const styles = getNodeBackgroundStyles(node, mockTheme, false);
+      expect(styles.backgroundImage).toBeDefined();
+      expect(styles.backgroundSize).toBe('24px 13.86px');
+
+      const decodedSvg = decodeURIComponent(styles.backgroundImage!.replace('url("data:image/svg+xml,', '').replace('")', ''));
+      expect(decodedSvg).toContain('width="24"');
+      expect(decodedSvg).toContain('height="13.86"');
+      // Asegura que usa el path canónico de 6 aristas
+      expect(decodedSvg).toContain('M 4,13.86 L 0,6.93 L 4,0 L 12,0 L 16,6.93 L 24,6.93 M 12,13.86 L 16,6.93');
+      // No debe contener trazos hacia el centro erróneo (2.5s = 20) que formaban rombos
+      expect(decodedSvg).not.toContain('20 0');
     });
   });
 });

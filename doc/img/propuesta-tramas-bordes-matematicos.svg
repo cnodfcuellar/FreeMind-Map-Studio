@@ -1,0 +1,235 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" style="background:#090d16; font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <rect width="1200" height="900" fill="#090d16" />
+  <defs>
+    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0284c7" flood-opacity="0.3" />
+    </filter>
+    <pattern id="pat-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#1e293b" />
+      <circle cx="6" cy="6" r="1.8" fill="#38bdf8" opacity="0.75" />
+      <circle cx="18" cy="18" r="1.8" fill="#38bdf8" opacity="0.75" />
+    </pattern>
+    <pattern id="pat-lines" width="20" height="16" patternUnits="userSpaceOnUse">
+      <rect width="20" height="16" fill="#1e293b" />
+      <line x1="0" y1="8" x2="20" y2="8" stroke="#38bdf8" stroke-width="1.4" opacity="0.7" />
+    </pattern>
+    <pattern id="pat-stripes" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#1e293b" />
+      <line x1="0" y1="20" x2="20" y2="0" stroke="#38bdf8" stroke-width="1.5" opacity="0.75" />
+      <line x1="-10" y1="10" x2="10" y2="-10" stroke="#38bdf8" stroke-width="1.5" opacity="0.75" />
+      <line x1="10" y1="30" x2="30" y2="10" stroke="#38bdf8" stroke-width="1.5" opacity="0.75" />
+    </pattern>
+    <pattern id="pat-grid" width="22" height="22" patternUnits="userSpaceOnUse">
+      <rect width="22" height="22" fill="#1e293b" />
+      <path d="M 22,0 L 0,0 L 0,22" fill="none" stroke="#38bdf8" stroke-width="1.2" opacity="0.65" />
+    </pattern>
+    <pattern id="pat-isometric" width="34.64" height="20" patternUnits="userSpaceOnUse">
+      <rect width="34.64" height="20" fill="#1e293b" />
+      <line x1="0" y1="10.0" x2="34.64" y2="10.0" stroke="#38bdf8" stroke-width="1.2" opacity="0.6" />
+      <line x1="0" y1="0" x2="34.64" y2="20" stroke="#38bdf8" stroke-width="1.2" opacity="0.6" />
+      <line x1="0" y1="20" x2="34.64" y2="0" stroke="#38bdf8" stroke-width="1.2" opacity="0.6" />
+    </pattern>
+    <pattern id="pat-diamonds" width="20" height="34.64" patternUnits="userSpaceOnUse">
+      <rect width="20" height="34.64" fill="#1e293b" />
+      <polygon points="10.0,0 20,17.32 10.0,34.64 0,17.32" fill="none" stroke="#38bdf8" stroke-width="1.2" opacity="0.75" />
+    </pattern>
+    <pattern id="pat-honeycomb" width="30" height="17.32" patternUnits="userSpaceOnUse">
+      <rect width="30" height="17.32" fill="#1e293b" />
+      <path d="M 0,8.66 L 5.0,0 L 15.0,0 L 20,8.66 L 15.0,17.32 L 5.0,17.32 Z" fill="none" stroke="#38bdf8" stroke-width="1.2" opacity="0.7" />
+      <path d="M 15.0,0 L 20,8.66 L 30,8.66" fill="none" stroke="#38bdf8" stroke-width="1.2" opacity="0.7" />
+    </pattern>
+    <pattern id="pat-crosses" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#1e293b" />
+      <line x1="5.3" y1="12" x2="18.7" y2="12" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round" opacity="0.8" />
+      <line x1="12" y1="5.3" x2="12" y2="18.7" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round" opacity="0.8" />
+    </pattern>
+  </defs>
+  <g transform="translate(40, 24)">
+    <rect width="1120" height="70" rx="14" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="28" y="34" font-size="20" font-weight="800" fill="#f8fafc">📐 Arquitectura Gráfica de Fórmulas Matemáticas (§6.2 y §6.3)</text>
+    <text x="28" y="55" font-size="12.5" fill="#94a3b8">Demostración en vivo de las 8 Familias de Tramas SVG, Bordes Paramétricos con Cuantización y Matrices Afines</text>
+    <rect x="980" y="20" width="116" height="28" rx="7" fill="#0284c7" />
+    <text x="1038" y="38" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">⚡ Vía GPU / SVG</text>
+  </g>
+  <g transform="translate(40, 114)">
+    <rect width="1120" height="340" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="28" y="32" font-size="15" font-weight="700" fill="#38bdf8">1. Las 8 Familias de Tramas Geométricas (§6.3)</text>
+    <text x="28" y="50" font-size="11.5" fill="#64748b">Celdas unitarias matemáticamente calibradas para teselación periódica continua C⁰ (cero costuras al escalar)</text>
+    <g transform="translate(28, 70)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-dots)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">1. Puntos (dots)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">Al tresbolillo (0.25s, 0.75s)</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Quincunx suave</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+    <g transform="translate(296, 70)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-lines)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">2. Líneas (lines)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">Horizontal centrada y = 0.5s</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Pautado uniforme</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+    <g transform="translate(564, 70)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-stripes)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">3. Rayas (stripes)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">3 diagonales a 45° desfasadas</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Sin costuras C⁰</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+    <g transform="translate(832, 70)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-grid)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">4. Cuadros (grid)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">Escuadra en L M(s,0)→L(0,0)→L(0,s)</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Anti doble-trazo</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+    <g transform="translate(28, 195)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-isometric)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">5. Isométrico (isometric)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">Triángulos a 60° (W = s√3, H = s)</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Malla 3D exacta</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+    <g transform="translate(296, 195)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-diamonds)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">6. Rombos (diamonds)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">Rómbico Kepler (w = s, h = s√3)</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Rombo 60°/120°</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+    <g transform="translate(564, 195)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-honeycomb)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">7. Panal (honeycomb)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">Voronoi 2 columnas (3s × s√3)</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Hexágonos puros</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+    <g transform="translate(832, 195)">
+      <rect width="256" height="114" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.2" />
+      <rect x="10" y="10" width="84" height="94" rx="8" fill="url(#pat-crosses)" stroke="#0284c7" stroke-width="1.5" />
+      <text x="104" y="28" font-size="12" font-weight="700" fill="#f8fafc">8. Cruces (crosses)</text>
+      <text x="104" y="46" font-size="9.5" fill="#94a3b8">Cruces griegas (brazo = 0.28s)</text>
+      <rect x="104" y="58" width="120" height="20" rx="5" fill="#0369a1" />
+      <text x="164" y="72" font-size="9" font-weight="700" fill="#e0f2fe" text-anchor="middle">✔ Respiración áurea</text>
+      <text x="104" y="96" font-size="9" fill="#38bdf8">patternUnits="userSpaceOnUse"</text>
+    </g>
+  </g>
+  <g transform="translate(40, 474)">
+    <rect width="680" height="390" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+    <text x="28" y="32" font-size="15" font-weight="700" fill="#38bdf8">2. Fórmulas de Bordes y Contornos (§6.2)</text>
+    <text x="28" y="50" font-size="11.5" fill="#64748b">Matriz afín concéntrica outset y cuantización cerrada de ciclos enteros N = round(L / step)</text>
+    <g transform="translate(28, 70)">
+      <rect width="300" height="135" rx="12" fill="#1e293b" stroke="#334155" />
+      <text x="14" y="24" font-size="11.5" font-weight="700" fill="#38bdf8">A. Doble Borde Concéntrico Bicolor</text>
+      <text x="14" y="40" font-size="9" fill="#94a3b8">matrix(sx, 0, 0, sy, -gap, -gap) con gap=5px</text>
+      <g transform="translate(45, 52)">
+        <rect x="-5" y="-5" width="220" height="66" rx="14" fill="none" stroke="#f59e0b" stroke-width="2.5" />
+        <rect x="0" y="0" width="210" height="56" rx="10" fill="#0284c7" stroke="#38bdf8" stroke-width="2" />
+        <text x="105" y="33" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Nodo con Doble Borde</text>
+      </g>
+      <text x="14" y="124" font-size="9" fill="#4ade80">✔ Concéntrico exacto en centroide (w/2, h/2)</text>
+    </g>
+    <g transform="translate(348, 70)">
+      <rect width="304" height="135" rx="12" fill="#1e293b" stroke="#334155" />
+      <text x="14" y="24" font-size="11.5" font-weight="700" fill="#38bdf8">B. Ondulado Bézier (wavy) Cuantizado</text>
+      <text x="14" y="40" font-size="9" fill="#94a3b8">N = round(L/step) → ciclos completos en las 4 esquinas</text>
+      <g transform="translate(42, 52)">
+        <path d="M 0,0 Q 27.5,6 55,0 Q 82.5,-6 110,0 Q 137.5,6 165,0 Q 192.5,-6 220,0 Q 226,14 220,28 Q 214,42 220,56 Q 192.5,50 165,56 Q 137.5,62 110,56 Q 82.5,50 55,56 Q 27.5,62 0,56 Q -6,42 0,28 Q 6,14 0,0 Z" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2" />
+        <text x="110" y="33" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Ondulado Sin Esquinas Rotas</text>
+      </g>
+      <text x="14" y="124" font-size="9" fill="#4ade80">✔ Q(x_mid, ±1.3·amp, x2, y2) armónico suave</text>
+    </g>
+    <g transform="translate(28, 220)">
+      <rect width="300" height="150" rx="12" fill="#1e293b" stroke="#334155" />
+      <text x="14" y="24" font-size="11.5" font-weight="700" fill="#38bdf8">C. Dientes de Sierra (zigzag)</text>
+      <text x="14" y="40" font-size="9" fill="#94a3b8">Alternancia (-1)^i · amp con step calibrado</text>
+      <g transform="translate(45, 54)">
+        <path d="M 0,0 L 25,5 L 50,-5 L 75,5 L 100,-5 L 125,5 L 150,-5 L 175,5 L 200,-5 L 210,0 L 215,28 L 210,56 L 175,51 L 150,61 L 125,51 L 100,61 L 75,51 L 50,61 L 25,51 L 0,56 L -5,28 Z" fill="#065f46" stroke="#34d399" stroke-width="2" />
+        <text x="105" y="33" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Zigzag Cuantizado</text>
+      </g>
+      <text x="14" y="136" font-size="9" fill="#4ade80">✔ Cierre perimetral sin truncamiento</text>
+    </g>
+    <g transform="translate(348, 220)">
+      <rect width="304" height="150" rx="12" fill="#1e293b" stroke="#334155" />
+      <text x="14" y="24" font-size="11.5" font-weight="700" fill="#38bdf8">D. Puntos Paramétricos (dotted)</text>
+      <text x="14" y="40" font-size="9" fill="#94a3b8">stroke-linecap="round", 0.1, dotGap exacto</text>
+      <g transform="translate(42, 54)">
+        <rect x="0" y="0" width="220" height="56" rx="12" fill="#581c87" stroke="#c084fc" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 10" />
+        <text x="110" y="33" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">Puntos Esferoidales SVG</text>
+      </g>
+      <text x="14" y="136" font-size="9" fill="#4ade80">✔ Círculos puros sin inconsistencias de navegador</text>
+    </g>
+  </g>
+  <g transform="translate(740, 474)">
+    <rect width="420" height="390" rx="16" fill="#fcf9f2" stroke="#e7dec8" stroke-width="1.8" />
+    <text x="24" y="30" font-size="14" font-weight="700" fill="#451a03">3. Mockup de Interfaz Pulida (Inspector)</text>
+    <text x="24" y="46" font-size="11" fill="#78350f">Sin textos cortados (0 elipsis) + micro-iconos de trama reales</text>
+    <g transform="translate(20, 60)">
+      <rect x="0" y="0" width="72" height="48" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+        <rect x="29" y="8" width="14" height="14" rx="3" fill="#3b82f6" />
+      <text x="36" y="38" font-size="10" font-weight="500" fill="#57534e" text-anchor="middle">Sólido</text>
+      <rect x="76" y="0" width="72" height="48" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+        <rect x="105" y="8" width="14" height="14" rx="3" fill="#6366f1" />
+      <text x="112" y="38" font-size="10" font-weight="500" fill="#57534e" text-anchor="middle">Gradiente</text>
+      <rect x="152" y="0" width="72" height="48" rx="8" fill="#fdead7" stroke="#c2410c" stroke-width="1.8" />
+        <path d="M 183,10 L 193,10 M 183,15 L 193,15 M 183,20 L 193,20" stroke="#c2410c" stroke-width="1.6" />
+      <text x="188" y="38" font-size="10" font-weight="700" fill="#9a3412" text-anchor="middle">Trama</text>
+      <rect x="228" y="0" width="72" height="48" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+        <rect x="257" y="8" width="14" height="14" rx="3" fill="none" stroke="#57534e" stroke-width="1.5" />
+        <circle cx="261" cy="12" r="1.5" fill="#57534e" />
+      <text x="264" y="38" font-size="10" font-weight="500" fill="#57534e" text-anchor="middle">Imagen</text>
+      <rect x="304" y="0" width="72" height="48" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+        <rect x="333" y="8" width="14" height="14" rx="3" fill="none" stroke="#a8a29e" stroke-width="1.5" stroke-dasharray="2 2" />
+      <text x="340" y="38" font-size="10" font-weight="500" fill="#57534e" text-anchor="middle">Ninguno</text>
+    </g>
+    <g transform="translate(20, 126)">
+      <text x="4" y="16" font-size="11.5" font-weight="700" fill="#451a03">Estilo de Trama (8 Familias)</text>
+      <rect x="0" y="28" width="90" height="50" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+      <rect x="37" y="34" width="16" height="16" rx="3" fill="url(#pat-dots)" stroke="#e7dec8" stroke-width="1" />
+      <text x="45" y="66" font-size="10.5" font-weight="500" fill="#57534e" text-anchor="middle">Puntos</text>
+      <rect x="95" y="28" width="90" height="50" rx="8" fill="#fdead7" stroke="#c2410c" stroke-width="1.8" />
+      <rect x="132" y="34" width="16" height="16" rx="3" fill="url(#pat-lines)" stroke="#c2410c" stroke-width="1" />
+      <text x="140" y="66" font-size="10.5" font-weight="700" fill="#9a3412" text-anchor="middle">Líneas</text>
+      <rect x="190" y="28" width="90" height="50" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+      <rect x="227" y="34" width="16" height="16" rx="3" fill="url(#pat-stripes)" stroke="#e7dec8" stroke-width="1" />
+      <text x="235" y="66" font-size="10.5" font-weight="500" fill="#57534e" text-anchor="middle">Rayas</text>
+      <rect x="285" y="28" width="90" height="50" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+      <rect x="322" y="34" width="16" height="16" rx="3" fill="url(#pat-grid)" stroke="#e7dec8" stroke-width="1" />
+      <text x="330" y="66" font-size="10.5" font-weight="500" fill="#57534e" text-anchor="middle">Cuadros</text>
+      <rect x="0" y="84" width="90" height="50" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+      <rect x="37" y="90" width="16" height="16" rx="3" fill="url(#pat-isometric)" stroke="#e7dec8" stroke-width="1" />
+      <text x="45" y="122" font-size="10.5" font-weight="500" fill="#57534e" text-anchor="middle">Isométrico</text>
+      <rect x="95" y="84" width="90" height="50" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+      <rect x="132" y="90" width="16" height="16" rx="3" fill="url(#pat-diamonds)" stroke="#e7dec8" stroke-width="1" />
+      <text x="140" y="122" font-size="10.5" font-weight="500" fill="#57534e" text-anchor="middle">Rombos</text>
+      <rect x="190" y="84" width="90" height="50" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+      <rect x="227" y="90" width="16" height="16" rx="3" fill="url(#pat-honeycomb)" stroke="#e7dec8" stroke-width="1" />
+      <text x="235" y="122" font-size="10.5" font-weight="500" fill="#57534e" text-anchor="middle">Panal</text>
+      <rect x="285" y="84" width="90" height="50" rx="8" fill="#ffffff" stroke="#e7dec8" stroke-width="1" />
+      <rect x="322" y="90" width="16" height="16" rx="3" fill="url(#pat-crosses)" stroke="#e7dec8" stroke-width="1" />
+      <text x="330" y="122" font-size="10.5" font-weight="500" fill="#57534e" text-anchor="middle">Cruces</text>
+    </g>
+    <g transform="translate(24, 260)">
+      <rect width="372" height="105" rx="10" fill="#f4eee0" stroke="#e2d9c8" />
+      <text x="16" y="24" font-size="11" font-weight="700" fill="#451a03">Calibración Paramétrica</text>
+      <text x="16" y="44" font-size="10" fill="#78350f">• Tamaño de Trama: slider 8px – 40px (default 16px)</text>
+      <text x="16" y="62" font-size="10" fill="#78350f">• Opacidad del Trazo: slider 10% – 100% (default 40%)</text>
+      <text x="16" y="80" font-size="10" fill="#78350f">• Color del Fondo Base + Color del Trazo con presets</text>
+      <text x="16" y="96" font-size="9.5" font-weight="600" fill="#15803d">✔ 0 elipsis • Textos completos • Micro-muestras SVG reales</text>
+    </g>
+  </g>
+</svg>

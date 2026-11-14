@@ -2470,6 +2470,81 @@ Responder al mandato del usuario ("el texto debe quedar dentro ajustado centrado
 - [x] `pnpm vitest run src/utils/__tests__/layoutEngine.test.ts`: **3/3 pruebas superadas**.
 - [x] `pnpm build`: **Compilación de producción exitosa (0 errores)** en 5.88s.
 
+---
+
+## 🎨 [Fondos y Tramas Geométricas] — 2026-11-14: Implementación de las 8 Familias Matemáticas de Tramas (§6.3) y Selector Visual en Inspector
+
+### 🎯 Motivo
+Cumplir el requerimiento del usuario enfocado estrictamente en fondos y texturas de nodo ("bordes nada solo fondo"), implementando las fórmulas geométricas rigurosas de la especificación técnica §6.3 y alineando la botonera del inspector `FormatTab.tsx` exactamente con la interfaz mostrada en la captura del usuario:
+1. **8 Familias Matemáticas de Tramas (§6.3):**
+   - `dots` (Puntos): Quincunce con dos puntos en $(0.25s, 0.25s)$ y $(0.75s, 0.75s)$ con radio calibrado a la escala.
+   - `lines` (Líneas): Segmento horizontal centrado en $y = 0.5s$.
+   - `stripes` (Rayas): 3 líneas paralelas a 45° con desfase $\pm 0.5s$ y $1.5s$ para teselado $C^0$ continuo y sin costuras en las esquinas.
+   - `grid` / `squares` (Cuadros): Escuadra ortogonal $M(s, 0) \to L(0, 0) \to L(0, s)$ para evitar duplicar el grosor en aristas colindantes.
+   - `isometric` / `triangles` (Isométrico): Malla triangular equilátera de 60° pura con orientación técnica estándar vertical (eje Z vertical a 90° y diagonales a $\pm 30^\circ$), con período $W_{\text{tile}} = s\sqrt{3}, H_{\text{tile}} = s$. Se corrigió la rotación de 90° y el solapamiento que generaba rombos intermedios, alineándola al 100% con el papel isométrico estándar de dibujo técnico y la referencia gráfica del usuario donde cada vértice une 6 triángulos equiláteros de 60°.
+   - `diamonds` (Rombos): Rombo cerrado de Kepler en celda $w = s, h = s\sqrt{3}$ (ángulos de 60° y 120°).
+   - `honeycomb` / `hexagons` (Panal): Teselación de panal hexagonal regular continuo con $W_{tile} = 3s, H_{tile} = s\sqrt{3}$ y 2 columnas desfasadas sin costuras.
+   - `crosses` / `cross` (Cruces): Cruces griegas perpendiculares con longitud de brazo de $0.28s$.
+2. **Dimensionamiento Dinámico de Teselas SVG:** En nodos de trazado poligonal SVG (`NodeSvgPolygonBackground`), el elemento `<pattern>` adopta dinámicamente `width` y `height` según la constante irracional $\sqrt{3} \approx 1.73205$ de la familia para evitar deformaciones en geometrías no cuadradas.
+3. **Imágenes de Fondo con Mapeo Concéntrico:** Soporte para `cover`, `contain` y `tile` elástico con dimensiones adaptativas a la silueta del nodo.
+4. **Botonera del Inspector en `FormatTab.tsx` idéntica a la referencia del usuario:**
+   - Fila superior de 5 tipos de fondo con tipografía y espaciado ajustados para evitar cortes con elipsis (`...`).
+   - Sección **"Estilo de Trama"** con grilla 4×2 de 8 botones: `[ Puntos ]`, `[ Lineas ]`, `[ Rayas ]`, `[ Cuadros ]`, `[ Isométrico ]`, `[ Rombos ]`, `[ Panal ]` y `[ Cruces ]`.
+   - Micro-iconos vectoriales SVG limpios de 18×18px integrados en cada botón que reflejan de forma idéntica los símbolos de la referencia visual.
+   - Resaltado activo cálido (ámbar/dorado) adaptado a temas sepia, claro y oscuro.
+5. **Sincronización con Exportador HTML:** Se actualizó `htmlExporter.ts` para que los mapas exportados a HTML autocontenido rendericen de forma idéntica las tramas matemáticas y fondos.
+
+### ✏️ Cambios Realizados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos | Ampliado `NodePatternStyle` con las 8 familias canónicas y alias: `'dots' \| 'lines' \| 'stripes' \| 'squares' \| 'grid' \| 'triangles' \| 'isometric' \| 'diamonds' \| 'hexagons' \| 'honeycomb' \| 'cross' \| 'crosses'`. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Implementadas las fórmulas matemáticas de las 8 tramas tanto en `getNodeBackgroundStyles` (CSS/Data-URI) como en `NodeSvgPolygonBackground` (SVG `<pattern>` con cálculo dinámico de `patW` y `patH`), además de teselado elástico de imágenes y la fórmula de 4 líneas puras para la malla isométrica vertical. |
+| `src/components/organisms/canvas/CanvasBackgroundLayer.tsx` | Organismo | Sincronizado el patrón de fondo del lienzo `triangles` con la fórmula matemática de 4 líneas a 60° sin rombos. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Actualizado `PATTERN_OPTIONS` con las 8 familias de trama, micro-iconos SVG vectoriales 18×18px idénticos a la referencia, soporte de alias y estado activo ámbar/dorado. |
+| `src/utils/htmlExporter.ts` | Utilidad | Añadido soporte de fondos y tramas matemáticas en la generación de HTML offline independiente. |
+| `src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts` | Tests | Actualizada suite de pruebas unitarias verificando la generación sin fallos de las 8 familias y sus alias. |
+| `doc/DESIGN.md` | Docs | Documentadas las fórmulas matemáticas de teselación y proporciones de las 8 familias de trama (§6.3). |
+| `doc/CHANGELOG.md` | Docs | Registro detallado de la implementación de fondos y tramas matemáticas. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm vitest run src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts`: **15/15 pruebas superadas**.
+- [x] `pnpm test:regression`: **49/49 suites superadas (304/304 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa (0 errores)** en 5.99s.
+
+---
+
+## 📌 [Fase 29] — 2026-11-14: Corrección Topológica del Panal Regular (`honeycomb` / `hexagons`)
+
+### 🎯 Motivo
+En la trama de fondo de nodo **"Panal"** (`honeycomb` / `hexagons`), el trazado anterior dibujaba un hexágono completo en la primera columna pero en la segunda columna conectaba las aristas oblicuas con el punto central $(2.5s, 0)$ en lugar de proyectarlas hacia los vértices del siguiente hexágono. Esto ocasionaba que entre las columnas de hexágonos se formaran columnas continuas de rombos alargados que rompían la continuidad de la colmena ("esto no es un panal", según captura enviada por el usuario).
+
+### 🛠️ Solución Técnica
+1. **Grafo Cúbico Regular $\{6, 3\}$ Canónico:** Se implementó la descomposición mínima de la celda unitaria periódica rectangular $W = 3s$, $H = s\sqrt{3}$ que embaldosa el plano con hexágonos regulares idénticos de 6 aristas de longitud $s$ y ángulos interiores de 120°.
+2. **6 Aristas Únicas sin Superposición:** Para evitar duplicación de grosores o solapamiento con `stroke-opacity`, la celda dibuja exactamente las 6 aristas generatrices:
+   $$\text{Trazo 1: } M(0.5s, H) \to L(0, H/2) \to L(0.5s, 0) \to L(1.5s, 0) \to L(2s, H/2) \to L(3s, H/2)$$
+   $$\text{Trazo 2: } M(1.5s, H) \to L(2s, H/2)$$
+   Al trasladarse por $W$ y $H$, cada vértice del plano posee valencia topológica exacta de 3 (demostrado formalmente en script de verificación computacional), cerrando el 100% de los hexágonos y dejando exactamente 0 rombos.
+3. **Sincronización en Todo el Sistema:**
+   - `NodeBackgroundRenderer.tsx`: aplicado en `getNodeBackgroundStyles` (CSS/Data-URI) y en `NodeSvgPolygonBackground` (SVG `<pattern>` para nodos de cualquier silueta poligonal).
+   - `htmlExporter.ts`: sincronizado para que las exportaciones HTML conserven la misma teselación perfecta.
+   - `NodeBackgroundRenderer.test.ts`: añadido test unitario comprobando dimensiones periódicas y el path de 6 aristas sin puntos centrales espurios.
+
+### ✏️ Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Corregida la fórmula de teselado hexagonal regular en `getNodeBackgroundStyles` y `NodeSvgPolygonBackground`. |
+| `src/utils/htmlExporter.ts` | Utilidad | Integrada la fórmula canónica de 6 aristas para `hexagons` / `honeycomb` y soporte ampliado para `diamonds`, `grid`, `crosses`. |
+| `src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts` | Tests | Añadido test unitario validando el path de 6 aristas y ausencia de rombos. |
+| `doc/CHANGELOG.md` | Docs | Registro detallado del diagnóstico geométrico y la solución topológica. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores**.
+- [x] `pnpm vitest run --pool=forks src/components/molecules/node/__tests__/NodeBackgroundRenderer.test.ts`: **16/16 superadas (+1 nueva)**.
+- [x] `pnpm test:regression`: **49/49 suites superadas (305/305 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 10.57s (0 errores)**.
+
+
 
 
 

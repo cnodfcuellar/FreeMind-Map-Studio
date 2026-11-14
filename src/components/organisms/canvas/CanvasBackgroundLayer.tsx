@@ -18,11 +18,10 @@ export const CanvasBackgroundLayer: React.FC<CanvasBackgroundLayerProps> = ({
 }) => {
   if (pattern === 'none') return null;
 
-  // Triangles pattern dimensions
-  const triangleW = patternSize * 2;
-  const triangleH = Math.round(patternSize * 1.732);
-  const triangleW2 = patternSize;
-  const triangleH2 = Math.round((patternSize * 1.732) / 2);
+  // Triangles (isometric) pattern dimensions: W = s * sqrt(3), H = s
+  const triangleW = Math.round(patternSize * Math.sqrt(3) * 10) / 10;
+  const triangleH = patternSize;
+  const triangleW2 = Math.round((triangleW / 2) * 10) / 10;
 
   // Hexagon pattern dimensions
   const R = patternSize;
@@ -95,7 +94,7 @@ export const CanvasBackgroundLayer: React.FC<CanvasBackgroundLayerProps> = ({
           </pattern>
         )}
 
-        {/* Pattern: Triangles */}
+        {/* Pattern: Triangles (Isometric) */}
         {pattern === 'triangles' && (
           <pattern
             id="canvas-bg-pattern"
@@ -103,9 +102,38 @@ export const CanvasBackgroundLayer: React.FC<CanvasBackgroundLayerProps> = ({
             height={triangleH}
             patternUnits="userSpaceOnUse"
           >
-            <path
-              d={`M 0 0 L ${triangleW} 0 M 0 ${triangleH2} L ${triangleW} ${triangleH2} M 0 0 L ${triangleW} ${triangleH} M ${triangleW2} 0 L ${triangleW} ${triangleH2} M 0 ${triangleH2} L ${triangleW2} ${triangleH} M ${triangleW} 0 L 0 ${triangleH} M ${triangleW2} 0 L 0 ${triangleH2} M ${triangleW} ${triangleH2} L ${triangleW2} ${triangleH}`}
-              fill="none"
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2={triangleH}
+              stroke={patternColor}
+              strokeWidth="1"
+              strokeOpacity={patternOpacity}
+            />
+            <line
+              x1={triangleW2}
+              y1="0"
+              x2={triangleW2}
+              y2={triangleH}
+              stroke={patternColor}
+              strokeWidth="1"
+              strokeOpacity={patternOpacity}
+            />
+            <line
+              x1="0"
+              y1="0"
+              x2={triangleW}
+              y2={triangleH}
+              stroke={patternColor}
+              strokeWidth="1"
+              strokeOpacity={patternOpacity}
+            />
+            <line
+              x1="0"
+              y1={triangleH}
+              x2={triangleW}
+              y2="0"
               stroke={patternColor}
               strokeWidth="1"
               strokeOpacity={patternOpacity}

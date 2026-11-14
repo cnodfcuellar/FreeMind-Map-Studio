@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600" style="background:#090d16; font-family: system-ui, sans-serif;">
+  <defs>
+    <!-- PATRÓN ANTERIOR ERRÓNEO: Triángulos desfasados que se superponen y generan rombos -->
+    <pattern id="pat-erroneo" width="41.57" height="24" patternUnits="userSpaceOnUse">
+      <rect width="100%" height="100%" fill="#131b2e" />
+      <path d="M 0 0 L 41.57 0 L 20.78 20.78 Z M 0 24 L 41.57 24 L 20.78 3.22 Z" fill="none" stroke="#60a5fa" stroke-width="1.4" opacity="0.8" />
+    </pattern>
+
+    <!-- PATRÓN ISOMÉTRICO MATEMÁTICO PURO: 3 familias a 0°, 60° y 120° -->
+    <pattern id="pat-correcto" width="30" height="51.96" patternUnits="userSpaceOnUse">
+      <rect width="100%" height="100%" fill="#131b2e" />
+      <!-- Horizontales a 0° -->
+      <line x1="0" y1="0" x2="30" y2="0" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+      <line x1="0" y1="25.98" x2="30" y2="25.98" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+      <!-- Diagonales a 60° -->
+      <line x1="0" y1="0" x2="30" y2="51.96" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+      <line x1="15" y1="0" x2="30" y2="25.98" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+      <line x1="0" y1="25.98" x2="15" y2="51.96" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+      <!-- Diagonales a 120° -->
+      <line x1="30" y1="0" x2="0" y2="51.96" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+      <line x1="15" y1="0" x2="0" y2="25.98" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+      <line x1="30" y1="25.98" x2="15" y2="51.96" stroke="#38bdf8" stroke-width="1.4" opacity="0.85" />
+    </pattern>
+  </defs>
+
+  <!-- Título Principal -->
+  <text x="500" y="45" font-size="22" font-weight="bold" fill="#f8fafc" text-anchor="middle">
+    Diagnóstico Geométrico: ¿Por qué aparecían Rombos en vez de Triángulos de 60°?
+  </text>
+  <text x="500" y="72" font-size="13" fill="#94a3b8" text-anchor="middle">
+    Explicación matemática del solapamiento de triángulos vs. teselado regular euclidiano
+  </text>
+
+  <!-- LADO IZQUIERDO: Lo que ocurría (Rombos / Malla celta) -->
+  <g transform="translate(60, 110)">
+    <rect width="400" height="280" rx="16" fill="#0f172a" stroke="#ef4444" stroke-width="2" />
+    <rect x="15" y="15" width="370" height="200" rx="10" fill="url(#pat-erroneo)" stroke="#334155" />
+    
+    <text x="200" y="240" font-size="15" font-weight="bold" fill="#f87171" text-anchor="middle">
+      ❌ Lo que ocurría: Generación de Rombos
+    </text>
+    <text x="200" y="260" font-size="11.5" fill="#cbd5e1" text-anchor="middle">
+      Dos triángulos opuestos de altura h > H/2 se cruzan en el centro.
+    </text>
+    <text x="200" y="275" font-size="11" fill="#94a3b8" text-anchor="middle">
+      El cruce de sus lados diagonales crea rombos (diamantes) cerrados.
+    </text>
+  </g>
+
+  <!-- LADO DERECHO: Corrección Matemática (Triángulos Equiláteros Puros) -->
+  <g transform="translate(540, 110)">
+    <rect width="400" height="280" rx="16" fill="#0f172a" stroke="#10b981" stroke-width="2" />
+    <rect x="15" y="15" width="370" height="200" rx="10" fill="url(#pat-correcto)" stroke="#334155" />
+
+    <text x="200" y="240" font-size="15" font-weight="bold" fill="#34d399" text-anchor="middle">
+      ✓ Malla Isométrica Pura: Triángulos de 60°
+    </text>
+    <text x="200" y="260" font-size="11.5" fill="#cbd5e1" text-anchor="middle">
+      3 familias continuas de rectas: 0°, 60° y 120° (H = s√3).
+    </text>
+    <text x="200" y="275" font-size="11" fill="#94a3b8" text-anchor="middle">
+      Cada vértice une 6 triángulos equiláteros perfectos (6 × 60° = 360°).
+    </text>
+  </g>
+
+  <!-- PANEL INFERIOR EXPLICATIVO -->
+  <g transform="translate(60, 420)">
+    <rect width="880" height="150" rx="14" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5" opacity="0.9" />
+    <text x="40" y="35" font-size="15" font-weight="bold" fill="#60a5fa">
+      📐 Causa Matemática Exacta del Problema:
+    </text>
+    <text x="40" y="65" font-size="12.5" fill="#e2e8f0">
+      1. En la fórmula inicial se dibujaban dos triángulos: uno con base en y=0 que bajaba hasta hTri = s·(√3/2) ≈ 0.866s,
+    </text>
+    <text x="40" y="85" font-size="12.5" fill="#e2e8f0">
+         y otro con base en y=s que subía hasta y = 0.134s.
+    </text>
+    <text x="40" y="110" font-size="12.5" fill="#fca5a5">
+      2. Al medir la celda H = s, los dos triángulos se solapaban en la franja central (entre 0.134s y 0.866s). Sus diagonales
+    </text>
+    <text x="40" y="130" font-size="12.5" fill="#fca5a5">
+         opuestas se intersectaban en 'X', encerrando una fila de rombos (diamantes) idéntica a la de tu captura.
+    </text>
+  </g>
+</svg>
