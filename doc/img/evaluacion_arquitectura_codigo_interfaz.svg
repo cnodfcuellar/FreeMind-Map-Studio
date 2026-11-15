@@ -1,0 +1,352 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" width="100%" height="100%" style="background:#0b0f19; font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.9"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#38bdf8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background Grid Pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.75" stroke-opacity="0.5"/>
+  </pattern>
+  <rect width="1600" height="1100" fill="url(#grid)"/>
+
+  <!-- ==================== HEADER ==================== -->
+  <g transform="translate(40, 30)">
+    <rect width="1520" height="115" rx="14" fill="url(#headerGrad)" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="8" height="115" rx="4" fill="#38bdf8"/>
+    
+    <!-- Title & Subtitle -->
+    <text x="32" y="44" fill="#f8fafc" font-size="24" font-weight="800" letter-spacing="0.5">EVALUACIÓN INTEGRAL DE ARQUITECTURA, CÓDIGO E INTERFAZ</text>
+    <text x="32" y="72" fill="#94a3b8" font-size="13" font-weight="500">FreeMind Map Studio — Diagnóstico Exhaustivo de Atomic Design, Estado, Homogeneidad UI, Métricas y Calidad de Código</text>
+    <text x="32" y="94" fill="#64748b" font-size="11" font-weight="600">Fecha de evaluación: Noviembre 2026 | Entorno: React 19 + TS 5.8 + Zustand 5 + Tailwind v4 | 146 archivos evaluados</text>
+
+    <!-- Global Score Badge -->
+    <g transform="translate(1330, 20)">
+      <rect width="160" height="75" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" filter="url(#glow)"/>
+      <text x="80" y="28" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="700" letter-spacing="1">CALIFICACIÓN GLOBAL</text>
+      <text x="80" y="60" text-anchor="middle" fill="#38bdf8" font-size="30" font-weight="900">7.1<tspan font-size="16" fill="#64748b">/10</tspan></text>
+    </g>
+  </g>
+
+  <!-- ==================== FILA 1: SCORECARD (IZQ) & ATOMIC DESIGN AUDIT (DER) ==================== -->
+  
+  <!-- PANEL 1: SCORECARD POR PILARES (X: 40, Y: 165, W: 740, H: 380) -->
+  <g transform="translate(40, 165)">
+    <rect width="740" height="380" rx="14" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="740" height="42" rx="14" fill="#1e293b" fill-opacity="0.6"/>
+    <path d="M 0 42 L 740 42" stroke="#334155" stroke-width="1"/>
+    
+    <circle cx="28" cy="21" r="6" fill="#38bdf8"/>
+    <text x="44" y="26" fill="#f8fafc" font-size="15" font-weight="700">1. Scorecard por Pilares de Arquitectura y Calidad</text>
+
+    <!-- Metrics Bars -->
+    <!-- Metric 1: TypeScript Strictness -->
+    <g transform="translate(30, 60)">
+      <text x="0" y="16" fill="#e2e8f0" font-size="13" font-weight="600">Tipado y Rigor TypeScript</text>
+      <text x="590" y="16" fill="#10b981" font-size="13" font-weight="700" text-anchor="end">9.5 / 10</text>
+      <text x="680" y="16" fill="#64748b" font-size="11" font-weight="600" text-anchor="end">Excelente</text>
+      <!-- Track -->
+      <rect x="0" y="24" width="680" height="8" rx="4" fill="#334155"/>
+      <rect x="0" y="24" width="646" height="8" rx="4" fill="url(#greenGrad)"/>
+      <text x="0" y="44" fill="#94a3b8" font-size="11">0 @ts-ignore, 0 @ts-expect-error, solo 10 'any' residuales en 146 archivos.</text>
+    </g>
+
+    <!-- Metric 2: Atomic Design Compliance -->
+    <g transform="translate(30, 115)">
+      <text x="0" y="16" fill="#e2e8f0" font-size="13" font-weight="600">Cumplimiento de Atomic Design</text>
+      <text x="590" y="16" fill="#3b82f6" font-size="13" font-weight="700" text-anchor="end">7.5 / 10</text>
+      <text x="680" y="16" fill="#64748b" font-size="11" font-weight="600" text-anchor="end">Fugas leves</text>
+      <!-- Track -->
+      <rect x="0" y="24" width="680" height="8" rx="4" fill="#334155"/>
+      <rect x="0" y="24" width="510" height="8" rx="4" fill="url(#blueGrad)"/>
+      <text x="0" y="44" fill="#94a3b8" font-size="11">0 violaciones de importación inversa, pero 10 organismos clave sueltos en src/components.</text>
+    </g>
+
+    <!-- Metric 3: State Flow & Props Discipline -->
+    <g transform="translate(30, 170)">
+      <text x="0" y="16" fill="#e2e8f0" font-size="13" font-weight="600">Arquitectura de Estado y Flujo de Props</text>
+      <text x="590" y="16" fill="#f59e0b" font-size="13" font-weight="700" text-anchor="end">6.0 / 10</text>
+      <text x="680" y="16" fill="#f59e0b" font-size="11" font-weight="600" text-anchor="end">Atención</text>
+      <!-- Track -->
+      <rect x="0" y="24" width="680" height="8" rx="4" fill="#334155"/>
+      <rect x="0" y="24" width="408" height="8" rx="4" fill="url(#amberGrad)"/>
+      <text x="0" y="44" fill="#94a3b8" font-size="11">Prop drilling masivo: 64 props a ToolPanel, 36 a Canvas; closures inline en cada render.</text>
+    </g>
+
+    <!-- Metric 4: UI Homogeneity & Theming -->
+    <g transform="translate(30, 225)">
+      <text x="0" y="16" fill="#e2e8f0" font-size="13" font-weight="600">Homogeneidad Visual y Soporte de Temas (Sepia/Dark)</text>
+      <text x="590" y="16" fill="#f59e0b" font-size="13" font-weight="700" text-anchor="end">6.8 / 10</text>
+      <text x="680" y="16" fill="#f59e0b" font-size="11" font-weight="600" text-anchor="end">Heterogéneo</text>
+      <!-- Track -->
+      <rect x="0" y="24" width="680" height="8" rx="4" fill="#334155"/>
+      <rect x="0" y="24" width="462" height="8" rx="4" fill="url(#amberGrad)"/>
+      <text x="0" y="44" fill="#94a3b8" font-size="11">Solo 15/55 usan tokens --sp-*. 21 componentes con 'bg-white' puro rompen modo sepia/oscuro.</text>
+    </g>
+
+    <!-- Metric 5: Test Coverage & Regression Suite -->
+    <g transform="translate(30, 280)">
+      <text x="0" y="16" fill="#e2e8f0" font-size="13" font-weight="600">Cobertura de Pruebas Unitarias</text>
+      <text x="590" y="16" fill="#3b82f6" font-size="13" font-weight="700" text-anchor="end">6.5 / 10</text>
+      <text x="680" y="16" fill="#64748b" font-size="11" font-weight="600" text-anchor="end">Desigual</text>
+      <!-- Track -->
+      <rect x="0" y="24" width="680" height="8" rx="4" fill="#334155"/>
+      <rect x="0" y="24" width="442" height="8" rx="4" fill="url(#blueGrad)"/>
+      <text x="0" y="44" fill="#94a3b8" font-size="11">339 tests aprobados en utils/hooks, pero 0 tests en MindMapCanvas y FormatTab.</text>
+    </g>
+
+    <!-- Metric 6: Accessibility (a11y) -->
+    <g transform="translate(30, 335)">
+      <text x="0" y="16" fill="#e2e8f0" font-size="13" font-weight="600">Accesibilidad Web y Semántica (a11y)</text>
+      <text x="590" y="16" fill="#ef4444" font-size="13" font-weight="700" text-anchor="end">3.0 / 10</text>
+      <text x="680" y="16" fill="#ef4444" font-size="11" font-weight="600" text-anchor="end">Crítico</text>
+      <!-- Track -->
+      <rect x="0" y="24" width="680" height="8" rx="4" fill="#334155"/>
+      <rect x="0" y="24" width="204" height="8" rx="4" fill="url(#redGrad)"/>
+      <text x="0" y="44" fill="#94a3b8" font-size="11">Solo 7/55 comps tienen atributos ARIA (20 en total). Sin focus-trap en modales.</text>
+    </g>
+  </g>
+
+  <!-- PANEL 2: AUDITORÍA ATOMIC DESIGN (X: 820, Y: 165, W: 740, H: 380) -->
+  <g transform="translate(820, 165)">
+    <rect width="740" height="380" rx="14" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="740" height="42" rx="14" fill="#1e293b" fill-opacity="0.6"/>
+    <path d="M 0 42 L 740 42" stroke="#334155" stroke-width="1"/>
+
+    <circle cx="28" cy="21" r="6" fill="#8b5cf6"/>
+    <text x="44" y="26" fill="#f8fafc" font-size="15" font-weight="700">2. Estructura Jerárquica Atomic Design</text>
+
+    <!-- Diagrama de capas -->
+    <g transform="translate(30, 60)">
+      <!-- Layer 1: Atoms -->
+      <rect x="0" y="0" width="680" height="48" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.2"/>
+      <rect x="0" y="0" width="90" height="48" rx="8" fill="#10b981" fill-opacity="0.15"/>
+      <text x="45" y="29" fill="#10b981" font-size="12" font-weight="800" text-anchor="middle">ÁTOMOS</text>
+      <text x="105" y="22" fill="#f8fafc" font-size="12" font-weight="700">12 componentes (Button, Input, Switch, SliderInput, Badge, ErrorBoundary...)</text>
+      <text x="105" y="38" fill="#94a3b8" font-size="11">Independencia 100%: 0 importaciones hacia capas superiores. Testeados en bloque.</text>
+      <circle cx="655" cy="24" r="10" fill="#10b981" fill-opacity="0.2"/>
+      <text x="655" y="28" fill="#10b981" font-size="11" font-weight="800" text-anchor="middle">✓</text>
+
+      <!-- Layer 2: Molecules -->
+      <rect x="0" y="58" width="680" height="48" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.2"/>
+      <rect x="0" y="58" width="90" height="48" rx="8" fill="#3b82f6" fill-opacity="0.15"/>
+      <text x="45" y="87" fill="#3b82f6" font-size="12" font-weight="800" text-anchor="middle">MOLÉCULAS</text>
+      <text x="105" y="80" fill="#f8fafc" font-size="12" font-weight="700">12 controles + subcarpeta node/ (NodeHeaderRow, NodeBorderOverlay, etc.)</text>
+      <text x="105" y="96" fill="#94a3b8" font-size="11">Alta cohesión de inputs compuestos. 0 importaciones a organismos. Buena cobertura.</text>
+      <circle cx="655" cy="82" r="10" fill="#3b82f6" fill-opacity="0.2"/>
+      <text x="655" y="86" fill="#3b82f6" font-size="11" font-weight="800" text-anchor="middle">✓</text>
+
+      <!-- Layer 3: Organisms (Desalineación detectada) -->
+      <rect x="0" y="116" width="680" height="58" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+      <rect x="0" y="116" width="90" height="58" rx="8" fill="#f59e0b" fill-opacity="0.15"/>
+      <text x="45" y="150" fill="#f59e0b" font-size="11" font-weight="800" text-anchor="middle">ORGANISMOS</text>
+      <text x="105" y="137" fill="#f8fafc" font-size="12" font-weight="700">Fragmentación: 10 en subcarpetas + 10 sueltos en raíz de src/components</text>
+      <text x="105" y="153" fill="#fbbf24" font-size="11">MenuBar, ToolBar, MindMapCanvas, ToolPanel no están en organisms/.</text>
+      <text x="105" y="167" fill="#94a3b8" font-size="10">Carpeta organisms/presentation vacía; existe src/components/Presentation (PascalCase).</text>
+      <circle cx="655" cy="145" r="10" fill="#f59e0b" fill-opacity="0.2"/>
+      <text x="655" y="149" fill="#f59e0b" font-size="11" font-weight="800" text-anchor="middle">⚠</text>
+
+      <!-- Layer 4: Templates -->
+      <rect x="0" y="184" width="680" height="48" rx="8" fill="#1e293b" stroke="#8b5cf6" stroke-width="1.2"/>
+      <rect x="0" y="184" width="90" height="48" rx="8" fill="#8b5cf6" fill-opacity="0.15"/>
+      <text x="45" y="213" fill="#8b5cf6" font-size="12" font-weight="800" text-anchor="middle">PLANTILLAS</text>
+      <text x="105" y="206" fill="#f8fafc" font-size="12" font-weight="700">MainEditorLayout.tsx (Layout semántico por slots de ReactNode)</text>
+      <text x="105" y="222" fill="#94a3b8" font-size="11">Implementación canónica correcta. App.tsx proyecta canvas, toolbars y modales en slots.</text>
+      <circle cx="655" cy="208" r="10" fill="#8b5cf6" fill-opacity="0.2"/>
+      <text x="655" y="212" fill="#8b5cf6" font-size="11" font-weight="800" text-anchor="middle">✓</text>
+
+      <!-- Layer 5: Modals / Views -->
+      <rect x="0" y="242" width="680" height="48" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/>
+      <rect x="0" y="242" width="90" height="48" rx="8" fill="#64748b" fill-opacity="0.15"/>
+      <text x="45" y="271" fill="#cbd5e1" font-size="12" font-weight="800" text-anchor="middle">MODALES</text>
+      <text x="105" y="264" fill="#f8fafc" font-size="12" font-weight="700">9 Modales especializados en carpeta paralela Modals/</text>
+      <text x="105" y="280" fill="#94a3b8" font-size="11">Comparten ModalBackdrop + ModalHeader pero conviven fuera del árbol atómico.</text>
+      <circle cx="655" cy="266" r="10" fill="#64748b" fill-opacity="0.2"/>
+      <text x="655" y="270" fill="#94a3b8" font-size="11" font-weight="800" text-anchor="middle">ℹ</text>
+    </g>
+  </g>
+
+  <!-- ==================== FILA 2: PUNTOS CRÍTICOS / HOTSPOTS (4 COLUMNAS) ==================== -->
+  
+  <!-- CONTENEDOR HOTSPOTS (X: 40, Y: 565, W: 1520, H: 250) -->
+  <g transform="translate(40, 565)">
+    <rect width="1520" height="250" rx="14" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="1520" height="40" rx="14" fill="#1e293b" fill-opacity="0.6"/>
+    <path d="M 0 40 L 1520 40" stroke="#334155" stroke-width="1"/>
+    
+    <circle cx="28" cy="20" r="6" fill="#ef4444"/>
+    <text x="44" y="25" fill="#f8fafc" font-size="15" font-weight="700">3. Cuatro Puntos Críticos y Hallazgos de Mayor Impacto (Hotspots)</text>
+
+    <!-- Tarjeta 1: Prop Drilling en App.tsx -->
+    <g transform="translate(25, 55)">
+      <rect width="350" height="175" rx="10" fill="#0f172a" stroke="#ef4444" stroke-width="1.2"/>
+      <rect x="0" y="0" width="350" height="32" rx="10" fill="#ef4444" fill-opacity="0.15"/>
+      <text x="14" y="21" fill="#fca5a5" font-size="12" font-weight="800">HOTSPOT 1: PROP-DRILLING MASIVO</text>
+      
+      <text x="14" y="52" fill="#f8fafc" font-size="13" font-weight="700">App.tsx → ToolPanel &amp; Canvas</text>
+      <text x="14" y="74" fill="#ef4444" font-size="20" font-weight="900">64 props <tspan font-size="12" fill="#94a3b8">en ToolPanel</tspan></text>
+      <text x="14" y="98" fill="#e2e8f0" font-size="11">• 36 props hacia MindMapCanvas.</text>
+      <text x="14" y="116" fill="#e2e8f0" font-size="11">• Suscripción sin selectores en App().</text>
+      <text x="14" y="134" fill="#e2e8f0" font-size="11">• Funciones flecha en línea en cada render.</text>
+      <text x="14" y="156" fill="#94a3b8" font-size="10">Impacto: Re-renders en cascada de todo el árbol.</text>
+    </g>
+
+    <!-- Tarjeta 2: God Component FormatTab -->
+    <g transform="translate(400, 55)">
+      <rect width="350" height="175" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+      <rect x="0" y="0" width="350" height="32" rx="10" fill="#f59e0b" fill-opacity="0.15"/>
+      <text x="14" y="21" fill="#fde68a" font-size="12" font-weight="800">HOTSPOT 2: MONOLITO FORMATTAB</text>
+
+      <text x="14" y="52" fill="#f8fafc" font-size="13" font-weight="700">FormatTab.tsx (ToolPanel)</text>
+      <text x="14" y="74" fill="#f59e0b" font-size="20" font-weight="900">1,755 LOC <tspan font-size="12" fill="#94a3b8">| 0 tests</tspan></text>
+      <text x="14" y="98" fill="#e2e8f0" font-size="11">• 4 macrosecciones sin modularizar.</text>
+      <text x="14" y="116" fill="#e2e8f0" font-size="11">• Decenas de sliders y pickers mezclados.</text>
+      <text x="14" y="134" fill="#e2e8f0" font-size="11">• Alto riesgo al agregar nuevos estilos.</text>
+      <text x="14" y="156" fill="#94a3b8" font-size="10">Impacto: Mantenibilidad crítica y deuda técnica.</text>
+    </g>
+
+    <!-- Tarjeta 3: MindNode Bloat -->
+    <g transform="translate(775, 55)">
+      <rect width="350" height="175" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"/>
+      <rect x="0" y="0" width="350" height="32" rx="10" fill="#f59e0b" fill-opacity="0.15"/>
+      <text x="14" y="21" fill="#fde68a" font-size="12" font-weight="800">HOTSPOT 3: TYPE BLOAT EN MINDNODE</text>
+
+      <text x="14" y="52" fill="#f8fafc" font-size="13" font-weight="700">src/types/mindmap.ts</text>
+      <text x="14" y="74" fill="#f59e0b" font-size="20" font-weight="900">138 campos <tspan font-size="12" fill="#94a3b8">en 1 interfaz</tspan></text>
+      <text x="14" y="98" fill="#e2e8f0" font-size="11">• Mezcla campos de burbujas, horquillas, aristas.</text>
+      <text x="14" y="116" fill="#e2e8f0" font-size="11">• Esquema plano sin sub-objetos composables.</text>
+      <text x="14" y="134" fill="#e2e8f0" font-size="11">• Payload inflado en persistencia de localStorage.</text>
+      <text x="14" y="156" fill="#94a3b8" font-size="10">Impacto: Alta carga cognitiva y polución de datos.</text>
+    </g>
+
+    <!-- Tarjeta 4: Theming & a11y Gaps -->
+    <g transform="translate(1150, 55)">
+      <rect width="345" height="175" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="1.2"/>
+      <rect x="0" y="0" width="345" height="32" rx="10" fill="#3b82f6" fill-opacity="0.15"/>
+      <text x="14" y="21" fill="#93c5fd" font-size="12" font-weight="800">HOTSPOT 4: THEME GAPS &amp; A11Y</text>
+
+      <text x="14" y="52" fill="#f8fafc" font-size="13" font-weight="700">UI Theming (Sepia) &amp; Accesibilidad</text>
+      <text x="14" y="74" fill="#3b82f6" font-size="20" font-weight="900">21 comps <tspan font-size="12" fill="#94a3b8">con 'bg-white'</tspan></text>
+      <text x="14" y="98" fill="#e2e8f0" font-size="11">• Deslumbran en modo Sepia y Oscuro.</text>
+      <text x="14" y="116" fill="#e2e8f0" font-size="11">• Solo 15/55 comps usan tokens semánticos.</text>
+      <text x="14" y="134" fill="#e2e8f0" font-size="11">• Solo 20 atributos ARIA; sin focus trap.</text>
+      <text x="14" y="156" fill="#94a3b8" font-size="10">Impacto: Inaccesible y con parches de color.</text>
+    </g>
+  </g>
+
+  <!-- ==================== FILA 3: HOJA DE RUTA DE REFACTORIZACIÓN (5 FASES) ==================== -->
+  
+  <g transform="translate(40, 835)">
+    <rect width="1520" height="230" rx="14" fill="url(#cardBg)" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="1520" height="40" rx="14" fill="#1e293b" fill-opacity="0.6"/>
+    <path d="M 0 40 L 1520 40" stroke="#334155" stroke-width="1"/>
+    
+    <circle cx="28" cy="20" r="6" fill="#10b981"/>
+    <text x="44" y="25" fill="#f8fafc" font-size="15" font-weight="700">4. Hoja de Ruta Priorizada de Modernización y Refactorización (Roadmap)</text>
+
+    <!-- 5 Phase Steps -->
+    <g transform="translate(25, 60)">
+      <!-- Step 1 -->
+      <g transform="translate(0, 0)">
+        <rect width="280" height="145" rx="8" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5"/>
+        <rect x="0" y="0" width="280" height="28" rx="8" fill="#3b82f6" fill-opacity="0.2"/>
+        <text x="12" y="19" fill="#60a5fa" font-size="11" font-weight="800">FASE 1: ESTADO ATÓMICO</text>
+        <text x="12" y="48" fill="#f8fafc" font-size="12" font-weight="700">Eliminar Prop-Drilling</text>
+        <text x="12" y="68" fill="#94a3b8" font-size="11">Migrar ToolPanel y FormatTab</text>
+        <text x="12" y="84" fill="#94a3b8" font-size="11">a selectores directos de Zustand:</text>
+        <text x="12" y="104" fill="#38bdf8" font-size="10" font-family="monospace">useMindMapStore(s =&gt; s.action)</text>
+        <text x="12" y="126" fill="#10b981" font-size="10" font-weight="600">Prioridad: ALTA (Performance)</text>
+      </g>
+
+      <!-- Step 2 -->
+      <g transform="translate(298, 0)">
+        <rect width="280" height="145" rx="8" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5"/>
+        <rect x="0" y="0" width="280" height="28" rx="8" fill="#3b82f6" fill-opacity="0.2"/>
+        <text x="12" y="19" fill="#60a5fa" font-size="11" font-weight="800">FASE 2: MODULARIZACIÓN</text>
+        <text x="12" y="48" fill="#f8fafc" font-size="12" font-weight="700">Trocear FormatTab (1.7k LOC)</text>
+        <text x="12" y="68" fill="#94a3b8" font-size="11">Dividir en 4 subcomponentes:</text>
+        <text x="12" y="84" fill="#94a3b8" font-size="11">• NodeShapeSection</text>
+        <text x="12" y="98" fill="#94a3b8" font-size="11">• NodeBgSection / NodeBorder</text>
+        <text x="12" y="112" fill="#94a3b8" font-size="11">• NodeEdgeSection</text>
+        <text x="12" y="128" fill="#10b981" font-size="10" font-weight="600">Prioridad: ALTA (Mantenibilidad)</text>
+      </g>
+
+      <!-- Step 3 -->
+      <g transform="translate(596, 0)">
+        <rect width="280" height="145" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+        <rect x="0" y="0" width="280" height="28" rx="8" fill="#10b981" fill-opacity="0.2"/>
+        <text x="12" y="19" fill="#34d399" font-size="11" font-weight="800">FASE 3: TOKENS Y TEMAS</text>
+        <text x="12" y="48" fill="#f8fafc" font-size="12" font-weight="700">Homogeneizar UI Theming</text>
+        <text x="12" y="68" fill="#94a3b8" font-size="11">Reemplazar 'bg-white' duro por</text>
+        <text x="12" y="84" fill="#94a3b8" font-size="11">tokens de superficie semánticos:</text>
+        <text x="12" y="104" fill="#34d399" font-size="10" font-family="monospace">bg-[var(--sp-bg)]</text>
+        <text x="12" y="126" fill="#10b981" font-size="10" font-weight="600">Prioridad: MEDIA (Consistencia)</text>
+      </g>
+
+      <!-- Step 4 -->
+      <g transform="translate(894, 0)">
+        <rect width="280" height="145" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+        <rect x="0" y="0" width="280" height="28" rx="8" fill="#10b981" fill-opacity="0.2"/>
+        <text x="12" y="19" fill="#34d399" font-size="11" font-weight="800">FASE 4: ESTRUCTURA ATÓMICA</text>
+        <text x="12" y="48" fill="#f8fafc" font-size="12" font-weight="700">Reordenar Organismos</text>
+        <text x="12" y="68" fill="#94a3b8" font-size="11">Mover los 10 componentes sueltos</text>
+        <text x="12" y="84" fill="#94a3b8" font-size="11">de src/components hacia:</text>
+        <text x="12" y="104" fill="#cbd5e1" font-size="10" font-family="monospace">organisms/canvas &amp; navigation</text>
+        <text x="12" y="126" fill="#38bdf8" font-size="10" font-weight="600">Prioridad: MEDIA (Arquitectura)</text>
+      </g>
+
+      <!-- Step 5 -->
+      <g transform="translate(1192, 0)">
+        <rect width="275" height="145" rx="8" fill="#0f172a" stroke="#8b5cf6" stroke-width="1.5"/>
+        <rect x="0" y="0" width="275" height="28" rx="8" fill="#8b5cf6" fill-opacity="0.2"/>
+        <text x="12" y="19" fill="#a78bfa" font-size="11" font-weight="800">FASE 5: DOMINIO Y A11Y</text>
+        <text x="12" y="48" fill="#f8fafc" font-size="12" font-weight="700">Composición MindNode &amp; a11y</text>
+        <text x="12" y="68" fill="#94a3b8" font-size="11">Agrupar las 138 props planas</text>
+        <text x="12" y="84" fill="#94a3b8" font-size="11">en sub-configs de dominio.</text>
+        <text x="12" y="104" fill="#94a3b8" font-size="11">Añadir focus trap y roles ARIA.</text>
+        <text x="12" y="126" fill="#8b5cf6" font-size="10" font-weight="600">Prioridad: MEDIA (Escalabilidad)</text>
+      </g>
+    </g>
+  </g>
+</svg>

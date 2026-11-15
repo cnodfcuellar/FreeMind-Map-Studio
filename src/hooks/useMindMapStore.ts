@@ -4,6 +4,7 @@ import {
   MindNode,
   Connector,
   EdgeStyle,
+  EdgeBorderStyle,
   EdgeProfile,
   LayoutType,
   BackgroundPatternStyle,
@@ -11,6 +12,7 @@ import {
 } from '../types/mindmap';
 import { BLANK_MAP, TUTORIAL_MAP } from '../utils/sampleMaps';
 import { loadCurrentMap, saveCurrentMap } from '../utils/storage';
+import { applyThemeRestyle, applyBackgroundUpdate } from '../utils/mapTheme';
 
 interface MindMapStore {
   // Estado base
@@ -75,6 +77,50 @@ interface MindMapStore {
   handleApplyIconsToChildren?: (nodeId?: string) => void;
   handleApplyIconsToSiblings?: (nodeId?: string) => void;
   handleRandomizeEdgeColors: () => void;
+
+  // Mutaciones Globales del Mapa y Conexiones (Fase 1: Desacoplamiento)
+  updateMapTheme: (themeId: string) => void;
+  updateMapLayout: (layout: LayoutType) => void;
+  updateMapEdgeStyle: (edgeStyle: EdgeStyle) => void;
+  updateMapEdgeWidth: (width: number) => void;
+  updateMapEdgeProfile: (profile: EdgeProfile) => void;
+  updateMapEdgeColor: (color?: string) => void;
+  updateMapEdgeDash: (dash: EdgeBorderStyle) => void;
+  updateMapEdgeShadow: (updates: {
+    edgeShadow?: boolean;
+    edgeShadowPreset?: 'soft' | 'deep' | 'glow';
+    edgeShadowBlur?: number;
+    edgeShadowOffsetY?: number;
+    edgeShadowColor?: string;
+  }) => void;
+  updateMapBackgroundColor: (backgroundColor?: string) => void;
+  updateMapBackground: (config: {
+    backgroundColor?: string;
+    backgroundPattern?: BackgroundPatternStyle;
+    backgroundPatternColor?: string;
+    backgroundPatternSize?: number;
+    backgroundPatternOpacity?: number;
+  }) => void;
+  resetMapBackground: () => void;
+  updateMapBackgroundPattern: (patternConfig: {
+    pattern?: BackgroundPatternStyle;
+    patternColor?: string;
+    patternSize?: number;
+    patternOpacity?: number;
+  }) => void;
+  updateMapSpacing: (horizontalGap: number, verticalGap: number) => void;
+  updateMapVisibility: (visibility: {
+    hideAllBodies?: boolean;
+    hideAllImages?: boolean;
+    hideAllTags?: boolean;
+    hideAllIcons?: boolean;
+    hideAllLinks?: boolean;
+    showAllNotesInline?: boolean;
+  }) => void;
+  deleteConnector: (connectorId: string) => void;
+  updateConnector: (connectorId: string, updates: Partial<Connector>) => void;
+  applyEdgeStyleToAllNodes: (edgeStyle: EdgeStyle) => void;
+  applyEdgeProfileToAllNodes: (edgeProfile: EdgeProfile) => void;
 }
 
 const extractNodeStyleBundle = (sourceNode: MindNode): Partial<MindNode> => {
@@ -785,6 +831,202 @@ export const useMindMapStore = create<MindMapStore>((set, get) => {
 
       set({ mindMap: nextMap });
       saveCurrentMap(nextMap);
+    },
+
+    updateMapTheme: (themeId: string) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap = applyThemeRestyle(mindMap, themeId);
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapLayout: (layout: LayoutType) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = { ...mindMap, layout, updatedAt: Date.now() };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapEdgeStyle: (edgeStyle: EdgeStyle) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const updatedNodes: Record<string, MindNode> = {};
+      Object.entries(mindMap.nodes).forEach(([id, node]) => {
+        updatedNodes[id] = { ...node, edgeStyle: undefined };
+      });
+      const nextMap: MindMap = { ...mindMap, edgeStyle, nodes: updatedNodes, updatedAt: Date.now() };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapEdgeWidth: (edgeWidth: number) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const updatedNodes: Record<string, MindNode> = {};
+      Object.entries(mindMap.nodes).forEach(([id, node]) => {
+        updatedNodes[id] = { ...node, edgeWidth: undefined };
+      });
+      const nextMap: MindMap = { ...mindMap, edgeWidth, nodes: updatedNodes, updatedAt: Date.now() };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapEdgeProfile: (edgeProfile: EdgeProfile) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const updatedNodes: Record<string, MindNode> = {};
+      Object.entries(mindMap.nodes).forEach(([id, node]) => {
+        updatedNodes[id] = { ...node, edgeProfile: undefined };
+      });
+      const nextMap: MindMap = { ...mindMap, edgeProfile, nodes: updatedNodes, updatedAt: Date.now() };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapEdgeColor: (edgeColor?: string) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const updatedNodes: Record<string, MindNode> = {};
+      Object.entries(mindMap.nodes).forEach(([id, node]) => {
+        updatedNodes[id] = { ...node, edgeColor: undefined };
+      });
+      const nextMap: MindMap = { ...mindMap, edgeColor, nodes: updatedNodes, updatedAt: Date.now() };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapEdgeDash: (edgeDash: EdgeBorderStyle) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const updatedNodes: Record<string, MindNode> = {};
+      Object.entries(mindMap.nodes).forEach(([id, node]) => {
+        updatedNodes[id] = { ...node, edgeDash: undefined, edgeBorderStyle: undefined };
+      });
+      const nextMap: MindMap = {
+        ...mindMap,
+        edgeDash,
+        edgeBorderStyle: edgeDash,
+        nodes: updatedNodes,
+        updatedAt: Date.now(),
+      };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapEdgeShadow: (updates) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = { ...mindMap, ...updates, updatedAt: Date.now() };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapBackgroundColor: (backgroundColor?: string) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = { ...mindMap, backgroundColor, updatedAt: Date.now() };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapBackground: (config) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap = applyBackgroundUpdate(mindMap, config);
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    resetMapBackground: () => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = {
+        ...mindMap,
+        backgroundColor: undefined,
+        backgroundPattern: undefined,
+        backgroundPatternColor: undefined,
+        backgroundPatternSize: undefined,
+        backgroundPatternOpacity: undefined,
+        updatedAt: Date.now(),
+      };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapBackgroundPattern: (patternConfig) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = {
+        ...mindMap,
+        backgroundPattern: patternConfig.pattern,
+        backgroundPatternColor: patternConfig.patternColor,
+        backgroundPatternSize: patternConfig.patternSize,
+        backgroundPatternOpacity: patternConfig.patternOpacity,
+        updatedAt: Date.now(),
+      };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapSpacing: (horizontalGap: number, verticalGap: number) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = {
+        ...mindMap,
+        horizontalGap,
+        verticalGap,
+        updatedAt: Date.now(),
+      };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateMapVisibility: (visibility) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = {
+        ...mindMap,
+        ...visibility,
+        updatedAt: Date.now(),
+      };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    deleteConnector: (connectorId: string) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = {
+        ...mindMap,
+        connectors: (mindMap.connectors || []).filter((c) => c.id !== connectorId),
+        updatedAt: Date.now(),
+      };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    updateConnector: (connectorId: string, updates: Partial<Connector>) => {
+      const { mindMap, pushHistory } = get();
+      pushHistory(mindMap);
+      const nextMap: MindMap = {
+        ...mindMap,
+        connectors: (mindMap.connectors || []).map((c) =>
+          c.id === connectorId ? { ...c, ...updates } : c
+        ),
+        updatedAt: Date.now(),
+      };
+      saveCurrentMap(nextMap);
+      set({ mindMap: nextMap });
+    },
+
+    applyEdgeStyleToAllNodes: (edgeStyle: EdgeStyle) => {
+      get().updateMapEdgeStyle(edgeStyle);
+    },
+
+    applyEdgeProfileToAllNodes: (edgeProfile: EdgeProfile) => {
+      get().updateMapEdgeProfile(edgeProfile);
     },
   };
 });

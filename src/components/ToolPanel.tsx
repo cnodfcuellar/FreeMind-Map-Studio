@@ -16,6 +16,8 @@ import { NotesTab } from './organisms/toolpanel/NotesTab';
 import { IconsTab } from './organisms/toolpanel/IconsTab';
 import { CloudsTab } from './organisms/toolpanel/CloudsTab';
 import { ThemeTab } from './organisms/toolpanel/ThemeTab';
+import { useMindMapStore } from '../hooks/useMindMapStore';
+import { THEMES } from '../utils/themes';
 import {
   Sliders,
   X,
@@ -28,15 +30,20 @@ import {
 } from 'lucide-react';
 
 export interface ToolPanelProps {
-  selectedNode: MindNode | null;
-  currentTheme: MindMapTheme;
-  layout: LayoutType;
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdateNode: (nodeId: string, updates: Partial<MindNode>) => void;
-  onUpdateMapTheme: (themeId: string) => void;
-  onUpdateMapLayout: (layout: LayoutType) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onOpenConnectorModal?: (fromId?: string) => void;
+  onEditConnector?: (connector: Connector) => void;
+  onOpenIconPackModal?: () => void;
+
+  // Propiedades opcionales para testing o inyección externa (retrocompatibilidad)
+  selectedNode?: MindNode | null;
+  currentTheme?: MindMapTheme;
+  layout?: LayoutType;
   mindMap?: MindMap;
+  onUpdateNode?: (nodeId: string, updates: Partial<MindNode>) => void;
+  onUpdateMapTheme?: (themeId: string) => void;
+  onUpdateMapLayout?: (layout: LayoutType) => void;
   onUpdateMapEdgeStyle?: (edgeStyle: EdgeStyle) => void;
   onUpdateMapEdgeProfile?: (edgeProfile: EdgeProfile) => void;
   onUpdateMapEdgeWidth?: (width: number) => void;
@@ -56,12 +63,9 @@ export interface ToolPanelProps {
   onApplyStyleToSiblings?: (nodeId: string) => void;
   onApplyIconsToChildren?: (nodeId: string) => void;
   onApplyIconsToSiblings?: (nodeId: string) => void;
-  onOpenConnectorModal?: (fromId?: string) => void;
-  onEditConnector?: (connector: Connector) => void;
   onDeleteConnector?: (connectorId: string) => void;
   onUpdateConnector?: (connectorId: string, updates: Partial<Connector>) => void;
   onUpdateMapGaps?: (gaps: { horizontal?: number; vertical?: number }) => void;
-  onOpenIconPackModal?: () => void;
   onUpdateMapBackground?: (config: {
     backgroundColor?: string;
     backgroundPattern?: BackgroundPatternStyle;
@@ -86,14 +90,49 @@ export interface ToolPanelProps {
     showAllNotesInline?: boolean;
   }) => void;
   onResetMapBackground?: () => void;
-
 }
 
 export type TabType = 'content' | 'format' | 'notes' | 'icons' | 'clouds' | 'theme';
 
 export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
-  const { selectedNode, isOpen, onClose } = props;
-  const [activeTab, setActiveTab] = useState<TabType>('content');
+  const store = useMindMapStore();
+  const [activeTab, setActiveTab] = useState<TabType>('format');
+
+  const isOpen = props.isOpen ?? store.isToolPanelOpen;
+  const onClose = props.onClose ?? (() => store.setIsToolPanelOpen(false));
+
+  const mindMap = props.mindMap ?? store.mindMap;
+  const selectedNodeId = store.selectedNodeId;
+  const selectedNode =
+    props.selectedNode !== undefined
+      ? props.selectedNode
+      : selectedNodeId
+      ? mindMap.nodes[selectedNodeId] || null
+      : null;
+  const currentTheme = props.currentTheme ?? (THEMES[mindMap.themeId] || THEMES.default);
+  const layout = props.layout ?? mindMap.layout;
+
+  const onUpdateNode = props.onUpdateNode ?? store.updateNode;
+  const onApplyStyleToChildren = props.onApplyStyleToChildren ?? store.handleApplyStyleToChildren;
+  const onApplyStyleToSiblings = props.onApplyStyleToSiblings ?? store.handleApplyStyleToSiblings;
+  const onApplyIconsToChildren = props.onApplyIconsToChildren ?? store.handleApplyIconsToChildren;
+  const onApplyIconsToSiblings = props.onApplyIconsToSiblings ?? store.handleApplyIconsToSiblings;
+  const onRandomizeEdgeColors = props.onRandomizeEdgeColors ?? store.handleRandomizeEdgeColors;
+
+  const onUpdateMapTheme = props.onUpdateMapTheme ?? store.updateMapTheme;
+  const onUpdateMapLayout = props.onUpdateMapLayout ?? store.updateMapLayout;
+  const onUpdateMapEdgeStyle = props.onUpdateMapEdgeStyle ?? store.updateMapEdgeStyle;
+  const onUpdateMapEdgeProfile = props.onUpdateMapEdgeProfile ?? store.updateMapEdgeProfile;
+  const onUpdateMapEdgeWidth = props.onUpdateMapEdgeWidth ?? store.updateMapEdgeWidth;
+  const onUpdateMapEdgeColor = props.onUpdateMapEdgeColor ?? store.updateMapEdgeColor;
+  const onUpdateMapEdgeDash = props.onUpdateMapEdgeDash ?? store.updateMapEdgeDash;
+  const onUpdateMapEdgeShadow = props.onUpdateMapEdgeShadow ?? store.updateMapEdgeShadow;
+  const onApplyEdgeStyleToAllNodes = props.onApplyEdgeStyleToAllNodes ?? store.applyEdgeStyleToAllNodes;
+  const onApplyEdgeProfileToAllNodes = props.onApplyEdgeProfileToAllNodes ?? store.applyEdgeProfileToAllNodes;
+  const onUpdateMapBackground = props.onUpdateMapBackground ?? store.updateMapBackground;
+  const onResetMapBackground = props.onResetMapBackground ?? store.resetMapBackground;
+  const onDeleteConnector = props.onDeleteConnector ?? store.deleteConnector;
+  const onUpdateConnector = props.onUpdateConnector ?? store.updateConnector;
 
   if (!isOpen) return null;
 
@@ -208,7 +247,7 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
             {activeTab === 'content' && selectedNode && (
               <ContentTab
                 selectedNode={selectedNode}
-                onUpdateNode={props.onUpdateNode}
+                onUpdateNode={onUpdateNode}
                 onOpenIconPackModal={props.onOpenIconPackModal}
               />
             )}
@@ -216,63 +255,64 @@ export const ToolPanel: React.FC<ToolPanelProps> = (props) => {
             {activeTab === 'format' && selectedNode && (
               <FormatTab
                 selectedNode={selectedNode}
-                onUpdateNode={props.onUpdateNode}
-                onApplyStyleToChildren={props.onApplyStyleToChildren}
-                onApplyStyleToSiblings={props.onApplyStyleToSiblings}
+                onUpdateNode={onUpdateNode}
+                onApplyStyleToChildren={onApplyStyleToChildren}
+                onApplyStyleToSiblings={onApplyStyleToSiblings}
               />
             )}
 
             {activeTab === 'notes' && selectedNode && (
-              <NotesTab selectedNode={selectedNode} onUpdateNode={props.onUpdateNode} />
+              <NotesTab selectedNode={selectedNode} onUpdateNode={onUpdateNode} />
             )}
 
             {activeTab === 'icons' && selectedNode && (
               <IconsTab
                 selectedNode={selectedNode}
-                onUpdateNode={props.onUpdateNode}
+                onUpdateNode={onUpdateNode}
                 onOpenIconPackModal={props.onOpenIconPackModal}
-                onApplyIconsToChildren={props.onApplyIconsToChildren}
-                onApplyIconsToSiblings={props.onApplyIconsToSiblings}
+                onApplyIconsToChildren={onApplyIconsToChildren}
+                onApplyIconsToSiblings={onApplyIconsToSiblings}
               />
             )}
 
             {activeTab === 'clouds' && selectedNode && (
-              <CloudsTab selectedNode={selectedNode} onUpdateNode={props.onUpdateNode} />
+              <CloudsTab selectedNode={selectedNode} onUpdateNode={onUpdateNode} />
             )}
 
             {activeTab === 'theme' && (
               <ThemeTab
-                currentTheme={props.currentTheme}
-                layout={props.layout}
-                mindMap={props.mindMap}
-                onUpdateMapTheme={props.onUpdateMapTheme}
-                onUpdateMapLayout={props.onUpdateMapLayout}
-                onUpdateMapEdgeStyle={props.onUpdateMapEdgeStyle}
-                onUpdateMapEdgeProfile={props.onUpdateMapEdgeProfile}
-                onUpdateMapEdgeWidth={props.onUpdateMapEdgeWidth}
-                onUpdateMapEdgeColor={props.onUpdateMapEdgeColor}
-                onUpdateMapEdgeDash={props.onUpdateMapEdgeDash}
-                onUpdateMapEdgeShadow={props.onUpdateMapEdgeShadow}
-                onApplyEdgeStyleToAllNodes={props.onApplyEdgeStyleToAllNodes}
-                onApplyEdgeProfileToAllNodes={props.onApplyEdgeProfileToAllNodes}
-                onRandomizeEdgeColors={props.onRandomizeEdgeColors}
+                currentTheme={currentTheme}
+                layout={layout}
+                mindMap={mindMap}
+                onUpdateMapTheme={onUpdateMapTheme}
+                onUpdateMapLayout={onUpdateMapLayout}
+                onUpdateMapEdgeStyle={onUpdateMapEdgeStyle}
+                onUpdateMapEdgeProfile={onUpdateMapEdgeProfile}
+                onUpdateMapEdgeWidth={onUpdateMapEdgeWidth}
+                onUpdateMapEdgeColor={onUpdateMapEdgeColor}
+                onUpdateMapEdgeDash={onUpdateMapEdgeDash}
+                onUpdateMapEdgeShadow={onUpdateMapEdgeShadow}
+                onApplyEdgeStyleToAllNodes={onApplyEdgeStyleToAllNodes}
+                onApplyEdgeProfileToAllNodes={onApplyEdgeProfileToAllNodes}
+                onRandomizeEdgeColors={onRandomizeEdgeColors}
                 onUpdateMapGaps={
                   props.onUpdateMapGaps ??
                   ((gaps) => {
-                    // Cableado 2026-10-17: App no pasa onUpdateMapGaps; adaptamos al
-                    // handler onUpdateMapSpacing(h, v) que App sí inyecta (App.tsx:553).
-                    props.onUpdateMapSpacing?.(
-                      gaps.horizontal ?? props.mindMap?.horizontalGap ?? 54,
-                      gaps.vertical ?? props.mindMap?.verticalGap ?? 14
-                    );
+                    const h = gaps.horizontal ?? mindMap.horizontalGap ?? 54;
+                    const v = gaps.vertical ?? mindMap.verticalGap ?? 14;
+                    if (props.onUpdateMapSpacing) {
+                      props.onUpdateMapSpacing(h, v);
+                    } else {
+                      store.updateMapSpacing(h, v);
+                    }
                   })
                 }
                 onOpenConnectorModal={props.onOpenConnectorModal}
                 onEditConnector={props.onEditConnector}
-                onDeleteConnector={props.onDeleteConnector}
-                onUpdateConnector={props.onUpdateConnector}
-                onUpdateMapBackground={props.onUpdateMapBackground}
-                onResetMapBackground={props.onResetMapBackground}
+                onDeleteConnector={onDeleteConnector}
+                onUpdateConnector={onUpdateConnector}
+                onUpdateMapBackground={onUpdateMapBackground}
+                onResetMapBackground={onResetMapBackground}
               />
             )}
           </>

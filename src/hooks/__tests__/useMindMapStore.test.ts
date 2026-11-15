@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useMindMapStore } from '../useMindMapStore';
 import { BLANK_MAP } from '../../utils/sampleMaps';
+import type { Connector } from '../../types/mindmap';
 
 function resetStore() {
   localStorage.clear();
@@ -226,5 +227,62 @@ describe('useMindMapStore', () => {
     expect(state().historyPast.length).toBe(3);
     state().handleJumpToHistory(3);
     expect(state().historyPast.length).toBe(3);
+  });
+
+  it('updateMapTheme y updateMapLayout actualizan el mapa y guardan historial', () => {
+    state().updateMapLayout('top');
+    expect(state().mindMap.layout).toBe('top');
+    expect(state().historyPast.length).toBe(1);
+
+    state().updateMapTheme('dark');
+    expect(state().mindMap.themeId).toBe('dark');
+    expect(state().historyPast.length).toBe(2);
+  });
+
+  it('updateMapEdgeStyle, updateMapEdgeWidth y updateMapEdgeDash limpian overrides en nodos', () => {
+    // Añadimos override en root
+    state().updateNode('root', { edgeStyle: 'linear', edgeWidth: 5, edgeBorderStyle: 'dashed' });
+    expect(state().mindMap.nodes['root'].edgeStyle).toBe('linear');
+
+    // Cambiamos globalmente la arista a corchete 45°
+    state().updateMapEdgeStyle('bracket');
+    expect(state().mindMap.edgeStyle).toBe('bracket');
+    expect(state().mindMap.nodes['root'].edgeStyle).toBeUndefined();
+
+    // Cambiamos ancho y dash global
+    state().updateMapEdgeWidth(3);
+    expect(state().mindMap.edgeWidth).toBe(3);
+    expect(state().mindMap.nodes['root'].edgeWidth).toBeUndefined();
+
+    state().updateMapEdgeDash('zigzag');
+    expect(state().mindMap.edgeBorderStyle).toBe('zigzag');
+    expect(state().mindMap.nodes['root'].edgeBorderStyle).toBeUndefined();
+  });
+
+  it('updateMapBackground y resetMapBackground modifican y restauran fondo', () => {
+    state().updateMapBackground({ backgroundColor: '#123456', backgroundPattern: 'dots' });
+    expect(state().mindMap.backgroundColor).toBe('#123456');
+    expect(state().mindMap.backgroundPattern).toBe('dots');
+
+    state().resetMapBackground();
+    expect(state().mindMap.backgroundColor).toBeUndefined();
+    expect(state().mindMap.backgroundPattern).toBeUndefined();
+  });
+
+  it('updateMapSpacing, deleteConnector y updateConnector operan correctamente', () => {
+    state().updateMapSpacing(80, 25);
+    expect(state().mindMap.horizontalGap).toBe(80);
+    expect(state().mindMap.verticalGap).toBe(25);
+
+    // Añadir conector ficticio
+    const testConn: Connector = { id: 'conn-1', fromId: 'root', toId: 'c1', label: 'Test' };
+    state().setMindMap((m) => ({ ...m, connectors: [testConn] }));
+    expect(state().mindMap.connectors?.length).toBe(1);
+
+    state().updateConnector('conn-1', { label: 'Updated' });
+    expect(state().mindMap.connectors?.[0].label).toBe('Updated');
+
+    state().deleteConnector('conn-1');
+    expect(state().mindMap.connectors?.length).toBe(0);
   });
 });

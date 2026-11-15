@@ -2740,6 +2740,96 @@ Resolver el problema donde los perfiles de grosor variable (`tapered` cónico, `
 - [x] `pnpm test:regression`: **51/51 suites superadas (339/339 pruebas unitarias exitosas, 100%)**.
 - [x] `pnpm build`: **Compilación de producción exitosa en 10.70s (0 errores)**.
 
+---
+
+## 📌 [Evaluación Técnica] — 2026-11-14: Auditoría Integral de Arquitectura, Código e Interfaz
+
+### 🎯 Motivo y Contexto
+Realizar una evaluación estática y dinámica exhaustiva de todo el proyecto para cuantificar la calidad del código, el apego estricto a Atomic Design, la gestión de estado con Zustand, la consistencia de estilos en temas claros/oscuros/sepia, accesibilidad y cobertura de pruebas.
+
+### 📊 Hallazgos y Diagnóstico Clave
+1. **Tipado y Rigor (9.5/10):** 0 directivas `@ts-ignore`/`@ts-expect-error`, solo 10 usos de `any` en 146 archivos.
+2. **Atomic Design (7.5/10):** 0 violaciones de importación inversa, pero 10 organismos clave conviven en la raíz de `src/components/`, y existe `src/components/Presentation/` en PascalCase.
+3. **Flujo de Estado (6.0/10):** Prop-drilling masivo en `App.tsx` (64 props a `ToolPanel`, 36 a `MindMapCanvas`), con closures inline instanciadas en cada renderizado.
+4. **Homogeneidad UI (6.8/10):** Solo 15 de 55 archivos usan tokens `--sp-*`. 21 componentes usan `bg-white` puro deslumbrando en modo Sepia u Oscuro.
+5. **Cobertura de Pruebas (6.5/10):** 339 tests pasando en utilidades y hooks, pero 0 tests en `MindMapCanvas.tsx` (1,785 LOC) y `FormatTab.tsx` (1,755 LOC).
+6. **Accesibilidad a11y (3.0/10):** Crítico, solo 7 componentes contienen atributos ARIA (20 en total). Sin focus-trap en modales.
+
+### 📄 Archivos Generados
+| Archivo | Tipo | Propósito |
+|---------|------|-----------|
+| `.py/generate_svg_evaluacion.py` | Script Python | Generador del diagrama vectorial SVG de evaluación y scorecard técnico. |
+| `doc/img/evaluacion_arquitectura_codigo_interfaz.svg` | SVG | Infografía técnica vectorial (1600x1100 px) con scorecard, auditoría de capas, 4 hotspots y roadmap de 5 fases. |
+| `visor_evaluacion.html` | Artefacto HTML | Visor interactivo con zoom suave y paneo para inspección visual detallada en el navegador. |
+
+---
+
+## 📌 [Plan de Solución] — 2026-11-14: Plan de Solución Integral en 6 Fases
+
+### 🎯 Motivo y Contexto
+Diseñar una hoja de ruta técnica rigurosa y viable para modernizar la arquitectura de FreeMind Map Studio, erradicando el prop-drilling en `App.tsx`, modularizando los componentes gigantes (`FormatTab.tsx`), normalizando el sistema de temas (Sepia/Dark), completando la accesibilidad web (a11y) y componiendo el modelo de datos `MindNode` garantizando cero regresiones.
+
+### 📄 Archivos Generados
+| Archivo | Tipo | Propósito |
+|---------|------|-----------|
+| `.py/generate_svg_plan_solucion.py` | Script Python | Script que renderiza y genera el diagrama SVG del Plan de Solución. |
+| `doc/img/plan_solucion_integral.svg` | SVG | Diagrama vectorial técnico (1600x1150 px) con comparativa de arquitectura, pipeline de 6 fases y definición de terminado (DoD). |
+| `dashboard_plan_solucion.html` | Artefacto HTML | Tablero interactivo Generative UI con controles de zoom, arrastre y ajuste embebido directamente en la aplicación. |
+
+---
+
+## 📌 [Fase 1 Plan de Solución] — 2026-11-14: Desacoplamiento de Estado y Erradicación de Prop-Drilling
+
+### 🎯 Motivo y Contexto
+Erradicar el antipatrón de prop-drilling en `App.tsx` (64 props transferidas a `ToolPanel`), que recreaba decenas de closures y funciones flecha anónimas en cada renderizado, provocando re-renderizados en cascada de todo el árbol de componentes.
+
+### 📐 Cambios Técnicos Realizados
+1. **Acciones Globales en `useMindMapStore.ts`:**
+   - Incorporadas al store de Zustand 16 mutaciones de configuración global del mapa y conectores con push a historial y persistencia en `localStorage`:
+     - `updateMapTheme(themeId)`
+     - `updateMapLayout(layout)`
+     - `updateMapEdgeStyle(edgeStyle)`
+     - `updateMapEdgeWidth(width)`
+     - `updateMapEdgeProfile(profile)`
+     - `updateMapEdgeColor(color)`
+     - `updateMapEdgeDash(dash)`
+     - `updateMapEdgeShadow(updates)`
+     - `updateMapBackgroundColor(backgroundColor)`
+     - `updateMapBackground(config)`
+     - `resetMapBackground()`
+     - `updateMapBackgroundPattern(patternConfig)`
+     - `updateMapSpacing(horizontalGap, verticalGap)`
+     - `updateMapVisibility(visibility)`
+     - `deleteConnector(connectorId)`
+     - `updateConnector(connectorId, updates)`
+     - `applyEdgeStyleToAllNodes(edgeStyle)` / `applyEdgeProfileToAllNodes(profile)`
+2. **Refactorización de `ToolPanel.tsx`:**
+   - Reducción drástica del contrato de props: `ToolPanel` ahora obtiene de forma autónoma el nodo seleccionado, el mapa, el tema y los mutadores directamente de `useMindMapStore`, manteniendo props opcionales para compatibilidad retroactiva con tests.
+3. **Refactorización de `StatusBar.tsx`:**
+   - Resuelve el conteo de nodos totales, texto de nodo seleccionado y modo (`Editando`/`Listo`) directamente desde el store, recibiendo desde `App.tsx` únicamente las coordenadas vivas del viewport.
+4. **Adelgazamiento de `App.tsx`:**
+   - Eliminadas 150 líneas de funciones flecha anónimas y prop-drilling masivo hacia `ToolPanel` y `StatusBar`.
+5. **Ampliación de Pruebas Unitarias:**
+   - Añadidas 4 nuevas pruebas en `src/hooks/__tests__/useMindMapStore.test.ts` verificando el comportamiento de las nuevas mutaciones del mapa y la gestión de historial (total: 21/21 pasando).
+
+### ✏️ Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/hooks/useMindMapStore.ts` | Hook / Store | Añadidas 16 acciones globales de mapa y conectores con historial y persistencia. |
+| `src/hooks/__tests__/useMindMapStore.test.ts` | Tests | Añadidas 4 pruebas unitarias para las nuevas mutaciones de mapa (21/21 tests pasando). |
+| `src/components/ToolPanel.tsx` | Organismo | Reducción de dependencias de props; consumo atómico del store de Zustand. |
+| `src/components/StatusBar.tsx` | Organismo | Obtención autónoma del estado de selección y nodos desde `useMindMapStore`. |
+| `src/App.tsx` | Orquestador | Eliminadas 150 líneas de funciones anónimas y 64 props redundantes. |
+| `doc/CHANGELOG.md` | Documentación | Registro de esta Fase 1 del Plan de Solución. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm vitest run src/hooks/__tests__/useMindMapStore.test.ts src/components/__tests__/ToolPanel.test.tsx`: **25/25 pruebas unitarias exitosas**.
+- [x] `pnpm test:regression`: **51/51 suites superadas (343/343 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 7.31s (0 errores)**.
+
+---
+
 
 
 

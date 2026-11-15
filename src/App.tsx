@@ -500,168 +500,18 @@ export default function App() {
       }
       toolPanel={
         <ToolPanel
-          selectedNode={selectedNode}
-          currentTheme={currentTheme}
-          layout={mindMap.layout}
           isOpen={isToolPanelOpen}
           onClose={() => setIsToolPanelOpen(false)}
-          onUpdateNode={updateNode}
-          onApplyStyleToChildren={handleApplyStyleToChildren}
-          onApplyStyleToSiblings={handleApplyStyleToSiblings}
-          onApplyIconsToChildren={handleApplyIconsToChildren}
-          onApplyIconsToSiblings={handleApplyIconsToSiblings}
-          onRandomizeEdgeColors={handleRandomizeEdgeColors}
-          onUpdateMapTheme={(themeId) => {
-            pushHistory(mindMap);
-            setMindMap((m) => applyThemeRestyle(m, themeId));
-          }}
-          onUpdateMapLayout={(layout: LayoutType) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, layout, updatedAt: Date.now() }));
-          }}
-          mindMap={mindMap}
-          onUpdateMapEdgeStyle={(edgeStyle: EdgeStyle) => {
-            pushHistory(mindMap);
-            setMindMap((m) => {
-              const updatedNodes: Record<string, MindNode> = {};
-              Object.entries(m.nodes).forEach(([id, node]) => {
-                updatedNodes[id] = { ...node, edgeStyle: undefined };
-              });
-              return { ...m, edgeStyle, nodes: updatedNodes, updatedAt: Date.now() };
-            });
-          }}
-          onUpdateMapEdgeWidth={(edgeWidth: number) => {
-            pushHistory(mindMap);
-            setMindMap((m) => {
-              const updatedNodes: Record<string, MindNode> = {};
-              Object.entries(m.nodes).forEach(([id, node]) => {
-                updatedNodes[id] = { ...node, edgeWidth: undefined };
-              });
-              return { ...m, edgeWidth, nodes: updatedNodes, updatedAt: Date.now() };
-            });
-          }}
-          onUpdateMapEdgeProfile={(edgeProfile: EdgeProfile) => {
-            pushHistory(mindMap);
-            setMindMap((m) => {
-              const updatedNodes: Record<string, MindNode> = {};
-              Object.entries(m.nodes).forEach(([id, node]) => {
-                updatedNodes[id] = { ...node, edgeProfile: undefined };
-              });
-              return { ...m, edgeProfile, nodes: updatedNodes, updatedAt: Date.now() };
-            });
-          }}
-          onUpdateMapEdgeColor={(edgeColor: string) => {
-            pushHistory(mindMap);
-            setMindMap((m) => {
-              const updatedNodes: Record<string, MindNode> = {};
-              Object.entries(m.nodes).forEach(([id, node]) => {
-                updatedNodes[id] = { ...node, edgeColor: undefined };
-              });
-              return { ...m, edgeColor, nodes: updatedNodes, updatedAt: Date.now() };
-            });
-          }}
-          onUpdateMapEdgeDash={(edgeDash: EdgeBorderStyle) => {
-            pushHistory(mindMap);
-            setMindMap((m) => {
-              const updatedNodes: Record<string, MindNode> = {};
-              Object.entries(m.nodes).forEach(([id, node]) => {
-                updatedNodes[id] = { ...node, edgeDash: undefined, edgeBorderStyle: undefined };
-              });
-              return { ...m, edgeDash, edgeBorderStyle: edgeDash, nodes: updatedNodes, updatedAt: Date.now() };
-            });
-          }}
-          onUpdateMapEdgeShadow={(updates) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, ...updates, updatedAt: Date.now() }));
-          }}
-          onUpdateMapBackgroundColor={(backgroundColor?: string) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({ ...m, backgroundColor, updatedAt: Date.now() }));
-          }}
-          onUpdateMapBackground={(config: {
-            backgroundColor?: string;
-            backgroundPattern?: BackgroundPatternStyle;
-            backgroundPatternColor?: string;
-            backgroundPatternSize?: number;
-            backgroundPatternOpacity?: number;
-          }) => {
-            pushHistory(mindMap);
-            setMindMap((m) => applyBackgroundUpdate(m, config));
-          }}
-          onResetMapBackground={() => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({
-              ...m,
-              backgroundColor: undefined,
-              backgroundPattern: undefined,
-              backgroundPatternColor: undefined,
-              backgroundPatternSize: undefined,
-              backgroundPatternOpacity: undefined,
-              updatedAt: Date.now(),
-            }));
-          }}
-          onUpdateMapBackgroundPattern={(patternConfig: {
-            pattern?: BackgroundPatternStyle;
-            patternColor?: string;
-            patternSize?: number;
-            patternOpacity?: number;
-          }) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({
-              ...m,
-              backgroundPattern: patternConfig.pattern,
-              backgroundPatternColor: patternConfig.patternColor,
-              backgroundPatternSize: patternConfig.patternSize,
-              backgroundPatternOpacity: patternConfig.patternOpacity,
-              updatedAt: Date.now(),
-            }));
-          }}
-          onUpdateMapSpacing={(horizontalGap: number, verticalGap: number) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({
-              ...m,
-              horizontalGap,
-              verticalGap,
-              updatedAt: Date.now(),
-            }));
-          }}
-          onUpdateMapVisibility={(visibility: {
-            hideAllBodies?: boolean;
-            hideAllImages?: boolean;
-            hideAllTags?: boolean;
-            hideAllIcons?: boolean;
-            hideAllLinks?: boolean;
-            showAllNotesInline?: boolean;
-          }) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({
-              ...m,
-              ...visibility,
-              updatedAt: Date.now(),
-            }));
-          }}
           onOpenConnectorModal={(fromId) => setConnectorSourceId(fromId || mindMap.rootId)}
           onEditConnector={(conn) => setEditingConnector(conn)}
-          onDeleteConnector={(connectorId) => {
-            pushHistory(mindMap);
-            setMindMap((m) => ({
-              ...m,
-              connectors: (m.connectors || []).filter((c) => c.id !== connectorId),
-              updatedAt: Date.now(),
-            }));
-          }}
           onOpenIconPackModal={() => setIsIconPackModalOpen(true)}
         />
       }
       statusBar={
         <StatusBar
-          totalNodes={Object.keys(mindMap.nodes).length}
-          selectedNodeText={selectedNode?.text || null}
-          selectedNodeId={selectedNodeId}
           zoom={Math.round(viewport.zoom * 100)}
           positionX={Math.round(viewport.x)}
           positionY={Math.round(viewport.y)}
-          mode={editingNodeId ? 'Editando' : 'Listo'}
         />
       }
       presentationOverlay={
