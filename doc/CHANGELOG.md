@@ -3030,6 +3030,44 @@ El repositorio mantenía organismos y módulos diseminados fuera de la jerarquí
 
 ---
 
+## 📌 [Plan de Solución Integral — Fase 6] — 2026-11-15: Testing de Canvas e Integración + Optimización de Quotas de Storage
+
+### 🎯 Motivo Técnico
+1. `MindMapCanvas.tsx` es el núcleo gráfico interactivo de la aplicación (renderizado de capas SVG, árbol de nodos, conexiones padre-hijo, conectores flotantes, zoom/pan, menú contextual y minimapa) y carecía de una suite dedicada de pruebas de integración.
+2. La persistencia en `src/utils/storage.ts` no gestionaba contingencias cuando el navegador alcanzaba el límite de almacenamiento `QuotaExceededError`.
+
+### 🛠️ Qué Cambió
+1. **Suite de Integración para el Canvas (`src/components/__tests__/MindMapCanvas.test.tsx`)**:
+   - Creadas 8 pruebas unitarias y de integración completas:
+     - Renderizado de capas `#canvas-background`, `#canvas-viewport`, `#edges-layer`, `#nodes-layer` y contenido de nodos.
+     - Selección de nodos secundarios al hacer clic (`onSelectNode`).
+     - Activación de edición en línea con doble clic (`onStartEditing`).
+     - Deselección de nodos activos al interactuar con el fondo del lienzo (`onSelectNode(null)`).
+     - Renderizado condicional de conectores flotantes (`#connectors-layer`).
+     - Ocultación correcta de subárboles en nodos plegados (`folded: true`).
+     - Presencia e interacción del widget de radar `MiniMap`.
+     - Despliegue del menú contextual (`CanvasContextMenu`) al hacer clic derecho sobre un nodo.
+2. **Optimización y Resiliencia de Cuota en `src/utils/storage.ts`**:
+   - `safeLocalStorageSetItem(key, value)`: Encapsula la escritura capturando `QuotaExceededError` y ejecutando recuperación por desalojo seguro de mapas antiguos (preservando el tutorial y el mapa activo).
+   - `loadMapById(id)`: Añadido fallback inteligente para resolver mapas que residan en el slot del mapa activo.
+   - Nueva prueba unitaria para simular fallos de cuota y verificar la no-propagación de excepciones no controladas.
+
+### 📄 Archivos Creados / Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/__tests__/MindMapCanvas.test.tsx` | Tests | Nueva suite con 8 pruebas de integración del canvas interactivo. |
+| `src/utils/storage.ts` | Utilidad / Persistencia | Implementación de `safeLocalStorageSetItem` y resiliencia ante límites de cuota. |
+| `src/utils/__tests__/storage.test.ts` | Tests | Prueba de recuperación y captura controlada de `QuotaExceededError`. |
+| `doc/CHANGELOG.md` | Documentación | Registro detallado de la Fase 6 y cierre del Plan Integral. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm test:regression`: **54/54 suites superadas (368/368 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.63s (0 errores)**.
+
+---
+
+
 
 
 

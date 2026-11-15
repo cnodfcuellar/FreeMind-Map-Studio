@@ -64,9 +64,46 @@ export function loadCurrentMap(): MindMap {
   return TUTORIAL_MAP;
 }
 
+/**
+ * Guarda de forma segura en localStorage con recuperación ante QuotaExceededError.
+ */
+export function safeLocalStorageSetItem(key: string, value: string): boolean {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err: any) {
+    const isQuota =
+      err?.name === 'QuotaExceededError' ||
+      err?.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+      err?.code === 22 ||
+      err?.code === 1014;
+
+    if (isQuota) {
+      console.warn(`[storage] LocalStorage quota alcanzada al escribir "${key}". Intentando recuperación...`);
+      try {
+        const list = getSavedMapsIndex();
+        if (list.length > 2) {
+          const oldest = list[list.length - 1];
+          if (oldest && oldest.id !== TUTORIAL_MAP.id && oldest.id !== 'map-tutorial-v1') {
+            localStorage.removeItem(`freemind_map_${oldest.id}`);
+            const updatedList = list.slice(0, list.length - 1);
+            localStorage.setItem(SAVED_MAPS_INDEX_KEY, JSON.stringify(updatedList));
+            localStorage.setItem(key, value);
+            return true;
+          }
+        }
+      } catch (evictErr) {
+        console.error('[storage] Falló la recuperación por desalojo:', evictErr);
+      }
+    }
+    console.error(`[storage] Error escribiendo clave "${key}":`, err);
+    return false;
+  }
+}
+
 export function saveCurrentMap(map: MindMap): void {
   try {
-    localStorage.setItem(CURRENT_MAP_KEY, JSON.stringify(map));
+    safeLocalStorageSetItem(CURRENT_MAP_KEY, JSON.stringify(map));
     updateSavedMapsIndex(map);
   } catch (err) {
     console.error('Error saving current map to localStorage:', err);
@@ -109,9 +146,9 @@ export function updateSavedMapsIndex(map: MindMap): void {
       list.unshift(meta);
     }
 
-    localStorage.setItem(SAVED_MAPS_INDEX_KEY, JSON.stringify(list));
+    safeLocalStorageSetItem(SAVED_MAPS_INDEX_KEY, JSON.stringify(list));
     // Also save the specific map in individual slot
-    localStorage.setItem(`freemind_map_${map.id}`, JSON.stringify(map));
+    safeLocalStorageSetItem(`freemind_map_${map.id}`, JSON.stringify(map));
   } catch (err) {
     console.error('Error updating maps index:', err);
   }
@@ -124,6 +161,14 @@ export function loadMapById(id: string): MindMap | null {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.rootId && parsed.nodes) {
         return normalizeMindMap(parsed);
+      }
+    }
+    // Fallback: si es el mapa actual cargado
+    const currentRaw = localStorage.getItem(CURRENT_MAP_KEY);
+    if (currentRaw) {
+      const currentParsed = JSON.parse(currentRaw);
+      if (currentParsed && currentParsed.id === id && currentParsed.rootId && currentParsed.nodes) {
+        return normalizeMindMap(currentParsed);
       }
     }
   } catch (err) {

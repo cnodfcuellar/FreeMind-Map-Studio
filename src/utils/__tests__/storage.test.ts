@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   loadCurrentMap,
   saveCurrentMap,
@@ -8,6 +8,7 @@ import {
   deleteMapById,
   normalizeNode,
   normalizeMindMap,
+  safeLocalStorageSetItem,
 } from '../storage';
 import { BLANK_MAP, TUTORIAL_MAP } from '../sampleMaps';
 
@@ -87,5 +88,23 @@ describe('storage', () => {
     expect(norm.nodes['root'].children).toEqual([]);
     expect(norm.nodes['child1'].text).toBe('');
     expect(norm.nodes['child1'].parentId).toBe('root');
+  });
+
+  it('safeLocalStorageSetItem escribe correctamente y gestiona cuotas sin lanzar excepción', () => {
+    const success = safeLocalStorageSetItem('test_key', 'test_value');
+    expect(success).toBe(true);
+    expect(localStorage.getItem('test_key')).toBe('test_value');
+
+    // Simular error de cuota permanente en Storage
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      const quotaErr = new Error('Quota exceeded');
+      quotaErr.name = 'QuotaExceededError';
+      throw quotaErr;
+    });
+
+    const failed = safeLocalStorageSetItem('test_heavy', 'some_big_data');
+    expect(failed).toBe(false);
+
+    setItemSpy.mockRestore();
   });
 });
