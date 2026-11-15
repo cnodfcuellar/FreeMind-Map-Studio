@@ -14,7 +14,13 @@ import {
   computeCloudBounds,
 } from '../utils/layoutEngine';
 import { getCloudShadowConfig } from '../utils/cloudUtils';
-import { computeEdgeShadowFilter } from '../utils/edgeUtils';
+import {
+  computeEdgeShadowFilter,
+  generateDoubleEdgePaths,
+  generateZigzagEdgePath,
+  generateWavyEdgePath,
+  generateDiamondPoints,
+} from '../utils/edgeUtils';
 import { generateDefaultPresentationSlides } from '../utils/presentationGenerator';
 import { MarkdownView } from '../utils/markdownRenderer';
 import { NodeComponent } from './NodeComponent';
@@ -1368,21 +1374,124 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
               const color = childNode.edgeColor || mindMap.edgeColor || getBranchColor(childLayout);
               const defaultWidth = childLayout.depth === 1 ? 2.5 : 1.75;
               const width = childNode.edgeWidth || mindMap.edgeWidth || defaultWidth;
-              const effectiveDash = childNode.edgeDash || mindMap.edgeDash || 'solid';
+              const effectiveDash = childNode.edgeBorderStyle || childNode.edgeDash || mindMap.edgeBorderStyle || mindMap.edgeDash || 'solid';
               const effectiveProfile = childNode.edgeProfile || mindMap.edgeProfile || 'uniform';
 
               // Calculate stroke dash pattern with proper, legible spacing
+              const dashLength = childNode.edgeDashLength ?? mindMap.edgeDashLength ?? 10;
+              const dashSpace = childNode.edgeDashSpace ?? mindMap.edgeDashSpace ?? 8;
+              const dotSpacing = childNode.edgeDotSpacing ?? mindMap.edgeDotSpacing ?? 9;
+              const dotShape = childNode.edgeDotShape || mindMap.edgeDotShape || 'circle';
+
               const strokeDasharray =
                 effectiveDash === 'dashed'
-                  ? `${Math.max(10, width * 3.5)} ${Math.max(7, width * 2.5)}`
-                  : effectiveDash === 'dotted'
-                  ? `0.1 ${Math.max(8, width * 3.0)}`
+                  ? `${dashLength} ${dashSpace}`
+                  : effectiveDash === 'dotted' && dotShape !== 'diamond'
+                  ? dotShape === 'square'
+                    ? `${Math.max(1, width)} ${dotSpacing}`
+                    : `0.1 ${dotSpacing}`
                   : undefined;
 
               const edgeShadowFilter = computeEdgeShadowFilter(childNode, color, mindMap);
               const edgeShadowStyle = edgeShadowFilter ? { filter: edgeShadowFilter } : undefined;
 
-              // If a variable-width profile is active, render dynamic filled ribbon
+              const isEdgeDimmed = searchMatches !== undefined && (!searchMatches.has(childNode.id) || !searchMatches.has(childNode.parentId || ''));
+              const combinedEdgeStyle: React.CSSProperties = {
+                ...edgeShadowStyle,
+                opacity: isEdgeDimmed ? 0.2 : undefined,
+                transition: 'opacity 300ms ease-in-out',
+              };
+
+              // Helper que renderiza el contenido vectorial según el estilo de línea
+              const renderStyledEdgeContent = () => {
+                if (effectiveDash === 'double') {
+                  const gap = childNode.edgeBorderGap ?? mindMap.edgeBorderGap ?? 4;
+                  const [pathA, pathB] = generateDoubleEdgePaths(edgePath, gap);
+                  return (
+                    <>
+                      <path
+                        d={pathA}
+                        stroke={color}
+                        strokeWidth={width}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d={pathB}
+                        stroke={color}
+                        strokeWidth={width}
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </>
+                  );
+                }
+
+                if (effectiveDash === 'zigzag') {
+                  const amplitude = childNode.edgeZigzagHeight ?? mindMap.edgeZigzagHeight ?? 8;
+                  const frequency = childNode.edgeZigzagFreq ?? mindMap.edgeZigzagFreq ?? 16;
+                  const zigzagPath = generateZigzagEdgePath(edgePath, amplitude, frequency);
+                  return (
+                    <path
+                      d={zigzagPath}
+                      stroke={color}
+                      strokeWidth={width}
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  );
+                }
+
+                if (effectiveDash === 'wavy') {
+                  const waveHeight = childNode.edgeWaveHeight ?? mindMap.edgeWaveHeight ?? 8;
+                  const waveWidth = childNode.edgeWaveWidth ?? mindMap.edgeWaveWidth ?? 24;
+                  const wavyPath = generateWavyEdgePath(edgePath, waveHeight, waveWidth);
+                  return (
+                    <path
+                      d={wavyPath}
+                      stroke={color}
+                      strokeWidth={width}
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  );
+                }
+
+                if (effectiveDash === 'dotted' && dotShape === 'diamond') {
+                  const diamondPoints = generateDiamondPoints(edgePath, dotSpacing);
+                  const diamondR = Math.max(2.5, width * 1.1);
+                  return (
+                    <>
+                      {diamondPoints.map((pt, pIdx) => (
+                        <polygon
+                          key={`dia-${pIdx}`}
+                          points={`${pt.x.toFixed(2)},${(pt.y - diamondR).toFixed(2)} ${(pt.x + diamondR).toFixed(2)},${pt.y.toFixed(2)} ${pt.x.toFixed(2)},${(pt.y + diamondR).toFixed(2)} ${(pt.x - diamondR).toFixed(2)},${pt.y.toFixed(2)}`}
+                          fill={color}
+                        />
+                      ))}
+                    </>
+                  );
+                }
+
+                const strokeLinecap = (effectiveDash === 'dotted' && dotShape === 'square') ? 'square' : 'round';
+                return (
+                  <path
+                    d={edgePath}
+                    stroke={color}
+                    strokeWidth={width}
+                    strokeDasharray={strokeDasharray}
+                    fill="none"
+                    strokeLinecap={strokeLinecap}
+                    strokeLinejoin="round"
+                  />
+                );
+              };
+
+              // Si un perfil de grosor variable (cónico, huso, reloj) está activo:
               if (effectiveProfile !== 'uniform') {
                 const ribbonPath = generateRibbonEdgePath(
                   parentLayout,
@@ -1393,7 +1502,6 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                   width
                 );
                 if (ribbonPath) {
-                  // If solid, render opaque filled ribbon
                   if (effectiveDash === 'solid') {
                     return (
                       <path
@@ -1404,16 +1512,17 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                         stroke={color}
                         strokeWidth={0.5}
                         strokeLinejoin="round"
-                        style={edgeShadowStyle}
+                        style={combinedEdgeStyle}
                       />
                     );
                   }
 
-                  // If dashed or dotted with variable thickness profile, render both profile silhouette and dashed spine
+                  // Para estilos no sólidos (doble, zigzag, ondulado, puntos, guiones):
+                  // Renderiza la silueta translúcida del perfil de fondo y el trazo estilizado encima.
                   return (
                     <g
                       key={`edge-group-${childNode.parentId}-${childNode.id}`}
-                      style={edgeShadowStyle}
+                      style={combinedEdgeStyle}
                     >
                       <path
                         d={ribbonPath}
@@ -1424,37 +1533,20 @@ export const MindMapCanvas: React.FC<MindMapCanvasProps> = ({
                         strokeOpacity={0.4}
                         strokeLinejoin="round"
                       />
-                      <path
-                        d={edgePath}
-                        stroke={color}
-                        strokeWidth={width}
-                        strokeDasharray={strokeDasharray}
-                        fill="none"
-                        strokeLinecap="round"
-                      />
+                      {renderStyledEdgeContent()}
                     </g>
                   );
                 }
               }
 
-              const isEdgeDimmed = searchMatches !== undefined && (!searchMatches.has(childNode.id) || !searchMatches.has(childNode.parentId || ''));
-              const combinedEdgeStyle: React.CSSProperties = {
-                ...edgeShadowStyle,
-                opacity: isEdgeDimmed ? 0.2 : undefined,
-                transition: 'opacity 300ms ease-in-out',
-              };
-
+              // Perfil uniforme estándar
               return (
-                <path
+                <g
                   key={`edge-${childNode.parentId}-${childNode.id}`}
-                  d={edgePath}
-                  stroke={color}
-                  strokeWidth={width}
-                  strokeDasharray={strokeDasharray}
-                  fill="none"
-                  strokeLinecap="round"
                   style={combinedEdgeStyle}
-                />
+                >
+                  {renderStyledEdgeContent()}
+                </g>
               );
             })}
           </g>

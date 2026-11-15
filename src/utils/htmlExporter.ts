@@ -1667,6 +1667,24 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           var midX2 = (startX + endX) / 2;
           return 'M ' + startX + ' ' + startY + ' L ' + midX2 + ' ' + startY + ' L ' + midX2 + ' ' + endY + ' L ' + endX + ' ' + endY;
         }
+      } else if (edgeStyle === 'bracket') {
+        var dx_b = Math.abs(endX - startX);
+        var dy_b = Math.abs(endY - startY);
+        if (dy_b <= 3) return 'M ' + startX + ' ' + startY + ' L ' + endX + ' ' + endY;
+        var trunk_b = Math.min(28, Math.max(8, dx_b * 0.25));
+        var delta_b = Math.max(4, Math.min(16, (dx_b - trunk_b) / 2.5, dy_b / 2));
+        var sX_b = endX > startX ? 1 : -1;
+        var sY_b = endY > startY ? 1 : -1;
+        var xSp = startX + sX_b * trunk_b;
+        var xBus = xSp + sX_b * delta_b;
+        var xEnt = xBus + sX_b * delta_b;
+        var yCh1 = startY + sY_b * delta_b;
+        var yCh2 = endY - sY_b * delta_b;
+        if (dy_b < 2 * delta_b) {
+          var midY_b = (startY + endY) / 2;
+          return 'M ' + startX + ' ' + startY + ' L ' + xSp + ' ' + startY + ' L ' + xBus + ' ' + midY_b + ' L ' + xEnt + ' ' + endY + ' L ' + endX + ' ' + endY;
+        }
+        return 'M ' + startX + ' ' + startY + ' L ' + xSp + ' ' + startY + ' L ' + xBus + ' ' + yCh1 + ' L ' + xBus + ' ' + yCh2 + ' L ' + xEnt + ' ' + endY + ' L ' + endX + ' ' + endY;
       } else if (edgeStyle === 'linear') {
         return 'M ' + startX + ' ' + startY + ' L ' + endX + ' ' + endY;
       } else {

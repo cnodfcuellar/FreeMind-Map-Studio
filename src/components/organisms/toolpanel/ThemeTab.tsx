@@ -4,6 +4,7 @@ import {
   MindMapTheme,
   LayoutType,
   EdgeStyle,
+  EdgeBorderStyle,
   EdgeProfile,
   BackgroundPatternStyle,
   Connector,
@@ -44,7 +45,7 @@ interface ThemeTabProps {
   onUpdateMapEdgeProfile?: (edgeProfile: EdgeProfile) => void;
   onUpdateMapEdgeWidth?: (width: number) => void;
   onUpdateMapEdgeColor?: (color: string | undefined) => void;
-  onUpdateMapEdgeDash?: (dash: 'solid' | 'dashed' | 'dotted') => void;
+  onUpdateMapEdgeDash?: (dash: EdgeBorderStyle) => void;
   onUpdateMapEdgeShadow?: (updates: {
     edgeShadow?: boolean;
     edgeShadowPreset?: 'soft' | 'deep' | 'glow';
@@ -400,7 +401,7 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
       >
         <div className="space-y-3">
           <span className="text-[11px] font-semibold text-slate-600 block">Forma de Conexión Global</span>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-5 gap-1.5">
             {[
               {
                 id: 'bezier' as EdgeStyle,
@@ -435,6 +436,15 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                 icon: (
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M4 18 H12 V6 H20" />
+                  </svg>
+                ),
+              },
+              {
+                id: 'bracket' as EdgeStyle,
+                label: 'Corchete',
+                icon: (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12 H7 L10 6 L14 6 H21 M7 12 L10 18 L14 18 H21 M7 12 H21" />
                   </svg>
                 ),
               },
@@ -562,16 +572,35 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
             </div>
           </div>
 
-          {/* Estilo de Trazo Global (Sólido / Guiones / Puntos) */}
+          {/* Estilo de Trazo Global (Sólido / Guiones / Puntos / Doble / Zigzag / Ondulado) */}
           <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
             <span className="text-[11px] font-semibold text-slate-600 block">Estilo de Línea Global</span>
             <div className="grid grid-cols-3 gap-1.5">
               {[
-                { id: 'solid' as const, label: 'Sólido', preview: 'border-t-2 border-slate-600' },
-                { id: 'dashed' as const, label: 'Guiones', preview: 'border-t-2 border-dashed border-slate-600' },
-                { id: 'dotted' as const, label: 'Puntos', preview: 'border-t-2 border-dotted border-slate-600' },
+                { id: 'solid' as EdgeBorderStyle, label: 'Sólido', preview: 'border-t-2 border-slate-600' },
+                { id: 'dashed' as EdgeBorderStyle, label: 'Guiones', preview: 'border-t-2 border-dashed border-slate-600' },
+                { id: 'dotted' as EdgeBorderStyle, label: 'Puntos', preview: 'border-t-2 border-dotted border-slate-600' },
+                { id: 'double' as EdgeBorderStyle, label: 'Doble', preview: 'border-t-4 border-double border-slate-600' },
+                {
+                  id: 'zigzag' as EdgeBorderStyle,
+                  label: 'Zigzag',
+                  customIcon: (
+                    <svg className="w-8 h-3 text-slate-600" viewBox="0 0 32 12" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M0 6 L4 2 L10 10 L16 2 L22 10 L28 2 L32 6" strokeLinejoin="round" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'wavy' as EdgeBorderStyle,
+                  label: 'Ondulado',
+                  customIcon: (
+                    <svg className="w-8 h-3 text-slate-600" viewBox="0 0 32 12" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M0 6 Q8 0, 16 6 T32 6" strokeLinecap="round" />
+                    </svg>
+                  ),
+                },
               ].map((opt) => {
-                const currentDash = mindMap?.edgeDash || 'solid';
+                const currentDash = mindMap?.edgeBorderStyle || mindMap?.edgeDash || 'solid';
                 const isSelected = currentDash === opt.id;
                 return (
                   <button
@@ -584,8 +613,12 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
                         : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
                     }`}
                   >
-                    <div className="w-8 my-1">
-                      <div className={`w-full ${opt.preview}`} />
+                    <div className="w-8 my-1 flex items-center justify-center">
+                      {'customIcon' in opt && opt.customIcon ? (
+                        opt.customIcon
+                      ) : (
+                        <div className={`w-full ${opt.preview}`} />
+                      )}
                     </div>
                     <span className="text-[10px] mt-0.5 text-center truncate w-full">{opt.label}</span>
                   </button>

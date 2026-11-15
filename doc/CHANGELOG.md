@@ -2647,6 +2647,99 @@ Corregir los errores reportados donde ciertos estilos de borde (Puntos, Dobles, 
 - [x] `pnpm test:regression`: **51/51 suites superadas (321/321 pruebas unitarias exitosas, 100%)**.
 - [x] `pnpm build`: **Compilación de producción exitosa en 6.02s (0 errores)**.
 
+---
+
+## 📌 [Fase 42] — 2026-11-14: Aristas tipo Corchete Biselado a 45° y Suite de Estilos de Línea Avanzados
+
+### 🎯 Motivo y Contexto
+Implementar la forma de arista diseñada y solicitada por el usuario en su boceto sobre papel cuadriculado: un **corchete con doble ángulo de 45°** (bifurcación en cúspide chevron `<` y segundo chaflán de llegada ortogonal horizontal al hijo) y dotar a las aristas del árbol de la suite completa de estilos de trazo configurables (Sólido, Guiones, Puntos [Esfera, Cuadrado, Rombo], Doble línea, Zigzag y Ondulado) con controles paramétricos idénticos a los del borde de los nodos.
+
+### 📐 Detalles Técnicos
+1. **Forma de Conexión `bracket` (Corchete Biselado a 45°):**
+   - **Tronco horizontal común:** se extiende desde el padre $(x_1, y_1)$ hasta el punto de bifurcación $x_{split} = x_1 \pm \text{trunkLen}$.
+   - **Bifurcación en cúspide a 45°:** apertura en abanico limpio $(\Delta x = \Delta y = \Delta)$ hacia la columna vertical.
+   - **Bus / Columna vertical compartida:** alinea a todos los nodos hermanos verticalmente sin cruces desordenados de cables.
+   - **Segundo bisel de llegada a 45°:** transiciona de la columna vertical a la horizontal suavemente con ángulo de 135°/45°.
+   - **Llegada horizontal directa:** garantiza conexión ortogonal limpia al nodo hijo. Si el hijo está al mismo nivel ($|y_2 - y_1| \le 3$), la conexión es horizontal recta.
+   - Soporte simétrico completo en árboles horizontales (derecha e izquierda), verticales (arriba y abajo) y radiales.
+2. **Suite de Estilos de Línea en Aristas (`EdgeBorderStyle`):**
+   - **Sólido:** trazo nítido continuo.
+   - **Guiones:** paramétrico con *Largo guión* (`edgeDashLength`, def. 10px) y *Espacio libre* (`edgeDashSpace`, def. 11px).
+   - **Puntos:** 3 sub-formas: *Esfera* (`circle`), *Cuadrado* (`square`) y *Rombo* (`diamond` ◆ con polígonos rotados generados en `generateDiamondPoints`), más slider de *Separación* (`edgeDotSpacing`, def. 9px).
+   - **Doble línea:** dos trazados paralelos generados proceduralmente mediante cálculo de normales por vértice en `generateDoubleEdgePaths`, con slider de *Separación* (`edgeBorderGap`, def. 4px).
+   - **Zigzag:** dientes triangulares alternados perpendicularmente a los segmentos en `generateZigzagEdgePath`, con sliders de *Altura de picos* (`edgeZigzagHeight`, def. 9.5px) y *Frecuencia* (`edgeZigzagFreq`, def. 19px).
+   - **Ondulado:** ondas sinusoidales continuas cuadráticas de Bézier calculadas en `generateWavyEdgePath`, con sliders de *Altura ondas* (`edgeWaveHeight`, def. 10px) y *Ancho onda* (`edgeWaveWidth`, def. 36px).
+3. **Controles en Panel de Herramientas:**
+   - `FormatTab.tsx` (Nodo > Aristas y Propagación): selector de 5 formas de conexión (Curva, Recta, Escuadra, Horiz., Corchete con micro-icono SVG dedicado) y selector de 6 estilos de línea con sus correspondientes paneles dinámicos de sliders.
+   - `ThemeTab.tsx` (Mapa Global): selector global de 5 formas de conexión y 6 estilos de línea de aristas para todo el mapa.
+4. **Exportadores HTML y PDF:**
+   - `htmlExporter.ts`: implementada la geometría de corchete a 45° para mapas auto-contenidos exportados.
+   - `pdfExporter.ts`: soporte directo vía `generateEdgePath`.
+
+### ✏️ Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos | Añadido `'bracket'` a `EdgeStyle`, nuevos tipos `EdgeBorderStyle` y `EdgeDotShape`, y propiedades de estilo de aristas en `MindNode` y `MindMap`. |
+| `src/utils/edgeUtils.ts` | Utilidad | Creadas `parseEdgePathPoints`, `generateDoubleEdgePaths`, `generateZigzagEdgePath`, `generateWavyEdgePath` y `generateDiamondPoints`. |
+| `src/utils/__tests__/edgeUtils.test.ts` | Tests | Añadidas 6 pruebas unitarias para paths dobles, zigzag, ondulado y diamantes (12/12 pasan). |
+| `src/utils/layoutEngine.ts` | Utilidad | Implementada geometría de corchete con bisel a 45° en `generateEdgePath` para casos horizontal, vertical y radial. |
+| `src/utils/__tests__/layoutEngine.test.ts` | Tests | Añadidas 4 pruebas unitarias para `generateEdgePath('bracket')` en horizontales, verticales y alineados (7/7 pasan). |
+| `src/components/MindMapCanvas.tsx` | Organismo | Renderizado interactivo de los 6 estilos de línea (Doble, Zigzag, Ondulado, Puntos con Rombo/Cuadrado/Esfera, Guiones y Sólido). |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Añadido botón Corchete en Forma de Conexión y sección interactiva de Estilo de Línea con sliders dinámicos. |
+| `src/components/organisms/toolpanel/ThemeTab.tsx` | Organismo | Añadido botón Corchete y grilla de 6 estilos de trazo global de aristas. |
+| `src/components/ToolPanel.tsx` | Organismo | Actualizado tipado de `onUpdateMapEdgeDash` con `EdgeBorderStyle`. |
+| `src/App.tsx` | Entrada | Propagación de `edgeBorderStyle` y reseteo limpio en `onUpdateMapEdgeDash`. |
+| `src/hooks/useMindMapStore.ts` | Hook | Clonado de nuevas propiedades de estilo de aristas en duplicación y copia de nodos. |
+| `src/utils/htmlExporter.ts` | Utilidad | Integrado trazado de `bracket` en el script del exportador HTML autónomo. |
+| `doc/DESIGN.md` | Documentación | Documentada la geometría de corchete a 45° y los 6 estilos de línea de aristas en el contrato visual. |
+| `doc/CHANGELOG.md` | Documentación | Registro de esta Fase 42. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm vitest run src/utils/__tests__/edgeUtils.test.ts src/utils/__tests__/layoutEngine.test.ts`: **19/19 pruebas unitarias exitosas**.
+- [x] `pnpm test:regression`: **51/51 suites superadas (339/339 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 10.70s (0 errores)**.
+
+---
+
+## 📌 [Fase 43] — 2026-11-14: Corrección Integral de Perfiles de Grosor (Ribbon) con Todos los Estilos de Arista y Línea
+
+### 🎯 Motivo y Contexto
+Resolver el problema donde los perfiles de grosor variable (`tapered` cónico, `spindle` huso, `hourglass` reloj de arena) no funcionaban correctamente al combinarse con:
+1. Las diferentes formas de conexión (`bracket` corchete, `horizontal` escalón, `sharp` escuadra).
+2. Los diferentes estilos de trazo (`double` doble línea, `zigzag`, `wavy` ondulado, `dotted` puntos con rombo/cuadrado/esfera, `dashed` guiones).
+
+### 📐 Detalles Técnicos
+1. **Universalización de `generateRibbonEdgePath` en `src/utils/layoutEngine.ts`:**
+   - Anteriormente, `generateRibbonEdgePath` tenía fórmulas analíticas Bézier hardcodeadas y solo manejaba `linear` o `sharp` de forma limitada, forzando a Bézier cualquier otra forma (incluyendo `bracket` y `horizontal`).
+   - Ahora, `generateRibbonEdgePath` invoca `generateEdgePath` para obtener la trayectoria central exacta de la arista, la descompone con `parseEdgePathPoints` y realiza un remuestreo denso uniforme a lo largo del recorrido.
+   - Calcula las normales ortogonales $N_k$ en cada punto y modula el ancho $W(t)$ según la distancia acumulada normalizada $t \in [0, 1]$.
+   - Funciona al 100% con **todas las geometrías**: `bracket` (corchete a 45°), `horizontal`, `sharp`, `linear` y `bezier`.
+2. **Renderizado Armónico de Perfil + Estilos de Línea en `src/components/MindMapCanvas.tsx`:**
+   - Anteriormente, cuando `effectiveProfile !== 'uniform'`, si el estilo no era `solid`, se hacía un `return` temprano con un trazo simple que anulaba por completo `double`, `zigzag`, `wavy` y `diamond`.
+   - Ahora, si `effectiveProfile !== 'uniform'`:
+     - Modo `solid`: renderiza el polígono sólido cerrado de la cinta con el perfil de grosor.
+     - Modos `double`, `zigzag`, `wavy`, `dotted` y `dashed`: renderiza la silueta translúcida de la cinta en el fondo (`fillOpacity: 0.18`) mostrando el grosor variable, y encima dibuja los trazos vectoriales estilizados correspondientes sin perder el zigzag, doble vía, ondas o rombos.
+3. **Selector de Perfil en `FormatTab.tsx`:**
+   - Añadido el control de *Perfil de Grosor (Ribbon)* con botones para *Uniforme* (`uniform`), *Cónica* (`tapered`), *Huso* (`spindle`) y *Reloj* (`hourglass`) en la pestaña de Formato del nodo seleccionado, con persistencia y sincronización inmediata.
+4. **Pruebas Unitarias:**
+   - Añadidas pruebas en `src/utils/__tests__/layoutEngine.test.ts` para verificar la generación de cintas poligonales en `bracket` + `tapered`, `horizontal` + `spindle` y `sharp` + `hourglass`.
+
+### ✏️ Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/utils/layoutEngine.ts` | Utilidad | `generateRibbonEdgePath` refactorizado para derivar polígonos cerrados de grosor variable a partir de cualquier `edgePath`. |
+| `src/utils/__tests__/layoutEngine.test.ts` | Tests | Añadidas 4 pruebas unitarias para `generateRibbonEdgePath` con perfiles cónico, huso y reloj en corchete, horizontal y escuadra (11/11 pasan). |
+| `src/components/MindMapCanvas.tsx` | Organismo | Integración limpia de perfiles de grosor con todos los estilos de trazo (doble, zigzag, ondulado, puntos con rombo/cuadrado/esfera y guiones). |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Añadido selector de Perfil de Grosor (Uniforme, Cónica, Huso, Reloj) en la sección de Aristas del nodo. |
+| `doc/CHANGELOG.md` | Documentación | Registro de esta Fase 43. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm vitest run src/utils/__tests__/layoutEngine.test.ts`: **11/11 pruebas unitarias exitosas**.
+- [x] `pnpm test:regression`: **51/51 suites superadas (339/339 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 10.70s (0 errores)**.
+
 
 
 

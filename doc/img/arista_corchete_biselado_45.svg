@@ -1,0 +1,406 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1250" width="100%" height="100%" style="background:#0f172a; font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Filtro de sombra suave -->
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity="0.18"/>
+    </filter>
+    <filter id="glow-magenta" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#f000ff" flood-opacity="0.3"/>
+    </filter>
+
+    <!-- Patrón de cuadrícula azul suave idéntica al cuaderno milimetrado del usuario -->
+    <pattern id="grid-user" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#7dd3fc" stroke-width="1.1" stroke-opacity="0.75"/>
+    </pattern>
+
+    <!-- Marcadores de Rombo y Cuadrado para Puntos -->
+    <marker id="marker-diamond" viewBox="-4 -4 8 8" markerWidth="6" markerHeight="6" orient="auto">
+      <polygon points="0,-3.5 3.5,0 0,3.5 -3.5,0" fill="#f59e0b"/>
+    </marker>
+    <marker id="marker-square" viewBox="-4 -4 8 8" markerWidth="6" markerHeight="6" orient="auto">
+      <rect x="-3" y="-3" width="6" height="6" fill="#0284c7"/>
+    </marker>
+  </defs>
+
+  <!-- TITULO PRINCIPAL DEL DOCUMENTO -->
+  <g transform="translate(40, 28)">
+    <text x="0" y="22" fill="#38bdf8" font-size="20" font-weight="800" letter-spacing="-0.5">PROPUESTA DE ARISTAS: CORCHETE CON BISEL A 45°</text>
+    <text x="0" y="44" fill="#94a3b8" font-size="13">Geometría exacta del dibujo en cuadrícula + Compatibilidad con los 6 estilos de línea del panel de formato</text>
+  </g>
+
+  <!-- ====================================================================
+       SECCIÓN 1: REPRODUCCIÓN EXACTA DEL DIBUJO DEL USUARIO EN CUADRÍCULA
+       ==================================================================== -->
+  <g transform="translate(40, 85)">
+    <!-- Lienzo de Papel Cuadriculado -->
+    <rect x="0" y="0" width="1200" height="420" rx="16" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="1200" height="420" rx="16" fill="url(#grid-user)"/>
+
+    <!-- Etiqueta de la Sección -->
+    <rect x="16" y="16" width="480" height="30" rx="6" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1"/>
+    <text x="28" y="36" fill="#0369a1" font-size="12.5" font-weight="700">1. Geometría Exacta del Boceto (Cuadrícula Milimetrada)</text>
+    <text x="1180" y="36" fill="#0284c7" font-size="11.5" font-weight="600" text-anchor="end">Doble Bisel a 45°: Tronco Bifurcado en Cúspide + Llegada Horizontal</text>
+
+    <!-- NODO PADRE MAGENTA (#ff00ff) exactamente como el dibujo del usuario -->
+    <!-- X = 72, Y = 168, Ancho = 144 (6 celdas), Alto = 96 (4 celdas) -->
+    <g transform="translate(72, 168)" filter="url(#glow-magenta)">
+      <rect x="0" y="0" width="144" height="96" rx="26" fill="#f000ff" stroke="#c000cc" stroke-width="2.5"/>
+      <text x="72" y="53" fill="#ffffff" font-size="15" font-weight="700" text-anchor="middle">Nodo Padre</text>
+    </g>
+
+    <!-- TRAZADO DE ARISTAS (CORCHETE CON DOBLE BISEL A 45°) -->
+    <g stroke="#0f172a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <!-- 1. Tronco común horizontal desde el nodo padre -->
+      <line x1="216" y1="216" x2="312" y2="216"/>
+
+      <!-- 2. Rama Superior:
+           - Bisel de apertura a 45°: (312, 216) -> (336, 192)  [dx=24, dy=-24]
+           - Columna vertical:       (336, 192) -> (336, 120)  [hacia arriba]
+           - Bisel de llegada a 45°:  (336, 120) -> (360, 96)   [dx=24, dy=-24]
+           - Llegada horizontal:      (360, 96)  -> (456, 96)   [directo al hijo]
+      -->
+      <path d="M 312 216 L 336 192 L 336 120 L 360 96 L 456 96"/>
+
+      <!-- 3. Rama Central:
+           - Conexión horizontal directa desde la cúspide al hijo central
+      -->
+      <line x1="312" y1="216" x2="456" y2="216"/>
+
+      <!-- 4. Rama Inferior:
+           - Bisel de apertura a 45°: (312, 216) -> (336, 240)  [dx=24, dy=+24]
+           - Columna vertical:       (336, 240) -> (336, 312)  [hacia abajo]
+           - Bisel de llegada a 45°:  (336, 312) -> (360, 336)  [dx=24, dy=+24]
+           - Llegada horizontal:      (360, 336) -> (456, 336)  [directo al hijo]
+      -->
+      <path d="M 312 216 L 336 240 L 336 312 L 360 336 L 456 336"/>
+    </g>
+
+    <!-- COTAS ANGULARES DIDÁCTICAS (45°) -->
+    <!-- Cota Cúspide Superior -->
+    <line x1="312" y1="216" x2="350" y2="216" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 2"/>
+    <path d="M 330 216 A 18 18 0 0 0 326 202" fill="none" stroke="#ea580c" stroke-width="1.8"/>
+    <text x="338" y="206" fill="#ea580c" font-size="11" font-weight="800">45°</text>
+
+    <!-- Cota Cúspide Inferior -->
+    <path d="M 330 216 A 18 18 0 0 1 326 230" fill="none" stroke="#ea580c" stroke-width="1.8"/>
+    <text x="338" y="234" fill="#ea580c" font-size="11" font-weight="800">45°</text>
+
+    <!-- Cota Llegada Superior -->
+    <line x1="312" y1="120" x2="336" y2="120" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 2"/>
+    <path d="M 336 108 A 12 12 0 0 1 346 114" fill="none" stroke="#ea580c" stroke-width="1.8"/>
+    <text x="348" y="113" fill="#ea580c" font-size="11" font-weight="800">45°</text>
+
+    <!-- Cota Llegada Inferior -->
+    <line x1="312" y1="312" x2="336" y2="312" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 2"/>
+    <path d="M 336 324 A 12 12 0 0 0 346 318" fill="none" stroke="#ea580c" stroke-width="1.8"/>
+    <text x="348" y="325" fill="#ea580c" font-size="11" font-weight="800">45°</text>
+
+    <!-- Puntos Clave de la Geometría -->
+    <circle cx="312" cy="216" r="4" fill="#f000ff" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="336" cy="192" r="3" fill="#0f172a"/>
+    <circle cx="336" cy="120" r="3" fill="#0f172a"/>
+    <circle cx="360" cy="96"  r="3" fill="#0f172a"/>
+    <circle cx="336" cy="240" r="3" fill="#0f172a"/>
+    <circle cx="336" cy="312" r="3" fill="#0f172a"/>
+    <circle cx="360" cy="336" r="3" fill="#0f172a"/>
+
+    <!-- 3 NODOS HIJOS MAGENTA (#ff00ff) -->
+    <!-- Hijo 1 (Superior): Y = 96 - 48 = 48 -->
+    <g transform="translate(456, 48)" filter="url(#glow-magenta)">
+      <rect x="0" y="0" width="144" height="96" rx="26" fill="#f000ff" stroke="#c000cc" stroke-width="2.5"/>
+      <text x="72" y="53" fill="#ffffff" font-size="15" font-weight="700" text-anchor="middle">Hijo Superior</text>
+    </g>
+
+    <!-- Hijo 2 (Central): Y = 216 - 48 = 168 -->
+    <g transform="translate(456, 168)" filter="url(#glow-magenta)">
+      <rect x="0" y="0" width="144" height="96" rx="26" fill="#f000ff" stroke="#c000cc" stroke-width="2.5"/>
+      <text x="72" y="53" fill="#ffffff" font-size="15" font-weight="700" text-anchor="middle">Hijo Central</text>
+    </g>
+
+    <!-- Hijo 3 (Inferior): Y = 336 - 48 = 288 -->
+    <g transform="translate(456, 288)" filter="url(#glow-magenta)">
+      <rect x="0" y="0" width="144" height="96" rx="26" fill="#f000ff" stroke="#c000cc" stroke-width="2.5"/>
+      <text x="72" y="53" fill="#ffffff" font-size="15" font-weight="700" text-anchor="middle">Hijo Inferior</text>
+    </g>
+
+    <!-- TARJETA EXPLICATIVA DE GEOMETRÍA -->
+    <g transform="translate(648, 52)">
+      <rect x="0" y="0" width="520" height="330" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      
+      <text x="24" y="32" fill="#0f172a" font-size="15" font-weight="800">Propiedades de la Geometría a 45°</text>
+
+      <g transform="translate(24, 52)">
+        <circle cx="10" cy="10" r="10" fill="#e0f2fe"/>
+        <text x="10" y="14" fill="#0284c7" font-size="11" font-weight="800" text-anchor="middle">1</text>
+        <text x="32" y="14" fill="#0f172a" font-size="12.5" font-weight="700">Cúspide de Tronco en Chevron (&lt;):</text>
+        <text x="32" y="30" fill="#64748b" font-size="12">El padre sale horizontal y se abre en abanico limpio a ±45°.</text>
+      </g>
+
+      <g transform="translate(24, 108)">
+        <circle cx="10" cy="10" r="10" fill="#e0f2fe"/>
+        <text x="10" y="14" fill="#0284c7" font-size="11" font-weight="800" text-anchor="middle">2</text>
+        <text x="32" y="14" fill="#0f172a" font-size="12.5" font-weight="700">Tronco / Bus Vertical Centralizado:</text>
+        <text x="32" y="30" fill="#64748b" font-size="12">Agrupa a todos los hermanos en una columna vertical común.</text>
+      </g>
+
+      <g transform="translate(24, 164)">
+        <circle cx="10" cy="10" r="10" fill="#e0f2fe"/>
+        <text x="10" y="14" fill="#0284c7" font-size="11" font-weight="800" text-anchor="middle">3</text>
+        <text x="32" y="14" fill="#0f172a" font-size="12.5" font-weight="700">Segundo Bisel a 45° hacia la Entrada:</text>
+        <text x="32" y="30" fill="#64748b" font-size="12">Elimina el ángulo recto seco (90°) y entra siempre horizontal.</text>
+      </g>
+
+      <g transform="translate(24, 220)">
+        <circle cx="10" cy="10" r="10" fill="#dcfce7"/>
+        <text x="10" y="14" fill="#16a34a" font-size="11" font-weight="800" text-anchor="middle">✓</text>
+        <text x="32" y="14" fill="#0f172a" font-size="12.5" font-weight="700">Compatibilidad Total:</text>
+        <text x="32" y="30" fill="#64748b" font-size="12">Funciona a la perfección con cualquier número de nodos hermanos.</text>
+      </g>
+
+      <rect x="24" y="272" width="472" height="40" rx="8" fill="#0f172a"/>
+      <text x="36" y="296" fill="#38bdf8" font-size="11.5" font-weight="700">Fórmula Vectorial:</text>
+      <text x="156" y="296" fill="#f1f5f9" font-size="11.5">dx = dy = 16px (45°)  |  x_bus = x_split + dx</text>
+    </g>
+  </g>
+
+  <!-- ====================================================================
+       SECCIÓN 2: APLICACIÓN DE LOS 6 ESTILOS DE LÍNEA DE LOS CONTROLES
+       ==================================================================== -->
+  <g transform="translate(40, 530)">
+    <rect x="0" y="0" width="1200" height="680" rx="16" fill="#1e293b" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+
+    <!-- Etiqueta de la Sección -->
+    <rect x="20" y="16" width="580" height="32" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+    <text x="34" y="37" fill="#f8fafc" font-size="13" font-weight="700">2. Estilos de Línea de los Controles Aplicados al Corchete a 45°</text>
+
+    <!-- GRID DE 6 ESTILOS (2 COLUMNAS X 3 FILAS) -->
+
+    <!-- ==================== FILA 1 ==================== -->
+    <!-- 1. SÓLIDO TÉCNICO -->
+    <g transform="translate(30, 65)">
+      <rect x="0" y="0" width="550" height="180" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+      <text x="20" y="28" fill="#38bdf8" font-size="13" font-weight="700">A. Estilo SÓLIDO (Básico Técnico)</text>
+      <text x="530" y="28" fill="#64748b" font-size="11" text-anchor="end">Grosor configurable</text>
+
+      <!-- Mini Padre -->
+      <rect x="20" y="65" width="80" height="42" rx="12" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="2"/>
+      <text x="60" y="90" fill="#e0f2fe" font-size="11" font-weight="700" text-anchor="middle">Padre</text>
+
+      <!-- Arista Sólida con Bisel 45° -->
+      <g stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <line x1="100" y1="86" x2="160" y2="86"/>
+        <path d="M 160 86 L 180 66 L 180 48 L 196 32 L 250 32"/>
+        <line x1="160" y1="86" x2="250" y2="86"/>
+        <path d="M 160 86 L 180 106 L 180 124 L 196 140 L 250 140"/>
+      </g>
+
+      <!-- Mini Hijos -->
+      <rect x="250" y="16" width="80" height="32" rx="8" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="290" y="36" fill="#e0f2fe" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 1</text>
+      <rect x="250" y="70" width="80" height="32" rx="8" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="290" y="90" fill="#e0f2fe" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 2</text>
+      <rect x="250" y="124" width="80" height="32" rx="8" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="290" y="144" fill="#e0f2fe" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 3</text>
+
+      <g transform="translate(350, 70)">
+        <text x="0" y="10" fill="#94a3b8" font-size="11">• Trazo continuo limpio</text>
+        <text x="0" y="26" fill="#94a3b8" font-size="11">• Uniones biseladas (round/bevel)</text>
+        <text x="0" y="42" fill="#94a3b8" font-size="11">• Cero cruces confusos</text>
+      </g>
+    </g>
+
+    <!-- 2. DOBLE LÍNEA -->
+    <g transform="translate(620, 65)">
+      <rect x="0" y="0" width="550" height="180" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+      <text x="20" y="28" fill="#facc15" font-size="13" font-weight="700">B. Estilo DOBLE (Vía Paralela / Troncal)</text>
+      <text x="530" y="28" fill="#64748b" font-size="11" text-anchor="end">Separación 3.5px</text>
+
+      <!-- Mini Padre -->
+      <rect x="20" y="65" width="80" height="42" rx="12" fill="#facc15" fill-opacity="0.15" stroke="#facc15" stroke-width="2"/>
+      <text x="60" y="90" fill="#fef08a" font-size="11" font-weight="700" text-anchor="middle">Padre</text>
+
+      <!-- Arista Doble con Bisel 45° (Línea Exterior e Interior) -->
+      <g stroke="#facc15" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- Pista A -->
+        <line x1="100" y1="84" x2="159" y2="84"/>
+        <path d="M 159 84 L 178 65 L 178 47 L 194 30 L 250 30"/>
+        <line x1="159" y1="84" x2="250" y2="84"/>
+        <path d="M 159 84 L 178 104 L 178 122 L 194 139 L 250 139"/>
+
+        <!-- Pista B -->
+        <line x1="100" y1="88" x2="161" y2="88"/>
+        <path d="M 161 88 L 182 67 L 182 49 L 198 34 L 250 34"/>
+        <line x1="161" y1="88" x2="250" y2="88"/>
+        <path d="M 161 88 L 182 108 L 182 126 L 198 143 L 250 143"/>
+      </g>
+
+      <!-- Mini Hijos -->
+      <rect x="250" y="16" width="80" height="32" rx="8" fill="#facc15" fill-opacity="0.15" stroke="#facc15" stroke-width="1.8"/>
+      <text x="290" y="36" fill="#fef08a" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 1</text>
+      <rect x="250" y="70" width="80" height="32" rx="8" fill="#facc15" fill-opacity="0.15" stroke="#facc15" stroke-width="1.8"/>
+      <text x="290" y="90" fill="#fef08a" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 2</text>
+      <rect x="250" y="124" width="80" height="32" rx="8" fill="#facc15" fill-opacity="0.15" stroke="#facc15" stroke-width="1.8"/>
+      <text x="290" y="144" fill="#fef08a" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 3</text>
+
+      <g transform="translate(350, 70)">
+        <text x="0" y="10" fill="#94a3b8" font-size="11">• Línea doble institucional</text>
+        <text x="0" y="26" fill="#94a3b8" font-size="11">• Jerarquías de alto nivel</text>
+        <text x="0" y="42" fill="#94a3b8" font-size="11">• Paralelismo exacto a 45°</text>
+      </g>
+    </g>
+
+    <!-- ==================== FILA 2 ==================== -->
+    <!-- 3. GUIONES -->
+    <g transform="translate(30, 265)">
+      <rect x="0" y="0" width="550" height="180" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+      <text x="20" y="28" fill="#a855f7" font-size="13" font-weight="700">C. Estilo GUIONES (Modular / Provisional)</text>
+      <text x="530" y="28" fill="#64748b" font-size="11" text-anchor="end">Guión: 10px | Espacio: 8px</text>
+
+      <!-- Mini Padre -->
+      <rect x="20" y="65" width="80" height="42" rx="12" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="2"/>
+      <text x="60" y="90" fill="#f3e8ff" font-size="11" font-weight="700" text-anchor="middle">Padre</text>
+
+      <!-- Arista Guiones con Bisel 45° -->
+      <g stroke="#a855f7" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="8 6" fill="none">
+        <line x1="100" y1="86" x2="160" y2="86"/>
+        <path d="M 160 86 L 180 66 L 180 48 L 196 32 L 250 32"/>
+        <line x1="160" y1="86" x2="250" y2="86"/>
+        <path d="M 160 86 L 180 106 L 180 124 L 196 140 L 250 140"/>
+      </g>
+
+      <!-- Mini Hijos -->
+      <rect x="250" y="16" width="80" height="32" rx="8" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="1.8"/>
+      <text x="290" y="36" fill="#f3e8ff" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 1</text>
+      <rect x="250" y="70" width="80" height="32" rx="8" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="1.8"/>
+      <text x="290" y="90" fill="#f3e8ff" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 2</text>
+      <rect x="250" y="124" width="80" height="32" rx="8" fill="#a855f7" fill-opacity="0.15" stroke="#a855f7" stroke-width="1.8"/>
+      <text x="290" y="144" fill="#f3e8ff" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 3</text>
+
+      <g transform="translate(350, 70)">
+        <text x="0" y="10" fill="#94a3b8" font-size="11">• Control: Largo de guión</text>
+        <text x="0" y="26" fill="#94a3b8" font-size="11">• Control: Espacio libre</text>
+        <text x="0" y="42" fill="#94a3b8" font-size="11">• Contornos adaptativos</text>
+      </g>
+    </g>
+
+    <!-- 4. PUNTOS (ESFERA / CUADRADO / ROMBO) -->
+    <g transform="translate(620, 265)">
+      <rect x="0" y="0" width="550" height="180" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+      <text x="20" y="28" fill="#fb923c" font-size="13" font-weight="700">D. Estilo PUNTOS (Esfera, Cuadrado, Rombo)</text>
+      <text x="530" y="28" fill="#64748b" font-size="11" text-anchor="end">Sub-formas del control de UI</text>
+
+      <!-- Mini Padre -->
+      <rect x="20" y="65" width="80" height="42" rx="12" fill="#fb923c" fill-opacity="0.15" stroke="#fb923c" stroke-width="2"/>
+      <text x="60" y="90" fill="#ffedd5" font-size="11" font-weight="700" text-anchor="middle">Padre</text>
+
+      <!-- Tronco común: Puntos Esferas -->
+      <g stroke="#fb923c" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 10" fill="none">
+        <line x1="100" y1="86" x2="160" y2="86"/>
+      </g>
+
+      <!-- Rama Superior: Cuadrados -->
+      <g stroke="#38bdf8" stroke-width="4" stroke-linecap="square" stroke-dasharray="1 11" fill="none">
+        <path d="M 160 86 L 180 66 L 180 48 L 196 32 L 250 32"/>
+      </g>
+
+      <!-- Rama Central: Esferas -->
+      <g stroke="#fb923c" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 11" fill="none">
+        <line x1="160" y1="86" x2="250" y2="86"/>
+      </g>
+
+      <!-- Rama Inferior: Rombos (con marcadores de rombo) -->
+      <g stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 12" fill="none">
+        <path d="M 160 86 L 180 106 L 180 124 L 196 140 L 250 140" marker-mid="url(#marker-diamond)" marker-start="url(#marker-diamond)" marker-end="url(#marker-diamond)"/>
+      </g>
+
+      <!-- Mini Hijos -->
+      <rect x="250" y="16" width="80" height="32" rx="8" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="290" y="36" fill="#e0f2fe" font-size="10" font-weight="600" text-anchor="middle">Cuadrados</text>
+      <rect x="250" y="70" width="80" height="32" rx="8" fill="#fb923c" fill-opacity="0.15" stroke="#fb923c" stroke-width="1.8"/>
+      <text x="290" y="90" fill="#ffedd5" font-size="10" font-weight="600" text-anchor="middle">Esferas</text>
+      <rect x="250" y="124" width="80" height="32" rx="8" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1.8"/>
+      <text x="290" y="144" fill="#fef3c7" font-size="10" font-weight="600" text-anchor="middle">Rombos</text>
+
+      <g transform="translate(350, 70)">
+        <text x="0" y="10" fill="#94a3b8" font-size="11">• Esfera: Círculos suaves</text>
+        <text x="0" y="26" fill="#94a3b8" font-size="11">• Cuadrado: Bloques píxel</text>
+        <text x="0" y="42" fill="#94a3b8" font-size="11">• Rombo: Diamantes a 45°</text>
+      </g>
+    </g>
+
+    <!-- ==================== FILA 3 ==================== -->
+    <!-- 5. ZIGZAG -->
+    <g transform="translate(30, 465)">
+      <rect x="0" y="0" width="550" height="180" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+      <text x="20" y="28" fill="#f43f5e" font-size="13" font-weight="700">E. Estilo ZIGZAG (Tensión / Dinamismo)</text>
+      <text x="530" y="28" fill="#64748b" font-size="11" text-anchor="end">Picos: 7px | Frecuencia: 14px</text>
+
+      <!-- Mini Padre -->
+      <rect x="20" y="65" width="80" height="42" rx="12" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-width="2"/>
+      <text x="60" y="90" fill="#ffe4e6" font-size="11" font-weight="700" text-anchor="middle">Padre</text>
+
+      <!-- Arista Zigzag con Bisel 45° -->
+      <g stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- Tronco en zigzag -->
+        <path d="M 100 86 L 110 81 L 120 91 L 130 81 L 140 91 L 150 81 L 160 86"/>
+        <!-- Rama Superior en zigzag -->
+        <path d="M 160 86 L 170 73 L 180 66 L 180 48 L 196 32 L 206 27 L 216 37 L 226 27 L 236 37 L 250 32"/>
+        <!-- Rama Central en zigzag -->
+        <path d="M 160 86 L 170 81 L 180 91 L 190 81 L 200 91 L 210 81 L 220 91 L 230 81 L 240 91 L 250 86"/>
+        <!-- Rama Inferior en zigzag -->
+        <path d="M 160 86 L 170 99 L 180 106 L 180 124 L 196 140 L 206 145 L 216 135 L 226 145 L 236 135 L 250 140"/>
+      </g>
+
+      <!-- Mini Hijos -->
+      <rect x="250" y="16" width="80" height="32" rx="8" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-width="1.8"/>
+      <text x="290" y="36" fill="#ffe4e6" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 1</text>
+      <rect x="250" y="70" width="80" height="32" rx="8" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-width="1.8"/>
+      <text x="290" y="90" fill="#ffe4e6" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 2</text>
+      <rect x="250" y="124" width="80" height="32" rx="8" fill="#f43f5e" fill-opacity="0.15" stroke="#f43f5e" stroke-width="1.8"/>
+      <text x="290" y="144" fill="#ffe4e6" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 3</text>
+
+      <g transform="translate(350, 70)">
+        <text x="0" y="10" fill="#94a3b8" font-size="11">• Control: Altura de picos</text>
+        <text x="0" y="26" fill="#94a3b8" font-size="11">• Control: Frecuencia (paso)</text>
+        <text x="0" y="42" fill="#94a3b8" font-size="11">• Alertas o procesos críticos</text>
+      </g>
+    </g>
+
+    <!-- 6. ONDULADO -->
+    <g transform="translate(620, 465)">
+      <rect x="0" y="0" width="550" height="180" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+      <text x="20" y="28" fill="#10b981" font-size="13" font-weight="700">F. Estilo ONDULADO (Fluido / Orgánico)</text>
+      <text x="530" y="28" fill="#64748b" font-size="11" text-anchor="end">Amplitud: 7px | Longitud: 22px</text>
+
+      <!-- Mini Padre -->
+      <rect x="20" y="65" width="80" height="42" rx="12" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+      <text x="60" y="90" fill="#d1fae5" font-size="11" font-weight="700" text-anchor="middle">Padre</text>
+
+      <!-- Arista Ondulada con Bisel 45° -->
+      <g stroke="#10b981" stroke-width="2.2" stroke-linecap="round" fill="none">
+        <!-- Tronco ondulado -->
+        <path d="M 100 86 Q 115 80 130 86 T 160 86"/>
+        <!-- Rama Superior ondulada -->
+        <path d="M 160 86 L 180 66 L 180 48 L 196 32 Q 210 26 224 32 T 250 32"/>
+        <!-- Rama Central ondulada -->
+        <path d="M 160 86 Q 175 80 190 86 T 220 86 T 250 86"/>
+        <!-- Rama Inferior ondulada -->
+        <path d="M 160 86 L 180 106 L 180 124 L 196 140 Q 210 146 224 140 T 250 140"/>
+      </g>
+
+      <!-- Mini Hijos -->
+      <rect x="250" y="16" width="80" height="32" rx="8" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1.8"/>
+      <text x="290" y="36" fill="#d1fae5" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 1</text>
+      <rect x="250" y="70" width="80" height="32" rx="8" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1.8"/>
+      <text x="290" y="90" fill="#d1fae5" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 2</text>
+      <rect x="250" y="124" width="80" height="32" rx="8" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1.8"/>
+      <text x="290" y="144" fill="#d1fae5" font-size="10.5" font-weight="600" text-anchor="middle">Hijo 3</text>
+
+      <g transform="translate(350, 70)">
+        <text x="0" y="10" fill="#94a3b8" font-size="11">• Control: Altura de onda</text>
+        <text x="0" y="26" fill="#94a3b8" font-size="11">• Control: Ancho de onda</text>
+        <text x="0" y="42" fill="#94a3b8" font-size="11">• Ideas creativas y suaves</text>
+      </g>
+    </g>
+  </g>
+</svg>

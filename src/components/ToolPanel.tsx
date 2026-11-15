@@ -6,6 +6,7 @@ import {
   MindMap,
   Connector,
   EdgeStyle,
+  EdgeBorderStyle,
   EdgeProfile,
   BackgroundPatternStyle,
 } from '../types/mindmap';
@@ -40,7 +41,7 @@ export interface ToolPanelProps {
   onUpdateMapEdgeProfile?: (edgeProfile: EdgeProfile) => void;
   onUpdateMapEdgeWidth?: (width: number) => void;
   onUpdateMapEdgeColor?: (color: string | undefined) => void;
-  onUpdateMapEdgeDash?: (dash: 'solid' | 'dashed' | 'dotted') => void;
+  onUpdateMapEdgeDash?: (dash: EdgeBorderStyle) => void;
   onUpdateMapEdgeShadow?: (updates: {
     edgeShadow?: boolean;
     edgeShadowPreset?: 'soft' | 'deep' | 'glow';

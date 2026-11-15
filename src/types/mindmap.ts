@@ -26,7 +26,10 @@ export type OvalRatio = 'classic' | 'slender' | 'capsule';
 export type ArrowDirection = 'right' | 'left' | 'up' | 'down';
 export type ArrowTailStyle = 'notch' | 'flat';
 
-export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'hidden';
+export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'bracket' | 'hidden';
+
+export type EdgeBorderStyle = 'solid' | 'dashed' | 'dotted' | 'double' | 'zigzag' | 'wavy';
+export type EdgeDotShape = 'circle' | 'square' | 'diamond';
 
 export type EdgeProfile = 'uniform' | 'tapered' | 'spindle' | 'hourglass';
 
@@ -241,7 +244,17 @@ export interface MindNode {
   edgeColor?: string;
   edgeStyle?: EdgeStyle;
   edgeWidth?: number;
-  edgeDash?: 'solid' | 'dashed' | 'dotted';
+  edgeDash?: EdgeBorderStyle | 'solid' | 'dashed' | 'dotted';
+  edgeBorderStyle?: EdgeBorderStyle;
+  edgeBorderGap?: number; // Separación para modo doble (px, def: 4)
+  edgeDashLength?: number; // Largo de guión para guiones (px, def: 10)
+  edgeDashSpace?: number; // Espacio entre guiones (px, def: 11)
+  edgeDotShape?: EdgeDotShape; // Forma del punto: 'circle' | 'square' | 'diamond'
+  edgeDotSpacing?: number; // Separación entre puntos (px, def: 9)
+  edgeZigzagHeight?: number; // Altura de picos para zigzag (px, def: 9.5)
+  edgeZigzagFreq?: number; // Frecuencia de picos para zigzag (px, def: 19)
+  edgeWaveHeight?: number; // Altura de ondas para ondulado (px, def: 10)
+  edgeWaveWidth?: number; // Ancho de onda para ondulado (px, def: 36)
   edgeProfile?: EdgeProfile;
   edgeShadow?: boolean;
   edgeShadowPreset?: 'soft' | 'deep' | 'glow';
@@ -355,7 +368,17 @@ export interface MindMap {
   edgeStyle?: EdgeStyle;
   edgeWidth?: number;
   edgeColor?: string;
-  edgeDash?: 'solid' | 'dashed' | 'dotted';
+  edgeDash?: EdgeBorderStyle | 'solid' | 'dashed' | 'dotted';
+  edgeBorderStyle?: EdgeBorderStyle;
+  edgeBorderGap?: number;
+  edgeDashLength?: number;
+  edgeDashSpace?: number;
+  edgeDotShape?: EdgeDotShape;
+  edgeDotSpacing?: number;
+  edgeZigzagHeight?: number;
+  edgeZigzagFreq?: number;
+  edgeWaveHeight?: number;
+  edgeWaveWidth?: number;
   edgeProfile?: EdgeProfile;
   edgeShadow?: boolean;
   edgeShadowPreset?: 'soft' | 'deep' | 'glow';

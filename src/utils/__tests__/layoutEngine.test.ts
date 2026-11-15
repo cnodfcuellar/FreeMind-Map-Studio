@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { estimateNodeSize, computeMindMapLayout } from '../layoutEngine';
-import { MindMap, MindNode } from '../../types/mindmap';
+import { estimateNodeSize, computeMindMapLayout, generateEdgePath, generateRibbonEdgePath } from '../layoutEngine';
+import { MindMap, MindNode, CalculatedNodeLayout } from '../../types/mindmap';
 
 describe('layoutEngine', () => {
   it('estimates node size appropriately based on text and padding', () => {
@@ -97,5 +97,111 @@ describe('layoutEngine', () => {
     // Bounding diamond safely encloses text with room to spare
     expect(diamondSize.width).toBeGreaterThanOrEqual(normalSize.width);
     expect(diamondSize.height).toBeGreaterThanOrEqual(48);
+  });
+
+  describe('generateEdgePath - bracket style (45° chamfered bracket)', () => {
+    const createTestLayout = (
+      id: string,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      side: 'right' | 'left' | 'top' | 'bottom' | 'radial'
+    ): CalculatedNodeLayout => ({
+      id,
+      x,
+      y,
+      width,
+      height,
+      depth: 0,
+      side,
+      branchIndex: 0,
+      bounds: { minX: x, maxX: x + width, minY: y, maxY: y + height },
+    });
+
+    const parentLayout = createTestLayout('parent', 100, 200, 120, 60, 'right');
+
+    it('generates direct horizontal line when child is vertically aligned (dy <= 3)', () => {
+      const childLayout = createTestLayout('child-center', 350, 200, 100, 60, 'right');
+      const path = generateEdgePath(parentLayout, childLayout, 'bracket');
+      // Parent right center: (220, 230), Child left center: (350, 230)
+      expect(path).toBe('M 220 230 L 350 230');
+    });
+
+    it('generates 45° chamfer cusp, vertical bus, and 45° arrival chamfer for children above or below', () => {
+      const childAbove = createTestLayout('child-above', 350, 80, 100, 60, 'right');
+      const path = generateEdgePath(parentLayout, childAbove, 'bracket');
+      expect(path.startsWith('M 220 230')).toBe(true);
+      expect(path.endsWith('L 350 110')).toBe(true);
+
+      // Verify intermediate 45° chamfer points are present
+      const commands = path.split(' L ');
+      expect(commands.length).toBe(6); // M x1 y1, L xSplit y1, L xBus yCh1, L xBus yCh2, L xEntry y2, L x2 y2
+    });
+
+    it('handles left-sided trees symmetrically', () => {
+      const childLeft = createTestLayout('child-left', -150, 80, 100, 60, 'left');
+      const path = generateEdgePath(parentLayout, childLeft, 'bracket');
+      // Parent left center: (100, 230)
+      expect(path.startsWith('M 100 230')).toBe(true);
+      expect(path.endsWith('L -50 110')).toBe(true);
+    });
+
+    it('handles vertical bottom and top layouts with 45° chamfers', () => {
+      const bottomChild = createTestLayout('child-bottom', 250, 400, 100, 60, 'bottom');
+      const pathBottom = generateEdgePath(parentLayout, bottomChild, 'bracket');
+      expect(pathBottom.startsWith('M 160 260')).toBe(true);
+      expect(pathBottom.endsWith('L 300 400')).toBe(true);
+    });
+  });
+
+  describe('generateRibbonEdgePath - variable thickness ribbon across all edge styles', () => {
+    const createTestLayout = (
+      id: string,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      side: 'right' | 'left' | 'top' | 'bottom' | 'radial'
+    ): CalculatedNodeLayout => ({
+      id,
+      x,
+      y,
+      width,
+      height,
+      depth: 0,
+      side,
+      branchIndex: 0,
+      bounds: { minX: x, maxX: x + width, minY: y, maxY: y + height },
+    });
+
+    const parent = createTestLayout('p', 100, 200, 120, 60, 'right');
+    const child = createTestLayout('c', 350, 80, 100, 60, 'right');
+
+    it('returns null when profile is uniform or edgeStyle is hidden', () => {
+      expect(generateRibbonEdgePath(parent, child, 'bracket', 'bubble', 'uniform')).toBeNull();
+      expect(generateRibbonEdgePath(parent, child, 'hidden', 'bubble', 'tapered')).toBeNull();
+    });
+
+    it('generates closed ribbon polygon for bracket + tapered', () => {
+      const ribbon = generateRibbonEdgePath(parent, child, 'bracket', 'bubble', 'tapered', 3);
+      expect(ribbon).not.toBeNull();
+      expect(ribbon?.startsWith('M')).toBe(true);
+      expect(ribbon?.endsWith('Z')).toBe(true);
+    });
+
+    it('generates closed ribbon polygon for horizontal + spindle', () => {
+      const ribbon = generateRibbonEdgePath(parent, child, 'horizontal', 'bubble', 'spindle', 3);
+      expect(ribbon).not.toBeNull();
+      expect(ribbon?.startsWith('M')).toBe(true);
+      expect(ribbon?.endsWith('Z')).toBe(true);
+    });
+
+    it('generates closed ribbon polygon for sharp + hourglass', () => {
+      const ribbon = generateRibbonEdgePath(parent, child, 'sharp', 'bubble', 'hourglass', 3);
+      expect(ribbon).not.toBeNull();
+      expect(ribbon?.startsWith('M')).toBe(true);
+      expect(ribbon?.endsWith('Z')).toBe(true);
+    });
   });
 });

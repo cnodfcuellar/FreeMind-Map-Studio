@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" width="100%" height="100%" style="background:#0f172a; font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Filtro de sombra suave -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#38bdf8" flood-opacity="0.6"/>
+    </filter>
+
+    <!-- Patrón de fondo del canvas -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="#334155" opacity="0.4"/>
+    </pattern>
+  </defs>
+
+  <!-- Fondo sutil de puntos de canvas -->
+  <rect width="1200" height="860" fill="#0f172a"/>
+  <rect width="1200" height="860" fill="url(#grid)"/>
+
+  <!-- CABECERA -->
+  <g transform="translate(40, 36)">
+    <rect x="0" y="0" width="1120" height="64" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="24" y="28" fill="#f8fafc" font-size="18" font-weight="700">Propuesta de Aristas Avanzadas: Ángulo a 45°, Corchetes y Estilos de Trazo</text>
+    <text x="24" y="48" fill="#94a3b8" font-size="12.5">Demostración geométrica de conexiones de alta gama integradas con el motor de nodos de FreeMind Map Studio</text>
+  </g>
+
+  <!-- ========================================================
+       SECCIÓN 1: ARISTAS HORIZONTALES CON ÁNGULO A 45° (CHAMFER)
+       ======================================================== -->
+  <g transform="translate(40, 120)">
+    <rect x="0" y="0" width="545" height="350" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1.2" filter="url(#shadow)"/>
+    
+    <!-- Encabezado de la tarjeta -->
+    <path d="M 0 14 Q 0 0 14 0 L 531 0 Q 545 0 545 14 L 545 42 L 0 42 Z" fill="#0f172a" opacity="0.5"/>
+    <text x="20" y="27" fill="#38bdf8" font-size="13" font-weight="700">1. Arista Horizontal con Esquinas a 45° (Chamfer / Bisel)</text>
+    <text x="460" y="26" fill="#10b981" font-size="10.5" font-weight="600" text-anchor="end">Δx = |Δy| (45° exacto)</text>
+
+    <!-- NODO PADRE -->
+    <g transform="translate(24, 150)">
+      <rect x="0" y="0" width="105" height="40" rx="10" fill="#1d4ed8" stroke="#60a5fa" stroke-width="2"/>
+      <text x="52" y="24" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Nodo Padre</text>
+    </g>
+
+    <!-- ARISTAS CON ÁNGULO A 45° -->
+    <!-- Hijo 1 (Arriba - Δy = -80, tramo diagonal 45° de 80px) -->
+    <!-- Salida: (129, 170) -> H a (160, 170) -> L (240, 90) -> H a (380, 90) -->
+    <path d="M 129 170 L 165 170 L 245 90 L 380 90" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Cota / indicador 45° -->
+    <line x1="165" y1="170" x2="215" y2="170" stroke="#64748b" stroke-width="1" stroke-dasharray="2 2"/>
+    <path d="M 195 170 A 30 30 0 0 0 186 149" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="202" y="156" fill="#f59e0b" font-size="10" font-weight="700">45°</text>
+
+    <!-- Hijo 2 (Centro - Nivel horizontal recto) -->
+    <path d="M 129 170 L 380 170" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Hijo 3 (Abajo - Δy = +80, tramo diagonal 45° de 80px) -->
+    <!-- Salida: (129, 170) -> H a (165, 170) -> L (245, 250) -> H a (380, 250) -->
+    <path d="M 129 170 L 165 170 L 245 250 L 380 250" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="165" y1="170" x2="215" y2="170" stroke="#64748b" stroke-width="1" stroke-dasharray="2 2"/>
+    <path d="M 195 170 A 30 30 0 0 1 186 191" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="202" y="192" fill="#f59e0b" font-size="10" font-weight="700">45°</text>
+
+    <!-- Puntos de anclaje elegantes -->
+    <circle cx="129" cy="170" r="3" fill="#60a5fa"/>
+    <circle cx="380" cy="90" r="3" fill="#38bdf8"/>
+    <circle cx="380" cy="170" r="3" fill="#38bdf8"/>
+    <circle cx="380" cy="250" r="3" fill="#38bdf8"/>
+
+    <!-- NODOS HIJOS -->
+    <g transform="translate(380, 72)">
+      <rect x="0" y="0" width="135" height="36" rx="8" fill="#0284c7" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="67" y="22" fill="#ffffff" font-size="11.5" font-weight="600" text-anchor="middle">Hijo Superior</text>
+    </g>
+    <g transform="translate(380, 152)">
+      <rect x="0" y="0" width="135" height="36" rx="8" fill="#0284c7" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="67" y="22" fill="#ffffff" font-size="11.5" font-weight="600" text-anchor="middle">Hijo Central</text>
+    </g>
+    <g transform="translate(380, 232)">
+      <rect x="0" y="0" width="135" height="36" rx="8" fill="#0284c7" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="67" y="22" fill="#ffffff" font-size="11.5" font-weight="600" text-anchor="middle">Hijo Inferior</text>
+    </g>
+
+    <!-- Explicación al pie -->
+    <rect x="20" y="298" width="505" height="36" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+    <text x="32" y="320" fill="#94a3b8" font-size="11">✓ Elimina la rigidez del ángulo de 90° sin perder la claridad cartesiana.</text>
+  </g>
+
+  <!-- ========================================================
+       SECCIÓN 2: ARISTAS TIPO CORCHETE (AGRUPACIÓN TAXONÓMICA)
+       ======================================================== -->
+  <g transform="translate(615, 120)">
+    <rect x="0" y="0" width="545" height="350" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1.2" filter="url(#shadow)"/>
+    
+    <!-- Encabezado de la tarjeta -->
+    <path d="M 0 14 Q 0 0 14 0 L 531 0 Q 545 0 545 14 L 545 42 L 0 42 Z" fill="#0f172a" opacity="0.5"/>
+    <text x="20" y="27" fill="#a855f7" font-size="13" font-weight="700">2. Arista tipo Corchete [ ] (Árbol de Llaves / Agrupador)</text>
+    <text x="460" y="26" fill="#c084fc" font-size="10.5" font-weight="600" text-anchor="end">Taxonomía limpia</text>
+
+    <!-- NODO PADRE -->
+    <g transform="translate(24, 150)">
+      <rect x="0" y="0" width="105" height="40" rx="10" fill="#7e22ce" stroke="#c084fc" stroke-width="2"/>
+      <text x="52" y="24" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">Categoría</text>
+    </g>
+
+    <!-- TRAZADO DEL CORCHETE AGRUPADOR -->
+    <!-- Tronco principal desde el padre hasta la columna del corchete -->
+    <path d="M 129 170 L 220 170" fill="none" stroke="#c084fc" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Barra vertical del corchete con remates biselados hacia los extremos -->
+    <!-- Columna vertical de y=80 a y=260 en x=220 -->
+    <path d="M 235 75 L 220 75 Q 215 75 215 85 L 215 255 Q 215 265 220 265 L 235 265" fill="none" stroke="#c084fc" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Ramas cortas desde el corchete hacia cada hermano -->
+    <!-- Rama 1 a Hijo A (y=75) -->
+    <path d="M 235 75 L 380 75" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Rama 2 a Hijo B (y=138) -->
+    <path d="M 215 138 L 380 138" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Rama 3 a Hijo C (y=202) -->
+    <path d="M 215 202 L 380 202" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Rama 4 a Hijo D (y=265) -->
+    <path d="M 235 265 L 380 265" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Puntos de unión -->
+    <circle cx="215" cy="170" r="4" fill="#fbcfe8"/>
+
+    <!-- 4 NODOS HERMANOS EN FILA VERTICAL COMPACTA -->
+    <g transform="translate(380, 57)">
+      <rect x="0" y="0" width="135" height="34" rx="7" fill="#581c87" stroke="#a855f7" stroke-width="1.6"/>
+      <text x="67" y="21" fill="#ffffff" font-size="11" font-weight="600" text-anchor="middle">Elemento 1</text>
+    </g>
+    <g transform="translate(380, 120)">
+      <rect x="0" y="0" width="135" height="34" rx="7" fill="#581c87" stroke="#a855f7" stroke-width="1.6"/>
+      <text x="67" y="21" fill="#ffffff" font-size="11" font-weight="600" text-anchor="middle">Elemento 2</text>
+    </g>
+    <g transform="translate(380, 184)">
+      <rect x="0" y="0" width="135" height="34" rx="7" fill="#581c87" stroke="#a855f7" stroke-width="1.6"/>
+      <text x="67" y="21" fill="#ffffff" font-size="11" font-weight="600" text-anchor="middle">Elemento 3</text>
+    </g>
+    <g transform="translate(380, 247)">
+      <rect x="0" y="0" width="135" height="34" rx="7" fill="#581c87" stroke="#a855f7" stroke-width="1.6"/>
+      <text x="67" y="21" fill="#ffffff" font-size="11" font-weight="600" text-anchor="middle">Elemento 4</text>
+    </g>
+
+    <!-- Explicación al pie -->
+    <rect x="20" y="298" width="505" height="36" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+    <text x="32" y="320" fill="#94a3b8" font-size="11">✓ Una sola línea matriz abraza a los 4 hermanos, reduciendo cruces y desorden.</text>
+  </g>
+
+  <!-- ========================================================
+       SECCIÓN 3: ESTILOS DE LÍNEA EN LAS ARISTAS (A JUEGO CON NODOS)
+       ======================================================== -->
+  <g transform="translate(40, 490)">
+    <rect x="0" y="0" width="1120" height="330" rx="14" fill="#1e293b" stroke="#334155" stroke-width="1.2" filter="url(#shadow)"/>
+    
+    <!-- Encabezado de la tarjeta -->
+    <path d="M 0 14 Q 0 0 14 0 L 1106 0 Q 1120 0 1120 14 L 1120 42 L 0 42 Z" fill="#0f172a" opacity="0.5"/>
+    <text x="24" y="27" fill="#f59e0b" font-size="13" font-weight="700">3. Estilos de Línea en Aristas (Heredados del Motor de Bordes de Nodos)</text>
+    <text x="1090" y="26" fill="#fbbf24" font-size="11" font-weight="600" text-anchor="end">Sólido · Doble · Ondulado · Zigzag · Guiones · Puntos</text>
+
+    <!-- FILA 1: SÓLIDO (Clásico) -->
+    <g transform="translate(30, 60)">
+      <text x="0" y="20" fill="#94a3b8" font-size="11.5" font-weight="700" width="80">SÓLIDO</text>
+      <!-- Nodo origen -->
+      <rect x="80" y="0" width="70" height="30" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+      <text x="115" y="19" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Origen</text>
+      <!-- Arista 45° sólida -->
+      <path d="M 150 15 L 230 15 L 260 15 L 400 15" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Nodo destino -->
+      <rect x="400" y="0" width="70" height="30" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="435" y="19" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Destino</text>
+      <text x="490" y="19" fill="#64748b" font-size="11">Relación jerárquica directa estándar</text>
+    </g>
+
+    <!-- FILA 2: DOBLE LÍNEA (Troncal / Vía Principal) -->
+    <g transform="translate(30, 102)">
+      <text x="0" y="20" fill="#94a3b8" font-size="11.5" font-weight="700">DOBLE</text>
+      <rect x="80" y="0" width="70" height="30" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+      <text x="115" y="19" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Origen</text>
+      <!-- Doble línea paralela a 45° con gap de 4px -->
+      <!-- Línea superior -->
+      <path d="M 150 13 L 230 13 L 260 25 L 400 25" fill="none" stroke="#facc15" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Línea inferior -->
+      <path d="M 150 17 L 228 17 L 258 29 L 400 29" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="400" y="12" width="70" height="30" rx="6" fill="#1e293b" stroke="#facc15" stroke-width="1.5"/>
+      <text x="435" y="31" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Destino</text>
+      <text x="490" y="25" fill="#facc15" font-size="11">Ramas troncales, autopistas de ideas o jerarquías clave</text>
+    </g>
+
+    <!-- FILA 3: ONDULADO (Creativo / Fluido) -->
+    <g transform="translate(30, 154)">
+      <text x="0" y="20" fill="#94a3b8" font-size="11.5" font-weight="700">ONDULADO</text>
+      <rect x="80" y="0" width="70" height="30" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+      <text x="115" y="19" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Origen</text>
+      <!-- Arista ondulada procedural continua -->
+      <path d="M 150 15 Q 165 9 180 15 T 210 15 T 240 15 T 270 25 T 300 35 T 330 35 T 360 35 T 390 35 L 400 35" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"/>
+      <rect x="400" y="20" width="70" height="30" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+      <text x="435" y="39" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Destino</text>
+      <text x="490" y="30" fill="#10b981" font-size="11">Pensamiento divergente, creatividad, metáforas y flujos orgánicos</text>
+    </g>
+
+    <!-- FILA 4: ZIGZAG (Tensión / Dinámico) -->
+    <g transform="translate(30, 206)">
+      <text x="0" y="20" fill="#94a3b8" font-size="11.5" font-weight="700">ZIGZAG</text>
+      <rect x="80" y="0" width="70" height="30" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+      <text x="115" y="19" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Origen</text>
+      <!-- Arista zigzag -->
+      <path d="M 150 15 L 160 10 L 170 20 L 180 10 L 190 20 L 200 10 L 210 20 L 220 15 L 235 25 L 250 35 L 260 30 L 270 40 L 280 30 L 290 40 L 300 30 L 310 40 L 320 30 L 330 40 L 340 30 L 350 40 L 360 30 L 370 40 L 380 35 L 400 35" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="400" y="20" width="70" height="30" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="435" y="39" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Destino</text>
+      <text x="490" y="32" fill="#f87171" font-size="11">Conflicto, riesgos, tensión, fricción o procesos con interrupción</text>
+    </g>
+
+    <!-- FILA 5: GUIONES & PUNTOS (Hipotético / Secundario) -->
+    <g transform="translate(30, 260)">
+      <text x="0" y="20" fill="#94a3b8" font-size="11.5" font-weight="700">GUIONES</text>
+      <rect x="80" y="0" width="70" height="30" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+      <text x="115" y="19" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Origen</text>
+      <!-- Guiones a 45° -->
+      <path d="M 150 15 L 230 15 L 260 25 L 400 25" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-dasharray="8 6" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="400" y="10" width="70" height="30" rx="6" fill="#1e293b" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="435" y="29" fill="#e2e8f0" font-size="10.5" text-anchor="middle">Destino</text>
+      <text x="490" y="22" fill="#c084fc" font-size="11">Ideas en borrador, hipótesis o relaciones no confirmadas</text>
+    </g>
+
+    <!-- MINI RESUMEN TÉCNICO -->
+    <g transform="translate(850, 60)">
+      <rect x="0" y="0" width="240" height="235" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+      <text x="16" y="28" fill="#e2e8f0" font-size="12" font-weight="700">Integración con el Store</text>
+      <text x="16" y="52" fill="#94a3b8" font-size="10.5">• edgeStyle: 'chamfer' | 'bracket'</text>
+      <text x="16" y="72" fill="#94a3b8" font-size="10.5">• edgeDash: 'solid' | 'dashed'</text>
+      <text x="24" y="90" fill="#94a3b8" font-size="10.5">| 'dotted' | 'double'</text>
+      <text x="24" y="108" fill="#94a3b8" font-size="10.5">| 'zigzag' | 'wavy'</text>
+      <text x="16" y="136" fill="#e2e8f0" font-size="12" font-weight="700">100% Vectorial</text>
+      <text x="16" y="160" fill="#94a3b8" font-size="10.5">• Cero lag en GPU</text>
+      <text x="16" y="180" fill="#94a3b8" font-size="10.5">• Conexión exacta a bordes</text>
+      <text x="16" y="200" fill="#94a3b8" font-size="10.5">• Exportable a SVG y PDF</text>
+    </g>
+  </g>
+</svg>

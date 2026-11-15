@@ -6,6 +6,8 @@ import {
   NodePatternStyle,
   NodeBgImageMode,
   EdgeStyle,
+  EdgeBorderStyle,
+  EdgeDotShape,
   EdgeProfile,
   MindNode,
   BubbleTailSide,
@@ -1295,7 +1297,7 @@ export const FormatTab: React.FC<FormatTabProps> = ({
       >
         <div className="space-y-3">
           <span className="text-[11px] font-semibold text-slate-600 block">Forma de la Conexión</span>
-          <div className="grid grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-5 gap-1.5">
             {[
               {
                 id: 'bezier' as EdgeStyle,
@@ -1333,6 +1335,15 @@ export const FormatTab: React.FC<FormatTabProps> = ({
                   </svg>
                 ),
               },
+              {
+                id: 'bracket' as EdgeStyle,
+                label: 'Corchete',
+                icon: (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12 H7 L10 6 L14 6 H21 M7 12 L10 18 L14 18 H21 M7 12 H21" />
+                  </svg>
+                ),
+              },
             ].map((opt) => {
               const isSelected = (selectedNode.edgeStyle || 'bezier') === opt.id;
               return (
@@ -1351,6 +1362,253 @@ export const FormatTab: React.FC<FormatTabProps> = ({
                 </button>
               );
             })}
+          </div>
+
+          {/* Perfil de Grosor de la Rama (Uniforme, Cónica, Huso, Reloj) */}
+          <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
+            <span className="text-[11px] font-semibold text-slate-600 block">Perfil de Grosor (Ribbon)</span>
+            <div className="grid grid-cols-4 gap-1.5">
+              {[
+                { id: 'uniform' as EdgeProfile, label: 'Uniforme', desc: '═' },
+                { id: 'tapered' as EdgeProfile, label: 'Cónica', desc: '◣' },
+                { id: 'spindle' as EdgeProfile, label: 'Huso', desc: '◆' },
+                { id: 'hourglass' as EdgeProfile, label: 'Reloj', desc: '⧖' },
+              ].map((opt) => {
+                const currentVal = selectedNode.edgeProfile || 'uniform';
+                const isSelected = currentVal === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onUpdateNode(selectedNode.id, { edgeProfile: opt.id })}
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="text-xs font-bold">{opt.desc}</span>
+                    <span className="text-[10px] mt-0.5 text-center truncate w-full">{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Estilo de Línea de la Arista (Sólido, Guiones, Puntos, Doble, Zigzag, Ondulado) */}
+          <div className="pt-2 border-t border-slate-200/80 space-y-2">
+            <span className="text-[11px] font-semibold text-slate-600 block">Estilo de Línea</span>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                {
+                  id: 'solid' as EdgeBorderStyle,
+                  label: 'Sólido',
+                  icon: (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="3" y1="12" x2="21" y2="12" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'dashed' as EdgeBorderStyle,
+                  label: 'Guiones',
+                  icon: (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 3">
+                      <line x1="3" y1="12" x2="21" y2="12" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'dotted' as EdgeBorderStyle,
+                  label: 'Puntos',
+                  icon: (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="0.1 5" strokeLinecap="round">
+                      <line x1="3" y1="12" x2="21" y2="12" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'double' as EdgeBorderStyle,
+                  label: 'Doble',
+                  icon: (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <line x1="3" y1="9" x2="21" y2="9" />
+                      <line x1="3" y1="15" x2="21" y2="15" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'zigzag' as EdgeBorderStyle,
+                  label: 'Zigzag',
+                  icon: (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+                      <path d="M3 12 L6 8 L10 16 L14 8 L18 16 L21 12" />
+                    </svg>
+                  ),
+                },
+                {
+                  id: 'wavy' as EdgeBorderStyle,
+                  label: 'Ondulado',
+                  icon: (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                      <path d="M3 12 C6 7, 9 17, 12 12 C15 7, 18 17, 21 12" />
+                    </svg>
+                  ),
+                },
+              ].map((styleItem) => {
+                const currentStyle = selectedNode.edgeBorderStyle || selectedNode.edgeDash || 'solid';
+                const isSelected = currentStyle === styleItem.id;
+                return (
+                  <button
+                    key={styleItem.id}
+                    type="button"
+                    onClick={() =>
+                      onUpdateNode(selectedNode.id, {
+                        edgeBorderStyle: styleItem.id,
+                        edgeDash: styleItem.id,
+                      })
+                    }
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all cursor-pointer select-none ${
+                      isSelected
+                        ? 'border-blue-600 bg-blue-50/80 text-blue-700 font-semibold shadow-2xs'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  >
+                    {styleItem.icon}
+                    <span className="text-[10px] mt-1 text-center truncate w-full">{styleItem.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Controles Dinámicos de Estilo de Línea para Aristas */}
+            {(selectedNode.edgeBorderStyle === 'dashed' || selectedNode.edgeDash === 'dashed') && (
+              <div className="grid grid-cols-2 gap-2 pt-1 animate-in fade-in duration-150">
+                <SliderInput
+                  label="Largo guión"
+                  value={selectedNode.edgeDashLength !== undefined ? selectedNode.edgeDashLength : 10}
+                  min={2}
+                  max={32}
+                  step={1}
+                  unit="px"
+                  badge={`${selectedNode.edgeDashLength !== undefined ? selectedNode.edgeDashLength : 10}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeDashLength: val })}
+                />
+                <SliderInput
+                  label="Espacio"
+                  value={selectedNode.edgeDashSpace !== undefined ? selectedNode.edgeDashSpace : 11}
+                  min={2}
+                  max={32}
+                  step={1}
+                  unit="px"
+                  badge={`${selectedNode.edgeDashSpace !== undefined ? selectedNode.edgeDashSpace : 11}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeDashSpace: val })}
+                />
+              </div>
+            )}
+
+            {(selectedNode.edgeBorderStyle === 'dotted' || selectedNode.edgeDash === 'dotted') && (
+              <div className="space-y-2.5 pt-1 animate-in fade-in duration-150">
+                <div className="flex p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px]">
+                  {[
+                    { id: 'circle' as const, label: '● Esfera' },
+                    { id: 'square' as const, label: '■ Cuadrado' },
+                    { id: 'diamond' as const, label: '◆ Rombo' },
+                  ].map((dot) => {
+                    const isDotSel = (selectedNode.edgeDotShape || 'circle') === dot.id;
+                    return (
+                      <button
+                        key={dot.id}
+                        type="button"
+                        onClick={() => onUpdateNode(selectedNode.id, { edgeDotShape: dot.id })}
+                        className={`flex-1 py-1 rounded-md text-center font-medium transition-all cursor-pointer ${
+                          isDotSel
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 font-semibold shadow-xs'
+                            : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        {dot.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <SliderInput
+                  label="Separación"
+                  value={selectedNode.edgeDotSpacing !== undefined ? selectedNode.edgeDotSpacing : 9}
+                  min={4}
+                  max={32}
+                  step={1}
+                  unit="px"
+                  badge={`${selectedNode.edgeDotSpacing !== undefined ? selectedNode.edgeDotSpacing : 9}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeDotSpacing: val })}
+                />
+              </div>
+            )}
+
+            {(selectedNode.edgeBorderStyle === 'double' || selectedNode.edgeDash === 'double') && (
+              <div className="pt-1 animate-in fade-in duration-150">
+                <SliderInput
+                  label="Separación entre líneas"
+                  value={selectedNode.edgeBorderGap !== undefined ? selectedNode.edgeBorderGap : 4}
+                  min={2}
+                  max={16}
+                  step={1}
+                  unit="px"
+                  badge={`${selectedNode.edgeBorderGap !== undefined ? selectedNode.edgeBorderGap : 4}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeBorderGap: val })}
+                />
+              </div>
+            )}
+
+            {(selectedNode.edgeBorderStyle === 'zigzag' || selectedNode.edgeDash === 'zigzag') && (
+              <div className="grid grid-cols-2 gap-2 pt-1 animate-in fade-in duration-150">
+                <SliderInput
+                  label="Altura picos"
+                  value={selectedNode.edgeZigzagHeight !== undefined ? selectedNode.edgeZigzagHeight : 9.5}
+                  min={2}
+                  max={20}
+                  step={0.5}
+                  unit="px"
+                  badge={`${selectedNode.edgeZigzagHeight !== undefined ? selectedNode.edgeZigzagHeight : 9.5}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeZigzagHeight: val })}
+                />
+                <SliderInput
+                  label="Frecuencia"
+                  value={selectedNode.edgeZigzagFreq !== undefined ? selectedNode.edgeZigzagFreq : 19}
+                  min={6}
+                  max={40}
+                  step={1}
+                  unit="px"
+                  badge={`${selectedNode.edgeZigzagFreq !== undefined ? selectedNode.edgeZigzagFreq : 19}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeZigzagFreq: val })}
+                />
+              </div>
+            )}
+
+            {(selectedNode.edgeBorderStyle === 'wavy' || selectedNode.edgeDash === 'wavy') && (
+              <div className="grid grid-cols-2 gap-2 pt-1 animate-in fade-in duration-150">
+                <SliderInput
+                  label="Altura ondas"
+                  value={selectedNode.edgeWaveHeight !== undefined ? selectedNode.edgeWaveHeight : 10}
+                  min={2}
+                  max={20}
+                  step={0.5}
+                  unit="px"
+                  badge={`${selectedNode.edgeWaveHeight !== undefined ? selectedNode.edgeWaveHeight : 10}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeWaveHeight: val })}
+                />
+                <SliderInput
+                  label="Ancho onda"
+                  value={selectedNode.edgeWaveWidth !== undefined ? selectedNode.edgeWaveWidth : 36}
+                  min={8}
+                  max={50}
+                  step={1}
+                  unit="px"
+                  badge={`${selectedNode.edgeWaveWidth !== undefined ? selectedNode.edgeWaveWidth : 36}px`}
+                  onChange={(val) => onUpdateNode(selectedNode.id, { edgeWaveWidth: val })}
+                />
+              </div>
+            )}
           </div>
 
           <ColorPicker

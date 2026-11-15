@@ -3,6 +3,7 @@ import {
   MindNode,
   NodeShape,
   EdgeStyle,
+  EdgeBorderStyle,
   EdgeProfile,
   LayoutType,
   Connector,
@@ -559,14 +560,14 @@ export default function App() {
               return { ...m, edgeColor, nodes: updatedNodes, updatedAt: Date.now() };
             });
           }}
-          onUpdateMapEdgeDash={(edgeDash: 'solid' | 'dashed' | 'dotted') => {
+          onUpdateMapEdgeDash={(edgeDash: EdgeBorderStyle) => {
             pushHistory(mindMap);
             setMindMap((m) => {
               const updatedNodes: Record<string, MindNode> = {};
               Object.entries(m.nodes).forEach(([id, node]) => {
-                updatedNodes[id] = { ...node, edgeDash: undefined };
+                updatedNodes[id] = { ...node, edgeDash: undefined, edgeBorderStyle: undefined };
               });
-              return { ...m, edgeDash, nodes: updatedNodes, updatedAt: Date.now() };
+              return { ...m, edgeDash, edgeBorderStyle: edgeDash, nodes: updatedNodes, updatedAt: Date.now() };
             });
           }}
           onUpdateMapEdgeShadow={(updates) => {

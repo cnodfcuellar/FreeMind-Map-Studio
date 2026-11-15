@@ -1,5 +1,6 @@
 import { MindMap, MindNode, CalculatedNodeLayout, NodeSide, EdgeProfile } from '../types/mindmap';
 import { isSquareRotated } from './rectangleCornerUtils';
+import { parseEdgePathPoints, dist, Point2D } from './edgeUtils';
 
 const HORIZONTAL_GAP = 54;
 const VERTICAL_GAP = 14;
@@ -1643,6 +1644,19 @@ export function generateEdgePath(
       return `M ${start.x} ${start.y} L ${midX} ${start.y} L ${midX} ${end.y} L ${end.x} ${end.y}`;
     }
 
+    if (edgeStyle === 'bracket') {
+      const midX = (start.x + end.x) / 2;
+      const dx = Math.abs(end.x - start.x);
+      const dy = Math.abs(end.y - start.y);
+      if (dy <= 3 || dx <= 3) {
+        return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
+      }
+      const delta = Math.min(14, dx / 4, dy / 4);
+      const signX = end.x > start.x ? 1 : -1;
+      const signY = end.y > start.y ? 1 : -1;
+      return `M ${start.x} ${start.y} L ${midX - signX * delta} ${start.y} L ${midX} ${start.y + signY * delta} L ${midX} ${end.y - signY * delta} L ${midX + signX * delta} ${end.y} L ${end.x} ${end.y}`;
+    }
+
     // Default: Organic cubic bezier along vector
     const dx = end.x - start.x;
     const dy = end.y - start.y;
@@ -1678,6 +1692,28 @@ export function generateEdgePath(
       return `M ${x1} ${y1} L ${x1} ${stepY} L ${x2} ${stepY} L ${x2} ${y2}`;
     }
 
+    if (edgeStyle === 'bracket') {
+      const dx = Math.abs(x2 - x1);
+      const dy = Math.abs(y2 - y1);
+      if (dx <= 3) {
+        return `M ${x1} ${y1} L ${x2} ${y2}`;
+      }
+      const trunkLen = Math.min(24, Math.max(8, dy * 0.25));
+      const maxDelta = Math.min(16, (dy - trunkLen) / 2.5, dx / 2);
+      const delta = Math.max(4, maxDelta);
+      const signX = x2 > x1 ? 1 : -1;
+      const ySplit = y1 + trunkLen;
+      const yBus = ySplit + delta;
+      const yEntry = yBus + delta;
+      const xChamfer1 = x1 + signX * delta;
+      const xChamfer2 = x2 - signX * delta;
+      if (dx < 2 * delta) {
+        const midX = (x1 + x2) / 2;
+        return `M ${x1} ${y1} L ${x1} ${ySplit} L ${midX} ${yBus} L ${x2} ${yEntry} L ${x2} ${y2}`;
+      }
+      return `M ${x1} ${y1} L ${x1} ${ySplit} L ${xChamfer1} ${yBus} L ${xChamfer2} ${yBus} L ${x2} ${yEntry} L ${x2} ${y2}`;
+    }
+
     const dy = Math.max(Math.abs(y2 - y1), 20);
     const cy1 = y1 + dy * 0.45;
     const cy2 = y2 - dy * 0.45;
@@ -1705,6 +1741,28 @@ export function generateEdgePath(
     if (edgeStyle === 'horizontal') {
       const stepY = y1 - Math.min(24, Math.abs(y2 - y1) * 0.4);
       return `M ${x1} ${y1} L ${x1} ${stepY} L ${x2} ${stepY} L ${x2} ${y2}`;
+    }
+
+    if (edgeStyle === 'bracket') {
+      const dx = Math.abs(x2 - x1);
+      const dy = Math.abs(y2 - y1);
+      if (dx <= 3) {
+        return `M ${x1} ${y1} L ${x2} ${y2}`;
+      }
+      const trunkLen = Math.min(24, Math.max(8, dy * 0.25));
+      const maxDelta = Math.min(16, (dy - trunkLen) / 2.5, dx / 2);
+      const delta = Math.max(4, maxDelta);
+      const signX = x2 > x1 ? 1 : -1;
+      const ySplit = y1 - trunkLen;
+      const yBus = ySplit - delta;
+      const yEntry = yBus - delta;
+      const xChamfer1 = x1 + signX * delta;
+      const xChamfer2 = x2 - signX * delta;
+      if (dx < 2 * delta) {
+        const midX = (x1 + x2) / 2;
+        return `M ${x1} ${y1} L ${x1} ${ySplit} L ${midX} ${yBus} L ${x2} ${yEntry} L ${x2} ${y2}`;
+      }
+      return `M ${x1} ${y1} L ${x1} ${ySplit} L ${xChamfer1} ${yBus} L ${xChamfer2} ${yBus} L ${x2} ${yEntry} L ${x2} ${y2}`;
     }
 
     const dy = Math.max(Math.abs(y2 - y1), 20);
@@ -1743,6 +1801,33 @@ export function generateEdgePath(
     return `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
   }
 
+  if (edgeStyle === 'bracket') {
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+    if (dy <= 3) {
+      return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+    const trunkLen = Math.min(28, Math.max(8, dx * 0.25));
+    const maxDelta = Math.min(16, (dx - trunkLen) / 2.5, dy / 2);
+    const delta = Math.max(4, maxDelta);
+    const signX = isRight ? 1 : -1;
+    const signY = y2 > y1 ? 1 : -1;
+
+    const xSplit = x1 + signX * trunkLen;
+    const xBus = xSplit + signX * delta;
+    const xEntry = xBus + signX * delta;
+
+    const yChamfer1 = y1 + signY * delta;
+    const yChamfer2 = y2 - signY * delta;
+
+    if (dy < 2 * delta) {
+      const midY = (y1 + y2) / 2;
+      return `M ${x1} ${y1} L ${xSplit} ${y1} L ${xBus} ${midY} L ${xEntry} ${y2} L ${x2} ${y2}`;
+    }
+
+    return `M ${x1} ${y1} L ${xSplit} ${y1} L ${xBus} ${yChamfer1} L ${xBus} ${yChamfer2} L ${xEntry} ${y2} L ${x2} ${y2}`;
+  }
+
   // Default: Smooth organic Bezier curve (Freeplane & Mindomo style)
   const dx = Math.max(Math.abs(x2 - x1), 20);
   const cx1 = isRight ? x1 + dx * 0.45 : x1 - dx * 0.45;
@@ -1766,69 +1851,46 @@ export function generateRibbonEdgePath(
     return null;
   }
 
-  const parentCenterX = parentLayout.x + parentLayout.width / 2;
-  const parentCenterY = parentLayout.y + parentLayout.height / 2;
-  const childCenterX = childLayout.x + childLayout.width / 2;
-  const childCenterY = childLayout.y + childLayout.height / 2;
+  // 1. Obtener la trayectoria central exacta según la forma geométrica (bracket, horizontal, sharp, linear, bezier)
+  const edgePath = generateEdgePath(parentLayout, childLayout, edgeStyle, childShape);
+  if (!edgePath) return null;
 
-  let x1: number, y1: number, x2: number, y2: number;
-  let cx1: number, cy1: number, cx2: number, cy2: number;
+  // 2. Descomponer en puntos vectoriales
+  const rawPoints = parseEdgePathPoints(edgePath);
+  if (rawPoints.length < 2) return null;
 
-  if (childLayout.side === 'radial' || childLayout.side === 'circular') {
-    const start = getBoxRayIntersection(parentLayout, { x: childCenterX, y: childCenterY });
-    const end = getBoxRayIntersection(childLayout, { x: parentCenterX, y: parentCenterY });
-    x1 = start.x;
-    y1 = start.y;
-    x2 = end.x;
-    y2 = end.y;
+  // 3. Muestreo denso y uniforme a lo largo de los segmentos para que la cinta sea suave en curvas y esquinas
+  const points: Point2D[] = [];
+  const TARGET_STEP = 5; // px por punto de muestreo
 
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    cx1 = x1 + dx * 0.4;
-    cy1 = y1 + dy * 0.4;
-    cx2 = x1 + dx * 0.6;
-    cy2 = y1 + dy * 0.6;
-  } else if (childLayout.side === 'bottom') {
-    x1 = parentCenterX;
-    y1 = parentLayout.y + parentLayout.height;
-    x2 = childCenterX;
-    y2 = childLayout.y;
-    const dy = Math.max(Math.abs(y2 - y1), 20);
-    cx1 = x1;
-    cy1 = y1 + dy * 0.45;
-    cx2 = x2;
-    cy2 = y2 - dy * 0.45;
-  } else if (childLayout.side === 'top') {
-    x1 = parentCenterX;
-    y1 = parentLayout.y;
-    x2 = childCenterX;
-    y2 = childLayout.y + childLayout.height;
-    const dy = Math.max(Math.abs(y2 - y1), 20);
-    cx1 = x1;
-    cy1 = y1 - dy * 0.45;
-    cx2 = x2;
-    cy2 = y2 + dy * 0.45;
-  } else {
-    const isRight =
-      childLayout.side === 'right' ||
-      (childLayout.side !== 'left' && childLayout.x >= parentLayout.x + parentLayout.width / 2);
+  for (let i = 0; i < rawPoints.length - 1; i++) {
+    const p1 = rawPoints[i];
+    const p2 = rawPoints[i + 1];
+    const segLen = dist(p1, p2);
+    if (segLen < 0.001) continue;
 
-    x1 = isRight ? parentLayout.x + parentLayout.width : parentLayout.x;
-    y1 = parentLayout.y + parentLayout.height / 2;
-    x2 = isRight ? childLayout.x : childLayout.x + childLayout.width;
-    y2 = childLayout.y + childLayout.height / 2;
-
-    if (childShape === 'fork') {
-      y2 = childLayout.y + childLayout.height - 2;
+    const numSub = Math.max(1, Math.round(segLen / TARGET_STEP));
+    for (let s = 0; s < numSub; s++) {
+      const u = s / numSub;
+      points.push({
+        x: p1.x + (p2.x - p1.x) * u,
+        y: p1.y + (p2.y - p1.y) * u,
+      });
     }
-
-    const dx = Math.max(Math.abs(x2 - x1), 20);
-    cx1 = isRight ? x1 + dx * 0.45 : x1 - dx * 0.45;
-    cx2 = isRight ? x2 - dx * 0.45 : x2 + dx * 0.45;
-    cy1 = y1;
-    cy2 = y2;
   }
+  points.push(rawPoints[rawPoints.length - 1]);
 
+  if (points.length < 2) return null;
+
+  // 4. Distancia acumulada a lo largo del recorrido para interpolar t en [0, 1]
+  const cumDist: number[] = [0];
+  for (let i = 1; i < points.length; i++) {
+    cumDist.push(cumDist[i - 1] + dist(points[i - 1], points[i]));
+  }
+  const totalLength = cumDist[cumDist.length - 1];
+  if (totalLength < 1) return null;
+
+  // 5. Función de ancho según el perfil de grosor
   const effectiveBase = Math.max(2.2, baseWidth);
   const getWidthAtT = (t: number): number => {
     let factor = 1.0;
@@ -1843,72 +1905,64 @@ export function generateRibbonEdgePath(
     return Math.max(1.0, effectiveBase * factor);
   };
 
-  const STEPS = 32;
-  const topPoints: { x: number; y: number }[] = [];
-  const bottomPoints: { x: number; y: number }[] = [];
+  // 6. Cálculo de normales perpendiculares y puntos superior/inferior
+  const topPoints: Point2D[] = [];
+  const bottomPoints: Point2D[] = [];
 
-  for (let i = 0; i <= STEPS; i++) {
-    const t = i / STEPS;
-    let px = 0;
-    let py = 0;
-    let tx = 0;
-    let ty = 0;
-
-    if (edgeStyle === 'linear') {
-      px = (1 - t) * x1 + t * x2;
-      py = (1 - t) * y1 + t * y2;
-      tx = x2 - x1;
-      ty = y2 - y1;
-    } else if (edgeStyle === 'sharp') {
-      const midX = (x1 + x2) / 2;
-      const midY = (y1 + y2) / 2;
-      if (t <= 0.5) {
-        const subT = t / 0.5;
-        px = (1 - subT) * x1 + subT * midX;
-        py = y1;
-        tx = midX - x1;
-        ty = 0;
-      } else {
-        const subT = (t - 0.5) / 0.5;
-        px = midX;
-        py = (1 - subT) * y1 + subT * y2;
-        tx = 0;
-        ty = y2 - y1;
-      }
-    } else {
-      const oneMinusT = 1 - t;
-      const oneMinusT2 = oneMinusT * oneMinusT;
-      const oneMinusT3 = oneMinusT2 * oneMinusT;
-      const t2 = t * t;
-      const t3 = t2 * t;
-
-      px = oneMinusT3 * x1 + 3 * oneMinusT2 * t * cx1 + 3 * oneMinusT * t2 * cx2 + t3 * x2;
-      py = oneMinusT3 * y1 + 3 * oneMinusT2 * t * cy1 + 3 * oneMinusT * t2 * cy2 + t3 * y2;
-
-      tx = 3 * oneMinusT2 * (cx1 - x1) + 6 * oneMinusT * t * (cx2 - cx1) + 3 * t2 * (x2 - cx2);
-      ty = 3 * oneMinusT2 * (cy1 - y1) + 6 * oneMinusT * t * (cy2 - cy1) + 3 * t2 * (y2 - cy2);
-    }
-
-    const len = Math.sqrt(tx * tx + ty * ty);
-    let nx = 0;
-    let ny = 1;
-    if (len > 0.0001) {
-      nx = -ty / len;
-      ny = tx / len;
-    }
-
+  for (let i = 0; i < points.length; i++) {
+    const cur = points[i];
+    const t = cumDist[i] / totalLength;
     const halfW = getWidthAtT(t) / 2;
 
+    let nx = 0;
+    let ny = 1;
+
+    if (i === 0) {
+      const next = points[1];
+      const d = dist(cur, next);
+      if (d > 0.001) {
+        nx = -(next.y - cur.y) / d;
+        ny = (next.x - cur.x) / d;
+      }
+    } else if (i === points.length - 1) {
+      const prev = points[points.length - 2];
+      const d = dist(prev, cur);
+      if (d > 0.001) {
+        nx = -(cur.y - prev.y) / d;
+        ny = (cur.x - prev.x) / d;
+      }
+    } else {
+      const prev = points[i - 1];
+      const next = points[i + 1];
+      const d1 = dist(prev, cur);
+      const d2 = dist(cur, next);
+      const nx1 = d1 > 0.001 ? -(cur.y - prev.y) / d1 : 0;
+      const ny1 = d1 > 0.001 ? (cur.x - prev.x) / d1 : 0;
+      const nx2 = d2 > 0.001 ? -(next.y - cur.y) / d2 : 0;
+      const ny2 = d2 > 0.001 ? (next.x - cur.x) / d2 : 0;
+      const avgX = (nx1 + nx2) / 2;
+      const avgY = (ny1 + ny2) / 2;
+      const len = Math.hypot(avgX, avgY);
+      if (len > 0.001) {
+        nx = avgX / len;
+        ny = avgY / len;
+      } else {
+        nx = nx1;
+        ny = ny1;
+      }
+    }
+
     topPoints.push({
-      x: Number((px + nx * halfW).toFixed(2)),
-      y: Number((py + ny * halfW).toFixed(2)),
+      x: Number((cur.x + nx * halfW).toFixed(2)),
+      y: Number((cur.y + ny * halfW).toFixed(2)),
     });
     bottomPoints.push({
-      x: Number((px - nx * halfW).toFixed(2)),
-      y: Number((py - ny * halfW).toFixed(2)),
+      x: Number((cur.x - nx * halfW).toFixed(2)),
+      y: Number((cur.y - ny * halfW).toFixed(2)),
     });
   }
 
+  // 7. Ensamblar polígono cerrado de la cinta
   let pathStr = `M ${topPoints[0].x} ${topPoints[0].y}`;
   for (let i = 1; i < topPoints.length; i++) {
     pathStr += ` L ${topPoints[i].x} ${topPoints[i].y}`;

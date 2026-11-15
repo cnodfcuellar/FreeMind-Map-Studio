@@ -40,6 +40,29 @@ Stack: Tailwind CSS v4 (`@import "tailwindcss"`, sin `tailwind.config`, sin toke
   * **Aristas del Árbol (`edgeShadow`)**: Dual: Global en ToolPanel > Mapa > Aristas Globales (`mindMap.edgeShadow`) y Local en ToolPanel > Estilos > Aristas y Propagación (`selectedNode.edgeShadow` con propagación a hijos/hermanos). Presets: `Suave` (`0 2px 4px`), `3D` (`0 4px 8px`), `Glow` (`0 0 6px [colorRama]`), sliders de Blur (1-20px), OffsetY (0-16px) y selector de color.
   * **Conectores Libres (`connector.shadow`)**: ConectorModal y MindMapCanvas. Filtro `drop-shadow(...)` perimetral sobre trazo y flechas del conector. Presets: `soft` (`0 2px 4px rgba(0,0,0,0.20)`), `deep` (`0 4px 10px rgba(0,0,0,0.35)`), `glow` (`0 0 8px [color]`), sliders de Blur (1-20px), OffsetY (0-16px) y selector de color.
 
+### Aristas y Estilos de Trazo
+- **Formas de Conexión (`EdgeStyle`)**:
+  - `bezier`: Curva orgánica cúbica suave.
+  - `linear`: Conexión recta directa.
+  - `sharp`: Escuadra ortogonal a 90°.
+  - `horizontal`: Escalón horizontal-vertical.
+  - `bracket`: **Corchete biselado a 45°** (bifurcación en cúspide chevron `<` a $\pm 45^\circ$, columna/bus vertical común para todos los hermanos, segundo bisel de llegada a $45^\circ$ y entrada ortogonal horizontal al hijo; conexión horizontal recta si está al mismo nivel).
+- **Estilos de Trazo de Aristas (`EdgeBorderStyle`)**:
+  - `solid`: Trazo técnico continuo.
+  - `dashed`: Guiones con sliders de *Largo guión* (`edgeDashLength`, def. 10px) y *Espacio* (`edgeDashSpace`, def. 11px).
+  - `dotted`: Puntos con selector de 3 formas (*Esfera* `circle`, *Cuadrado* `square`, *Rombo* `diamond` ◆ con polígonos rotados a 45°) y slider de *Separación* (`edgeDotSpacing`, def. 9px).
+  - `double`: Doble línea paralela equidistante con slider de *Separación entre líneas* (`edgeBorderGap`, def. 4px).
+  - `zigzag`: Dientes angulados paramétricos con sliders de *Altura picos* (`edgeZigzagHeight`, def. 9.5px) y *Frecuencia* (`edgeZigzagFreq`, def. 19px).
+  - `wavy`: Ondas sinusoidales continuas de Bézier con sliders de *Altura ondas* (`edgeWaveHeight`, def. 10px) y *Ancho onda* (`edgeWaveWidth`, def. 36px).
+- **Perfiles de Grosor Variable (`EdgeProfile`)**:
+  - `uniform`: Grosor constante homogéneo.
+  - `tapered` (Cónica): Grosor decreciente desde la raíz hacia los hijos.
+  - `spindle` (Huso): Grosor abultado en la sección central de la arista.
+  - `hourglass` (Reloj): Grosor acentuado en los extremos (padre e hijo) y estrecho en el centro.
+  - *Interacción con estilos de trazo*:
+    * Con `solid`: renderiza el polígono continuo cerrado de la cinta modulada.
+    * Con `double`, `zigzag`, `wavy`, `dotted` o `dashed`: proyecta la silueta suave translúcida del perfil en el fondo (`fillOpacity: 0.18`) y dibuja encima el trazo estilizado correspondiente, garantizando total visibilidad tanto de la forma de la línea como de la modulación de grosor.
+
 ### Scrollbars y utilidades globales (`index.css`)
 - Scrollbar `6px`; track transparente; thumb `rgba(148,163,184,.4)` radius `4px`; hover `rgba(100,116,139,.6)`.
 - `.bg-grid-dots`: `radial-gradient(rgba(148,163,184,.35) 1px, transparent 1px)` tamaño `24px`.
