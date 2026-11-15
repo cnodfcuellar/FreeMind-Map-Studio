@@ -2830,6 +2830,51 @@ Erradicar el antipatrón de prop-drilling en `App.tsx` (64 props transferidas a 
 
 ---
 
+## 📌 [Plan de Solución Integral — Fase 2] — 2026-11-14: Desarticulación de Mega-Componentes y Extracción de Utilidades Matemáticas
+
+### 🎯 Motivo Técnico
+Reducir la complejidad ciclomática y cognitiva extrema de los componentes visuales con sobrecarga de responsabilidades (`FormatTab.tsx` con 1,755 LOC y `NodeBackgroundRenderer.tsx` con cálculos de CSS/geometría acoplados a la capa visual). Separar los cálculos puros de geometría, fondo y sombras para posibilitar pruebas unitarias sin DOM, y modularizar las 4 secciones del panel de formato siguiendo los principios de Atomic Design.
+
+### 🛠️ Qué Cambió
+1. **Extracción de Funciones Matemáticas y de Estilo (`src/utils/nodeStyleUtils.ts`):**
+   - Centralización de funciones puras: `isDarkNodeBackground`, `getNodeBackgroundStyles`, `getNodeShapeStyles`, `computeNodeShadowStyle`.
+   - Soporte desacoplado para gradientes lineales/radiales, tramas SVG dinámicas, imágenes y estilos de contorno.
+2. **Refactorización de `NodeBackgroundRenderer.tsx`:**
+   - Reducción del componente visual al re-exportar y consumir las utilidades puras de `nodeStyleUtils.ts`.
+3. **Modularización de `FormatTab.tsx` en 4 Sub-Componentes Específicos:**
+   - Creado el directorio `src/components/organisms/toolpanel/format/`.
+   - `NodeShapeSection.tsx`: Selección geométrica, dimensiones de nodo (W/H), anatomía de bocadillo (speech bubble) y horquilla (fork), delegando en controles moleculares.
+   - `NodeBackgroundSection.tsx`: Tipos de relleno (sólido, degradado, trama SVG con `PATTERN_OPTIONS`, imagen y transparencia).
+   - `NodeBorderSection.tsx`: Estilos de línea de contorno (sólido, guiones, puntos, doble, zigzag, ondulado) con controles paramétricos contextuales y sombra del nodo.
+   - `NodeEdgeSection.tsx`: Forma de arista a hijos, perfiles de grosor (ribbon), estilo de línea, resplandor/sombra y botones de propagación a descendientes/hermanos.
+   - `FormatTab.tsx`: Reducido de 1,755 líneas a ~95 líneas, actuando como orquestador de plegado/desplegado y re-exportando `PATTERN_OPTIONS` para retrocompatibilidad.
+4. **Nuevas Pruebas Unitarias:**
+   - `src/utils/__tests__/nodeStyleUtils.test.ts`: 8 pruebas cubriendo detección de luminancia, cálculo de degradados, filtros de drop-shadow y estilos de forma.
+   - `src/components/organisms/toolpanel/__tests__/FormatTab.test.tsx`: 4 pruebas verificando montaje de secciones, botones globales de expandir/plegar, mutaciones de geometría y propagación de estilos.
+
+### ✏️ Archivos Creados y Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/utils/nodeStyleUtils.ts` | Utilidad Pura | Creado. Centraliza cálculos de estilos, fondos, formas y sombras de nodos. |
+| `src/utils/__tests__/nodeStyleUtils.test.ts` | Tests | Creado. 8 pruebas unitarias para cálculos puros de estilo. |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Refactorizado para delegar en `nodeStyleUtils.ts`. |
+| `src/components/organisms/toolpanel/format/NodeShapeSection.tsx` | Organismo / Sección | Creado. Sub-componente de Forma y Geometría. |
+| `src/components/organisms/toolpanel/format/NodeBackgroundSection.tsx` | Organismo / Sección | Creado. Sub-componente de Fondo y Relleno con `PATTERN_OPTIONS`. |
+| `src/components/organisms/toolpanel/format/NodeBorderSection.tsx` | Organismo / Sección | Creado. Sub-componente de Bordes y Contorno con parámetros contextuales. |
+| `src/components/organisms/toolpanel/format/NodeEdgeSection.tsx` | Organismo / Sección | Creado. Sub-componente de Aristas, Conexiones y Propagación. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Reducido de 1,755 a 95 LOC; orquesta los 4 submódulos. |
+| `src/components/organisms/toolpanel/__tests__/FormatTab.test.tsx` | Tests | Creado. 4 pruebas unitarias de integración de pestaña de formato. |
+| `doc/CHANGELOG.md` | Documentación | Registro detallado de la Fase 2. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm vitest run src/components/organisms/toolpanel/__tests__/FormatTab.test.tsx`: **4/4 pruebas unitarias exitosas**.
+- [x] `pnpm test:regression`: **53/53 suites superadas (355/355 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.12s (0 errores)**.
+
+---
+
+
 
 
 
