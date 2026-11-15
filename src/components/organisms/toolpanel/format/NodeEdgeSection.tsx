@@ -39,7 +39,7 @@ export const NodeEdgeSection: React.FC<NodeEdgeSectionProps> = ({
     >
       <div className="space-y-3">
         <span className="text-[11px] font-semibold text-slate-600 block">Forma de la Conexión</span>
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-4 gap-1.5">
           {[
             {
               id: 'bezier' as EdgeStyle,
@@ -78,11 +78,29 @@ export const NodeEdgeSection: React.FC<NodeEdgeSectionProps> = ({
               ),
             },
             {
-              id: 'bracket' as EdgeStyle,
-              label: 'Corchete',
+              id: 'bracket-bevel-45' as EdgeStyle,
+              label: 'Bisel 45°',
               icon: (
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 12 H7 L10 6 L14 6 H21 M7 12 L10 18 L14 18 H21 M7 12 H21" />
+                  <path d="M3 18 H7 L11 14 V10 L15 6 H21" />
+                </svg>
+              ),
+            },
+            {
+              id: 'bracket-square' as EdgeStyle,
+              label: 'Ortogonal',
+              icon: (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 18 H11 V6 H21" />
+                </svg>
+              ),
+            },
+            {
+              id: 'bracket' as EdgeStyle,
+              label: 'Bisel Simple',
+              icon: (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 18 H7 L14 6 H21" />
                 </svg>
               ),
             },

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { MindMap, CalculatedNodeLayout } from '../../types/mindmap';
 import { ALL_TEMPLATES, BLANK_MAP } from '../../utils/sampleMaps';
-import { computeMindMapLayout } from '../../utils/layoutEngine';
+import { computeMindMapLayout, generateEdgePath } from '../../utils/layoutEngine';
 import { THEMES } from '../../utils/themes';
 import { TEMPLATE_SVGS } from '../../utils/templateIllustrations';
 import {
@@ -83,6 +83,26 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
         viewBox={viewBox}
         preserveAspectRatio="xMidYMid meet"
       >
+        <defs>
+          <filter id={`preview-node-shadow-${map.id}`} x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow
+              dx="0"
+              dy={isDark ? "0" : "1.5"}
+              stdDeviation={isDark ? "3" : "2"}
+              floodColor={isDark ? (map.nodes[map.rootId]?.nodeShadowColor || "#38bdf8") : "rgba(0, 0, 0, 0.22)"}
+              floodOpacity={isDark ? "0.6" : "0.9"}
+            />
+          </filter>
+          <filter id={`preview-edge-shadow-${map.id}`} x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow
+              dx="0"
+              dy="1"
+              stdDeviation="1.5"
+              floodColor={isDark ? "rgba(56, 189, 248, 0.35)" : "rgba(0, 0, 0, 0.15)"}
+            />
+          </filter>
+        </defs>
+
         {/* Branches / Edges */}
         <g id="preview-edges">
           {nodesList.map((childLayout) => {
@@ -97,47 +117,37 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
               theme.branchColors[childLayout.branchIndex % theme.branchColors.length] ||
               '#3b82f6';
 
-            let pathData = '';
-            if (childLayout.side === 'left') {
-              const startX = parentLayout.x;
-              const startY = parentLayout.y + parentLayout.height / 2;
-              const endX = childLayout.x + childLayout.width;
-              const endY = childLayout.y + childLayout.height / 2;
-              const midX = (startX + endX) / 2;
-              pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
-            } else if (childLayout.side === 'bottom') {
-              const startX = parentLayout.x + parentLayout.width / 2;
-              const startY = parentLayout.y + parentLayout.height;
-              const endX = childLayout.x + childLayout.width / 2;
-              const endY = childLayout.y;
-              const midY = (startY + endY) / 2;
-              pathData = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
-            } else if (childLayout.side === 'top') {
-              const startX = parentLayout.x + parentLayout.width / 2;
-              const startY = parentLayout.y;
-              const endX = childLayout.x + childLayout.width / 2;
-              const endY = childLayout.y + childLayout.height;
-              const midY = (startY + endY) / 2;
-              pathData = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`;
-            } else {
-              const startX = parentLayout.x + parentLayout.width;
-              const startY = parentLayout.y + parentLayout.height / 2;
-              const endX = childLayout.x;
-              const endY = childLayout.y + childLayout.height / 2;
-              const midX = (startX + endX) / 2;
-              pathData = `M ${startX} ${startY} C ${midX} ${startY}, ${midX} ${endY}, ${endX} ${endY}`;
-            }
+            const hasEdgeShadow = Boolean(map.edgeShadow || childNode.edgeShadow);
+            const isDashed = childNode.edgeBorderStyle === 'dashed' || map.edgeBorderStyle === 'dashed';
+            const isDotted = childNode.edgeBorderStyle === 'dotted' || map.edgeBorderStyle === 'dotted';
+            const isDouble = childNode.edgeBorderStyle === 'double' || map.edgeBorderStyle === 'double';
+
+            const effectiveStyle = childNode.edgeStyle || map.edgeStyle || theme.edgeStyle || 'bezier';
+            const pathData = generateEdgePath(parentLayout, childLayout, effectiveStyle, childNode.shape);
+            if (!pathData) return null;
 
             return (
-              <path
-                key={`preview-edge-${childNode.parentId}-${childNode.id}`}
-                d={pathData}
-                fill="none"
-                stroke={branchColor}
-                strokeWidth={childLayout.depth === 1 ? 3 : 2}
-                strokeOpacity={0.85}
-                strokeLinecap="round"
-              />
+              <g key={`preview-edge-${childNode.parentId}-${childNode.id}`}>
+                <path
+                  d={pathData}
+                  fill="none"
+                  stroke={branchColor}
+                  strokeWidth={childLayout.depth === 1 ? 3 : 2}
+                  strokeOpacity={0.85}
+                  strokeDasharray={isDashed ? "4 3" : isDotted ? "2 2" : undefined}
+                  strokeLinecap="round"
+                  filter={hasEdgeShadow ? `url(#preview-edge-shadow-${map.id})` : undefined}
+                />
+                {isDouble && (
+                  <path
+                    d={pathData}
+                    fill="none"
+                    stroke={bgColor}
+                    strokeWidth={1}
+                    strokeLinecap="round"
+                  />
+                )}
+              </g>
             );
           })}
         </g>
@@ -160,14 +170,16 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
               }
             }
 
-            const strokeColor = isRoot ? '#ffffff' : l.depth === 1 ? '#ffffff' : branchColor;
-            const strokeW = isRoot ? 2.5 : 1.5;
+            const strokeColor = node?.borderColor || (isRoot ? '#ffffff' : l.depth === 1 ? '#ffffff' : branchColor);
+            const strokeW = node?.borderWidth ? Math.min(node.borderWidth, 2.5) : (isRoot ? 2.5 : 1.5);
+            const strokeDash = node?.borderStyle === 'dashed' || node?.borderDash === 'dashed' ? '3 2' : node?.borderStyle === 'dotted' ? '1.5 1.5' : undefined;
+            const filterAttr = node?.nodeShadow !== false ? `url(#preview-node-shadow-${map.id})` : undefined;
             const shape = node?.shape || (isRoot ? 'bubble' : 'bubble');
 
             if (shape === 'circle') {
               const r = Math.min(l.width, l.height) / 2;
               return (
-                <g key={`preview-node-${l.id}`}>
+                <g key={`preview-node-${l.id}`} filter={filterAttr}>
                   <circle
                     cx={l.x + l.width / 2}
                     cy={l.y + l.height / 2}
@@ -175,6 +187,7 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
                     fill={nodeFill}
                     stroke={strokeColor}
                     strokeWidth={strokeW}
+                    strokeDasharray={strokeDash}
                   />
                 </g>
               );
@@ -182,7 +195,7 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
 
             if (shape === 'oval') {
               return (
-                <g key={`preview-node-${l.id}`}>
+                <g key={`preview-node-${l.id}`} filter={filterAttr}>
                   <ellipse
                     cx={l.x + l.width / 2}
                     cy={l.y + l.height / 2}
@@ -191,6 +204,7 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
                     fill={nodeFill}
                     stroke={strokeColor}
                     strokeWidth={strokeW}
+                    strokeDasharray={strokeDash}
                   />
                 </g>
               );
@@ -204,12 +218,13 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
               const cut = Math.min(w * 0.18, 12);
               const points = `${x + cut},${y} ${x + w - cut},${y} ${x + w},${y + h / 2} ${x + w - cut},${y + h} ${x + cut},${y + h} ${x},${y + h / 2}`;
               return (
-                <g key={`preview-node-${l.id}`}>
+                <g key={`preview-node-${l.id}`} filter={filterAttr}>
                   <polygon
                     points={points}
                     fill={nodeFill}
                     stroke={strokeColor}
                     strokeWidth={strokeW}
+                    strokeDasharray={strokeDash}
                   />
                 </g>
               );
@@ -218,7 +233,7 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
             if (shape === 'pill') {
               const r = l.height / 2;
               return (
-                <g key={`preview-node-${l.id}`}>
+                <g key={`preview-node-${l.id}`} filter={filterAttr}>
                   <rect
                     x={l.x}
                     y={l.y}
@@ -228,6 +243,7 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
                     fill={nodeFill}
                     stroke={strokeColor}
                     strokeWidth={strokeW}
+                    strokeDasharray={strokeDash}
                   />
                 </g>
               );
@@ -235,7 +251,7 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
 
             if (shape === 'fork') {
               return (
-                <g key={`preview-node-${l.id}`}>
+                <g key={`preview-node-${l.id}`} filter={filterAttr}>
                   <line
                     x1={l.x}
                     y1={l.y + l.height}
@@ -244,24 +260,41 @@ const TemplateMapPreview: React.FC<{ map: MindMap; height?: number }> = ({ map, 
                     stroke={strokeColor}
                     strokeWidth={strokeW * 2}
                     strokeLinecap="round"
+                    strokeDasharray={strokeDash}
                   />
                 </g>
               );
             }
 
+            const isNodeDouble = node?.borderStyle === 'double' || node?.borderDash === 'double';
+            const nodeRadius = isRoot ? 8 : shape === 'square' ? 2 : shape === 'rectangle' ? 3 : 6;
+
             // Default Bubble / Rectangle / Star / Square / Arrow
             return (
-              <g key={`preview-node-${l.id}`}>
+              <g key={`preview-node-${l.id}`} filter={filterAttr}>
                 <rect
                   x={l.x}
                   y={l.y}
                   width={l.width}
                   height={l.height}
-                  rx={isRoot ? 8 : shape === 'square' ? 2 : shape === 'rectangle' ? 3 : 6}
+                  rx={nodeRadius}
                   fill={nodeFill}
                   stroke={strokeColor}
                   strokeWidth={strokeW}
+                  strokeDasharray={strokeDash}
                 />
+                {isNodeDouble && (
+                  <rect
+                    x={l.x + 2}
+                    y={l.y + 2}
+                    width={Math.max(0, l.width - 4)}
+                    height={Math.max(0, l.height - 4)}
+                    rx={Math.max(0, nodeRadius - 1.5)}
+                    fill="none"
+                    stroke={strokeColor}
+                    strokeWidth={Math.max(1, strokeW * 0.75)}
+                  />
+                )}
               </g>
             );
           })}

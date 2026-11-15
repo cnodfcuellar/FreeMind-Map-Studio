@@ -1644,7 +1644,7 @@ export function generateEdgePath(
       return `M ${start.x} ${start.y} L ${midX} ${start.y} L ${midX} ${end.y} L ${end.x} ${end.y}`;
     }
 
-    if (edgeStyle === 'bracket') {
+    if (edgeStyle === 'bracket' || edgeStyle === 'bracket-bevel-45') {
       const midX = (start.x + end.x) / 2;
       const dx = Math.abs(end.x - start.x);
       const dy = Math.abs(end.y - start.y);
@@ -1655,6 +1655,11 @@ export function generateEdgePath(
       const signX = end.x > start.x ? 1 : -1;
       const signY = end.y > start.y ? 1 : -1;
       return `M ${start.x} ${start.y} L ${midX - signX * delta} ${start.y} L ${midX} ${start.y + signY * delta} L ${midX} ${end.y - signY * delta} L ${midX + signX * delta} ${end.y} L ${end.x} ${end.y}`;
+    }
+
+    if (edgeStyle === 'bracket-square') {
+      const midX = (start.x + end.x) / 2;
+      return `M ${start.x} ${start.y} L ${midX} ${start.y} L ${midX} ${end.y} L ${end.x} ${end.y}`;
     }
 
     // Default: Organic cubic bezier along vector
@@ -1692,7 +1697,12 @@ export function generateEdgePath(
       return `M ${x1} ${y1} L ${x1} ${stepY} L ${x2} ${stepY} L ${x2} ${y2}`;
     }
 
-    if (edgeStyle === 'bracket') {
+    if (edgeStyle === 'bracket-square') {
+      const midY = (y1 + y2) / 2;
+      return `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
+    }
+
+    if (edgeStyle === 'bracket' || edgeStyle === 'bracket-bevel-45') {
       const dx = Math.abs(x2 - x1);
       const dy = Math.abs(y2 - y1);
       if (dx <= 3) {
@@ -1743,7 +1753,12 @@ export function generateEdgePath(
       return `M ${x1} ${y1} L ${x1} ${stepY} L ${x2} ${stepY} L ${x2} ${y2}`;
     }
 
-    if (edgeStyle === 'bracket') {
+    if (edgeStyle === 'bracket-square') {
+      const midY = (y1 + y2) / 2;
+      return `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
+    }
+
+    if (edgeStyle === 'bracket' || edgeStyle === 'bracket-bevel-45') {
       const dx = Math.abs(x2 - x1);
       const dy = Math.abs(y2 - y1);
       if (dx <= 3) {
@@ -1799,6 +1814,47 @@ export function generateEdgePath(
     const offset = isRight ? Math.min(28, Math.abs(x2 - x1) * 0.4) : -Math.min(28, Math.abs(x2 - x1) * 0.4);
     const midX = x1 + offset;
     return `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+  }
+
+  if (edgeStyle === 'bracket-square') {
+    // Pure 90° orthogonal bracket: trunk out -> vertical bus -> horizontal entry
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+    if (dy <= 3) return `M ${x1} ${y1} L ${x2} ${y2}`;
+    const trunkLen = Math.min(32, Math.max(12, dx * 0.3));
+    const signX = isRight ? 1 : -1;
+    const xBus = x1 + signX * trunkLen;
+    return `M ${x1} ${y1} L ${xBus} ${y1} L ${xBus} ${y2} L ${x2} ${y2}`;
+  }
+
+  if (edgeStyle === 'bracket-bevel-45') {
+    // Exact 45° chamfered bracket (Δx = |Δy|) from user design:
+    // trunk out -> 45° chamfer to vertical bus -> vertical bus -> 45° chamfer into entry -> child
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+    if (dy <= 3) {
+      return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+    const trunkLen = Math.min(28, Math.max(8, dx * 0.22));
+    const signX = isRight ? 1 : -1;
+    const signY = y2 > y1 ? 1 : -1;
+    // Exactly 45° slope (dx == dy)
+    const maxChamfer = Math.min(22, (dx - trunkLen) / 2.5, dy / 2.2);
+    const chamfer = Math.max(4, maxChamfer);
+
+    const xTrunk = x1 + signX * trunkLen;
+    const xBus = xTrunk + signX * chamfer;
+    const yBusStart = y1 + signY * chamfer;
+    const yBusEnd = y2 - signY * chamfer;
+    const xEntry = xBus + signX * chamfer;
+
+    if (dy < 2 * chamfer || dx < trunkLen + 2 * chamfer) {
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+      return `M ${x1} ${y1} L ${xTrunk} ${y1} L ${midX} ${midY} L ${x2} ${y2}`;
+    }
+
+    return `M ${x1} ${y1} L ${xTrunk} ${y1} L ${xBus} ${yBusStart} L ${xBus} ${yBusEnd} L ${xEntry} ${y2} L ${x2} ${y2}`;
   }
 
   if (edgeStyle === 'bracket') {

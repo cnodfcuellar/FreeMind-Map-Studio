@@ -26,7 +26,15 @@ export type OvalRatio = 'classic' | 'slender' | 'capsule';
 export type ArrowDirection = 'right' | 'left' | 'up' | 'down';
 export type ArrowTailStyle = 'notch' | 'flat';
 
-export type EdgeStyle = 'bezier' | 'linear' | 'sharp' | 'horizontal' | 'bracket' | 'hidden';
+export type EdgeStyle =
+  | 'bezier'
+  | 'linear'
+  | 'sharp'
+  | 'horizontal'
+  | 'bracket'
+  | 'bracket-bevel-45'
+  | 'bracket-square'
+  | 'hidden';
 
 export type EdgeBorderStyle = 'solid' | 'dashed' | 'dotted' | 'double' | 'zigzag' | 'wavy';
 export type EdgeDotShape = 'circle' | 'square' | 'diamond';

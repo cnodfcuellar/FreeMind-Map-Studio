@@ -153,6 +153,24 @@ describe('layoutEngine', () => {
       expect(pathBottom.startsWith('M 160 260')).toBe(true);
       expect(pathBottom.endsWith('L 300 400')).toBe(true);
     });
+
+    it('generates exact 45° chamfered bracket path for bracket-bevel-45', () => {
+      const childAbove = createTestLayout('child-above', 350, 80, 100, 60, 'right');
+      const path = generateEdgePath(parentLayout, childAbove, 'bracket-bevel-45');
+      expect(path.startsWith('M 220 230')).toBe(true);
+      expect(path.endsWith('L 350 110')).toBe(true);
+      const points = path.split(' L ');
+      expect(points.length).toBe(6);
+    });
+
+    it('generates pure 90° orthogonal bracket path for bracket-square', () => {
+      const childAbove = createTestLayout('child-above', 350, 80, 100, 60, 'right');
+      const path = generateEdgePath(parentLayout, childAbove, 'bracket-square');
+      expect(path.startsWith('M 220 230')).toBe(true);
+      expect(path.endsWith('L 350 110')).toBe(true);
+      const points = path.split(' L ');
+      expect(points.length).toBe(4); // M x1 y1, L xBus y1, L xBus y2, L x2 y2
+    });
   });
 
   describe('generateRibbonEdgePath - variable thickness ribbon across all edge styles', () => {

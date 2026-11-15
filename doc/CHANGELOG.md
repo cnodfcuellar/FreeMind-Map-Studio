@@ -3080,3 +3080,56 @@ El repositorio mantenía organismos y módulos diseminados fuera de la jerarquí
 
 
 
+
+## 📌 [Estilos y Guía Interactiva] — 2026-11-15: Nuevos Estilos de Arista (Bisel 45° y Ortogonal), Bordes en Plantillas y Actualización del Tutorial
+
+### 🎯 Motivo Técnico
+El usuario identificó que los nuevos estilos de aristas (`bracket-bevel-45` / Corchete Biselado a 45° y `bracket-square` / Corchete Ortogonal a 90°) no contaban con botones de selección en el panel lateral (`NodeEdgeSection.tsx`), que la previsualización de plantillas (`TemplatesModal.tsx`) generaba curvas Bézier fijas ignorando el estilo real de arista y borde, y que la Guía Interactiva (`TUTORIAL_MAP`) y las plantillas no mostraban de manera visible los bordes dobles, ondulados, en zigzag, biselados ni las nuevas aristas.
+
+### 🛠️ Qué Cambió
+1. **Nuevos Estilos de Arista en el Panel Lateral (`src/components/organisms/toolpanel/format/NodeEdgeSection.tsx`)**:
+   - Agregadas las opciones `'bracket-bevel-45'` ("Bisel 45°") y `'bracket-square'` ("Ortogonal") en la botonera de formas de conexión.
+   - Diseñados iconos vectoriales SVG limpios que representan fielmente la geometría:
+     - Bisel 45°: Tronco horizontal -> bisel 45° ($\Delta x = |\Delta y|$) -> barra vertical -> bisel 45° -> llegada horizontal (`M 3 18 H 7 L 11 14 V 10 L 15 6 H 21`).
+     - Ortogonal: Tronco horizontal -> quiebre a 90° puro -> llegada horizontal (`M 3 18 H 11 V 6 H 21`).
+   - Reorganizado el grid de selección a 4 columnas con proporciones ergonómicas.
+2. **Previsualizaciones Reales de Arista y Bordes en Modal de Plantillas (`src/components/Modals/TemplatesModal.tsx`)**:
+   - Reemplazada la curva Bézier fija por invocación directa a `generateEdgePath(parentLayout, childLayout, effectiveStyle, childNode.shape)`. Ahora cada tarjeta en el catálogo muestra su arista auténtica (ortogonal, biselada a 45°, recta, etc.).
+   - Añadido soporte visual en la miniatura para bordes dobles (`borderStyle: 'double'`) y aristas dobles (`edgeBorderStyle: 'double'`).
+3. **Actualización Completa de la Guía Interactiva (`TUTORIAL_MAP` en `src/utils/sampleMaps.ts`)**:
+   - En la rama de Estilos Visuales (`node-styles`), se configuraron nodos de demostración prácticos:
+     - `fmt-bubble`: Borde Ondulado (`borderStyle: 'wavy'`, `borderWaveHeight: 7`, `borderWaveWidth: 24`).
+     - `fmt-rect`: Borde Doble con Esquinas Biseladas (`borderStyle: 'double'`, `borderGap: 3.5`, `rectCornerStyle: 'bevel'`, `rectRadius: 6`).
+     - `fmt-square`: Borde con Guiones (`borderStyle: 'dashed'`, `borderDashLength: 10`, `borderDashSpace: 6`).
+     - `fmt-oval`: Borde Punteado con Rombos Geométricos (`borderStyle: 'dotted'`, `borderDotShape: 'diamond'`, `borderDotSpacing: 10`).
+     - `fmt-pill`: Borde en Zigzag continuo (`borderStyle: 'zigzag'`, `borderZigzagHeight: 7`, `borderZigzagFreq: 14`).
+   - En la rama de Conexiones y Temas (`node-edges-theme`), se crearon 3 nodos demostrativos dedicados:
+     - `edge-bracket-45`: 'Arista Bisel 45° (Chamfer)' con `edgeStyle: 'bracket-bevel-45'`, `edgeShadow: true`, `edgeShadowPreset: 'glow'`.
+     - `edge-bracket-square`: 'Arista Corchete Ortogonal 90°' con `edgeStyle: 'bracket-square'`.
+     - `edge-double-glow`: 'Arista Doble con Brillo (Glow)' con `borderStyle: 'double'`, `edgeBorderStyle: 'double'`, `edgeShadow: true`, `edgeShadowPreset: 'glow'`.
+4. **Enriquecimiento de Plantillas Clave**:
+   - `ORG_CHART_MAP` (Organigrama): Conexiones `edgeStyle: 'bracket-square'` y nodos clave con `borderStyle: 'double'`.
+   - `OKR_STRATEGY_MAP` (OKRs Anuales): Conexiones `edgeStyle: 'bracket-bevel-45'` y nodos raíz con `borderStyle: 'double'`.
+   - `CYBERSECURITY_FRAMEWORK_MAP` (Marco NIST Zero-Trust): Conexiones `edgeStyle: 'bracket-bevel-45'` y nodos de alerta (`sec-detect`, `sec-respond`) con contorno en zigzag (`borderStyle: 'zigzag'`).
+   - `BRAINSTORMING_MAP` (Lluvia de Ideas): Nodos de categoría con contorno ondulado lúdico (`borderStyle: 'wavy'`).
+5. **Pruebas Automatizadas (`src/utils/__tests__/layoutEngine.test.ts`)**:
+   - Añadidas pruebas unitarias para validar la geometría de `bracket-bevel-45` (6 puntos vectoriales) y `bracket-square` (4 puntos vectoriales a 90°).
+
+### 📄 Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos Centralizados | Incorporación de `'bracket-bevel-45'` y `'bracket-square'` en `EdgeStyle`. |
+| `src/utils/layoutEngine.ts` | Utilidad / Geometría | Soporte matemático para bisel 45° y corchete ortogonal 90° en horizontal, vertical y radial. |
+| `src/components/organisms/toolpanel/format/NodeEdgeSection.tsx` | Organismo / ToolPanel | Botones e iconos vectoriales interactivos para seleccionar Bisel 45° y Ortogonal. |
+| `src/components/Modals/TemplatesModal.tsx` | Organismo / Modal | Integración de `generateEdgePath` y renderizado de bordes/aristas dobles en tarjetas. |
+| `src/utils/sampleMaps.ts` | Utilidad / Plantillas | Actualización del `TUTORIAL_MAP`, `ORG_CHART_MAP`, `OKR_STRATEGY_MAP` y `BRAINSTORMING_MAP`. |
+| `src/utils/additionalTemplates.ts` | Utilidad / Plantillas | Actualización de `CYBERSECURITY_FRAMEWORK_MAP` con bisel 45° y bordes zigzag. |
+| `src/utils/__tests__/layoutEngine.test.ts` | Tests | Pruebas unitarias de las geometrías de arista añadidas. |
+| `doc/CHANGELOG.md` | Documentación | Registro pormenorizado de los cambios y justificaciones técnicas. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm test:regression`: **54/54 suites superadas (370/370 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.76s (0 errores)**.
+
+---
