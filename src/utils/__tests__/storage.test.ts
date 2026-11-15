@@ -6,6 +6,8 @@ import {
   updateSavedMapsIndex,
   loadMapById,
   deleteMapById,
+  normalizeNode,
+  normalizeMindMap,
 } from '../storage';
 import { BLANK_MAP, TUTORIAL_MAP } from '../sampleMaps';
 
@@ -57,5 +59,33 @@ describe('storage', () => {
     deleteMapById('map-new');
     expect(loadMapById('map-new')).toBeNull();
     expect(getSavedMapsIndex().some((m) => m.id === 'map-new')).toBe(false);
+  });
+
+  it('normalizeNode provee defaults para id, text, parentId y children', () => {
+    const raw = { borderColor: '#ff0000', rectRadius: 8 };
+    const normalized = normalizeNode(raw);
+    expect(normalized.id).toBeDefined();
+    expect(normalized.text).toBe('');
+    expect(normalized.parentId).toBeNull();
+    expect(normalized.children).toEqual([]);
+    expect(normalized.borderColor).toBe('#ff0000');
+    expect(normalized.rectRadius).toBe(8);
+  });
+
+  it('normalizeMindMap normaliza todos los nodos y garantiza connectors como arreglo', () => {
+    const rawMap = {
+      id: 'map-custom',
+      title: 'Custom',
+      rootId: 'root',
+      nodes: {
+        root: { id: 'root', text: 'Raíz' },
+        child1: { id: 'child1', parentId: 'root' },
+      },
+    };
+    const norm = normalizeMindMap(rawMap);
+    expect(norm.connectors).toEqual([]);
+    expect(norm.nodes['root'].children).toEqual([]);
+    expect(norm.nodes['child1'].text).toBe('');
+    expect(norm.nodes['child1'].parentId).toBe('root');
   });
 });

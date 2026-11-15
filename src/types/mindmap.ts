@@ -115,7 +115,9 @@ export type NodeBgImageMode = 'fit' | 'cover' | 'contain' | 'tile';
 export type NodeBorderStyle = 'solid' | 'dashed' | 'dotted' | 'double' | 'zigzag' | 'wavy';
 export type NodeBorderDotShape = 'circle' | 'square' | 'diamond';
 
-export interface MindNode {
+// --- MindNode Sub-Configurations (Fase 5: Composición Modular) ---
+
+export interface MindNodeBase {
   id: string;
   text: string;
   parentId: string | null;
@@ -124,26 +126,30 @@ export interface MindNode {
   side?: NodeSide;
   createdAt?: number;
   updatedAt?: number;
-  
-  // Visual Styles
   shape?: NodeShape;
   customWidth?: number;
   customHeight?: number;
+  isFreeFloating?: boolean;
+  freePosition?: { x: number; y: number };
+  cloud?: NodeCloud;
+}
 
-  // Bubble Shape Tail Customization (Anatomía de la colita de burbuja)
+export interface NodeTailConfig {
   tailLength?: number;
   tailWidth?: number;
   tailSide?: BubbleTailSide;
   tailOffset?: number;
   tailStyle?: BubbleTailStyle;
+}
 
-  // Fork Shape Customization (Cualidades anatómicas de la horquilla)
+export interface NodeForkConfig {
   forkHooks?: ForkHooksSide;
   forkHookHeight?: number;
   forkCornerStyle?: ForkCornerStyle;
   forkPreset?: ForkPreset;
+}
 
-  // Rectangle and Square Shape Customization (Cualidades del rectángulo y cuadrado)
+export interface NodeRectConfig {
   rectCornerStyle?: RectangleCornerStyle;
   rectRadius?: number;
   rectPreset?: RectanglePreset;
@@ -153,19 +159,24 @@ export interface MindNode {
   rectCornerBottomLeft?: boolean;
   squareRotation?: 0 | 45 | number; // 0 (cuadrado estándar) o 45 (rombo de decisión)
   squareKeepTextHorizontal?: boolean;
+}
 
-  // Oval Shape Customization (Cualidades del óvalo / elipse)
+export interface NodeOvalConfig {
   ovalRotation?: number;
   ovalKeepTextHorizontal?: boolean;
   ovalPreset?: OvalPreset;
   ovalRatio?: OvalRatio;
+}
 
-  // Arrow Shape Customization (Cualidades y dirección de la flecha)
+export interface NodeArrowConfig {
   arrowDirection?: ArrowDirection;
   arrowAutoOrient?: boolean;
   arrowTailStyle?: ArrowTailStyle;
   arrowBidirectional?: boolean;
   arrowTipRatio?: number; // proporción de la punta (0.15 a 0.50, default ~0.32)
+}
+
+export interface NodeBackgroundConfig {
   color?: string; // background fill or accent
   bgType?: NodeBackgroundType;
   gradientColor1?: string;
@@ -175,18 +186,16 @@ export interface MindNode {
   nodePatternColor?: string;
   nodePatternSize?: number;
   nodePatternOpacity?: number;
-
-  // Background Image (Fondo del nodo)
   bgImageUrl?: string;
   bgImageMode?: NodeBgImageMode;
   bgImageOpacity?: number;
+}
 
+export interface NodeBorderConfig {
   borderColor?: string;
   borderWidth?: number;
   borderDash?: NodeBorderStyle;
   borderStyle?: NodeBorderStyle;
-
-  // Parámetros avanzados de bordes y contornos (estilos dinámicos)
   borderGap?: number; // Separación para modo doble (px, def: 4)
   borderColorInner?: string; // Color línea interior para modo doble
   borderColorOuter?: string; // Color línea exterior para modo doble
@@ -198,15 +207,17 @@ export interface MindNode {
   borderZigzagFreq?: number; // Frecuencia de picos para zigzag (px, def: 19)
   borderWaveHeight?: number; // Altura de ondas para ondulado (px, def: 10)
   borderWaveWidth?: number; // Ancho de onda para ondulado (px, def: 36)
+}
 
-  // Node Box / Shape Shadow (Sombra del contorno del nodo)
+export interface NodeShadowConfig {
   nodeShadow?: boolean;
   nodeShadowPreset?: 'soft' | 'medium' | 'deep' | 'glow';
   nodeShadowBlur?: number;
   nodeShadowOffsetY?: number;
   nodeShadowColor?: string;
+}
 
-  // Node Attached Content Image (Imagen de contenido del nodo)
+export interface NodeImageConfig {
   imageUrl?: string;
   imageWidth?: number;
   imageHeight?: number;
@@ -215,8 +226,9 @@ export interface MindNode {
   imageShadowPreset?: 'soft' | 'medium' | 'deep' | 'glow';
   imageShadowBlur?: number;
   imageShadowColor?: string;
+}
 
-  // Title Text & Typography
+export interface NodeTypographyConfig {
   textColor?: string;
   fontSize?: number;
   bold?: boolean;
@@ -230,8 +242,9 @@ export interface MindNode {
   textShadowOffsetX?: number;
   textShadowOffsetY?: number;
   applyTextShadowToBody?: boolean;
+}
 
-  // Body Text & Typography (Cuerpo del nodo)
+export interface NodeBodyTypographyConfig {
   body?: string;
   bodyFontSize?: number;
   bodyBold?: boolean;
@@ -239,8 +252,9 @@ export interface MindNode {
   bodyColor?: string;
   bodyFontFamily?: string;
   bodyAlign?: 'left' | 'center' | 'right';
-  
-  // Edges
+}
+
+export interface NodeEdgeConfig {
   edgeColor?: string;
   edgeStyle?: EdgeStyle;
   edgeWidth?: number;
@@ -261,8 +275,9 @@ export interface MindNode {
   edgeShadowBlur?: number;
   edgeShadowOffsetY?: number;
   edgeShadowColor?: string;
-  
-  // Metadata & Features
+}
+
+export interface NodeMetadataConfig {
   icons?: string[];
   iconPosition?: 'left' | 'top';
   iconColor?: string;
@@ -274,22 +289,37 @@ export interface MindNode {
   note?: string; // Rich Markdown note
   showNoteInline?: boolean; // When true, displays the note inline below the body instead of only in tooltips
   details?: string; // Additional details
+}
 
-  // Node Element Visibility Overrides (Eye Toggles)
+export interface NodeVisibilityConfig {
   hideBody?: boolean;
   hideImage?: boolean;
   hideTags?: boolean;
   hideIcons?: boolean;
   hideLink?: boolean;
   hideProgress?: boolean;
-  
-  // Free floating / Post-it
-  isFreeFloating?: boolean;
-  freePosition?: { x: number; y: number };
-  
-  // Groupings
-  cloud?: NodeCloud;
 }
+
+/**
+ * MindNode compuesto mediante herencia de sub-configuraciones modulares.
+ * Ofrece 100% retrocompatibilidad con accesos directos y permite tipado atómico por cualidad visual.
+ */
+export interface MindNode
+  extends MindNodeBase,
+    NodeTailConfig,
+    NodeForkConfig,
+    NodeRectConfig,
+    NodeOvalConfig,
+    NodeArrowConfig,
+    NodeBackgroundConfig,
+    NodeBorderConfig,
+    NodeShadowConfig,
+    NodeImageConfig,
+    NodeTypographyConfig,
+    NodeBodyTypographyConfig,
+    NodeEdgeConfig,
+    NodeMetadataConfig,
+    NodeVisibilityConfig {}
 
 export interface Connector {
   id: string;

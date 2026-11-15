@@ -2984,6 +2984,53 @@ El repositorio mantenía organismos y módulos diseminados fuera de la jerarquí
 
 ---
 
+## 📌 [Plan de Solución Integral — Fase 5] — 2026-11-15: Composición de Interfaces de MindNode y Normalización de Almacenamiento
+
+### 🎯 Motivo Técnico
+1. La interfaz `MindNode` en `src/types/mindmap.ts` albergaba más de 110 atributos planos sin modularización conceptual (mezclando anatomía de formas, tipografía, bordes, sombras, imagen, aristas y metadatos).
+2. Funciones y módulos periféricos requerían acoplarse a toda la interfaz `MindNode` en lugar de aceptar contratos mínimos cohesivos (`NodeBorderConfig`, `NodeBackgroundConfig`, etc.).
+3. La carga de mapas mentales desde `localStorage` requería una capa de normalización tolerante a esquemas incompletos o corruptos para garantizar que `id`, `text`, `parentId` y `children` nunca fuesen indefinidos.
+
+### 🛠️ Qué Cambió
+1. **Descomposición Semántica de `MindNode` en Sub-interfaces (`src/types/mindmap.ts`)**:
+   - `MindNodeBase`: Atributos raíz obligatorios y de grafo (`id`, `text`, `parentId`, `children`, `folded`, `side`, etc.).
+   - `NodeTailConfig`: Anatomía de la colita de burbuja.
+   - `NodeForkConfig`: Ganchos y esquinas de horquilla.
+   - `NodeRectConfig`: Presets, radio y esquinas independientes de rectángulos/cuadrados/rombos.
+   - `NodeOvalConfig`: Rotación, proporciones y presets de elipses.
+   - `NodeArrowConfig`: Dirección, bidireccionalidad y punta de flecha.
+   - `NodeBackgroundConfig`: Rellenos sólidos, degradados, patrones e imagen de fondo.
+   - `NodeBorderConfig`: Estilos de línea (doble, guiones, puntos, zigzag, ondas) y colores.
+   - `NodeShadowConfig`: Sombra envolvente del nodo.
+   - `NodeImageConfig`: Imagen de contenido adjunta (posicionamiento, dimensiones y sombra).
+   - `NodeTypographyConfig` & `NodeBodyTypographyConfig`: Tipografía del título y cuerpo del nodo.
+   - `NodeEdgeConfig`: Configuración de la arista conector hacia el padre.
+   - `NodeMetadataConfig` & `NodeVisibilityConfig`: Iconos, tags, notas Markdown, progreso y toggles de visibilidad.
+2. **Composición Heradada Transparente**:
+   - `MindNode` ahora extiende todas las sub-interfaces mencionadas, manteniendo el 100% de compatibilidad binaria y estática con el código existente.
+3. **Capa de Normalización en `src/utils/storage.ts`**:
+   - `normalizeNode(raw)`: Asegura que todo nodo cargado posea `id` válido, `text: string`, `parentId: string | null` y `children: string[]`.
+   - `normalizeMindMap(raw)`: Normaliza cada nodo del mapa y asegura `connectors: Connector[]`.
+   - `loadCurrentMap` y `loadMapById` integrados con `normalizeMindMap`.
+4. **Pruebas Unitarias**:
+   - Añadidas pruebas en `src/utils/__tests__/storage.test.ts` para validar `normalizeNode` y `normalizeMindMap`.
+
+### 📄 Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos Centrales | Descomposición en 14 sub-interfaces y recomposición de `MindNode`. |
+| `src/utils/storage.ts` | Utilidad / Persistencia | Funciones `normalizeNode` y `normalizeMindMap`, blindaje en carga. |
+| `src/utils/__tests__/storage.test.ts` | Tests | 2 nuevas pruebas unitarias de normalización (8/8 tests pasando). |
+| `doc/CHANGELOG.md` | Documentación | Registro detallado de la Fase 5. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm test:regression`: **53/53 suites superadas (359/359 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.15s (0 errores)**.
+
+---
+
+
 
 
 
