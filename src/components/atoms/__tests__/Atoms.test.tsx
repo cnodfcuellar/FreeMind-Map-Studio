@@ -6,6 +6,8 @@ import { IconButton } from '../IconButton';
 import { Input } from '../Input';
 import { Badge } from '../Badge';
 import { ModalBackdrop } from '../ModalBackdrop';
+import { SliderInput } from '../SliderInput';
+import { ToggleButton } from '../ToggleButton';
 
 describe('Atomic Design Atoms', () => {
   it('renders Button and triggers onClick', () => {
@@ -58,13 +60,56 @@ describe('Atomic Design Atoms', () => {
     expect(handleRemove).toHaveBeenCalledTimes(1);
   });
 
-  it('renders ModalBackdrop when isOpen is true', () => {
+  it('renders ModalBackdrop with dialog role, aria-modal, and handles Escape key', () => {
     const handleClose = vi.fn();
     render(
       <ModalBackdrop isOpen={true} onClose={handleClose}>
+        <button type="button">Primer Botón</button>
         <div>Contenido Modal</div>
       </ModalBackdrop>
     );
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
     expect(screen.getByText('Contenido Modal')).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(handleClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders SliderInput with accessible ARIA attributes and triggers onChange', () => {
+    const handleChange = vi.fn();
+    render(
+      <SliderInput
+        label="Grosor"
+        value={4}
+        min={1}
+        max={10}
+        onChange={handleChange}
+      />
+    );
+    const slider = screen.getByRole('slider', { name: 'Grosor' });
+    expect(slider).toBeInTheDocument();
+    expect(slider).toHaveAttribute('aria-valuenow', '4');
+    expect(slider).toHaveAttribute('aria-valuemin', '1');
+    expect(slider).toHaveAttribute('aria-valuemax', '10');
+
+    fireEvent.change(slider, { target: { value: '6' } });
+    expect(handleChange).toHaveBeenCalledWith(6);
+  });
+
+  it('renders ToggleButton with aria-pressed', () => {
+    const handleClick = vi.fn();
+    render(
+      <ToggleButton
+        label="Activar"
+        active={true}
+        onClick={handleClick}
+      />
+    );
+    const btn = screen.getByRole('button', { name: 'Activar' });
+    expect(btn).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(btn);
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
 });

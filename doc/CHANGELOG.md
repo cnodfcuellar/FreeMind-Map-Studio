@@ -2874,6 +2874,60 @@ Reducir la complejidad ciclomática y cognitiva extrema de los componentes visua
 
 ---
 
+## 📌 [Plan de Solución Integral — Fase 3] — 2026-11-14: Consistencia UI, Tokens de Color y Accesibilidad a11y
+
+### 🎯 Motivo Técnico
+Eliminar inconsistencias cromáticas en componentes que utilizaban `bg-white` y colores de texto fijos sin variantes para los temas oscuro y sepia. Garantizar el cumplimiento de estándares de accesibilidad WAI-ARIA (roles de diálogo, trampas de foco en modales, estados `aria-pressed`/`aria-expanded`, y atributos `aria-valuemin`/`aria-valuemax` en controles deslizantes).
+
+### 🛠️ Qué Cambió
+1. **Accesibilidad y Trampa de Foco en Modales (`ModalBackdrop.tsx`):**
+   - Agregados los atributos `role="dialog"`, `aria-modal="true"`, `tabIndex={-1}` y soporte para `ariaLabel`/`ariaLabelledBy`.
+   - Implementado Focus Trap por teclado: tecla `Tab` cicla de forma circular entre los elementos interactivos del modal sin escapar al fondo.
+   - Enfoque automático al primer elemento interactivo al abrir, y restauración automática del elemento previamente enfocado al cerrar.
+2. **Homogeneización y Accesibilidad en Átomos Primitivos:**
+   - `SliderInput.tsx`: Incorporados `aria-label`, `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext`, estilos accesibles de foco `focus-visible:ring-2` y tokens para tema oscuro (`dark:bg-slate-700`, `dark:text-slate-300`).
+   - `ColorPicker.tsx`: Añadido `aria-label` en inputs nativos y botones de preset, con soporte dark en el contenedor hexadecimal.
+   - `ToggleButton.tsx` y `ToggleButtonGroup.tsx`: Añadido `aria-pressed`, soporte para contraste en tema oscuro (`dark:bg-slate-800`, `dark:border-slate-700`).
+   - `Switch.tsx`: Añadido `aria-label` explícito adaptado a texto, descripción o título.
+   - `CollapsibleSection.tsx`: Añadido `aria-expanded` en cabecera de acordeón, `aria-label` en botón de flecha y fondos temáticos (`dark:bg-slate-800/40`).
+3. **Reemplazo de Fondos Hardcodeados (`bg-white`) en Moléculas y Modales:**
+   - `FontFormatToolbar.tsx`: Contenedores y botones adaptados a modo oscuro con `aria-pressed`.
+   - `TagManager.tsx`: Inputs y badges de etiquetas adaptados con estilos `dark:bg-slate-800` y botones con `aria-label`.
+   - `ShapeSelector.tsx`: Grilla de formas con contraste accesible en modo oscuro y `aria-pressed`.
+   - `RectangleCornerControl.tsx`, `OvalQualitiesControl.tsx`, `ArrowQualitiesControl.tsx`: Presets, switches, sliders y botones matriciales con estilos de contraste dark y atributos ARIA.
+   - `IconPackModal.tsx`: Reemplazado `bg-white` hardcodeado por variables semánticas `--sp-bg`, `--sp-bg2` y clases `dark:bg-slate-900`.
+4. **Pruebas Unitarias de Accesibilidad:**
+   - `src/components/atoms/__tests__/Atoms.test.tsx`: Añadidas pruebas unitarias para `role="dialog"`, atributos `aria-modal`, cierre por `Escape`, `SliderInput` con ARIA range, y `ToggleButton` con `aria-pressed` (7/7 tests pasando).
+
+### ✏️ Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/atoms/ModalBackdrop.tsx` | Átomo | Focus trap, `role="dialog"`, `aria-modal`, restauración de foco al cerrar. |
+| `src/components/atoms/SliderInput.tsx` | Átomo | Atributos ARIA de rango (`aria-valuenow`, etc.), `focus-visible`, tokens dark. |
+| `src/components/atoms/ColorPicker.tsx` | Átomo | Accesibilidad `aria-label`, contraste dark en selector y presets. |
+| `src/components/atoms/ToggleButton.tsx` | Átomo | Atributo `aria-pressed`, variantes dark. |
+| `src/components/atoms/ToggleButtonGroup.tsx` | Átomo | Atributos `aria-pressed`, contraste dark en contenedor e items. |
+| `src/components/atoms/Switch.tsx` | Átomo | Atributo `aria-label` adaptativo. |
+| `src/components/atoms/CollapsibleSection.tsx` | Átomo | Atributo `aria-expanded`, accesibilidad de botón y tokens dark. |
+| `src/components/molecules/FontFormatToolbar.tsx` | Molécula | Atributos `aria-pressed`, variantes dark. |
+| `src/components/molecules/TagManager.tsx` | Molécula | `aria-label` en inputs y chips, soporte tema oscuro. |
+| `src/components/molecules/ShapeSelector.tsx` | Molécula | Contraste dark y `aria-pressed`. |
+| `src/components/molecules/RectangleCornerControl.tsx` | Molécula | Contraste dark en presets y matriz 2x2, `aria-pressed`. |
+| `src/components/molecules/OvalQualitiesControl.tsx` | Molécula | Contraste dark en presets, `role="switch"`, `aria-label`. |
+| `src/components/molecules/ArrowQualitiesControl.tsx` | Molécula | Contraste dark, `role="switch"`, `aria-label`, `aria-expanded`. |
+| `src/components/Modals/IconPackModal.tsx` | Modal / Organismo | Eliminado `bg-white` hardcodeado; tokens `--sp-bg` y variantes dark. |
+| `src/components/atoms/__tests__/Atoms.test.tsx` | Tests | Pruebas para a11y (dialog, slider range, toggleButton). |
+| `doc/CHANGELOG.md` | Documentación | Registro detallado de la Fase 3. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm vitest run src/components/atoms/__tests__/Atoms.test.tsx`: **7/7 pruebas unitarias exitosas**.
+- [x] `pnpm test:regression`: **53/53 suites superadas (357/357 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.25s (0 errores)**.
+
+---
+
+
 
 
 

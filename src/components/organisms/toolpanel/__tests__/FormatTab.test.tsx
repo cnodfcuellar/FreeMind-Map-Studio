@@ -8,6 +8,8 @@ const createMockNode = (overrides?: Partial<MindNode>): MindNode => ({
   text: 'Nodo de Prueba',
   shape: 'bubble',
   color: '#3b82f6',
+  parentId: null,
+  children: [],
   ...overrides,
 });
 

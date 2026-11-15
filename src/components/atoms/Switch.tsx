@@ -54,6 +54,7 @@ export const Switch: React.FC<SwitchProps> = ({
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-label={typeof label === 'string' ? label : title || 'Interruptor'}
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 ease-in-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-1 dark:focus:ring-offset-slate-900 ${trackWidth} ${

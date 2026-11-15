@@ -25,24 +25,25 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`bg-slate-50/80 border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden transition-all ${className}`}>
-      <div className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors select-none">
+    <div className={`bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-2xs overflow-hidden transition-all ${className}`}>
+      <div className="w-full px-3.5 py-3 flex items-center justify-between text-left hover:bg-slate-100/70 dark:hover:bg-slate-800/70 transition-colors select-none">
         <button
           type="button"
           onClick={onToggle}
+          aria-expanded={isOpen}
           className="flex items-center gap-2 min-w-0 flex-1 cursor-pointer text-left"
         >
           {icon && (
-            <div className="w-6 h-6 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 flex items-center justify-center shrink-0">
               {icon}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <span className="font-semibold text-slate-800 text-xs block truncate cursor-pointer">
+            <span className="font-semibold text-slate-800 dark:text-slate-100 text-xs block truncate cursor-pointer">
               {title}
             </span>
             {subtitle && (
-              <span className="text-[10px] text-slate-400 font-normal block truncate">
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal block truncate">
                 {subtitle}
               </span>
             )}
@@ -55,7 +56,8 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
           <button
             type="button"
             onClick={onToggle}
-            className="p-0.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+            aria-label={isOpen ? `Plegar ${title}` : `Desplegar ${title}`}
+            className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
           >
             <ChevronDown
               className={`w-4 h-4 transition-transform duration-200 ${
@@ -67,7 +69,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       </div>
 
       {isOpen && (
-        <div className="px-3.5 pb-3.5 pt-1 space-y-2.5 border-t border-slate-200/60 animate-in fade-in duration-150">
+        <div className="px-3.5 pb-3.5 pt-1 space-y-2.5 border-t border-slate-200/60 dark:border-slate-800/60 animate-in fade-in duration-150">
           {children}
         </div>
       )}

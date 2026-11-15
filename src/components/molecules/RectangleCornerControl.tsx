@@ -144,22 +144,22 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
             onClick={() => handleSelectSquareRotation(0)}
             className={`py-1.5 px-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
               !isRotated45
-                ? 'border-blue-600 bg-blue-50/90 shadow-xs ring-2 ring-blue-500/20'
-                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+                ? 'border-blue-600 bg-blue-50/90 dark:bg-blue-950/60 dark:border-blue-500 shadow-xs ring-2 ring-blue-500/20'
+                : 'border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
             }`}
           >
-            <span className="text-sm font-bold text-slate-700">▢</span>
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">▢</span>
             <div>
               <div
                 className={`text-[10.5px] font-bold ${
-                  !isRotated45 ? 'text-blue-700' : 'text-slate-700'
+                  !isRotated45 ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 Cuadrado
               </div>
               <div
                 className={`text-[8.5px] ${
-                  !isRotated45 ? 'text-blue-600/80 font-medium' : 'text-slate-400'
+                  !isRotated45 ? 'text-blue-600/80 dark:text-blue-400 font-medium' : 'text-slate-400'
                 }`}
               >
                 0° estándar
@@ -173,22 +173,22 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
             onClick={() => handleSelectSquareRotation(45)}
             className={`py-1.5 px-2 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
               isRotated45
-                ? 'border-blue-600 bg-blue-50/90 shadow-xs ring-2 ring-blue-500/20'
-                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+                ? 'border-blue-600 bg-blue-50/90 dark:bg-blue-950/60 dark:border-blue-500 shadow-xs ring-2 ring-blue-500/20'
+                : 'border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
             }`}
           >
-            <span className="text-sm font-bold text-blue-600">◇</span>
+            <span className="text-sm font-bold text-blue-600 dark:text-blue-400">◇</span>
             <div>
               <div
                 className={`text-[10.5px] font-bold ${
-                  isRotated45 ? 'text-blue-700' : 'text-slate-700'
+                  isRotated45 ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 Rombo
               </div>
               <div
                 className={`text-[8.5px] ${
-                  isRotated45 ? 'text-blue-600/80 font-medium' : 'text-slate-400'
+                  isRotated45 ? 'text-blue-600/80 dark:text-blue-400 font-medium' : 'text-slate-400'
                 }`}
               >
                 45° decisión
@@ -208,13 +208,13 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
             onClick={() => handleSelectCornerType(opt.id)}
             className={`py-1.5 px-1 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
               opt.isActive
-                ? 'border-blue-600 bg-blue-50/90 shadow-xs ring-2 ring-blue-500/20'
-                : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
+                ? 'border-blue-600 bg-blue-50/90 dark:bg-blue-950/60 dark:border-blue-500 shadow-xs ring-2 ring-blue-500/20'
+                : 'border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
             }`}
           >
             <div
               className={`text-[10px] font-bold flex items-center gap-0.5 ${
-                opt.isActive ? 'text-blue-700' : 'text-slate-700'
+                opt.isActive ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'
               }`}
             >
               <span className="text-[11px] leading-none">{opt.icon}</span>
@@ -222,7 +222,7 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
             </div>
             <div
               className={`text-[8.5px] mt-0.5 ${
-                opt.isActive ? 'text-blue-600/80 font-medium' : 'text-slate-400'
+                opt.isActive ? 'text-blue-600/80 dark:text-blue-400 font-medium' : 'text-slate-400'
               }`}
             >
               {opt.sub}
@@ -280,8 +280,9 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
                 <button
                   type="button"
                   data-testid="radius-decrement"
+                  aria-label="Reducir radio (-2px)"
                   onClick={() => handleRadiusChange(config.radius - 2)}
-                  className="w-6 h-6 rounded-md bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
+                  className="w-6 h-6 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
                   title="Reducir radio (-2px)"
                 >
                   −
@@ -292,15 +293,17 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
                   max="32"
                   step="1"
                   value={config.radius}
+                  aria-label="Radio de curvatura de esquinas"
                   onChange={(e) => handleRadiusChange(parseInt(e.target.value, 10))}
                   data-testid="radius-slider"
-                  className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
                 <button
                   type="button"
                   data-testid="radius-increment"
+                  aria-label="Aumentar radio (+2px)"
                   onClick={() => handleRadiusChange(config.radius + 2)}
-                  className="w-6 h-6 rounded-md bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
+                  className="w-6 h-6 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
                   title="Aumentar radio (+2px)"
                 >
                   +
@@ -327,16 +330,18 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
               </div>
 
               {/* Matriz 2x2 que refleja físicamente la orientación de las esquinas */}
-              <div className="grid grid-cols-2 gap-1.5 bg-white p-1.5 rounded-lg border border-slate-200/80">
+              <div className="grid grid-cols-2 gap-1.5 bg-white dark:bg-slate-800/80 p-1.5 rounded-lg border border-slate-200/80 dark:border-slate-700">
                 {/* Superior Izquierda */}
                 <button
                   type="button"
                   data-testid="toggle-corner-tl"
+                  aria-pressed={config.topLeft}
+                  aria-label="Esquina Superior Izquierda"
                   onClick={() => handleToggleCorner('rectCornerTopLeft', config.topLeft)}
                   className={`py-1.5 px-2 rounded-md border text-center transition-all cursor-pointer flex items-center justify-between text-[10px] font-medium ${
                     config.topLeft
-                      ? 'border-blue-500 bg-blue-50/80 text-blue-700 shadow-2xs'
-                      : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-slate-300'
+                      ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-300 dark:hover:border-slate-600'
                   }`}
                 >
                   <span className="font-bold text-xs">⌜ Sup-Izq</span>
@@ -351,11 +356,13 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
                 <button
                   type="button"
                   data-testid="toggle-corner-tr"
+                  aria-pressed={config.topRight}
+                  aria-label="Esquina Superior Derecha"
                   onClick={() => handleToggleCorner('rectCornerTopRight', config.topRight)}
                   className={`py-1.5 px-2 rounded-md border text-center transition-all cursor-pointer flex items-center justify-between text-[10px] font-medium ${
                     config.topRight
-                      ? 'border-blue-500 bg-blue-50/80 text-blue-700 shadow-2xs'
-                      : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-slate-300'
+                      ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-300 dark:hover:border-slate-600'
                   }`}
                 >
                   <span className="font-bold text-xs">⌝ Sup-Der</span>
@@ -370,11 +377,13 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
                 <button
                   type="button"
                   data-testid="toggle-corner-bl"
+                  aria-pressed={config.bottomLeft}
+                  aria-label="Esquina Inferior Izquierda"
                   onClick={() => handleToggleCorner('rectCornerBottomLeft', config.bottomLeft)}
                   className={`py-1.5 px-2 rounded-md border text-center transition-all cursor-pointer flex items-center justify-between text-[10px] font-medium ${
                     config.bottomLeft
-                      ? 'border-blue-500 bg-blue-50/80 text-blue-700 shadow-2xs'
-                      : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-slate-300'
+                      ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-300 dark:hover:border-slate-600'
                   }`}
                 >
                   <span className="font-bold text-xs">⌞ Inf-Izq</span>
@@ -389,11 +398,13 @@ export const RectangleCornerControl: React.FC<RectangleCornerControlProps> = ({
                 <button
                   type="button"
                   data-testid="toggle-corner-br"
+                  aria-pressed={config.bottomRight}
+                  aria-label="Esquina Inferior Derecha"
                   onClick={() => handleToggleCorner('rectCornerBottomRight', config.bottomRight)}
                   className={`py-1.5 px-2 rounded-md border text-center transition-all cursor-pointer flex items-center justify-between text-[10px] font-medium ${
                     config.bottomRight
-                      ? 'border-blue-500 bg-blue-50/80 text-blue-700 shadow-2xs'
-                      : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-slate-300'
+                      ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:border-slate-300 dark:hover:border-slate-600'
                   }`}
                 >
                   <span className="font-bold text-xs">⌟ Inf-Der</span>

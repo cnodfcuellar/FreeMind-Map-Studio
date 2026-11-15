@@ -29,16 +29,17 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   return (
     <div className={`space-y-1.5 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
       <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-slate-700">{label}</span>
+        <span className="font-medium text-slate-700 dark:text-slate-300">{label}</span>
         <div className="flex items-center gap-1.5">
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded px-1.5 py-0.5 shadow-2xs">
+          <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-1.5 py-0.5 shadow-2xs">
             <input
               type="color"
+              aria-label={label}
               value={currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : defaultColor}
               onChange={(e) => onChange(e.target.value)}
               className="w-4 h-4 rounded border-0 cursor-pointer p-0 bg-transparent"
             />
-            <span className="text-[10px] font-mono text-slate-500 uppercase">
+            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase">
               {value ? value : 'Auto'}
             </span>
           </div>
@@ -47,7 +48,8 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
               type="button"
               onClick={onClear}
               title="Restablecer a automático"
-              className="text-[10px] text-slate-400 hover:text-slate-600 hover:underline cursor-pointer"
+              aria-label={`Restablecer ${label} a automático`}
+              className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:underline cursor-pointer"
             >
               Reset
             </button>
@@ -63,11 +65,12 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
               type="button"
               onClick={() => onChange(color)}
               title={color}
+              aria-label={`Seleccionar color ${color}`}
               style={{ backgroundColor: color }}
               className={`w-full aspect-square rounded-md border transition-all cursor-pointer hover:scale-110 active:scale-95 shadow-2xs ${
                 value?.toLowerCase() === color.toLowerCase()
                   ? 'border-blue-600 ring-2 ring-blue-400 ring-offset-1 z-1'
-                  : 'border-slate-200/80 hover:border-slate-400'
+                  : 'border-slate-200/80 dark:border-slate-700 hover:border-slate-400'
               }`}
             />
           ))}

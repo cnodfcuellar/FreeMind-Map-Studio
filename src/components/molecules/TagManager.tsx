@@ -38,12 +38,14 @@ export const TagManager: React.FC<TagManagerProps> = ({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Añadir etiqueta..."
-          className="flex-1 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500 shadow-2xs"
+          aria-label="Nueva etiqueta"
+          className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 outline-none focus:border-blue-500 shadow-2xs"
         />
         <button
           type="button"
           onClick={handleAdd}
           disabled={!input.trim()}
+          aria-label="Añadir etiqueta"
           className="flex items-center justify-center p-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer shadow-2xs transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -55,12 +57,13 @@ export const TagManager: React.FC<TagManagerProps> = ({
           {tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200/60 px-2 py-0.5 rounded-md text-[11px] font-medium"
+              className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 px-2 py-0.5 rounded-md text-[11px] font-medium"
             >
               <span>{tag}</span>
               <button
                 type="button"
                 onClick={() => onRemoveTag(tag)}
+                aria-label={`Eliminar etiqueta ${tag}`}
                 className="hover:text-red-500 transition-colors cursor-pointer"
               >
                 <X className="w-3 h-3" />

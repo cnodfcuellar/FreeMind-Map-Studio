@@ -96,20 +96,20 @@ export const OvalQualitiesControl: React.FC<OvalQualitiesControlProps> = ({
             onClick={() => handleApplyPreset(preset.id)}
             className={`py-1.5 px-1 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
               preset.isActive
-                ? 'border-blue-600 bg-blue-50/90 shadow-xs ring-2 ring-blue-500/20'
-                : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
+                ? 'border-blue-600 bg-blue-50/90 dark:bg-blue-950/60 dark:border-blue-500 shadow-xs ring-2 ring-blue-500/20'
+                : 'border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
             }`}
           >
             <div
               className={`text-[10.5px] font-bold ${
-                preset.isActive ? 'text-blue-700' : 'text-slate-700'
+                preset.isActive ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'
               }`}
             >
               {preset.label}
             </div>
             <div
               className={`text-[9px] ${
-                preset.isActive ? 'text-blue-600/80' : 'text-slate-400'
+                preset.isActive ? 'text-blue-600/80 dark:text-blue-400' : 'text-slate-400'
               }`}
             >
               {preset.sub}
@@ -119,21 +119,24 @@ export const OvalQualitiesControl: React.FC<OvalQualitiesControlProps> = ({
       </div>
 
       {/* 2. Switch: Texto siempre horizontal (Protección de legibilidad) */}
-      <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-200/80">
+      <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700">
         <div className="space-y-0.5">
-          <div className="text-[10.5px] font-semibold text-slate-700">
+          <div className="text-[10.5px] font-semibold text-slate-700 dark:text-slate-200">
             Texto siempre horizontal
           </div>
-          <div className="text-[8.5px] text-slate-400 leading-tight">
+          <div className="text-[8.5px] text-slate-400 dark:text-slate-500 leading-tight">
             Mantiene el texto legible aunque la elipse gire
           </div>
         </div>
         <button
           type="button"
+          role="switch"
+          aria-checked={config.keepTextHorizontal}
+          aria-label="Texto siempre horizontal"
           data-testid="toggle-keep-text-horizontal"
           onClick={handleToggleKeepTextHorizontal}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
-            config.keepTextHorizontal ? 'bg-emerald-500' : 'bg-slate-300'
+            config.keepTextHorizontal ? 'bg-emerald-500 dark:bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
           }`}
           title={config.keepTextHorizontal ? 'Texto horizontal activo' : 'Texto gira con la elipse'}
         >
@@ -194,8 +197,9 @@ export const OvalQualitiesControl: React.FC<OvalQualitiesControlProps> = ({
                 <button
                   type="button"
                   data-testid="angle-decrement"
+                  aria-label="Reducir ángulo (-5°)"
                   onClick={() => handleRotationChange(config.rotation - 5)}
-                  className="w-6 h-6 rounded-md bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
+                  className="w-6 h-6 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
                   title="Reducir ángulo (-5°)"
                 >
                   −
@@ -206,15 +210,17 @@ export const OvalQualitiesControl: React.FC<OvalQualitiesControlProps> = ({
                   max="90"
                   step="1"
                   value={config.rotation}
+                  aria-label="Ángulo de rotación de la elipse"
                   onChange={(e) => handleRotationChange(parseInt(e.target.value, 10))}
                   data-testid="oval-angle-slider"
-                  className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                 />
                 <button
                   type="button"
                   data-testid="angle-increment"
+                  aria-label="Aumentar ángulo (+5°)"
                   onClick={() => handleRotationChange(config.rotation + 5)}
-                  className="w-6 h-6 rounded-md bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
+                  className="w-6 h-6 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-xs flex items-center justify-center cursor-pointer shadow-2xs"
                   title="Aumentar ángulo (+5°)"
                 >
                   +
@@ -230,8 +236,8 @@ export const OvalQualitiesControl: React.FC<OvalQualitiesControlProps> = ({
                     onClick={() => handleRotationChange(deg)}
                     className={`py-0.5 rounded border text-[9.5px] font-medium transition-all ${
                       config.rotation === deg
-                        ? 'border-blue-500 bg-blue-50 text-blue-700 font-bold'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 font-bold'
+                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >
                     {deg > 0 ? `+${deg}°` : `${deg}°`}
@@ -241,11 +247,11 @@ export const OvalQualitiesControl: React.FC<OvalQualitiesControlProps> = ({
             </div>
 
             {/* Proporción / Esbeltez del Óvalo */}
-            <div className="space-y-1.5 pt-1 border-t border-slate-200/60">
-              <span className="text-[10.5px] font-semibold text-slate-600 block">
+            <div className="space-y-1.5 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+              <span className="text-[10.5px] font-semibold text-slate-600 dark:text-slate-300 block">
                 Esbeltez / Proporción:
               </span>
-              <div className="grid grid-cols-3 gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/80">
+              <div className="grid grid-cols-3 gap-1 bg-slate-100/80 dark:bg-slate-800/60 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700">
                 {[
                   { id: 'classic' as OvalRatio, label: 'Clásico', sub: '3:2' },
                   { id: 'slender' as OvalRatio, label: 'Esbelto', sub: '2:1' },
@@ -257,11 +263,12 @@ export const OvalQualitiesControl: React.FC<OvalQualitiesControlProps> = ({
                       key={opt.id}
                       type="button"
                       data-testid={`oval-ratio-${opt.id}`}
+                      aria-pressed={isSelected}
                       onClick={() => handleSelectRatio(opt.id)}
                       className={`py-1 px-1 rounded-lg text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
                         isSelected
-                          ? 'bg-white text-blue-700 font-bold shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900 font-medium'
+                          ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-300 font-bold shadow-xs'
+                          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-medium'
                       }`}
                     >
                       <span className="text-[10px] leading-tight">{opt.label}</span>

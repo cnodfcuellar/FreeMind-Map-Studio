@@ -188,7 +188,7 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
           {/* Right Main Content Area */}
           <main className="flex-1 flex flex-col min-w-0 bg-[var(--sp-bg)] overflow-hidden">
             {/* Top Search Bar & Suggestions */}
-            <div className="p-3.5 border-b border-slate-200 space-y-2.5 bg-white shrink-0">
+            <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 space-y-2.5 bg-[var(--sp-bg)] dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -198,13 +198,15 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Buscar por nombre, tag o ID (ej: dinero, cpu, correo, exito, estrella)..."
-                    className="w-full bg-[var(--sp-input)] border border-[var(--sp-border)] rounded-xl pl-10 pr-10 py-2 text-xs text-[var(--sp-text)] outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400 shadow-2xs"
+                    aria-label="Buscar iconos"
+                    className="w-full bg-[var(--sp-input)] border border-[var(--sp-border)] rounded-xl pl-10 pr-10 py-2 text-xs text-[var(--sp-text)] outline-none focus:bg-[var(--sp-bg)] dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all placeholder:text-slate-400 shadow-2xs"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 text-xs cursor-pointer"
+                      aria-label="Limpiar búsqueda"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 text-xs cursor-pointer"
                     >
                       ×
                     </button>
@@ -226,7 +228,7 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
                     className={`text-[10.5px] px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
                       searchQuery === st.query
                         ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-2xs'
-                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
                     {st.label}
@@ -236,7 +238,7 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
             </div>
 
             {/* Active Category Header in Main Area */}
-            <div className="px-4 py-2 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between text-xs shrink-0">
+            <div className="px-4 py-2 bg-[var(--sp-bg2)] border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shrink-0">
               <div className="flex items-center gap-2 font-semibold text-[var(--sp-text)]">
                 <span className="text-sm">{CATEGORY_EMOJIS[activeCategory] || '📁'}</span>
                 <span>
@@ -334,22 +336,22 @@ export const IconPackModal: React.FC<IconPackModalProps> = ({
         </div>
 
         {/* Footer with Inspector and Quick Actions */}
-        <div className="p-4 border-t border-slate-200 bg-white flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-[var(--sp-bg2)] dark:bg-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3">
           {previewIcon ? (
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-blue-600 shrink-0 shadow-2xs">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0 shadow-2xs">
                 {React.createElement(previewIcon.icon, { className: 'w-6 h-6' })}
               </div>
               <div className="min-w-0 flex-1 sm:flex-initial">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-900 truncate">
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
                     {previewIcon.name}
                   </span>
-                  <code className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
+                  <code className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded font-mono">
                     {previewIcon.id}
                   </code>
                 </div>
-                <div className="text-[11px] text-slate-500 truncate max-w-md">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-md">
                   Etiquetas: {previewIcon.tags.join(', ')}
                 </div>
               </div>

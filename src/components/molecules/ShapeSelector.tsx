@@ -120,11 +120,12 @@ export const ShapeSelector: React.FC<ShapeSelectorProps> = ({
               type="button"
               title={s.name}
               aria-label={s.name}
+              aria-pressed={isSelected}
               onClick={() => onSelectShape(s.id)}
               className={`h-10 flex items-center justify-center rounded-xl border transition-all cursor-pointer select-none ${
                 isSelected
-                  ? 'border-blue-600 bg-blue-50/90 text-blue-700 shadow-xs ring-2 ring-blue-500/20'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800'
+                  ? 'border-blue-600 bg-blue-50/90 text-blue-700 shadow-xs ring-2 ring-blue-500/20 dark:border-blue-500 dark:bg-blue-950/60 dark:text-blue-300'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100'
               }`}
             >
               {s.icon}

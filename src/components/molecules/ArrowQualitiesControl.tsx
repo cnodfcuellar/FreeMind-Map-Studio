@@ -88,16 +88,17 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
               key={opt.id}
               type="button"
               data-testid={`preset-arrow-${opt.id}`}
+              aria-pressed={isActive}
               onClick={() => handleSelectDirection(opt.id)}
               className={`py-1.5 px-1 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
                 isActive
-                  ? 'border-blue-600 bg-blue-50/90 shadow-xs ring-2 ring-blue-500/20'
-                  : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
+                  ? 'border-blue-600 bg-blue-50/90 dark:bg-blue-950/60 dark:border-blue-500 shadow-xs ring-2 ring-blue-500/20'
+                  : 'border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
               }`}
             >
               <div
                 className={`text-[11px] font-bold flex items-center gap-0.5 ${
-                  isActive ? 'text-blue-700' : 'text-slate-700'
+                  isActive ? 'text-blue-700 dark:text-blue-300' : 'text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <span>{opt.icon}</span>
@@ -105,7 +106,7 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
               </div>
               <div
                 className={`text-[8.5px] mt-0.5 ${
-                  isActive ? 'text-blue-600/80 font-medium' : 'text-slate-400'
+                  isActive ? 'text-blue-600/80 dark:text-blue-400 font-medium' : 'text-slate-400'
                 }`}
               >
                 {opt.sub}
@@ -116,21 +117,23 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
       </div>
 
       {/* 2. Switch Inteligente: Auto-orientación según rama */}
-      <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-200/80">
+      <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700">
         <div className="flex flex-col pr-2">
-          <span className="text-[10px] font-bold text-slate-700">
+          <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">
             Auto-orientación según rama
           </span>
-          <span className="text-[8.5px] text-slate-400">
+          <span className="text-[8.5px] text-slate-400 dark:text-slate-500">
             Apunta a la izquierda si el nodo está en rama izquierda
           </span>
         </div>
         <button
           type="button"
+          role="switch"
+          aria-checked={config.autoOrient}
           data-testid="toggle-arrow-auto-orient"
           onClick={handleToggleAutoOrient}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-            config.autoOrient ? 'bg-emerald-600' : 'bg-slate-200'
+            config.autoOrient ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'
           }`}
           aria-label="Alternar auto-orientación según rama"
         >
@@ -147,25 +150,26 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
         <button
           type="button"
           data-testid="toggle-arrow-calibration"
+          aria-expanded={isExpanded}
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 transition-colors text-left cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 px-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 transition-colors text-left cursor-pointer"
         >
-          <span className="text-[10.5px] font-semibold text-slate-700 flex items-center gap-1.5">
+          <span className="text-[10.5px] font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
             <Sliders className="w-3.5 h-3.5 text-slate-500" />
             Calibración de punta, cola y doble punta
           </span>
           <ChevronDown
             className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
-              isExpanded ? 'rotate-180 text-blue-600' : ''
+              isExpanded ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
             }`}
           />
         </button>
 
         {isExpanded && (
-          <div className="mt-2 p-2.5 bg-slate-50/70 border border-slate-200/70 rounded-xl space-y-3 animate-fadeIn">
+          <div className="mt-2 p-2.5 bg-slate-50/70 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 rounded-xl space-y-3 animate-fadeIn">
             {/* Estilo de Cola / Modo */}
             <div className="space-y-1.5">
-              <span className="text-[10px] font-semibold text-slate-600">
+              <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300">
                 Estilo de cola trasera:
               </span>
               <div className="grid grid-cols-3 gap-1.5">
@@ -175,8 +179,8 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
                   onClick={() => handleSelectTailStyle('notch', false)}
                   className={`py-1.5 px-1 rounded-lg border text-center transition-all cursor-pointer text-[9.5px] font-bold ${
                     !config.isBidirectional && config.tailStyle === 'notch'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 shadow-xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                   }`}
                 >
                   ❮ Con muesca
@@ -187,8 +191,8 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
                   onClick={() => handleSelectTailStyle('flat', false)}
                   className={`py-1.5 px-1 rounded-lg border text-center transition-all cursor-pointer text-[9.5px] font-bold ${
                     !config.isBidirectional && config.tailStyle === 'flat'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 shadow-xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                   }`}
                 >
                   | Plana (Señal)
@@ -199,8 +203,8 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
                   onClick={() => handleSelectTailStyle('notch', true)}
                   className={`py-1.5 px-1 rounded-lg border text-center transition-all cursor-pointer text-[9.5px] font-bold ${
                     config.isBidirectional
-                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 shadow-xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                   }`}
                 >
                   ↔ Doble punta
@@ -211,18 +215,18 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
             {/* Slider de Proporción de Punta */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-slate-600">
+                <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300">
                   Proporción de punta:
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200/80 px-1.5 py-0.5 rounded">
+                  <span className="text-[10px] font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/70 border border-blue-200/80 dark:border-blue-800/80 px-1.5 py-0.5 rounded">
                     {Math.round(config.tipRatio * 100)}%
                   </span>
                   <button
                     type="button"
                     data-testid="btn-reset-arrow-tip"
                     onClick={handleResetTipRatio}
-                    className="text-[9px] text-slate-400 hover:text-slate-600 underline cursor-pointer"
+                    className="text-[9px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline cursor-pointer"
                   >
                     Restablecer
                   </button>
@@ -233,10 +237,11 @@ export const ArrowQualitiesControl: React.FC<ArrowQualitiesControlProps> = ({
                 min="15"
                 max="50"
                 step="1"
+                aria-label="Proporción de punta de flecha"
                 data-testid="slider-arrow-tip-ratio"
                 value={Math.round(config.tipRatio * 100)}
                 onChange={(e) => handleTipRatioChange(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
               />
             </div>
           </div>
