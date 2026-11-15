@@ -31,9 +31,9 @@ import { MenuBar } from './components/MenuBar';
 import { ToolBar } from './components/ToolBar';
 import { FilterBar } from './components/FilterBar';
 import { MindMapCanvas } from './components/MindMapCanvas';
-import { ToolPanel } from './components/ToolPanel';
+import { ToolPanel } from './components/organisms/toolpanel/ToolPanel';
 import { OutlineView } from './components/OutlineView';
-import { PresentationMode } from './components/PresentationMode';
+import { PresentationMode } from './components/organisms/presentation/PresentationMode';
 import { StatusBar } from './components/StatusBar';
 
 // Modales (Organisms)
@@ -46,7 +46,7 @@ import { IconPackModal } from './components/Modals/IconPackModal';
 import { CommandPaletteModal } from './components/Modals/CommandPaletteModal';
 import { PdfExportModal } from './components/Modals/PdfExportModal';
 import { HistoryTimelineModal } from './components/Modals/HistoryTimelineModal';
-import { ElaboratePresentationSystem } from './components/Presentation/ElaboratePresentationSystem';
+import { ElaboratePresentationSystem } from './components/organisms/presentation/ElaboratePresentationSystem';
 
 export default function App() {
   const store = useMindMapStore();

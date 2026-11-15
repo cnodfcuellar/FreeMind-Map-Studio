@@ -2927,6 +2927,64 @@ Eliminar inconsistencias cromáticas en componentes que utilizaban `bg-white` y 
 
 ---
 
+## 📌 [Plan de Solución Integral — Fase 4] — 2026-11-15: Alineación Estricta de Directorios Atomic Design
+
+### 🎯 Motivo Técnico
+El repositorio mantenía organismos y módulos diseminados fuera de la jerarquía estándar de Atomic Design:
+1. `src/components/Presentation/` utilizaba casing PascalCase y alojaba organismos de diapositivas (`ElaboratePresentationSystem`, `SlideDetailModal`, `SpatialSlideCardComponent`) desconectados de `src/components/organisms/`.
+2. `src/components/PresentationMode.tsx` residía en la raíz de componentes en lugar de ubicarse en `src/components/organisms/presentation/`.
+3. `ToolPanel.tsx` residía en la raíz de `src/components/` a pesar de que sus pestañas modulares (`FormatTab`, `ThemeTab`, etc.) ya se encontraban agrupadas en `src/components/organisms/toolpanel/`.
+4. `MiniMap.tsx` residía en la raíz de `src/components/` a pesar de que el resto de capas del lienzo (`CanvasBackgroundLayer`, `CanvasContextMenu`, `CanvasDrawingOverlay`, `CanvasPresentationHUD`) residían en `src/components/organisms/canvas/`.
+
+### 🛠️ Qué Cambió
+1. **Reubicación a `src/components/organisms/presentation/`**:
+   - `PresentationMode.tsx`
+   - `ElaboratePresentationSystem.tsx`
+   - `SlideDetailModal.tsx`
+   - `SpatialSlideCardComponent.tsx`
+   - Ajustadas las rutas de importación relativas hacia los niveles superiores.
+2. **Reubicación a `src/components/organisms/toolpanel/`**:
+   - `ToolPanel.tsx` ahora reside junto a sus pestañas en `src/components/organisms/toolpanel/ToolPanel.tsx`.
+3. **Reubicación a `src/components/organisms/canvas/`**:
+   - `MiniMap.tsx` ahora reside junto a las capas del lienzo en `src/components/organisms/canvas/MiniMap.tsx`.
+4. **Retrocompatibilidad Absoluta (Zero-Breaking Barrels)**:
+   - Se crearon barriles de re-exportación en las ubicaciones heredadas:
+     - `src/components/PresentationMode.tsx`
+     - `src/components/ToolPanel.tsx`
+     - `src/components/MiniMap.tsx`
+     - `src/components/Presentation/ElaboratePresentationSystem.tsx`
+     - `src/components/Presentation/SlideDetailModal.tsx`
+     - `src/components/Presentation/SpatialSlideCardComponent.tsx`
+5. **Actualización de Consumidores Canónicos**:
+   - `src/App.tsx` y `src/components/MindMapCanvas.tsx` actualizados para importar desde las nuevas rutas canónicas de organismos.
+
+### 📄 Archivos Creados / Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/organisms/presentation/PresentationMode.tsx` | Organismo | Componente de presentación canónico en Atomic Design. |
+| `src/components/organisms/presentation/ElaboratePresentationSystem.tsx` | Organismo | Sistema espacial de diapositivas canónico. |
+| `src/components/organisms/presentation/SlideDetailModal.tsx` | Organismo | Modal de detalle de diapositiva. |
+| `src/components/organisms/presentation/SpatialSlideCardComponent.tsx` | Organismo | Tarjeta espacial de diapositiva. |
+| `src/components/organisms/toolpanel/ToolPanel.tsx` | Organismo | Panel de herramientas canónico agrupado con sus pestañas. |
+| `src/components/organisms/canvas/MiniMap.tsx` | Organismo | Radar MiniMapa canónico agrupado con las capas del canvas. |
+| `src/components/PresentationMode.tsx` | Barrel | Re-exportación para retrocompatibilidad. |
+| `src/components/ToolPanel.tsx` | Barrel | Re-exportación para retrocompatibilidad. |
+| `src/components/MiniMap.tsx` | Barrel | Re-exportación para retrocompatibilidad. |
+| `src/components/Presentation/ElaboratePresentationSystem.tsx` | Barrel | Re-exportación para retrocompatibilidad. |
+| `src/components/Presentation/SlideDetailModal.tsx` | Barrel | Re-exportación para retrocompatibilidad. |
+| `src/components/Presentation/SpatialSlideCardComponent.tsx` | Barrel | Re-exportación para retrocompatibilidad. |
+| `src/App.tsx` | Template / Orchestrator | Actualizadas importaciones canónicas de organismos. |
+| `src/components/MindMapCanvas.tsx` | Organismo | Actualizada importación de MiniMap. |
+| `doc/CHANGELOG.md` | Documentación | Registro detallado de la Fase 4. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm test:regression`: **53/53 suites superadas (357/357 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 7.17s (0 errores)**.
+
+---
+
+
 
 
 
