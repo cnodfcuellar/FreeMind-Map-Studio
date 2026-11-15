@@ -2544,6 +2544,111 @@ En la trama de fondo de nodo **"Panal"** (`honeycomb` / `hexagons`), el trazado 
 - [x] `pnpm test:regression`: **49/49 suites superadas (305/305 pruebas unitarias exitosas, 100%)**.
 - [x] `pnpm build`: **Compilación de producción exitosa en 10.57s (0 errores)**.
 
+---
+
+## 📌 [Fase 30] — 2026-11-14: Estilos Avanzados de Borde y Contorno de Nodo (Grid 3×2 y Paneles Contextuales)
+
+### 🎯 Motivo
+Reemplazar el selector plano anterior de 3 estilos de borde en `FormatTab.tsx` por la suite completa de 6 estilos avanzados vectoriales (`Sólido`, `Guiones`, `Puntos`, `Doble`, `Zigzag`, `Ondulado`) con micro-iconos SVG y controles contextuales reactivos idénticos a los 5 mockups del usuario.
+
+### 🛠️ Solución Técnica
+1. **Tipos e Interfaces (`mindmap.ts`):**
+   - Formalizado `NodeBorderStyle`: `'solid' | 'dashed' | 'dotted' | 'double' | 'zigzag' | 'wavy'`.
+   - Añadidos campos contextuales a `MindNode`: `borderGap`, `borderColorInner`, `borderColorOuter`, `borderDashLength`, `borderDashSpace`, `borderDotShape` (`circle | square | diamond`), `borderDotSpacing`, `borderZigzagHeight`, `borderZigzagFreq`, `borderWaveHeight`, `borderWaveWidth`.
+   - Sincronizado en `extractNodeStyleBundle` (`useMindMapStore.ts`) para copia fiel a hijos y hermanos.
+2. **Motor Geométrico de Bordes (`borderPathUtils.ts`):**
+   - `generateZigzagPath`: algoritmo de dientes triangulares perimetrales continuos a 60° con ajuste entero de picos por tramo para garantizar esquinas sin roturas.
+   - `generateWavyPath`: algoritmo sinusoidal Bézier cúbico continuo $C^1$ perimetral.
+   - `getDoubleBorderRects`: cálculo de rectángulos concéntricos exterior e interior con offsets precisos.
+3. **Renderizadores Híbridos (`NodeBorderOverlay.tsx`, `NodeBackgroundRenderer.tsx`, `NodeComponent.tsx`):**
+   - `NodeBorderOverlay`: componente overlay vectorial SVG posicionado con precisión subpíxel (`pointer-events: none`). Renderiza el trazado exacto sin afectar el flujo del texto, badges o acciones.
+   - `getNodeShapeStyles`: inhibe el borde CSS plano en modos procedurales para evitar duplicación.
+   - `NodeSvgPolygonBackground`: soporta contorno concéntrico doble y `strokeDasharray` dinámico en polígonos.
+4. **Inspector `FormatTab.tsx` Fiel a las Capturas:**
+   - Grid 3×2 con micro-iconos limpios y estado activo en ámbar cálido.
+   - Paneles contextuales reactivos:
+     - **Guiones:** sliders de `Largo guión` (2–32px) y `Espacio` (2–32px).
+     - **Puntos:** control segmentado de 3 formas (`● Esfera`, `■ Cuadrado`, `◆ Rombo`) y slider `Separación` (2–24px).
+     - **Doble:** slider `Separación` (1–16px), selectores independientes de `Color Línea Interior` y `Color Línea Exterior`.
+     - **Zigzag:** sliders de `Altura picos` (2–20px step 0.5) y `Frecuencia` (6–40px).
+     - **Ondulado:** sliders de `Altura ondas` (2–20px step 0.5) y `Ancho onda` (12–60px).
+     - `Color del Borde` unificado para estilos no dobles.
+     - `Grosor del borde` con slider decimal (step 0.5px) y badge `px`.
+5. **Sincronización Exportador HTML (`htmlExporter.ts`):**
+   - Soporte para bordes dobles bicolor con `box-shadow` concéntrico múltiple y compatibilidad offline.
+
+### ✏️ Archivos Modificados y Creados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/types/mindmap.ts` | Tipos | Añadidos `NodeBorderStyle`, `NodeBorderDotShape` y los 11 parámetros avanzados a `MindNode`. |
+| `src/utils/borderPathUtils.ts` | Utilidad | **Nuevo:** funciones matemáticas para generar caminos SVG de zigzag, ondulado y rectángulos dobles concéntricos. |
+| `src/utils/__tests__/borderPathUtils.test.ts` | Tests | **Nuevo:** pruebas unitarias de los generadores de trazados perimetrales (3/3 superadas). |
+| `src/components/molecules/node/NodeBorderOverlay.tsx` | Molécula | **Nuevo:** componente overlay SVG de renderizado de bordes avanzados para nodos de caja. |
+| `src/components/molecules/node/__tests__/NodeBorderOverlay.test.tsx` | Tests | **Nuevo:** pruebas de renderizado del overlay (7/7 superadas). |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Integrado el bypass de borde nativo en `getNodeShapeStyles` y soporte de trazos en `NodeSvgPolygonBackground`. |
+| `src/components/NodeComponent.tsx` | Organismo | Montado `<NodeBorderOverlay />` para nodos estándar. |
+| `src/components/organisms/toolpanel/FormatTab.tsx` | Organismo | Reescrita la sección "Bordes y Contorno" con grid 3×2 y los 5 paneles contextuales reactivos. |
+| `src/hooks/useMindMapStore.ts` | Hook | Añadida propagación de estilos de borde a hijos y hermanos en `extractNodeStyleBundle`. |
+| `src/utils/htmlExporter.ts` | Utilidad | Soporte de bordes avanzados en la exportación HTML offline. |
+| `doc/CHANGELOG.md` | Docs | Registro detallado de la implementación de la Fase 30. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores** de tipado TypeScript.
+- [x] `pnpm vitest run --pool=forks src/utils/__tests__/borderPathUtils.test.ts`: **3/3 pruebas superadas**.
+- [x] `pnpm vitest run --pool=forks src/components/molecules/node/__tests__/NodeBorderOverlay.test.tsx`: **7/7 pruebas superadas**.
+- [x] `pnpm test:regression`: **51/51 suites superadas (315/315 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.71s (0 errores)**.
+
+---
+
+## 📌 [Fase 31] — 2026-11-15: Adaptación Geométrica Total de Bordes a Todas las Formas de Nodo
+
+### 🎯 Motivo
+Corregir los errores reportados donde ciertos estilos de borde (Puntos, Dobles, Zigzag, Ondulado) no seguían la silueta real del nodo (`rombo/cuadrado 45°`, `píldora`, `círculo`, `óvalo`, `horquilla`, `rectángulo vivo/redondeado`, `hexágono`, `flecha`, `estrella`).
+
+### 🛠️ Solución Técnica
+1. **Rombo / Cuadrado rotado 45° (`isSquareRotated`):**
+   - Se modela como polígono de 4 vértices explícitos `points` en `NodeSvgPolygonBackground` en lugar de rama estática `pathD`.
+   - Ahora soporta de forma 100% nativa:
+     - **Borde Doble:** polígono concéntrico interior escalado con `getDoublePolygonPoints`.
+     - **Zigzag:** `generatePolygonZigzag` recorriendo las 4 aristas diagonales con picos orientados hacia afuera.
+     - **Ondulado:** `generatePolygonWavy` generando ondas sinusoidales Bézier a lo largo de las 4 caras.
+     - **Puntos (Rombo ◆):** `generatePerimeterDiamonds` distribuyendo rombos rotados a 45° a lo largo de las aristas del rombo.
+2. **Píldora / Cápsula (`pill`):**
+   - Implementadas `generatePillZigzagPath` y `generatePillWavyPath` en `borderPathUtils.ts`.
+   - Zigzag y ondas recorren el borde superior, el semicírculo derecho radial exterior, el borde inferior y el semicírculo izquierdo radial exterior de forma continua y cerrada, eliminando extremos planos.
+3. **Distribución Geométrica de Puntos Rombo (◆):**
+   - Creada la función `generatePerimeterDiamonds` que calcula las coordenadas precisas $(x, y)$ perimetrales para cualquier forma:
+     - **Círculo y Óvalo:** distribución radial en coordenadas polares.
+     - **Horquilla (Fork):** distribución lineal a lo largo del subrayado inferior.
+     - **Burbuja:** recorre tramos rectos y arcos circulares de las 4 esquinas sin generar cajas rectas falsas.
+     - **Polígonos (Rombo, Hexágono, Flecha, Estrella, Bisel):** distribución equiespaciada por aristas.
+4. **Rectángulos y Cuadrados Vivos vs Redondeados:**
+   - `NodeComponent.tsx` resuelve dinámicamente `resolvedBorderRadius` mediante `resolveRectangleCorners(node)`.
+   - Si `rectCornerStyle === 'sharp'`, `borderRadius` es `0px` exacto (esquinas 90° vivas en zigzag, wavy, double y puntos).
+   - Si `rectCornerStyle === 'rounded'`, se usa `rectRadius` exacto del nodo.
+5. **Corrección de Referencia en `borderPathUtils.ts:177`:**
+   - Corregido typo `${endX.toFixed(2)}` por `${x1.toFixed(2)}` en la curva Bézier derecha de `generateWavyPath`.
+
+### ✏️ Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/utils/borderPathUtils.ts` | Utilidad | Añadidas `generatePillZigzagPath`, `generatePillWavyPath`, `generatePerimeterDiamonds` y corrección de typo Bézier en `generateWavyPath`. |
+| `src/utils/__tests__/borderPathUtils.test.ts` | Tests | 8 pruebas unitarias superadas (añadidas pruebas de píldora y diamantes). |
+| `src/components/molecules/node/NodeBorderOverlay.tsx` | Molécula | Integrado soporte de diamantes en círculo, óvalo, horquilla, píldora y burbuja, además de trazados de píldora continua. |
+| `src/components/molecules/node/__tests__/NodeBorderOverlay.test.tsx` | Tests | 12 pruebas unitarias superadas (añadidas pruebas de píldora y diamantes). |
+| `src/components/molecules/node/NodeBackgroundRenderer.tsx` | Molécula | Rombo 45° y bisel convertidos a polígonos `points` dinámicos con soporte de doble, zigzag, ondulado y diamantes. |
+| `src/components/NodeComponent.tsx` | Organismo | Resolución exacta de `resolvedBorderRadius` para esquinas rectas ($r=0$) y redondeadas. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores**.
+- [x] `pnpm vitest run --pool=forks src/utils/__tests__/borderPathUtils.test.ts`: **8/8 pruebas superadas**.
+- [x] `pnpm vitest run --pool=forks src/components/molecules/node/__tests__/NodeBorderOverlay.test.tsx`: **12/12 pruebas superadas**.
+- [x] `pnpm test:regression`: **51/51 suites superadas (321/321 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.02s (0 errores)**.
+
+
+
 
 
 

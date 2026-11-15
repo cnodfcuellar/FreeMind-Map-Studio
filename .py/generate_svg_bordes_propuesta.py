@@ -1,0 +1,358 @@
+import os
+import math
+
+def generate_svg():
+    # Dimensiones generales
+    width = 1180
+    height = 760
+
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" style="background:#0b0f19; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Filtros de sombra y glow -->
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#3b82f6" flood-opacity="0.6"/>
+    </filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="plus-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="panel-bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#121826"/>
+      <stop offset="100%" stop-color="#0e131f"/>
+    </linearGradient>
+
+    <!-- Patrón de zigzag perimetral para rectángulos -->
+    <!-- Creamos trazados paramétricos limpios -->
+  </defs>
+
+  <!-- ========================================== -->
+  <!-- CABECERA GENERAL -->
+  <!-- ========================================== -->
+  <text x="590" y="40" fill="#f8fafc" font-size="20" font-weight="bold" text-anchor="middle" letter-spacing="0.5">
+    PROPUESTA DE BORDES Y CONTORNO DE NODOS
+  </text>
+  <text x="590" y="65" fill="#94a3b8" font-size="13" text-anchor="middle">
+    Mockup del Inspector (izq.) y Renderizado Real de los 6 Estilos de Línea (der.)
+  </text>
+
+  <!-- ==================================================================== -->
+  <!-- COLUMNA IZQUIERDA: EL PANEL INSPECTOR (CALCADO A TU CAPTURA)         -->
+  <!-- ==================================================================== -->
+  <g transform="translate(40, 90)">
+    <!-- Marco contenedor del panel oscuro -->
+    <rect x="0" y="0" width="370" height="630" rx="16" fill="url(#panel-bg)" stroke="#1e293b" stroke-width="1.5" filter="url(#soft-shadow)"/>
+
+    <!-- Título de sección -->
+    <text x="24" y="38" fill="#f1f5f9" font-size="15" font-weight="700">Estilo de Línea</text>
+
+    <!-- GRID 3x2 DE ESTILOS -->
+    <!-- Fila 1: Sólido, Guiones, Puntos -->
+    <!-- 1. Sólido -->
+    <g transform="translate(24, 55)">
+      <rect x="0" y="0" width="100" height="52" rx="10" fill="#182032" stroke="#253248" stroke-width="1.2"/>
+      <line x1="26" y1="20" x2="74" y2="20" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="50" y="40" fill="#94a3b8" font-size="11" font-weight="600" text-anchor="middle">Sólido</text>
+    </g>
+
+    <!-- 2. Guiones -->
+    <g transform="translate(134, 55)">
+      <rect x="0" y="0" width="100" height="52" rx="10" fill="#182032" stroke="#253248" stroke-width="1.2"/>
+      <line x1="24" y1="20" x2="76" y2="20" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="6 3" stroke-linecap="round"/>
+      <text x="50" y="40" fill="#94a3b8" font-size="11" font-weight="600" text-anchor="middle">Guiones</text>
+    </g>
+
+    <!-- 3. Puntos -->
+    <g transform="translate(244, 55)">
+      <rect x="0" y="0" width="100" height="52" rx="10" fill="#182032" stroke="#253248" stroke-width="1.2"/>
+      <circle cx="36" cy="20" r="2.2" fill="#94a3b8"/>
+      <circle cx="50" cy="20" r="2.2" fill="#94a3b8"/>
+      <circle cx="64" cy="20" r="2.2" fill="#94a3b8"/>
+      <text x="50" y="40" fill="#94a3b8" font-size="11" font-weight="600" text-anchor="middle">Puntos</text>
+    </g>
+
+    <!-- Fila 2: Doble (Activo), Zigzag, Ondulado -->
+    <!-- 4. Doble (ACTIVO - con halo azul como tu imagen) -->
+    <g transform="translate(24, 117)">
+      <rect x="0" y="0" width="100" height="52" rx="10" fill="#172554" stroke="#3b82f6" stroke-width="2" filter="url(#glow-blue)"/>
+      <line x1="26" y1="17" x2="74" y2="17" stroke="#60a5fa" stroke-width="2"/>
+      <line x1="26" y1="23" x2="74" y2="23" stroke="#60a5fa" stroke-width="2"/>
+      <text x="50" y="41" fill="#93c5fd" font-size="11" font-weight="700" text-anchor="middle">Doble</text>
+    </g>
+
+    <!-- 5. Zigzag -->
+    <g transform="translate(134, 117)">
+      <rect x="0" y="0" width="100" height="52" rx="10" fill="#182032" stroke="#253248" stroke-width="1.2"/>
+      <path d="M 28 23 L 36 16 L 44 24 L 52 16 L 60 24 L 68 17" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linejoin="round"/>
+      <text x="50" y="41" fill="#94a3b8" font-size="11" font-weight="600" text-anchor="middle">Zigzag</text>
+    </g>
+
+    <!-- 6. Ondulado -->
+    <g transform="translate(244, 117)">
+      <rect x="0" y="0" width="100" height="52" rx="10" fill="#182032" stroke="#253248" stroke-width="1.2"/>
+      <path d="M 28 21 Q 38 14 48 21 T 68 21" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round"/>
+      <text x="50" y="41" fill="#94a3b8" font-size="11" font-weight="600" text-anchor="middle">Ondulado</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- SLIDER: SEPARACIÓN (4px)                       -->
+    <!-- ============================================== -->
+    <g transform="translate(24, 195)">
+      <text x="0" y="0" fill="#f1f5f9" font-size="14" font-weight="600">Separación</text>
+      <!-- Badge 4px -->
+      <rect x="272" y="-14" width="48" height="22" rx="6" fill="#1e293b"/>
+      <text x="296" y="1" fill="#93c5fd" font-size="12" font-weight="700" text-anchor="middle">4px</text>
+
+      <!-- Barra de slider -->
+      <rect x="0" y="14" width="320" height="5" rx="2.5" fill="#1e293b"/>
+      <rect x="0" y="14" width="95" height="5" rx="2.5" fill="#60a5fa"/>
+      <!-- Knob -->
+      <circle cx="95" cy="16.5" r="9" fill="#93c5fd" stroke="#3b82f6" stroke-width="2" filter="url(#soft-shadow)"/>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- COLOR LÍNEA INTERIOR                           -->
+    <!-- ============================================== -->
+    <g transform="translate(24, 260)">
+      <text x="0" y="18" fill="#f1f5f9" font-size="14" font-weight="600">Color Línea Interior</text>
+      
+      <!-- Input de color swatch activo (#FACC15) -->
+      <rect x="175" y="0" width="88" height="26" rx="6" fill="#182032" stroke="#2a374d" stroke-width="1"/>
+      <rect x="180" y="5" width="16" height="16" rx="3" fill="#facc15"/>
+      <text x="202" y="17" fill="#f1f5f9" font-size="11" font-weight="600">#FACC15</text>
+
+      <!-- Botón Reset -->
+      <text x="285" y="17" fill="#64748b" font-size="12" font-weight="600" cursor="pointer">Reset</text>
+
+      <!-- Fila de 9 swatches circulares + botón '+' -->
+      <g transform="translate(0, 36)">
+        <!-- 1. Negro -->
+        <circle cx="12" cy="14" r="10.5" fill="#090d16" stroke="#1e293b" stroke-width="1.5"/>
+        <!-- 2. Blanco -->
+        <circle cx="42" cy="14" r="10.5" fill="#ffffff"/>
+        <!-- 3. Vinotinto/Marrón -->
+        <circle cx="72" cy="14" r="10.5" fill="#7f1d1d"/>
+        <!-- 4. Rojo -->
+        <circle cx="102" cy="14" r="10.5" fill="#ef4444"/>
+        <!-- 5. Naranja -->
+        <circle cx="132" cy="14" r="10.5" fill="#f97316"/>
+        <!-- 6. Amarillo (Seleccionado con aro exterior azul) -->
+        <circle cx="162" cy="14" r="13" fill="none" stroke="#3b82f6" stroke-width="2"/>
+        <circle cx="162" cy="14" r="9.5" fill="#facc15"/>
+        <!-- 7. Verde -->
+        <circle cx="192" cy="14" r="10.5" fill="#10b981"/>
+        <!-- 8. Azul -->
+        <circle cx="222" cy="14" r="10.5" fill="#3b82f6"/>
+        <!-- 9. Violeta -->
+        <circle cx="252" cy="14" r="10.5" fill="#8b5cf6"/>
+        <!-- 10. Botón '+' degradado con halo -->
+        <circle cx="284" cy="14" r="11" fill="url(#plus-grad)" filter="url(#glow-blue)"/>
+        <text x="284" y="19" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">+</text>
+      </g>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- COLOR LÍNEA EXTERIOR                           -->
+    <!-- ============================================== -->
+    <g transform="translate(24, 360)">
+      <text x="0" y="18" fill="#f1f5f9" font-size="14" font-weight="600">Color Línea Exterior</text>
+      
+      <!-- Input de color swatch activo (#FACC15) -->
+      <rect x="175" y="0" width="88" height="26" rx="6" fill="#182032" stroke="#2a374d" stroke-width="1"/>
+      <rect x="180" y="5" width="16" height="16" rx="3" fill="#facc15"/>
+      <text x="202" y="17" fill="#f1f5f9" font-size="11" font-weight="600">#FACC15</text>
+
+      <!-- Botón Reset -->
+      <text x="285" y="17" fill="#64748b" font-size="12" font-weight="600" cursor="pointer">Reset</text>
+
+      <!-- Fila de 9 swatches circulares + botón '+' -->
+      <g transform="translate(0, 36)">
+        <circle cx="12" cy="14" r="10.5" fill="#090d16" stroke="#1e293b" stroke-width="1.5"/>
+        <circle cx="42" cy="14" r="10.5" fill="#ffffff"/>
+        <circle cx="72" cy="14" r="10.5" fill="#7f1d1d"/>
+        <circle cx="102" cy="14" r="10.5" fill="#ef4444"/>
+        <circle cx="132" cy="14" r="10.5" fill="#f97316"/>
+        <!-- Seleccionado amarillo -->
+        <circle cx="162" cy="14" r="13" fill="none" stroke="#3b82f6" stroke-width="2"/>
+        <circle cx="162" cy="14" r="9.5" fill="#facc15"/>
+        <circle cx="192" cy="14" r="10.5" fill="#10b981"/>
+        <circle cx="222" cy="14" r="10.5" fill="#3b82f6"/>
+        <circle cx="252" cy="14" r="10.5" fill="#8b5cf6"/>
+        <circle cx="284" cy="14" r="11" fill="url(#plus-grad)" filter="url(#glow-blue)"/>
+        <text x="284" y="19" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle">+</text>
+      </g>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- SLIDER: GROSOR DEL BORDE (2.5px)               -->
+    <!-- ============================================== -->
+    <g transform="translate(24, 465)">
+      <text x="0" y="0" fill="#f1f5f9" font-size="14" font-weight="600">Grosor del borde</text>
+      <!-- Badge 2.5px -->
+      <rect x="264" y="-14" width="56" height="22" rx="6" fill="#1e293b"/>
+      <text x="292" y="1" fill="#93c5fd" font-size="12" font-weight="700" text-anchor="middle">2.5px</text>
+
+      <!-- Barra de slider -->
+      <rect x="0" y="14" width="320" height="5" rx="2.5" fill="#1e293b"/>
+      <rect x="0" y="14" width="65" height="5" rx="2.5" fill="#60a5fa"/>
+      <!-- Knob -->
+      <circle cx="65" cy="16.5" r="9" fill="#93c5fd" stroke="#3b82f6" stroke-width="2" filter="url(#soft-shadow)"/>
+    </g>
+
+    <text x="185" y="585" fill="#64748b" font-size="11" text-anchor="middle" font-style="italic">
+      Diseño 100% idéntico a tu referencia
+    </text>
+  </g>
+
+  <!-- ==================================================================== -->
+  <!-- COLUMNA DERECHA: DEMOSTRACIÓN DE LOS 6 ESTILOS EN NODOS REALES       -->
+  <!-- ==================================================================== -->
+  <g transform="translate(460, 90)">
+    <!-- Marco contenedor de preview -->
+    <rect x="0" y="0" width="680" height="630" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" filter="url(#soft-shadow)"/>
+    
+    <text x="340" y="32" fill="#38bdf8" font-size="14" font-weight="bold" text-anchor="middle">
+      VISTA PREVIA EN EL LIENZO DE MAPAS MENTALES
+    </text>
+
+    <!-- ============================================== -->
+    <!-- NODO 1: SÓLIDO                                 -->
+    <!-- ============================================== -->
+    <g transform="translate(40, 60)">
+      <rect x="0" y="0" width="270" height="66" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2.5" filter="url(#soft-shadow)"/>
+      <text x="24" y="28" fill="#1e293b" font-size="13" font-weight="bold">Borde Sólido (solid)</text>
+      <text x="24" y="48" fill="#64748b" font-size="11">Grosor uniforme: 2.5px | Trazo continuo</text>
+      <!-- Badge de tipo -->
+      <rect x="200" y="10" width="58" height="18" rx="4" fill="#eff6ff"/>
+      <text x="229" y="23" fill="#2563eb" font-size="10" font-weight="bold" text-anchor="middle">SÓLIDO</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- NODO 2: GUIONES                                -->
+    <!-- ============================================== -->
+    <g transform="translate(370, 60)">
+      <rect x="0" y="0" width="270" height="66" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="8 4" stroke-linecap="round" filter="url(#soft-shadow)"/>
+      <text x="24" y="28" fill="#1e293b" font-size="13" font-weight="bold">Borde Guiones (dashed)</text>
+      <text x="24" y="48" fill="#64748b" font-size="11">Segmentado técnico | dasharray="8 4"</text>
+      <rect x="195" y="10" width="63" height="18" rx="4" fill="#eff6ff"/>
+      <text x="226" y="23" fill="#2563eb" font-size="10" font-weight="bold" text-anchor="middle">GUIONES</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- NODO 3: PUNTOS                                 -->
+    <!-- ============================================== -->
+    <g transform="translate(40, 150)">
+      <rect x="0" y="0" width="270" height="66" rx="12" fill="#ffffff" stroke="#3b82f6" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round" filter="url(#soft-shadow)"/>
+      <text x="24" y="28" fill="#1e293b" font-size="13" font-weight="bold">Borde Puntos (dotted)</text>
+      <text x="24" y="48" fill="#64748b" font-size="11">Puntos redondos finos | round cap</text>
+      <rect x="200" y="10" width="58" height="18" rx="4" fill="#eff6ff"/>
+      <text x="229" y="23" fill="#2563eb" font-size="10" font-weight="bold" text-anchor="middle">PUNTOS</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- NODO 4: DOBLE BICOLOR (DESTACADO DE TU CAPTURA)-->
+    <!-- ============================================== -->
+    <g transform="translate(370, 150)">
+      <!-- Capa exterior: amarillo dorado #facc15 -->
+      <rect x="0" y="0" width="270" height="66" rx="14" fill="none" stroke="#facc15" stroke-width="2.5"/>
+      <!-- Capa interior (separada 4px): amarillo dorado o azul -->
+      <rect x="5.5" y="5.5" width="259" height="55" rx="10" fill="#ffffff" stroke="#facc15" stroke-width="2"/>
+      <text x="24" y="28" fill="#1e293b" font-size="13" font-weight="bold">Borde Doble Bicolor</text>
+      <text x="24" y="48" fill="#854d0e" font-size="11">Separación 4px | Exterior e Interior #FACC15</text>
+      <rect x="190" y="10" width="68" height="18" rx="4" fill="#fef9c3"/>
+      <text x="224" y="23" fill="#ca8a04" font-size="10" font-weight="bold" text-anchor="middle">DOBLE ★</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- NODO 5: ZIGZAG (TRIANGULAR PERIMETRAL)         -->
+    <!-- ============================================== -->
+    <g transform="translate(40, 240)">
+      <!-- Fondo del nodo -->
+      <rect x="6" y="6" width="258" height="54" rx="6" fill="#ffffff"/>
+      <!-- Trazado perimetral en zigzag matemático -->
+      <!-- Borde superior zigzag -->
+      <path d="M 6 6 
+               L 16 1 L 26 6 L 36 1 L 46 6 L 56 1 L 66 6 L 76 1 L 86 6 L 96 1 L 106 6 L 116 1 L 126 6 L 136 1 L 146 6 L 156 1 L 166 6 L 176 1 L 186 6 L 196 1 L 206 6 L 216 1 L 226 6 L 236 1 L 246 6 L 256 1 L 264 6
+               L 269 16 L 264 26 L 269 36 L 264 46 L 269 56 L 264 60
+               L 256 65 L 246 60 L 236 65 L 226 60 L 216 65 L 206 60 L 196 65 L 186 60 L 176 65 L 166 60 L 156 65 L 146 60 L 136 65 L 126 60 L 116 65 L 106 60 L 96 65 L 86 60 L 76 65 L 66 60 L 56 65 L 46 60 L 36 65 L 26 60 L 16 65 L 6 60
+               L 1 50 L 6 40 L 1 30 L 6 20 Z"
+            fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linejoin="round" filter="url(#soft-shadow)"/>
+      <text x="24" y="28" fill="#1e293b" font-size="13" font-weight="bold">Borde Zigzag (zigzag)</text>
+      <text x="24" y="48" fill="#991b1b" font-size="11">Perímetro dentado dinámico | Dientes a 60°</text>
+      <rect x="200" y="10" width="58" height="18" rx="4" fill="#fef2f2"/>
+      <text x="229" y="23" fill="#dc2626" font-size="10" font-weight="bold" text-anchor="middle">ZIGZAG</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- NODO 6: ONDULADO (SINUSOIDAL PERIMETRAL)       -->
+    <!-- ============================================== -->
+    <g transform="translate(370, 240)">
+      <rect x="6" y="6" width="258" height="54" rx="8" fill="#ffffff"/>
+      <!-- Trazado de onda suave continua -->
+      <path d="M 6 6 
+               Q 16 0 26 6 T 46 6 T 66 6 T 86 6 T 106 6 T 126 6 T 146 6 T 166 6 T 186 6 T 206 6 T 226 6 T 246 6 T 264 6
+               Q 270 16 264 26 T 264 46 T 264 60
+               Q 254 66 244 60 T 224 60 T 204 60 T 184 60 T 164 60 T 144 60 T 124 60 T 104 60 T 84 60 T 64 60 T 44 60 T 24 60 T 6 60
+               Q 0 50 6 40 T 6 20 Z"
+            fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" filter="url(#soft-shadow)"/>
+      <text x="24" y="28" fill="#1e293b" font-size="13" font-weight="bold">Borde Ondulado (wavy)</text>
+      <text x="24" y="48" fill="#065f46" font-size="11">Onda sinusoidal C1 continua y suave</text>
+      <rect x="190" y="10" width="68" height="18" rx="4" fill="#ecfdf5"/>
+      <text x="224" y="23" fill="#059669" font-size="10" font-weight="bold" text-anchor="middle">ONDULADO</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- DEMOSTRACIÓN EXTRA: FORMAS ESPECIALES (POLÍGONOS) -->
+    <!-- ============================================== -->
+    <line x1="40" y1="330" x2="640" y2="330" stroke="#1e293b" stroke-width="1.5"/>
+    <text x="340" y="358" fill="#94a3b8" font-size="12" font-weight="bold" text-anchor="middle">
+      COMPATIBILIDAD CON FORMAS POLIGONALES (ROMBOS, HEXÁGONOS)
+    </text>
+
+    <!-- Rombo con Doble Bicolor -->
+    <g transform="translate(110, 390)">
+      <!-- Rombo exterior -->
+      <polygon points="100,0 200,60 100,120 0,60" fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+      <!-- Rombo interior (gap 5px) -->
+      <polygon points="100,7 188,60 100,113 12,60" fill="#ffffff" stroke="#facc15" stroke-width="2"/>
+      <text x="100" y="58" fill="#1e293b" font-size="12" font-weight="bold" text-anchor="middle">Rombo Doble</text>
+      <text x="100" y="74" fill="#64748b" font-size="10" text-anchor="middle">Azul + Dorado</text>
+    </g>
+
+    <!-- Hexágono con Zigzag perimetral o Doble -->
+    <g transform="translate(390, 390)">
+      <!-- Hexágono exterior -->
+      <polygon points="50,5 150,5 200,60 150,115 50,115 0,60" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
+      <!-- Hexágono interior (gap 5px) -->
+      <polygon points="53,11 147,11 192,60 147,109 53,109 8,60" fill="#ffffff" stroke="#ec4899" stroke-width="2"/>
+      <text x="100" y="58" fill="#1e293b" font-size="12" font-weight="bold" text-anchor="middle">Hexágono Doble</text>
+      <text x="100" y="74" fill="#64748b" font-size="10" text-anchor="middle">Púrpura + Rosa</text>
+    </g>
+
+    <!-- Explicación técnica de renderizado -->
+    <rect x="40" y="540" width="600" height="60" rx="10" fill="#131c31" stroke="#1e293b"/>
+    <text x="340" y="563" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle">
+      ✔ Arquitectura de renderizado 100% limpia y sin dependencias
+    </text>
+    <text x="340" y="583" fill="#94a3b8" font-size="11" text-anchor="middle">
+      CSS nativo para Sólido/Guiones/Puntos | Capas concéntricas SVG para Doble bicolor | Algoritmo paramétrico para Zigzag y Ondulado
+    </text>
+  </g>
+</svg>'''
+
+    svg_path = "C:/Users/admin/.gemini/antigravity/brain/e14d73aa-b7b2-4a1d-9994-dc393facce6c/propuesta_bordes.svg"
+    doc_path = "../doc/img/propuesta_bordes_estilos_linea.svg"
+
+    with open(svg_path, "w", encoding="utf-8") as f:
+        f.write(svg)
+    with open(doc_path, "w", encoding="utf-8") as f:
+        f.write(svg)
+
+    print("SVG de propuesta de bordes generado exitosamente.")
+
+if __name__ == "__main__":
+    generate_svg()

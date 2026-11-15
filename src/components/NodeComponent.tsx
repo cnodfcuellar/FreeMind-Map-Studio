@@ -6,13 +6,14 @@ import {
   isDarkNodeBackground,
   computeNodeShadowStyle,
   NodeSvgPolygonBackground,
+  NodeBorderOverlay,
   NodeBubbleTail,
 } from './molecules/node/NodeBackgroundRenderer';
 import { NodeForkHooks } from './molecules/node/NodeForkHooks';
 import { NodeHeaderRow } from './molecules/node/NodeHeaderRow';
 import { NodeBadgesBar } from './molecules/node/NodeBadgesBar';
 import { NodeActionButtons } from './molecules/node/NodeActionButtons';
-import { isRectangleSvgShape, isSquareRotated } from '../utils/rectangleCornerUtils';
+import { isRectangleSvgShape, isSquareRotated, resolveRectangleCorners } from '../utils/rectangleCornerUtils';
 import { isOvalSvgShape } from '../utils/ovalShapeUtils';
 
 export interface NodeComponentProps {
@@ -175,6 +176,32 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
         isRoot={isRoot}
         isSelected={isSelected}
       />
+
+      {/* 1b. Procedural Border Overlay (Doble bicolor, Zigzag, Ondulado, Puntos geométricos) */}
+      {!isSvgShape && (() => {
+        let resolvedBorderRadius = 14;
+        if (shape === 'bubble') {
+          resolvedBorderRadius = isRoot ? 24 : 16;
+        } else if (shape === 'pill' || shape === 'circle') {
+          resolvedBorderRadius = Math.min(layout.width, layout.height) / 2;
+        } else if (shape === 'rectangle' || shape === 'square') {
+          const rectConfig = resolveRectangleCorners(node);
+          resolvedBorderRadius = rectConfig.style === 'sharp' ? 0 : rectConfig.radius;
+        } else if (shape === 'fork') {
+          resolvedBorderRadius = 0;
+        }
+
+        return (
+          <NodeBorderOverlay
+            node={node}
+            width={layout.width}
+            height={layout.height}
+            borderRadius={resolvedBorderRadius}
+            borderColor={node.borderColor || branchColor || theme.nodeBorder || '#3b82f6'}
+            isRoot={isRoot}
+          />
+        );
+      })()}
 
       {/* 2. Visible Speech Bubble Pointy Tail */}
       <NodeBubbleTail

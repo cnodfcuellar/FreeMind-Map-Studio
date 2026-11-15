@@ -360,13 +360,30 @@ Verificado en `FormatTab.tsx:144-383` y render en `NodeBackgroundRenderer.tsx:40
 
 ### Contrato funcional de "Bordes y Contorno" (FormatTab, sección 3)
 
-Verificado en `FormatTab.tsx:385-436` y render en `NodeBackgroundRenderer.tsx:190-194`.
+Verificado en `FormatTab.tsx:898-1150`, `NodeBorderOverlay.tsx`, `borderPathUtils.ts` y render en `NodeBackgroundRenderer.tsx`.
 
-- **Header**: icono `Sparkles` (mismo icono que la opción "Trama" del selector de fondo), "Bordes y Contorno" / "Grosor, color y estilo de línea" — **sin badge**.
-- **"Color del Borde"** — `ColorPicker` sobre `borderColor` **con Reset** (`onClear` → `undefined`). Semántica de Auto (enlaza con §4): el borde automático **de un nodo normal es el color de su rama** — `borderColor = node.borderColor || (isRoot ? (node.borderWidth ? branchColor : 'transparent') : branchColor || theme.nodeBorder)`; la raíz **sin grosor** queda `transparent`, con grosor toma el color de rama.
-- **"Grosor del borde"** — `SliderInput` `borderWidth` **0–8px, step 1 (default de `SliderInput`), sin `badge`, sin `onReset`**: `value` = `borderWidth !== undefined ? borderWidth : 1` (muestra 1 si nunca se tocó), `onChange` escribe el número **tal cual, incluido 0**. **Diferencia con §8 Forma**: aquí 0 **no borra** el valor — deja `borderWidth: 0` fijo (nodo sin borde visible), y no hay atajo de vuelta al estado "sin tocar" salvo Reset manual del dato. **Gotcha decimal**: si `borderWidth` llega de otro origen con decimal (p. ej. 2.5 desde ThemeTab/mapa), el slider lo **muestra** pero al arrastrar salta a enteros (step 1).
-- **"Estilo de Línea"** — label `text-[11px] font-semibold text-slate-600 block` + `grid grid-cols-3 gap-1.5` con **preview de línea real** (`w-8 border-t-2 border-{solid|dashed|dotted} border-current my-1`): `solid` Sólido / `dashed` Guiones / `dotted` Puntos, default `solid`. **Gotcha doble escritura**: el clic escribe **`borderDash` y `borderStyle` a la vez** (`{ borderDash: dash.id, borderStyle: dash.id }`, `FormatTab.tsx:422` — duplicado legacy), pero la selección del panel se lee **solo de `borderDash`** (`|| 'solid'`); el render acepta ambos (`node.borderDash || node.borderStyle || 'solid'`, `NodeBackgroundRenderer.tsx:190`). No eliminar un campo sin revisar el otro.
-- El panel **no ofrece** presets de grosor ni checkbox "Auto (color de rama)" (specs viejos lo decían; era falso).
+- **Header**: icono `Sparkles`, "Bordes y Contorno" / "Grosor, color y estilo de línea" — **sin badge**.
+- **"Estilo de Línea"**: `grid grid-cols-3 gap-1.5` con **6 botones y micro-iconos vectoriales SVG** limpios:
+  1. `solid` **Sólido**: Trazo continuo estándar.
+  2. `dashed` **Guiones**: Segmentado técnico. Despliega panel contextual con 2 sliders: `Largo guión` (2–32px, def 10px) y `Espacio` (2–32px, def 11px).
+  3. `dotted` **Puntos**: Trazado punteado perimetral. Despliega panel contextual con selector segmentado de 3 formas de punto (`● Esfera`, `■ Cuadrado`, `◆ Rombo`) y slider de `Separación` (2–24px, def 9px).
+  4. `double` **Doble**: Doble contorno concéntrico. Despliega panel contextual con slider de `Separación` (1–16px, def 4px) y dos `ColorPicker` independientes para personalización bicolor: `Color Línea Interior` y `Color Línea Exterior`.
+  5. `zigzag` **Zigzag**: Borde perimetral dentado a 60° generado por `generateZigzagPath`. Despliega panel contextual con 2 sliders: `Altura picos` (2–20px step 0.5, def 9.5px) y `Frecuencia` (6–40px, def 19px).
+  6. `wavy` **Ondulado**: Borde perimetral sinusoidal $C^1$ continuo generado por `generateWavyPath`. Despliega panel contextual con 2 sliders: `Altura ondas` (2–20px step 0.5, def 10px) y `Ancho onda` (12–60px, def 36px).
+  - Estado activo: resaltado cálido ámbar/dorado (`border-amber-600 bg-amber-50/90 text-amber-800 font-semibold shadow-2xs ring-1 ring-amber-500/50`).
+- **"Color del Borde"**: `ColorPicker` sobre `borderColor` **con Reset** (`onClear` → `undefined`). Visible para todos los estilos que no son `double` (los cuales usan sus selectores específicos interior y exterior).
+- **"Grosor del borde"**: `SliderInput` `borderWidth` **0–10px, step 0.5px** con badge decimal `{n}px` (ej. `2.5px`).
+- **Renderizado híbrido y adaptación geométrica estricta**:
+  - `NodeBorderOverlay`: componente overlay vectorial SVG con aceleración de hardware para contornos dobles, zigzags, ondulados y puntos geométricos.
+  - `getNodeShapeStyles`: inhibe el borde CSS plano en modos procedurales para evitar duplicidad visual y conservar ceñido perfecto del contenido del nodo.
+  - **Adaptación geométrica a cada forma de nodo (`borderPathUtils.ts` + `NodeBackgroundRenderer.tsx` + `NodeComponent.tsx`)**:
+    - **Rombo / Cuadrado 45° (`isSquareRotated`)**: modelado como polígono de 4 vértices `points` en SVG, soportando doble concéntrico, zigzag en las 4 aristas, ondas Bézier y diamantes perimetrales.
+    - **Píldora (`pill`)**: `generatePillZigzagPath` y `generatePillWavyPath` con picos y ondas envolviendo los semicírculos radiales izquierdo y derecho sin cortes ni extremos planos.
+    - **Puntos Rombo (◆)**: `generatePerimeterDiamonds` calcula coordenadas perimetrales continuas $(x, y)$ para círculo, óvalo, horquilla, píldora, burbuja, rectángulos vivos/redondeados y polígonos.
+    - **Rectángulos y Cuadrados Vivos vs Redondeados**: resolución exacta de `resolvedBorderRadius` (0px para esquinas rectas sharp; `rectRadius` para redondeadas).
+    - **Polígonos (Hexágono, Flecha, Estrella, Bisel)**: doble borde concéntrico vía `getDoublePolygonPoints`, zigzag y ondulado perimetral por arista.
+    - **Horquilla (`fork`)**: doble línea paralela, zigzag y ondulado horizontal alineados con la línea base de subrayado.
+  - Sincronizado en `NodeSvgPolygonBackground` para formas poligonales y en `htmlExporter.ts` para exportaciones offline.
 
 ### Contrato funcional de "Aristas y Propagación" (FormatTab, sección 4)
 

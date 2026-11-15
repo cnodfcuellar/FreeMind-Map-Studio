@@ -109,6 +109,9 @@ export type NodePatternStyle =
   | 'crosses';
 export type NodeBgImageMode = 'fit' | 'cover' | 'contain' | 'tile';
 
+export type NodeBorderStyle = 'solid' | 'dashed' | 'dotted' | 'double' | 'zigzag' | 'wavy';
+export type NodeBorderDotShape = 'circle' | 'square' | 'diamond';
+
 export interface MindNode {
   id: string;
   text: string;
@@ -177,8 +180,21 @@ export interface MindNode {
 
   borderColor?: string;
   borderWidth?: number;
-  borderDash?: 'solid' | 'dashed' | 'dotted';
-  borderStyle?: 'solid' | 'dashed' | 'dotted';
+  borderDash?: NodeBorderStyle;
+  borderStyle?: NodeBorderStyle;
+
+  // Parámetros avanzados de bordes y contornos (estilos dinámicos)
+  borderGap?: number; // Separación para modo doble (px, def: 4)
+  borderColorInner?: string; // Color línea interior para modo doble
+  borderColorOuter?: string; // Color línea exterior para modo doble
+  borderDashLength?: number; // Largo de guión para guiones (px, def: 10)
+  borderDashSpace?: number; // Espacio entre guiones (px, def: 11)
+  borderDotShape?: NodeBorderDotShape; // Forma del punto: 'circle' | 'square' | 'diamond'
+  borderDotSpacing?: number; // Separación entre puntos (px, def: 9)
+  borderZigzagHeight?: number; // Altura de picos para zigzag (px, def: 9.5)
+  borderZigzagFreq?: number; // Frecuencia de picos para zigzag (px, def: 19)
+  borderWaveHeight?: number; // Altura de ondas para ondulado (px, def: 10)
+  borderWaveWidth?: number; // Ancho de onda para ondulado (px, def: 36)
 
   // Node Box / Shape Shadow (Sombra del contorno del nodo)
   nodeShadow?: boolean;

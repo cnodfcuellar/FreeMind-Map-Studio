@@ -4,6 +4,7 @@ import { computeBubbleTailGeometry } from '../../../utils/bubbleTailUtils';
 import {
   isRectangleSvgShape,
   isSquareRotated,
+  resolveRectangleCorners,
   computeRectangleSvgPath,
   computeRhombusSvgPath,
   computeRectangleBorderRadius,
@@ -17,6 +18,17 @@ import {
   computeArrowPolygonPoints,
   computeArrowContentPadding,
 } from '../../../utils/arrowShapeUtils';
+import {
+  generatePolygonZigzag,
+  generatePolygonWavy,
+  generateRadialZigzag,
+  generateRadialWavy,
+  getDoublePolygonPoints,
+  generatePerimeterDiamonds,
+  Point2D,
+} from '../../../utils/borderPathUtils';
+import { NodeBorderOverlay } from './NodeBorderOverlay';
+export { NodeBorderOverlay };
 
 export interface NodeBackgroundProps {
   node: MindNode;
@@ -240,9 +252,16 @@ export const getNodeShapeStyles = (
   const borderColor = node.borderColor || (isRoot ? (node.borderWidth ? fallbackBorderColor : 'transparent') : fallbackBorderColor);
   const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
 
+  const isCustomProceduralBorder =
+    borderStyle === 'zigzag' ||
+    borderStyle === 'wavy' ||
+    borderStyle === 'double' ||
+    (borderStyle === 'dashed' && (node.borderDashLength !== undefined || node.borderDashSpace !== undefined)) ||
+    (borderStyle === 'dotted' && (node.borderDotShape === 'diamond' || node.borderDotShape === 'square' || node.borderDotSpacing !== undefined));
+
   const baseStyle: React.CSSProperties = {
     ...bgStyles,
-    border: borderWidth > 0 ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
+    border: borderWidth > 0 && !isCustomProceduralBorder ? `${borderWidth}px ${borderStyle} ${borderColor}` : 'none',
   };
 
   if (shape === 'fork') {
@@ -436,8 +455,14 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   const fallbackBorderColor = branchColor || theme.nodeBorder || '#3b82f6';
   const borderColor = node.borderColor || (isRoot ? (node.borderWidth ? fallbackBorderColor : 'transparent') : fallbackBorderColor);
   const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
-  const strokeDash = borderStyle === 'dashed' ? '6 4' : borderStyle === 'dotted' ? '2.5 3' : undefined;
-  const effectiveBorderColor = borderWidth > 0 ? borderColor : 'none';
+  const strokeDash =
+    borderStyle === 'dashed'
+      ? `${node.borderDashLength || 10} ${node.borderDashSpace || 11}`
+      : borderStyle === 'dotted'
+      ? `${node.borderDotShape === 'square' ? borderWidth : 0.1} ${node.borderDotSpacing || 9}`
+      : undefined;
+  const strokeCap = borderStyle === 'dotted' ? (node.borderDotShape === 'square' ? 'butt' : 'round') : 'round';
+  const effectiveBorderColor = borderWidth > 0 ? (borderStyle === 'double' ? (node.borderColorOuter || borderColor) : borderColor) : 'none';
   const effectiveBorderWidth = borderWidth;
 
   const bgType = node.bgType || (node.bgImageUrl ? 'image' : 'color');
@@ -463,7 +488,28 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
   let pathD: string | null = null;
 
   if (isSquareRotated(node)) {
-    pathD = computeRhombusSvgPath(w, h, node, effectiveBorderWidth);
+    const pad = Math.max(effectiveBorderWidth / 2, 0.5);
+    const cx = w / 2;
+    const cy = h / 2;
+    const x0 = pad;
+    const x1 = Math.max(x0, w - pad);
+    const y0 = pad;
+    const y1 = Math.max(y0, h - pad);
+    points = `${cx},${y0} ${x1},${cy} ${cx},${y1} ${x0},${cy}`;
+  } else if (node.rectCornerStyle === 'bevel') {
+    const pad = Math.max(effectiveBorderWidth / 2, 0.5);
+    const x0 = pad;
+    const y0 = pad;
+    const x1 = Math.max(x0, w - pad);
+    const y1 = Math.max(y0, h - pad);
+    const config = resolveRectangleCorners(node);
+    const maxR = Math.max(0, Math.min((x1 - x0) / 2, (y1 - y0) / 2));
+    const r = Math.max(0, Math.min(config.radius, maxR));
+    const rTL = config.topLeft ? r : 0;
+    const rTR = config.topRight ? r : 0;
+    const rBR = config.bottomRight ? r : 0;
+    const rBL = config.bottomLeft ? r : 0;
+    points = `${x0 + rTL},${y0} ${x1 - rTR},${y0} ${x1},${y0 + rTR} ${x1},${y1 - rBR} ${x1 - rBR},${y1} ${x0 + rBL},${y1} ${x0},${y1 - rBL} ${x0},${y0 + rTL}`;
   } else if (isRectSvg) {
     pathD = computeRectangleSvgPath(w, h, node, effectiveBorderWidth);
   } else if (shape === 'hexagon') {
@@ -789,40 +835,268 @@ export const NodeSvgPolygonBackground: React.FC<NodeBackgroundProps> = ({
 
       {/* Forma principal con fondo y borde (con sombra perimetral SVG) */}
       {isOvalSvg ? (
-        <ellipse
-          cx={w / 2}
-          cy={h / 2}
-          rx={Math.max(2, (w - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2)}
-          ry={Math.max(2, (h - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2)}
-          transform={computeOvalSvgTransform(w, h, node.ovalRotation || 0)}
-          fill={fillAttr}
-          stroke={effectiveBorderColor}
-          strokeWidth={effectiveBorderWidth}
-          strokeDasharray={strokeDash}
-          style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
-        />
+        (() => {
+          const cx = w / 2;
+          const cy = h / 2;
+          const rx = Math.max(2, (w - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2);
+          const ry = Math.max(2, (h - 2 * Math.max(effectiveBorderWidth / 2, 0.5)) / 2);
+          const transform = computeOvalSvgTransform(w, h, node.ovalRotation || 0);
+
+          if (borderStyle === 'double' && borderWidth > 0) {
+            const gap = node.borderGap !== undefined ? node.borderGap : 4;
+            const colorInner = node.borderColorInner || borderColor;
+            const colorOuter = node.borderColorOuter || borderColor;
+            return (
+              <g transform={transform}>
+                <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fillAttr} stroke={colorOuter} strokeWidth={effectiveBorderWidth} />
+                <ellipse cx={cx} cy={cy} rx={Math.max(1, rx - gap)} ry={Math.max(1, ry - gap)} fill="none" stroke={colorInner} strokeWidth={effectiveBorderWidth} />
+              </g>
+            );
+          }
+
+          if (borderStyle === 'zigzag' && borderWidth > 0) {
+            const amp = node.borderZigzagHeight !== undefined ? node.borderZigzagHeight : 8;
+            const freq = node.borderZigzagFreq !== undefined ? node.borderZigzagFreq : 16;
+            const zzPath = generateRadialZigzag(cx, cy, rx, ry, amp, freq);
+            return (
+              <g transform={transform}>
+                <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fillAttr} stroke="none" />
+                <path d={zzPath} fill="none" stroke={effectiveBorderColor} strokeWidth={effectiveBorderWidth} strokeLinejoin="round" />
+              </g>
+            );
+          }
+
+          if (borderStyle === 'wavy' && borderWidth > 0) {
+            const amp = node.borderWaveHeight !== undefined ? node.borderWaveHeight : 8;
+            const waveW = node.borderWaveWidth !== undefined ? node.borderWaveWidth : 24;
+            const wavePath = generateRadialWavy(cx, cy, rx, ry, amp, waveW);
+            return (
+              <g transform={transform}>
+                <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fillAttr} stroke="none" />
+                <path d={wavePath} fill="none" stroke={effectiveBorderColor} strokeWidth={effectiveBorderWidth} strokeLinecap="round" />
+              </g>
+            );
+          }
+
+          if (borderStyle === 'dotted' && node.borderDotShape === 'diamond' && borderWidth > 0) {
+            const dSize = Math.max(3, borderWidth * 1.5);
+            const diamonds = generatePerimeterDiamonds({
+              shape: 'oval',
+              w,
+              h,
+              spacing: node.borderDotSpacing !== undefined ? node.borderDotSpacing : 9,
+              dSize,
+            });
+            return (
+              <g transform={transform}>
+                <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fillAttr} stroke="none" />
+                {diamonds.map((pt, idx) => (
+                  <rect
+                    key={idx}
+                    x={pt.x - dSize / 2}
+                    y={pt.y - dSize / 2}
+                    width={dSize}
+                    height={dSize}
+                    fill={effectiveBorderColor}
+                    transform={`rotate(45 ${pt.x} ${pt.y})`}
+                  />
+                ))}
+              </g>
+            );
+          }
+
+          return (
+            <ellipse
+              cx={cx}
+              cy={cy}
+              rx={rx}
+              ry={ry}
+              transform={transform}
+              fill={fillAttr}
+              stroke={effectiveBorderColor}
+              strokeWidth={effectiveBorderWidth}
+              strokeDasharray={strokeDash}
+              strokeLinecap={strokeCap}
+              style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+            />
+          );
+        })()
       ) : pathD ? (
-        <path
-          d={pathD}
-          fill={fillAttr}
-          stroke={effectiveBorderColor}
-          strokeWidth={effectiveBorderWidth}
-          strokeDasharray={strokeDash}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
-        />
+        borderStyle === 'double' && borderWidth > 0 ? (
+          (() => {
+            const gap = node.borderGap !== undefined ? node.borderGap : 4;
+            const colorInner = node.borderColorInner || borderColor;
+            const colorOuter = node.borderColorOuter || borderColor;
+            const innerPathD = computeRectangleSvgPath(w, h, node, effectiveBorderWidth + gap * 2);
+            return (
+              <>
+                <path
+                  d={pathD}
+                  fill={fillAttr}
+                  stroke={colorOuter}
+                  strokeWidth={effectiveBorderWidth}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+                />
+                <path
+                  d={innerPathD}
+                  fill="none"
+                  stroke={colorInner}
+                  strokeWidth={effectiveBorderWidth}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </>
+            );
+          })()
+        ) : (
+          <path
+            d={pathD}
+            fill={fillAttr}
+            stroke={effectiveBorderColor}
+            strokeWidth={effectiveBorderWidth}
+            strokeDasharray={strokeDash}
+            strokeLinejoin="round"
+            strokeLinecap={strokeCap}
+            style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+          />
+        )
       ) : (
-        <polygon
-          points={points}
-          fill={fillAttr}
-          stroke={effectiveBorderColor}
-          strokeWidth={effectiveBorderWidth}
-          strokeDasharray={strokeDash}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
-        />
+        (() => {
+          const pts: Point2D[] = points
+            .split(' ')
+            .filter(Boolean)
+            .map((s) => {
+              const [px, py] = s.split(',').map(Number);
+              return { x: px, y: py };
+            });
+
+          if (borderStyle === 'double' && borderWidth > 0) {
+            const gap = node.borderGap !== undefined ? node.borderGap : 4;
+            const colorInner = node.borderColorInner || borderColor;
+            const colorOuter = node.borderColorOuter || borderColor;
+            const innerPts = getDoublePolygonPoints(pts, gap);
+            const innerPointsStr = innerPts.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ');
+
+            return (
+              <>
+                <polygon
+                  points={points}
+                  fill={fillAttr}
+                  stroke={colorOuter}
+                  strokeWidth={effectiveBorderWidth}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+                />
+                <polygon
+                  points={innerPointsStr}
+                  fill="none"
+                  stroke={colorInner}
+                  strokeWidth={effectiveBorderWidth}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </>
+            );
+          }
+
+          if (borderStyle === 'zigzag' && borderWidth > 0) {
+            const amp = node.borderZigzagHeight !== undefined ? node.borderZigzagHeight : 8;
+            const freq = node.borderZigzagFreq !== undefined ? node.borderZigzagFreq : 16;
+            const zzPath = generatePolygonZigzag(pts, amp, freq);
+
+            return (
+              <>
+                <polygon
+                  points={points}
+                  fill={fillAttr}
+                  stroke="none"
+                  style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+                />
+                <path
+                  d={zzPath}
+                  fill="none"
+                  stroke={effectiveBorderColor}
+                  strokeWidth={effectiveBorderWidth}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </>
+            );
+          }
+
+          if (borderStyle === 'wavy' && borderWidth > 0) {
+            const amp = node.borderWaveHeight !== undefined ? node.borderWaveHeight : 8;
+            const waveW = node.borderWaveWidth !== undefined ? node.borderWaveWidth : 24;
+            const wavePath = generatePolygonWavy(pts, amp, waveW);
+
+            return (
+              <>
+                <polygon
+                  points={points}
+                  fill={fillAttr}
+                  stroke="none"
+                  style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+                />
+                <path
+                  d={wavePath}
+                  fill="none"
+                  stroke={effectiveBorderColor}
+                  strokeWidth={effectiveBorderWidth}
+                  strokeLinecap="round"
+                />
+              </>
+            );
+          }
+
+          if (borderStyle === 'dotted' && node.borderDotShape === 'diamond' && borderWidth > 0) {
+            const dSize = Math.max(3, borderWidth * 1.5);
+            const diamonds = generatePerimeterDiamonds({
+              w,
+              h,
+              spacing: node.borderDotSpacing !== undefined ? node.borderDotSpacing : 9,
+              dSize,
+              polygonPts: pts,
+            });
+
+            return (
+              <>
+                <polygon
+                  points={points}
+                  fill={fillAttr}
+                  stroke="none"
+                  style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+                />
+                {diamonds.map((pt, idx) => (
+                  <rect
+                    key={idx}
+                    x={pt.x - dSize / 2}
+                    y={pt.y - dSize / 2}
+                    width={dSize}
+                    height={dSize}
+                    fill={effectiveBorderColor}
+                    transform={`rotate(45 ${pt.x} ${pt.y})`}
+                  />
+                ))}
+              </>
+            );
+          }
+
+          return (
+            <polygon
+              points={points}
+              fill={fillAttr}
+              stroke={effectiveBorderColor}
+              strokeWidth={effectiveBorderWidth}
+              strokeDasharray={strokeDash}
+              strokeLinejoin="round"
+              strokeLinecap={strokeCap}
+              style={node.nodeShadow ? { filter: computeNodeShadowStyle(node, true).filter } : undefined}
+            />
+          );
+        })()
       )}
     </svg>
   );

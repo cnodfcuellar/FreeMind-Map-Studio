@@ -1943,9 +1943,25 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         }
 
         // Borders
-        div.style.borderColor = node.borderColor || (isRoot ? '#1d4ed8' : '#cbd5e1');
-        div.style.borderWidth = (node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 2 : 1.5)) + 'px';
-        div.style.borderStyle = node.borderDash || node.borderStyle || 'solid';
+        var bStyle = node.borderDash || node.borderStyle || 'solid';
+        var bCol = node.borderColor || (isRoot ? '#1d4ed8' : '#cbd5e1');
+        var bWidth = (node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 2 : 1.5)) + 'px';
+        if (bStyle === 'double') {
+          var gap = node.borderGap !== undefined ? node.borderGap : 4;
+          var numW = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 2 : 1.5);
+          var cInner = node.borderColorInner || bCol;
+          var cOuter = node.borderColorOuter || bCol;
+          div.style.border = 'none';
+          div.style.boxShadow = '0 0 0 ' + numW + 'px ' + cOuter + ', 0 0 0 ' + (numW + gap) + 'px transparent, 0 0 0 ' + (numW + gap + numW) + 'px ' + cInner;
+        } else if (bStyle === 'zigzag' || bStyle === 'wavy') {
+          div.style.borderColor = bCol;
+          div.style.borderWidth = bWidth;
+          div.style.borderStyle = 'dashed';
+        } else {
+          div.style.borderColor = bCol;
+          div.style.borderWidth = bWidth;
+          div.style.borderStyle = bStyle;
+        }
 
         // Node Shadow (Sombra de contorno)
         if (node.nodeShadow) {
