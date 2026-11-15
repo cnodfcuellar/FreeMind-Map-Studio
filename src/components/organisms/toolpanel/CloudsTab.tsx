@@ -202,12 +202,23 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
             isOpen={sectionsOpen.fill}
             onToggle={() => toggleSection('fill')}
             icon={<Paintbrush className="w-3.5 h-3.5" />}
+            badge={
+              currentCloud.color ? (
+                <span
+                  className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-600 shadow-2xs inline-block"
+                  style={{ backgroundColor: currentCloud.color }}
+                  title={`Color: ${currentCloud.color}`}
+                />
+              ) : undefined
+            }
           >
             <div className="space-y-3">
               <ColorPicker
                 label="Color de Nube"
-                value={currentCloud.color || '#3b82f6'}
+                value={currentCloud.color}
+                defaultColor="#3b82f6"
                 onChange={(color) => updateCloudProps({ color })}
+                onClear={() => updateCloudProps({ color: undefined })}
               />
 
               <SliderInput
@@ -228,12 +239,23 @@ export const CloudsTab: React.FC<CloudsTabProps> = ({ selectedNode, onUpdateNode
             isOpen={sectionsOpen.border}
             onToggle={() => toggleSection('border')}
             icon={<Sparkles className="w-3.5 h-3.5" />}
+            badge={
+              currentCloud.borderColor ? (
+                <span
+                  className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-600 shadow-2xs inline-block"
+                  style={{ backgroundColor: currentCloud.borderColor }}
+                  title={`Borde: ${currentCloud.borderColor}`}
+                />
+              ) : undefined
+            }
           >
             <div className="space-y-3">
               <ColorPicker
                 label="Color de Borde"
-                value={currentCloud.borderColor || '#3b82f6'}
+                value={currentCloud.borderColor}
+                defaultColor="#3b82f6"
                 onChange={(bc) => updateCloudProps({ borderColor: bc })}
+                onClear={() => updateCloudProps({ borderColor: undefined })}
               />
 
               <SliderInput

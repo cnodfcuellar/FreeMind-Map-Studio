@@ -10,10 +10,14 @@ interface ColorPickerProps {
   disabled?: boolean;
 }
 
-const DEFAULT_PRESETS = [
-  '#ffffff', '#f8fafc', '#eff6ff', '#f0fdf4', '#fefce8', '#fff7ed', '#faf5ff', '#ecfeff',
-  '#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#475569', '#0f172a'
+export const EDUCATIONAL_COLOR_PRESETS = [
+  // Fila 1: 8 Fondos de estudio (Pasteles limpios, diferenciables y legibles)
+  '#ffffff', '#dbeafe', '#dcfce7', '#fef08a', '#ffedd5', '#fee2e2', '#f3e8ff', '#f1f5f9',
+  // Fila 2: 8 Tintas y énfasis de aprendizaje (WCAG AAA alto contraste)
+  '#0f172a', '#2563eb', '#16a34a', '#d97706', '#ea580c', '#dc2626', '#7c3aed', '#db2777'
 ];
+
+const DEFAULT_PRESETS = EDUCATIONAL_COLOR_PRESETS;
 
 export const ColorPicker: React.FC<ColorPickerProps> = ({
   label,
@@ -26,6 +30,23 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
 }) => {
   const currentColor = value || defaultColor;
 
+  const getHexColor = (col: string) => {
+    if (col.startsWith('#') && col.length === 7) return col;
+    if (col.startsWith('#') && col.length === 4) {
+      return `#${col[1]}${col[1]}${col[2]}${col[2]}${col[3]}${col[3]}`;
+    }
+    const match = col.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (match) {
+      const r = parseInt(match[1], 10).toString(16).padStart(2, '0');
+      const g = parseInt(match[2], 10).toString(16).padStart(2, '0');
+      const b = parseInt(match[3], 10).toString(16).padStart(2, '0');
+      return `#${r}${g}${b}`;
+    }
+    return defaultColor;
+  };
+
+  const inputColor = getHexColor(currentColor);
+
   return (
     <div className={`space-y-1.5 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
       <div className="flex items-center justify-between text-xs">
@@ -35,12 +56,15 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             <input
               type="color"
               aria-label={label}
-              value={currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : defaultColor}
+              value={inputColor}
               onChange={(e) => onChange(e.target.value)}
-              className="w-4 h-4 rounded border-0 cursor-pointer p-0 bg-transparent"
+              className="w-4 h-4 rounded border-0 cursor-pointer p-0 bg-transparent shrink-0"
             />
-            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase">
-              {value ? value : 'Auto'}
+            <span
+              title={value || 'Auto'}
+              className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase max-w-[55px] truncate"
+            >
+              {value ? (value.toLowerCase().startsWith('rgba') ? 'RGBA' : value) : 'Auto'}
             </span>
           </div>
           {onClear && value && (

@@ -11,17 +11,13 @@ describe('CompactTextToolbar', () => {
     defaultFontSize: 14,
     minFontSize: 10,
     maxFontSize: 36,
-    color: undefined,
-    defaultColor: '#ffffff',
-    colorLabel: 'Color del Texto',
     onToggleBold: vi.fn(),
     onToggleItalic: vi.fn(),
     onChangeAlign: vi.fn(),
     onChangeFontSize: vi.fn(),
-    onChangeColor: vi.fn(),
   };
 
-  it('renderiza botones de estilo, alineación, tamaño y swatch de color', () => {
+  it('renderiza botones de estilo, alineación y stepper de tamaño', () => {
     render(<CompactTextToolbar {...defaultProps} />);
 
     expect(screen.getByTitle('Negrita')).toBeDefined();
@@ -30,7 +26,8 @@ describe('CompactTextToolbar', () => {
     expect(screen.getByTitle('Centrar')).toBeDefined();
     expect(screen.getByTitle('Alinear a la derecha')).toBeDefined();
     expect(screen.getByText('14px')).toBeDefined();
-    expect(screen.getByTitle(/Color del Texto/)).toBeDefined();
+    expect(screen.getByTitle('Reducir tamaño')).toBeDefined();
+    expect(screen.getByTitle('Aumentar tamaño')).toBeDefined();
   });
 
   it('invoca callbacks de negrita y cursiva', () => {
@@ -78,25 +75,13 @@ describe('CompactTextToolbar', () => {
     expect(onChangeFontSize).toHaveBeenCalledWith(undefined);
   });
 
-  it('abre y cierra el panel desplegable de color', () => {
-    const onChangeColor = vi.fn();
-    render(<CompactTextToolbar {...defaultProps} onChangeColor={onChangeColor} />);
+  it('deshabilita botones en límites mínimo y máximo', () => {
+    const { rerender } = render(<CompactTextToolbar {...defaultProps} fontSize={10} minFontSize={10} />);
+    const decreaseBtn = screen.getByTitle('Reducir tamaño') as HTMLButtonElement;
+    expect(decreaseBtn.disabled).toBe(true);
 
-    // Inicialmente cerrado
-    expect(screen.queryByTitle('Cerrar paleta')).toBeNull();
-
-    // Clic en el botón swatch de color
-    fireEvent.click(screen.getByTitle(/Color del Texto/));
-    expect(screen.getByTitle('Cerrar paleta')).toBeDefined();
-
-    // Seleccionar un preset de color
-    const presetButtons = screen.getAllByRole('button');
-    const bluePreset = screen.getByTitle('#2563eb');
-    fireEvent.click(bluePreset);
-    expect(onChangeColor).toHaveBeenCalledWith('#2563eb');
-
-    // Cerrar paleta
-    fireEvent.click(screen.getByTitle('Cerrar paleta'));
-    expect(screen.queryByTitle('Cerrar paleta')).toBeNull();
+    rerender(<CompactTextToolbar {...defaultProps} fontSize={36} maxFontSize={36} />);
+    const increaseBtn = screen.getByTitle('Aumentar tamaño') as HTMLButtonElement;
+    expect(increaseBtn.disabled).toBe(true);
   });
 });

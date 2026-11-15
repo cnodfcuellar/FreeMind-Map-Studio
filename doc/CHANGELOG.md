@@ -3133,3 +3133,94 @@ El usuario identificó que los nuevos estilos de aristas (`bracket-bevel-45` / C
 - [x] `pnpm build`: **Compilación de producción exitosa en 6.76s (0 errores)**.
 
 ---
+
+## 🎨 [Refactor UI] — 2026-11-15: Unificación arquitectónica de selectores de color, paleta educativa de 16 tonos y eliminación de inconsistencias de interfaz
+
+### 💡 Motivo
+El usuario identificó inconsistencias visuales y de interacción entre distintas pestañas del ToolPanel (`Fondo y Relleno`, `Bordes y Contorno`, `Color y Tamaño de Iconos` y `Título del Nodo` en `ContentTab`):
+1. **Paleta desbalanceada y falta de colores educativos clave:** Faltaban tonos pastel distinguibles para fondos y tintas de alta legibilidad con contraste WCAG AAA para el estudio y mnemotecnia.
+2. **Duplicidad innecesaria ("Colores Sugeridos"):** `IconsTab.tsx` incluía una fila ad-hoc de 7 círculos con "Sugeridos:" y botón "Original", ausente en los demás controles.
+3. **Control anómalo en barra de texto:** `CompactTextToolbar.tsx` en `ContentTab.tsx` utilizaba un menú flotante (*popover*) con título duplicado, input HEX redundante y cruz de cierre `X`, provocando que los botones cayeran en filas huérfanas por `flex-wrap`.
+4. **Texto truncado:** En `NodeBackgroundSection.tsx`, el botón `Degradado` en la cuadrícula de 5 columnas se mostraba cortado como `"Degra..."`.
+5. **Inconsistencia de indicadores en cabeceras:** Solo `IconsTab` mostraba un círculo de color activo en su cabecera `CollapsibleSection`; `Fondo`, `Borde` y `Título` carecían de badge al plegarse.
+
+### 🛠️ Qué Cambió
+1. **Paleta Universal Educativa de 16 Colores en `ColorPicker.tsx` (`EDUCATIONAL_COLOR_PRESETS`)**:
+   - **Fila 1 (8 Fondos de Estudio / Pasteles legibles):** `#ffffff` (Blanco puro), `#dbeafe` (Celeste apunte), `#dcfce7` (Menta conceptos), `#fef08a` (Amarillo flúor), `#ffedd5` (Melocotón pastel), `#fee2e2` (Coral suave), `#f3e8ff` (Lavanda ideas), `#f1f5f9` (Gris cuaderno).
+   - **Fila 2 (8 Tintas y Énfasis / WCAG AAA alto contraste):** `#0f172a` (Carbón texto principal), `#2563eb` (Azul ciencias), `#16a34a` (Verde aciertos), `#d97706` (Ámbar examen), `#ea580c` (Naranja acción), `#dc2626` (Rojo alertas), `#7c3aed` (Púrpura teoría), `#db2777` (Fucsia mnemotécnico).
+   - Ahora todos los selectores de color del sistema (Fondo, Borde, Aristas, Iconos, Nubes, Texto de Título, Texto de Cuerpo, Fondo del Lienzo) comparten exactamente la misma matriz 2×8.
+2. **Eliminación de la Fila "Sugeridos:" en `IconsTab.tsx`**:
+   - Eliminado el bloque redundante de botones sugeridos y botón "Original". El control de color se unifica al estándar `<ColorPicker label="Tinte del Icono" ... />` con su botón de `Reset` ("Auto").
+3. **Refactorización de `CompactTextToolbar.tsx` a Molécula Pura de Formato Tipográfico**:
+   - Extraída la lógica duplicada de selector de color flotante (popover, `isColorOpen`, listeners de `mousedown`).
+   - `CompactTextToolbar` queda como una barra ultra-compacta en 1 sola fila sin saltos: `[B I] [Alinear Izq/Centro/Der] [- 14px + ⟲]`.
+4. **Integración Directa de `<ColorPicker>` en `ContentTab.tsx`**:
+   - La sección `Título del Nodo` y la sección `Cuerpo / Subtexto` ahora renderizan de forma predecible e inline los átomos `<ColorPicker label="Color del Título" />` y `<ColorPicker label="Color del Cuerpo" />`.
+5. **Corrección de Truncado en `NodeBackgroundSection.tsx`**:
+   - Renombrada la opción `'Degradado'` a `'Gradiente'`, garantizando legibilidad total en los 5 botones de tipo de fondo sin truncamiento `"..."`.
+6. **Unificación de Badges Circulares en Cabeceras `CollapsibleSection`**:
+   - Incorporado el badge de previsualización de color activo (`selectedNode.color`, `selectedNode.borderColor`, `selectedNode.textColor`, `selectedNode.bodyColor`) en las cabeceras colapsables de Fondo, Borde, Título y Cuerpo, igualando el estándar de Iconos.
+7. **Sincronización en `htmlExporter.ts`**:
+   - Integrada la generación de rutas vectoriales para aristas `bracket-square` y `bracket-bevel-45` dentro del exportador HTML autónomo.
+8. **Actualización de Pruebas Unitarias (`CompactTextToolbar.test.tsx`)**:
+   - Actualizada la suite de pruebas del componente para validar estilos, alineaciones, incremento/decremento de tamaño, reset y límites mín/máx.
+
+### 📄 Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/atoms/ColorPicker.tsx` | Átomo | Matriz de 16 presets educativos (`EDUCATIONAL_COLOR_PRESETS`). |
+| `src/components/organisms/toolpanel/format/NodeBackgroundSection.tsx` | Organismo | Renombrado a `'Gradiente'` y badge de color en `CollapsibleSection`. |
+| `src/components/organisms/toolpanel/format/NodeBorderSection.tsx` | Organismo | Badge de color de contorno en cabecera `CollapsibleSection`. |
+| `src/components/organisms/toolpanel/IconsTab.tsx` | Organismo | Eliminación de fila redundante "Sugeridos:" y "Original". |
+| `src/components/molecules/CompactTextToolbar.tsx` | Molécula | Simplificación a 1 sola fila pura de tipografía, eliminando popover de color. |
+| `src/components/organisms/toolpanel/ContentTab.tsx` | Organismo | Integración inline de `<ColorPicker>` para título y cuerpo + badges en headers. |
+| `src/components/molecules/__tests__/CompactTextToolbar.test.tsx` | Tests | Actualización de tests para la molécula de formato tipográfico. |
+| `src/utils/htmlExporter.ts` | Utilidad | Soporte para aristas biseladas y ortogonales en el exportador HTML. |
+| `doc/CHANGELOG.md` | Documentación | Registro detallado de la unificación UI y eliminación de inconsistencias. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de tipos**.
+- [x] `pnpm vitest run src/components/molecules/__tests__/CompactTextToolbar.test.tsx`: **6/6 pruebas pasadas**.
+- [x] `pnpm test:regression` (`--pool=forks`): **54/54 suites aprobadas (370/370 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Bundle de producción compilado en 7.28s (0 errores)**.
+
+---
+
+## 🎨 [Refactor UI] — 2026-11-15: Eliminación de focos residuales de inconsistencia en Aristas Globales, Sombra de Texto y Nubes
+
+### 💡 Motivo
+El usuario detectó 3 inconsistencias visuales adicionales mediante capturas de pantalla:
+1. **Fila "Sugeridos:" en Aristas Globales:** En `ThemeTab.tsx` persistía una fila redundante de 8 círculos de color con el label "Sugeridos:", idéntica a la que se había retirado de `IconsTab.tsx`.
+2. **Popover flotante y paleta desfasada en Sombra de Texto:** En `CompactTextShadowControl.tsx` existía un menú desplegable con botón `X` de cierre y una matriz obsoleta `SHADOW_COLOR_PRESETS` no alineada con los 16 colores educativos.
+3. **Ausencia de badges de color y desborde en Nubes:** En `CloudsTab.tsx`, las cabeceras `Relleno de la Nube` y `Borde y Sombra` no mostraban el badge circular de previsualización; faltaba el botón `Reset` en ambos selectores y los valores en formato `RGBA(...)` ensanchaban la caja de texto.
+
+### 🛠️ Qué Cambió
+1. **Eliminación definitiva de "Sugeridos:" en `ThemeTab.tsx`**:
+   - Retirado el bloque completo de 8 círculos sugeridos en *Aristas Globales*. Ahora usa exclusivamente `<ColorPicker label="Color Uniforme de Ramas" />`.
+2. **Unificación de Sombra en `CompactTextShadowControl.tsx`**:
+   - Eliminado el popover flotante, el estado `isColorOpen`, los listeners de cierre y la paleta hardcodeada `SHADOW_COLOR_PRESETS`.
+   - Reemplazado por el átomo estándar `<ColorPicker label="Color de Sombra" />` en línea con la paleta educativa de 16 colores.
+3. **Badges circulares y Reset en `CloudsTab.tsx`**:
+   - Añadido el badge circular con el color activo en las cabeceras colapsables de *Relleno de la Nube* y *Borde y Sombra*.
+   - Añadido `onClear` a ambos selectores de color para permitir restablecer a automático.
+4. **Resiliencia en `ColorPicker.tsx` para valores RGBA**:
+   - Incorporada la función `getHexColor` para derivar el valor hex nativo desde cadenas `rgba(r, g, b, a)` y acortada la etiqueta a `RGBA` con `truncate` para que nunca más desborde la caja de texto.
+
+### 📄 Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/components/atoms/ColorPicker.tsx` | Átomo | Soporte y acortamiento visual para valores `rgba(...)`. |
+| `src/components/molecules/CompactTextShadowControl.tsx` | Molécula | Integración en línea de `<ColorPicker>`, eliminación de popover y paleta obsoleta. |
+| `src/components/molecules/__tests__/CompactTextShadowControl.test.tsx` | Tests | Actualización de tests para la interacción directa con `ColorPicker`. |
+| `src/components/organisms/toolpanel/ThemeTab.tsx` | Organismo | Eliminación de fila "Sugeridos:" en Aristas Globales. |
+| `src/components/organisms/toolpanel/CloudsTab.tsx` | Organismo | Badges circulares en cabeceras y botón Reset en selectores de color. |
+| `doc/CHANGELOG.md` | Documentación | Registro de la erradicación de los 3 focos residuales. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm vitest run src/components/molecules/__tests__/CompactTextShadowControl.test.tsx`: **3/3 pruebas pasadas**.
+- [x] `pnpm vitest run src/components/organisms/toolpanel/__tests__/ThemeTab.test.tsx`: **2/2 pruebas pasadas**.
+- [x] `pnpm vitest run src/components/Modals/__tests__/CommandPaletteModal.test.tsx src/components/Modals/__tests__/TemplatesModal.test.tsx`: **15/15 pruebas pasadas**.
+- [x] `pnpm build`: **Bundle de producción generado en 6.15s (0 errores)**.
+
+---

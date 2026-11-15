@@ -544,32 +544,6 @@ export const ThemeTab: React.FC<ThemeTabProps> = ({
               onChange={(c) => onUpdateMapEdgeColor && onUpdateMapEdgeColor(c)}
               onClear={() => onUpdateMapEdgeColor && onUpdateMapEdgeColor(undefined)}
             />
-
-            {/* Paleta rápida de colores populares para aristas */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
-              <span className="text-[10px] text-slate-400 shrink-0 font-medium">Sugeridos:</span>
-              {[
-                { col: '#3b82f6', label: 'Azul' },
-                { col: '#8b5cf6', label: 'Púrpura' },
-                { col: '#10b981', label: 'Verde' },
-                { col: '#f59e0b', label: 'Ámbar' },
-                { col: '#ef4444', label: 'Rojo' },
-                { col: '#ec4899', label: 'Rosa' },
-                { col: '#475569', label: 'Pizarra' },
-                { col: '#0f172a', label: 'Oscuro' },
-              ].map((item) => (
-                <button
-                  key={item.col}
-                  type="button"
-                  title={item.label}
-                  onClick={() => onUpdateMapEdgeColor && onUpdateMapEdgeColor(item.col)}
-                  className={`w-4.5 h-4.5 rounded-full shrink-0 border transition-transform hover:scale-115 cursor-pointer shadow-2xs ${
-                    mindMap?.edgeColor === item.col ? 'ring-2 ring-blue-500 ring-offset-1 border-white' : 'border-slate-300'
-                  }`}
-                  style={{ backgroundColor: item.col }}
-                />
-              ))}
-            </div>
           </div>
 
           {/* Estilo de Trazo Global (Sólido / Guiones / Puntos / Doble / Zigzag / Ondulado) */}

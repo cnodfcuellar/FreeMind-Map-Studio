@@ -57,7 +57,7 @@ describe('CompactTextShadowControl', () => {
     expect(onUpdate).toHaveBeenCalledWith({ textShadowBlur: 3 });
   });
 
-  it('permite abrir y seleccionar color de sombra', () => {
+  it('permite seleccionar color de sombra', () => {
     const onUpdate = vi.fn();
     render(
       <CompactTextShadowControl
@@ -67,11 +67,7 @@ describe('CompactTextShadowControl', () => {
       />
     );
 
-    // Abrir popover de color
-    fireEvent.click(screen.getByTitle(/Color de sombra:/));
-    expect(screen.getByTitle('Cerrar paleta')).toBeDefined();
-
-    // Seleccionar color
+    // Seleccionar color directamente con el ColorPicker integrado
     fireEvent.click(screen.getByTitle('#2563eb'));
     expect(onUpdate).toHaveBeenCalledWith({ textShadowColor: '#2563eb' });
   });

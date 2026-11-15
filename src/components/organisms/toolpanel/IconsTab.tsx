@@ -105,38 +105,6 @@ export const IconsTab: React.FC<IconsTabProps> = ({
             onClear={() => onUpdateNode(selectedNode.id, { iconColor: undefined })}
           />
 
-          {/* Paleta rápida de colores populares para iconos */}
-          <div className="flex items-center gap-1.5 pt-0.5 overflow-x-auto pb-0.5">
-            <span className="text-[10px] text-slate-400 shrink-0 font-medium">Sugeridos:</span>
-            {[
-              { col: '#ef4444', label: 'Rojo' },
-              { col: '#f59e0b', label: 'Ámbar' },
-              { col: '#10b981', label: 'Verde' },
-              { col: '#3b82f6', label: 'Azul' },
-              { col: '#8b5cf6', label: 'Púrpura' },
-              { col: '#ec4899', label: 'Rosa' },
-              { col: '#475569', label: 'Pizarra' },
-            ].map((item) => (
-              <button
-                key={item.col}
-                type="button"
-                title={item.label}
-                onClick={() => onUpdateNode(selectedNode.id, { iconColor: item.col })}
-                className="w-4.5 h-4.5 rounded-full shrink-0 border border-slate-300 transition-transform hover:scale-115 cursor-pointer shadow-2xs"
-                style={{ backgroundColor: item.col }}
-              />
-            ))}
-            {selectedNode.iconColor && (
-              <button
-                type="button"
-                onClick={() => onUpdateNode(selectedNode.id, { iconColor: undefined })}
-                className="text-[10px] text-slate-400 hover:text-slate-600 underline ml-auto shrink-0 cursor-pointer"
-              >
-                Original
-              </button>
-            )}
-          </div>
-
           {/* Barra deslizante para cambiar el tamaño de los iconos */}
           <div className="pt-2 border-t border-slate-200/80 space-y-1">
             <SliderInput

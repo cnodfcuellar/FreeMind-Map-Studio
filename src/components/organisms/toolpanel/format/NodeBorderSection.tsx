@@ -26,6 +26,15 @@ export const NodeBorderSection: React.FC<NodeBorderSectionProps> = ({
       isOpen={isOpen}
       onToggle={onToggle}
       icon={<Sparkles className="w-3.5 h-3.5" />}
+      badge={
+        selectedNode.borderColor ? (
+          <span
+            className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-600 shadow-2xs inline-block"
+            style={{ backgroundColor: selectedNode.borderColor }}
+            title={`Borde: ${selectedNode.borderColor}`}
+          />
+        ) : undefined
+      }
     >
       <div className="space-y-3.5">
         {/* Estilo de Línea (Grid 3x2) */}

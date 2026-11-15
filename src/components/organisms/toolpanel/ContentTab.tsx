@@ -94,9 +94,18 @@ export const ContentTab: React.FC<ContentTabProps> = ({
         onToggle={() => toggleSection('title')}
         icon={<Type className="w-3.5 h-3.5" />}
         badge={
-          <span className="text-[10px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-            {selectedNode.fontSize || 14}px
-          </span>
+          <div className="flex items-center gap-1.5">
+            {selectedNode.textColor && (
+              <span
+                className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-600 shadow-2xs inline-block"
+                style={{ backgroundColor: selectedNode.textColor }}
+                title={`Color: ${selectedNode.textColor}`}
+              />
+            )}
+            <span className="text-[10px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+              {selectedNode.fontSize || 14}px
+            </span>
+          </div>
         }
       >
         <textarea
@@ -116,14 +125,17 @@ export const ContentTab: React.FC<ContentTabProps> = ({
             defaultFontSize={14}
             minFontSize={10}
             maxFontSize={36}
-            color={selectedNode.textColor}
-            defaultColor="#ffffff"
-            colorLabel="Color del Título"
             onToggleBold={() => onUpdateNode(selectedNode.id, { bold: !selectedNode.bold })}
             onToggleItalic={() => onUpdateNode(selectedNode.id, { italic: !selectedNode.italic })}
             onChangeAlign={(align) => onUpdateNode(selectedNode.id, { textAlign: align })}
             onChangeFontSize={(s) => onUpdateNode(selectedNode.id, { fontSize: s })}
-            onChangeColor={(c) => onUpdateNode(selectedNode.id, { textColor: c })}
+          />
+
+          <ColorPicker
+            label="Color del Título"
+            value={selectedNode.textColor}
+            onChange={(c) => onUpdateNode(selectedNode.id, { textColor: c })}
+            onClear={() => onUpdateNode(selectedNode.id, { textColor: undefined })}
           />
 
           {/* Sombra de Texto Compacta */}
@@ -166,11 +178,20 @@ export const ContentTab: React.FC<ContentTabProps> = ({
         }
         badge={
           selectedNode.body ? (
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-              selectedNode.hideBody ? 'text-amber-700 bg-amber-100' : 'text-emerald-700 bg-emerald-100'
-            }`}>
-              {selectedNode.hideBody ? 'Oculto' : 'Activo'}
-            </span>
+            <div className="flex items-center gap-1.5">
+              {selectedNode.bodyColor && (
+                <span
+                  className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-600 shadow-2xs inline-block"
+                  style={{ backgroundColor: selectedNode.bodyColor }}
+                  title={`Color: ${selectedNode.bodyColor}`}
+                />
+              )}
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                selectedNode.hideBody ? 'text-amber-700 bg-amber-100' : 'text-emerald-700 bg-emerald-100'
+              }`}>
+                {selectedNode.hideBody ? 'Oculto' : 'Activo'}
+              </span>
+            </div>
           ) : undefined
         }
       >
@@ -183,7 +204,7 @@ export const ContentTab: React.FC<ContentTabProps> = ({
         />
 
         {selectedNode.body && (
-          <div className="pt-2 border-t border-slate-200/80">
+          <div className="pt-2 border-t border-slate-200/80 space-y-2.5">
             <CompactTextToolbar
               bold={selectedNode.bodyBold}
               italic={selectedNode.bodyItalic}
@@ -192,14 +213,17 @@ export const ContentTab: React.FC<ContentTabProps> = ({
               defaultFontSize={12}
               minFontSize={9}
               maxFontSize={24}
-              color={selectedNode.bodyColor}
-              defaultColor="#334155"
-              colorLabel="Color del Cuerpo"
               onToggleBold={() => onUpdateNode(selectedNode.id, { bodyBold: !selectedNode.bodyBold })}
               onToggleItalic={() => onUpdateNode(selectedNode.id, { bodyItalic: !selectedNode.bodyItalic })}
               onChangeAlign={(align) => onUpdateNode(selectedNode.id, { bodyAlign: align })}
               onChangeFontSize={(s) => onUpdateNode(selectedNode.id, { bodyFontSize: s })}
-              onChangeColor={(c) => onUpdateNode(selectedNode.id, { bodyColor: c })}
+            />
+
+            <ColorPicker
+              label="Color del Cuerpo"
+              value={selectedNode.bodyColor}
+              onChange={(c) => onUpdateNode(selectedNode.id, { bodyColor: c })}
+              onClear={() => onUpdateNode(selectedNode.id, { bodyColor: undefined })}
             />
           </div>
         )}

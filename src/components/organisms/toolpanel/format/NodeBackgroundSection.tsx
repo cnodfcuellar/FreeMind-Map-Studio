@@ -139,13 +139,22 @@ export const NodeBackgroundSection: React.FC<NodeBackgroundSectionProps> = ({
       isOpen={isOpen}
       onToggle={onToggle}
       icon={<Paintbrush className="w-3.5 h-3.5" />}
+      badge={
+        selectedNode.color ? (
+          <span
+            className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-600 shadow-2xs inline-block"
+            style={{ backgroundColor: selectedNode.color }}
+            title={`Fondo: ${selectedNode.color}`}
+          />
+        ) : undefined
+      }
     >
       <div className="space-y-3">
         {/* Selector visual de tipo de fondo */}
         <div className="grid grid-cols-5 gap-1.5">
           {[
             { id: 'color' as NodeBackgroundType, label: 'Sólido', icon: <div className="w-4 h-4 rounded bg-blue-500 border border-blue-600/40" /> },
-            { id: 'gradient' as NodeBackgroundType, label: 'Degradado', icon: <div className="w-4 h-4 rounded bg-gradient-to-br from-blue-500 to-purple-600" /> },
+            { id: 'gradient' as NodeBackgroundType, label: 'Gradiente', icon: <div className="w-4 h-4 rounded bg-gradient-to-br from-blue-500 to-purple-600" /> },
             { id: 'pattern' as NodeBackgroundType, label: 'Trama', icon: <Sparkles className="w-4 h-4 text-slate-700" /> },
             { id: 'image' as NodeBackgroundType, label: 'Imagen', icon: <Layers className="w-4 h-4 text-slate-700" /> },
             { id: 'transparent' as NodeBackgroundType, label: 'Transp.', icon: <div className="w-4 h-4 rounded border-2 border-dashed border-slate-400" /> },

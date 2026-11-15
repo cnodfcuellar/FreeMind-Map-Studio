@@ -1667,6 +1667,31 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
           var midX2 = (startX + endX) / 2;
           return 'M ' + startX + ' ' + startY + ' L ' + midX2 + ' ' + startY + ' L ' + midX2 + ' ' + endY + ' L ' + endX + ' ' + endY;
         }
+      } else if (edgeStyle === 'bracket-square') {
+        var dx_sq = Math.abs(endX - startX);
+        var trunk_sq = Math.min(28, Math.max(8, dx_sq * 0.22));
+        var signX_sq = endX > startX ? 1 : -1;
+        var xBus_sq = startX + signX_sq * trunk_sq;
+        return 'M ' + startX + ' ' + startY + ' L ' + xBus_sq + ' ' + startY + ' L ' + xBus_sq + ' ' + endY + ' L ' + endX + ' ' + endY;
+      } else if (edgeStyle === 'bracket-bevel-45') {
+        var dx_45 = Math.abs(endX - startX);
+        var dy_45 = Math.abs(endY - startY);
+        if (dy_45 <= 3) return 'M ' + startX + ' ' + startY + ' L ' + endX + ' ' + endY;
+        var trunk_45 = Math.min(28, Math.max(8, dx_45 * 0.22));
+        var signX_45 = endX > startX ? 1 : -1;
+        var signY_45 = endY > startY ? 1 : -1;
+        var chamfer_45 = Math.max(4, Math.min(22, (dx_45 - trunk_45) / 2.5, dy_45 / 2.2));
+        var xTrunk_45 = startX + signX_45 * trunk_45;
+        var xBus_45 = xTrunk_45 + signX_45 * chamfer_45;
+        var yBusStart_45 = startY + signY_45 * chamfer_45;
+        var yBusEnd_45 = endY - signY_45 * chamfer_45;
+        var xEntry_45 = xBus_45 + signX_45 * chamfer_45;
+        if (dy_45 < 2 * chamfer_45 || dx_45 < trunk_45 + 2 * chamfer_45) {
+          var midX_45 = (startX + endX) / 2;
+          var midY_45 = (startY + endY) / 2;
+          return 'M ' + startX + ' ' + startY + ' L ' + xTrunk_45 + ' ' + startY + ' L ' + midX_45 + ' ' + midY_45 + ' L ' + endX + ' ' + endY;
+        }
+        return 'M ' + startX + ' ' + startY + ' L ' + xTrunk_45 + ' ' + startY + ' L ' + xBus_45 + ' ' + yBusStart_45 + ' L ' + xBus_45 + ' ' + yBusEnd_45 + ' L ' + xEntry_45 + ' ' + endY + ' L ' + endX + ' ' + endY;
       } else if (edgeStyle === 'bracket') {
         var dx_b = Math.abs(endX - startX);
         var dy_b = Math.abs(endY - startY);
