@@ -37,6 +37,7 @@ import {
   Sun,
   Moon,
   Coffee,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface MenuBarProps {
@@ -49,6 +50,7 @@ interface MenuBarProps {
   onSaveMap: () => void;
   onOpenExportModal: () => void;
   onOpenPdfModal?: () => void;
+  onOpenImageModal?: (initialTab?: 'image' | 'outline') => void;
   onOpenImportModal: () => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -84,6 +86,7 @@ export const MenuBar: React.FC<MenuBarProps> = ({
   onSaveMap,
   onOpenExportModal,
   onOpenPdfModal,
+  onOpenImageModal,
   onOpenImportModal,
   onUndo,
   onRedo,
@@ -201,9 +204,26 @@ export const MenuBar: React.FC<MenuBarProps> = ({
                   <span className="text-[9px] font-bold text-purple-700 bg-purple-100 px-1.5 py-0.2 rounded-full">Póster</span>
                 </button>
               )}
+              {onOpenImageModal && (
+                <>
+                  <button
+                    onClick={() => { onOpenImageModal('image'); setOpenMenu(null); }}
+                    className="w-full px-3 py-1.5 text-left flex items-center justify-between font-semibold text-emerald-600 hover:bg-emerald-50 cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2"><ImageIcon className="w-3.5 h-3.5 text-emerald-600" /> Exportar Imagen HD (PNG / JPG)...</span>
+                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded-full">2x / 4x</span>
+                  </button>
+                  <button
+                    onClick={() => { onOpenImageModal('outline'); setOpenMenu(null); }}
+                    className="w-full px-3 py-1.5 text-left flex items-center justify-between text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2"><FileText className="w-3.5 h-3.5 text-slate-600" /> Exportar Esquema (Markdown / OPML)...</span>
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => { onOpenExportModal(); setOpenMenu(null); }}
-                className="w-full px-3 py-1.5 text-left flex items-center justify-between font-semibold text-blue-600 hover:bg-blue-50"
+                className="w-full px-3 py-1.5 text-left flex items-center justify-between font-semibold text-blue-600 hover:bg-blue-50 cursor-pointer"
               >
                 <span className="flex items-center gap-2"><FileDown className="w-3.5 h-3.5" /> Exportar (.mm / HTML)</span>
               </button>

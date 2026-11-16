@@ -46,6 +46,7 @@ import { IconPackModal } from './components/Modals/IconPackModal';
 import { CommandPaletteModal } from './components/Modals/CommandPaletteModal';
 import { PdfExportModal } from './components/Modals/PdfExportModal';
 import { HistoryTimelineModal } from './components/Modals/HistoryTimelineModal';
+import { ImageExportModal } from './components/Modals/ImageExportModal';
 import { ElaboratePresentationSystem } from './components/organisms/presentation/ElaboratePresentationSystem';
 
 export default function App() {
@@ -103,6 +104,8 @@ export default function App() {
   const [isIconPackModalOpen, setIsIconPackModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isImageExportModalOpen, setIsImageExportModalOpen] = useState(false);
+  const [imageExportInitialTab, setImageExportInitialTab] = useState<'image' | 'outline'>('image');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [connectorSourceId, setConnectorSourceId] = useState<string | null>(null);
   const [editingConnector, setEditingConnector] = useState<Connector | null>(null);
@@ -118,6 +121,7 @@ export default function App() {
   const isAnyModalOpen = Boolean(
     isExportModalOpen ||
       isPdfModalOpen ||
+      isImageExportModalOpen ||
       isHistoryModalOpen ||
       isShortcutsModalOpen ||
       isTemplatesModalOpen ||
@@ -131,6 +135,7 @@ export default function App() {
   const handleCloseModals = () => {
     setIsExportModalOpen(false);
     setIsPdfModalOpen(false);
+    setIsImageExportModalOpen(false);
     setIsHistoryModalOpen(false);
     setIsShortcutsModalOpen(false);
     setIsTemplatesModalOpen(false);
@@ -239,6 +244,10 @@ export default function App() {
           onSaveMap={() => saveCurrentMap(mindMap)}
           onOpenExportModal={() => setIsExportModalOpen(true)}
           onOpenPdfModal={() => setIsPdfModalOpen(true)}
+          onOpenImageModal={(tab) => {
+            setImageExportInitialTab(tab || 'image');
+            setIsImageExportModalOpen(true);
+          }}
           onOpenImportModal={() => setIsExportModalOpen(true)}
           onUndo={handleUndo}
           onRedo={handleRedo}
@@ -561,6 +570,10 @@ export default function App() {
             isOpen={isExportModalOpen}
             onClose={() => setIsExportModalOpen(false)}
             onOpenPdfModal={() => setIsPdfModalOpen(true)}
+            onOpenImageModal={(tab) => {
+              setImageExportInitialTab(tab || 'image');
+              setIsImageExportModalOpen(true);
+            }}
             onImportMap={(imported) => {
               pushHistory(mindMap);
               setMindMap(imported);
@@ -676,6 +689,10 @@ export default function App() {
             onOpenSavedMaps={() => setIsSavedMapsModalOpen(true)}
             onOpenExportModal={() => setIsExportModalOpen(true)}
             onOpenPdfModal={() => setIsPdfModalOpen(true)}
+            onOpenImageModal={(tab) => {
+              setImageExportInitialTab(tab || 'image');
+              setIsImageExportModalOpen(true);
+            }}
             onOpenImportModal={() => setIsExportModalOpen(true)}
             onOpenShortcuts={() => setIsShortcutsModalOpen(true)}
             onOpenConnectorModal={() => setConnectorSourceId(selectedNodeId || mindMap.rootId)}
@@ -767,6 +784,13 @@ export default function App() {
             mindMap={mindMap}
             isOpen={isPdfModalOpen}
             onClose={() => setIsPdfModalOpen(false)}
+          />
+
+          <ImageExportModal
+            mindMap={mindMap}
+            isOpen={isImageExportModalOpen}
+            onClose={() => setIsImageExportModalOpen(false)}
+            initialTab={imageExportInitialTab}
           />
 
           <HistoryTimelineModal

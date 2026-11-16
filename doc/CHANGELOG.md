@@ -3224,3 +3224,153 @@ El usuario detectó 3 inconsistencias visuales adicionales mediante capturas de 
 - [x] `pnpm build`: **Bundle de producción generado en 6.15s (0 errores)**.
 
 ---
+
+## 🚀 [Feature] — 2026-11-15: Sistema integral de exportación: Imágenes HD (PNG/JPEG/SVG en 1x/2x/4x) y Esquemas Estructurados (Markdown multi-modo y OPML 2.0)
+
+### 💡 Motivo
+Los usuarios requerían exportar mapas mentales en alta resolución con fondo transparente o del lienzo para integrarlos en diapositivas (PowerPoint, Keynote), documentos (Word, Google Docs), o como esquemas de texto enriquecido e interoperables para Notion, Obsidian, OmniOutliner, Workflowy y Logseq.
+
+### 🛠️ Qué Cambió
+1. **Módulo de Exportación de Esquemas (`src/utils/outlineExporter.ts`)**:
+   - **Markdown Configurable (`exportToMarkdown`)**:
+     - Modo `headers`: Encabezados jerárquicos (`#`, `##`, `###`, `####`) para Notion y Obsidian.
+     - Modo `bullets`: Listas anidadas con viñetas en negrita (`- **tema**`).
+     - Modo `tasks`: Listas de tareas y checklists ejecutables (`- [ ]`, `- [x]`) según el progreso de cada nodo (0% a 100%).
+     - Inclusión granular de notas en bloques de cita (`> quote`), cuerpos/descripciones, enlaces con formato `[texto](url)`, etiquetas `#tags`, metadatos Frontmatter y tabla final de relaciones/conectores libres.
+   - **OPML 2.0 Estándar (`exportToOPML`)**:
+     - Generación de XML OPML 2.0 con `<opml version="2.0">`, `<head>` y nodos `<outline>` recursivos con atributos de notas, descripción, progreso y categorías. Compatible universalmente con OmniOutliner, MindNode, Dynalist, Scrivener y Workflowy.
+2. **Módulo de Renderizado y Exportación de Imágenes HD (`src/utils/imageExporter.ts`)**:
+   - Generación vectorial y rasterización a canvas de alta fidelidad.
+   - Formatos: `PNG` (sin pérdida y con canal alfa de transparencia), `JPEG` (calidad fotográfica compacta) y `SVG` (vectorial puro).
+   - Resoluciones escaladas: `1x` (estándar web), `2x Retina HD` (presentaciones de alta densidad) y `4x Ultra HD` (impresión en gran formato).
+   - Modos de fondo: `Transparente` (para insertar sin caja sobre cualquier fondo), `Lienzo del Mapa` (con el color o gradiente activo) y `Blanco Puro`.
+   - Soporte para copiar directamente al portapapeles del sistema operativo (`copyMindMapImageToClipboard`) con formato nativo `image/png` para pegar con `Ctrl+V` directamente en Slack, PPT o Word.
+3. **Modal Dedicado de Exportación Visual (`src/components/Modals/ImageExportModal.tsx`)**:
+   - Interfaz con 2 pestañas dedicadas: *Imagen en Alta Resolución* y *Esquemas & Notas*.
+   - Previsualización en tiempo real del mapa con fondo cuadriculado para transparencia y cálculo dinámico de dimensiones en píxeles.
+   - Visor de código en vivo para esquemas con botón "Copiar Texto" y feedback de copiado.
+4. **Integración Global en la Aplicación**:
+   - `MenuBar.tsx`: Nuevos accesos directos en el menú "Archivo": *"Exportar Imagen HD (PNG / JPG)..."* y *"Exportar Esquema (Markdown / OPML)..."*.
+   - `ExportImportModal.tsx`: Incorporadas tarjetas destacadas para Imagen HD y Esquemas OPML/Markdown.
+   - `CommandPaletteModal.tsx` (`Ctrl+K`): Añadidos los comandos de acceso rápido correspondientes.
+   - `App.tsx`: Orquestación y estado local de apertura y pestaña inicial.
+5. **Pruebas Automatizadas**:
+   - `src/utils/__tests__/outlineExporter.test.ts`: 4 pruebas unitarias cubriendo los modos de Markdown y OPML 2.0.
+   - `src/utils/__tests__/imageExporter.test.ts`: 2 pruebas unitarias de dimensiones escaladas y fondos.
+   - `src/components/Modals/__tests__/ImageExportModal.test.tsx`: 3 pruebas de renderizado, interacción y conmutación de formatos.
+
+### 📄 Archivos Modificados / Creados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/utils/outlineExporter.ts` | Utilidad | **Nuevo**. Exportación avanzada a Markdown (3 modos) y OPML 2.0. |
+| `src/utils/imageExporter.ts` | Utilidad | **Nuevo**. Renderizado y rasterización a Canvas en 1x/2x/4x con fondos transparente/lienzo. |
+| `src/components/Modals/ImageExportModal.tsx` | Organismo / Modal | **Nuevo**. Modal interactivo con previsualización en vivo, copiado al portapapeles y descarga. |
+| `src/components/Modals/ExportImportModal.tsx` | Organismo / Modal | Enlaces directos a exportación de Imagen HD y Esquemas. |
+| `src/components/MenuBar.tsx` | Organismo / Menú | Opciones de exportar Imagen HD y Esquema en menú Archivo. |
+| `src/components/Modals/CommandPaletteModal.tsx` | Organismo / Modal | Comandos de exportación en la paleta rápida (`Ctrl+K`). |
+| `src/App.tsx` | Orquestador | Cableado y renderizado de `ImageExportModal`. |
+| `src/utils/__tests__/outlineExporter.test.ts` | Tests | **Nuevo**. Suite de pruebas para Markdown y OPML. |
+| `src/utils/__tests__/imageExporter.test.ts` | Tests | **Nuevo**. Suite de pruebas para dimensiones y fondos SVG. |
+| `src/components/Modals/__tests__/ImageExportModal.test.tsx` | Tests | **Nuevo**. Pruebas de interacción del modal de exportación. |
+| `doc/CHANGELOG.md` | Documentación | Registro de la nueva funcionalidad de exportación HD y esquemas. |
+
+---
+
+## 📌 [Fase 4.4] — 2026-11-15: Auditoría Integral del Sistema de Exportación y Corrección de Desbordamiento de Texto
+
+### 🎯 Objetivo y Motivo
+Resolver de forma definitiva las inconsistencias visuales y de renderizado reportadas por el usuario en las exportaciones:
+1. **Desbordamiento de texto (`el texto sobresale del nodo`)**: En la exportación a SVG vectorial, PDF e imágenes HD (PNG/JPEG), el texto de los nodos se renderizaba como una única línea horizontal sin salto de línea ni envoltura tipográfica, causando que textos largos o con saltos de línea se salieran de los límites del nodo hacia ambos lados.
+2. **Discrepancia con el diseño de árbol del lienzo (`no es igual a árbol`)**: El motor de exportación vectorial SVG no soportaba geometrías avanzadas (`oval`, `square` en rombo 45°, `arrow`, `star`, `fork` con ganchos), ignoraba perfiles de grosor variable en las aristas (cintas cónicas, huso, reloj de arena), no representaba estilos de trazo discontinuo/punteado ni etiquetas/tags, y en la exportación HTML autónoma la altura del nodo estaba fijada con `height` en vez de `minHeight`.
+3. **Revisión y unificación de todas las opciones de exportar**: Auditoría y armonización de las 7 vías de exportación de la plataforma (PDF Vectorial, Imagen HD, HTML Autónomo, Freeplane .mm XML, Markdown enriquecido, OPML 2.0 y Respaldo JSON).
+
+### 🛠️ Modificaciones Realizadas
+
+1. **Motor de Medición y Envoltura Tipográfica SVG (`src/utils/pdfExporter.ts`)**:
+   - `estimateSvgCharWidth`: Función de estimación proporcional de anchos de caracteres según la tipografía *Plus Jakarta Sans* (diferenciando caracteres estrechos, medianos, anchos y mayúsculas).
+   - `measureSvgTextWidth`: Cálculo acumulado del ancho visual en píxeles de cualquier cadena de texto.
+   - `wrapSvgTextLines`: Algoritmo de división y salto de línea automático que descompone títulos y cuerpos (`node.body`) en múltiples líneas (`tspan`) respetando estrictamente el ancho útil disponible (`maxWidth`) según la forma geométrica del nodo (reserva de 32% en hexágonos, 28% en círculos, 25% en óvalos, 35% en rombos). Si una palabra individual supera el ancho, se divide de forma segura para impedir cualquier desbordamiento.
+   - Alineación vertical y horizontal: Centrado geométrico exacto del bloque combinado (título multi-línea + espaciado + cuerpo multi-línea + tags) con baselines calculados y soporte para `node.textAlign` (`start`, `middle`, `end`).
+
+2. **Geometría y Renderizado de Formas Avanzadas en SVG (`src/utils/pdfExporter.ts`)**:
+   - `oval`: Renderizado vectorial mediante `<ellipse>` centrado con radios `rx` y `ry`.
+   - `square`: Renderizado de cuadrado 1:1 o rombo a 45° mediante `computeRhombusSvgPath`.
+   - `arrow`: Renderizado mediante polígono SVG procedural con `computeArrowPolygonPoints`.
+   - `star`: Renderizado de estrella regular de 10 vértices poligonales alternados.
+   - `fork`: Línea base de subrayado con ganchos verticales anatómicos en los extremos.
+   - `rectangle`: Renderizado de esquinas curvas, rectas o achaflanadas mediante `computeRectangleSvgPath`.
+   - Tags y etiquetas: Renderizado de insignias estilizadas `#etiqueta` en la base del nodo.
+
+3. **Fidelidad Total de Aristas y Conectores en Exportación (`src/utils/pdfExporter.ts`)**:
+   - Soporte para perfiles de grosor variable mediante `generateRibbonEdgePath` (cintas cónicas, huso, reloj de arena).
+   - Soporte para trazos discontinuos (`stroke-dasharray="8 6"`) y punteados (`stroke-dasharray="2 4"`).
+   - Herencia correcta de estilos desde `theme.edgeStyle` y color de mapa `mindMap.edgeColor`.
+
+4. **Corrección en Exportador HTML Autónomo (`src/utils/htmlExporter.ts`)**:
+   - Modificado `div.style.height` a `div.style.minHeight` para que los nodos HTML en el visor autónomo crezcan fluidamente con el contenido sin desbordar el texto por la parte inferior.
+
+5. **Actualización de Modales de Exportación (`src/components/Modals/ExportImportModal.tsx`)**:
+   - Reemplazada la función rudimentaria de Markdown por `exportToMarkdown` enriquecido de `outlineExporter.ts` (con notas, cuerpo, tags, links y tareas).
+   - Añadido botón directo de descarga para formato estándar **OPML 2.0**.
+   - Integración clara de accesos directos a PDF Vectorial e Imagen HD.
+
+### 📄 Archivos Modificados / Creados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/utils/pdfExporter.ts` | Utilidad | Algoritmo de envoltura multi-línea SVG (`wrapSvgTextLines`), formas avanzadas (`oval`, `square`, `arrow`, `star`, `fork`), cintas de grosor variable (`generateRibbonEdgePath`) y renderizado de tags. |
+| `src/utils/htmlExporter.ts` | Utilidad | Corrección de `minHeight` en nodos HTML para prevenir desbordamiento vertical. |
+| `src/components/Modals/ExportImportModal.tsx` | Organismo / Modal | Integración de Markdown enriquecido y descarga directa de OPML 2.0. |
+| `src/utils/__tests__/pdfExporter.test.ts` | Tests | Nuevas pruebas para envoltura de texto largo, formas geométricas variadas y etiquetas. |
+| `src/components/Modals/__tests__/ExportImportModal.test.tsx` | Tests | **Nuevo**. Suite de 4 pruebas de renderizado, tabs y descargas. |
+| `doc/CHANGELOG.md` | Documentación | Registro detallado de la auditoría y correcciones. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm test:regression`: **58/58 suites superadas (385/385 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.24s (0 errores)**.
+
+---
+
+## 📌 [Fase 4.5] — 2026-11-15: Corrección de Paginación en PDF Vectorial (1 Hoja Única sin Cortes) y Eliminación de Espacio Desperdiciado
+
+### 🎯 Objetivo y Motivo
+Resolver el problema reportado por el usuario donde la previsualización del modal de PDF se veía bien, pero al generar/imprimir el PDF en el navegador:
+1. **El mapa se cortaba en 4 páginas**: Página 1 vacía o desfasada, el nodo central partido por la mitad entre hojas 2 y 3, y ramas residuales en la hoja 4.
+2. **Espacio desperdiciado en márgenes**: Se generaban franjas blancas excesivas alrededor del mapa mental debido a orientaciones estáticas y padding innecesario.
+
+### 🛠️ Causa Raíz Técnica y Soluciones Implementadas
+
+1. **Corrección de Sintaxis CSS W3C `@page size` (`src/utils/pdfExporter.ts`)**:
+   - *Causa*: La regla CSS `@page { size: ${width}mm ${height}mm ${orientation}; }` generaba `size: 297mm 210mm landscape;`. En el estándar W3C CSS Paged Media Module Level 3, combinar medidas métricas con palabras clave de orientación es inválido. Chromium (Chrome / Edge) descartaba la regla completa por error de sintaxis y recurría al ajuste por defecto del sistema (**A4 Vertical 210×297 mm**). Al intentar imprimir una hoja apaisada de 297 mm en un papel interpretado como vertical de 210 mm, Chromium realizaba un mosaico forzado de 2×2 (4 páginas).
+   - *Solución*: Se unificó a la sintaxis estándar canónica:
+     - Formatos estándar: `size: ${paperSize.toLowerCase()} ${effectiveOrientation};` (p. ej. `size: a4 landscape;` o `size: letter portrait;`), 100% reconocido por Chromium/Safari/Firefox.
+     - Formatos personalizados o continuo póster: `size: ${paperWidthMm}mm ${paperHeightMm}mm;` (sin sufijo de orientación).
+2. **Control Preciso de Márgenes de Hoja (`@page { margin: 0; }`)**:
+   - Se fijó `@page { margin: 0; }` para neutralizar los márgenes por defecto del diálogo del navegador (12.7 mm).
+   - El margen solicitado por el usuario se aplica internamente en `.page-sheet` mediante padding seguro (`box-sizing: border-box; width: 100vw; height: 100vh;`).
+3. **Eliminación de Salto de Página Residual**:
+   - Se añadió `.page-sheet:last-child { page-break-after: avoid !important; break-after: avoid !important; }`, impidiendo que la última página (o la única en modo `single`) solicite un salto de página adicional que provocaba hojas vacías.
+4. **Orientación Inteligente Automática (`auto`)**:
+   - Detección automática en `resolveEffectiveOrientation`: calcula el aspect ratio (`box.width >= box.height ? 'landscape' : 'portrait'`), seleccionando automáticamente la orientación que maximiza el tamaño del mapa en la hoja sin bandas vacías.
+5. **Ajuste Geométrico Tighter (Eliminación de Espacio Desperdiciado)**:
+   - Se redujo el padding perimetral de 50-60 px a 24 px en `computeMapBoundingBox`.
+   - Se integró `preserveAspectRatio="xMidYMid meet"` en el elemento `<svg>`, asegurando que el mapa llene armónicamente el área imprimible manteniendo su proporción sin recortes.
+6. **Rediseño del Modal de Exportación (`src/components/Modals/PdfExportModal.tsx`)**:
+   - **Orientación**: Botón `Auto (Recomendado)` con insignia dinámica (`Horizontal detectado` / `Vertical detectado`), junto a `Horizontal` y `Vertical`.
+   - **Márgenes**: Selector visual con 3 niveles: *Mínimo (4 mm)* para máximo aprovechamiento, *Estándar (8 mm)* y *Amplio (14 mm)* para encuadernación.
+   - **Paginación**: La opción `single` ahora se resalta como *"1 Sola Hoja (Ajuste Óptimo 100%) [Recomendado]"* garantizando al usuario que todo el mapa mental se escala y centra en 1 única hoja sin cortes.
+
+### 📄 Archivos Modificados
+| Archivo | Nivel Atomic | Qué cambió |
+|---------|--------------|-----------|
+| `src/utils/pdfExporter.ts` | Utilidad | Sintaxis válida CSS W3C para `@page`, `@page { margin: 0; }`, `.page-sheet:last-child { break-after: avoid }`, `resolveEffectiveOrientation` y bounding box optimizado (24px). |
+| `src/components/Modals/PdfExportModal.tsx` | Organismo / Modal | Soporte para orientación `auto`, selector de márgenes en mm (4mm/8mm/14mm), badge de recomendación "1 Sola Hoja" y previsualización sincronizada. |
+| `src/utils/__tests__/pdfExporter.test.ts` | Tests | Pruebas de resolución de orientación automática, sintaxis `@page` y prevención de saltos de página. |
+| `src/components/Modals/__tests__/PdfExportModal.test.tsx` | Tests | Pruebas de alternancia de orientación Auto y selección de márgenes. |
+| `doc/CHANGELOG.md` | Documentación | Registro del motivo, causa raíz de Chromium y soluciones aplicadas. |
+
+### 🔍 Verificación
+- [x] `pnpm lint` (`tsc --noEmit`): **0 errores de compilación**.
+- [x] `pnpm test:regression`: **58/58 suites superadas (390/390 pruebas unitarias exitosas, 100%)**.
+- [x] `pnpm build`: **Compilación de producción exitosa en 6.94s (0 errores)**.
+

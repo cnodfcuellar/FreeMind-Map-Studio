@@ -1910,7 +1910,7 @@ export function exportToStandaloneHTML(mindMap: MindMap): string {
         div.style.left = layout.x + 'px';
         div.style.top = layout.y + 'px';
         div.style.width = layout.width + 'px';
-        div.style.height = layout.height + 'px';
+        div.style.minHeight = layout.height + 'px';
 
         // Background
         if (node.bgType === 'transparent') {

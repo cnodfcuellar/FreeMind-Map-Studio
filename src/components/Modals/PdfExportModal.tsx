@@ -43,22 +43,58 @@ const PAPER_OPTIONS: { id: PdfPaperSize; name: string; desc: string }[] = [
   { id: 'Poster', name: 'Póster Continuo', desc: 'Ajuste exacto al tamaño del mapa' },
 ];
 
-const PAGINATION_OPTIONS: { id: PdfPaginationMode; name: string; pages: string; icon: string }[] = [
-  { id: 'single', name: '1 Sola Hoja (Póster)', pages: '1 pág.', icon: '1' },
-  { id: 'grid-2x1', name: 'Mosaico 2×1 (Horizontal)', pages: '2 págs.', icon: '2' },
-  { id: 'grid-2x2', name: 'Mosaico 2×2 (Cuadrícula)', pages: '4 págs.', icon: '4' },
-  { id: 'grid-3x2', name: 'Mosaico 3×2 (Panorámico)', pages: '6 págs.', icon: '6' },
-  { id: 'grid-3x3', name: 'Mosaico 3×3 (Mural Gigante)', pages: '9 págs.', icon: '9' },
+const PAGINATION_OPTIONS: { id: PdfPaginationMode; name: string; pages: string; icon: string; desc: string }[] = [
+  {
+    id: 'single',
+    name: '1 Sola Hoja (Ajuste Óptimo 100%)',
+    pages: '1 hoja',
+    icon: '1',
+    desc: 'Todo el mapa mental escalado y centrado en 1 única hoja sin cortes',
+  },
+  {
+    id: 'grid-2x1',
+    name: 'Mosaico 2×1 (Horizontal)',
+    pages: '2 págs.',
+    icon: '2',
+    desc: 'Divide horizontalmente en 2 hojas',
+  },
+  {
+    id: 'grid-2x2',
+    name: 'Mosaico 2×2 (Cuadrícula)',
+    pages: '4 págs.',
+    icon: '4',
+    desc: 'Mural en cuadrícula de 4 hojas',
+  },
+  {
+    id: 'grid-3x2',
+    name: 'Mosaico 3×2 (Panorámico)',
+    pages: '6 págs.',
+    icon: '6',
+    desc: 'Mural panorámico en 6 hojas',
+  },
+  {
+    id: 'grid-3x3',
+    name: 'Mosaico 3×3 (Mural Gigante)',
+    pages: '9 págs.',
+    icon: '9',
+    desc: 'Mural gigante en 9 hojas',
+  },
+];
+
+const MARGIN_OPTIONS: { id: number; name: string; desc: string }[] = [
+  { id: 4, name: 'Mínimo (4 mm)', desc: 'Aprovechamiento máximo sin espacio desperdiciado' },
+  { id: 8, name: 'Estándar (8 mm)', desc: 'Margen seguro para impresoras domésticas' },
+  { id: 14, name: 'Amplio (14 mm)', desc: 'Ideal para anillados, carpetas y encuadernación' },
 ];
 
 export const PdfExportModal: React.FC<PdfExportModalProps> = ({ mindMap, isOpen, onClose }) => {
   const [paperSize, setPaperSize] = useState<PdfPaperSize>('A4');
-  const [orientation, setOrientation] = useState<PdfOrientation>('landscape');
+  const [orientation, setOrientation] = useState<PdfOrientation>('auto');
   const [paginationMode, setPaginationMode] = useState<PdfPaginationMode>('single');
   const [includeBackground, setIncludeBackground] = useState(true);
   const [includeHeaderFooter, setIncludeHeaderFooter] = useState(true);
   const [includeCropMarks, setIncludeCropMarks] = useState(true);
-  const [marginMm, setMarginMm] = useState<number>(8);
+  const [marginMm, setMarginMm] = useState<number>(6);
 
   const currentOptions: PdfExportOptions = useMemo(
     () => ({
@@ -133,39 +169,91 @@ export const PdfExportModal: React.FC<PdfExportModalProps> = ({ mindMap, isOpen,
 
           {/* 2. Orientation */}
           <div>
-            <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1.5 flex items-center gap-1.5">
-              <Layout className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Orientación de Hoja</span>
+            <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Layout className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Orientación de Hoja</span>
+              </span>
+              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">
+                {gridInfo.effectiveOrientation === 'landscape' ? 'Horizontal detectado' : 'Vertical detectado'}
+              </span>
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => setOrientation('auto')}
+                className={`py-2 px-2 rounded-xl border text-center font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
+                  orientation === 'auto'
+                    ? 'border-indigo-600 bg-indigo-50/70 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200 dark:border-indigo-500 font-semibold shadow-2xs'
+                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span className="text-[11px] font-bold">Auto</span>
+                </div>
+                <span className="text-[9px] text-slate-400 dark:text-slate-500 truncate">
+                  {gridInfo.effectiveOrientation === 'landscape' ? 'Horizontal' : 'Vertical'}
+                </span>
+              </button>
               <button
                 type="button"
                 onClick={() => setOrientation('landscape')}
-                className={`py-2 px-3 rounded-xl border text-center font-medium transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                className={`py-2 px-2 rounded-xl border text-center font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                   orientation === 'landscape'
                     ? 'border-indigo-600 bg-indigo-50/70 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200 dark:border-indigo-500 font-semibold shadow-2xs'
                     : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 <div className="w-4 h-3 border border-current rounded-xs shrink-0" />
-                <span>Horizontal (Apaisado)</span>
+                <span className="text-[11px] truncate">Horizontal (Apaisado)</span>
               </button>
               <button
                 type="button"
                 onClick={() => setOrientation('portrait')}
-                className={`py-2 px-3 rounded-xl border text-center font-medium transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                className={`py-2 px-2 rounded-xl border text-center font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
                   orientation === 'portrait'
                     ? 'border-indigo-600 bg-indigo-50/70 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200 dark:border-indigo-500 font-semibold shadow-2xs'
                     : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
                 <div className="w-3 h-4 border border-current rounded-xs shrink-0" />
-                <span>Vertical (Retrato)</span>
+                <span className="text-[11px] truncate">Vertical (Retrato)</span>
               </button>
             </div>
           </div>
 
-          {/* 3. Pagination Mode */}
+          {/* 3. Margin Selector */}
+          <div>
+            <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Maximize2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Márgenes de Hoja</span>
+              </span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">
+                {marginMm} mm
+              </span>
+            </label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {MARGIN_OPTIONS.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setMarginMm(m.id)}
+                  className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
+                    marginMm === m.id
+                      ? 'border-emerald-600 bg-emerald-50/70 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 dark:border-emerald-500 font-semibold shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  <div className="text-[11px] truncate font-medium">{m.name}</div>
+                  <div className="text-[9px] text-slate-400 dark:text-slate-500 truncate mt-0.5">{m.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 4. Pagination Mode */}
           <div>
             <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1.5 flex items-center gap-1.5">
               <Grid className="w-3.5 h-3.5 text-purple-600" />
@@ -177,19 +265,31 @@ export const PdfExportModal: React.FC<PdfExportModalProps> = ({ mindMap, isOpen,
                   key={mode.id}
                   type="button"
                   onClick={() => setPaginationMode(mode.id)}
-                  className={`w-full p-2 px-3 rounded-xl text-left border transition-all cursor-pointer flex items-center justify-between ${
+                  className={`w-full p-2.5 px-3 rounded-xl text-left border transition-all cursor-pointer flex items-center justify-between ${
                     paginationMode === mode.id
                       ? 'border-purple-600 bg-purple-50/70 text-purple-900 dark:bg-purple-950/40 dark:text-purple-200 dark:border-purple-500 font-semibold shadow-2xs'
                       : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <span className="w-5 h-5 rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-mono font-bold text-[10px] flex items-center justify-center shrink-0">
                       {mode.icon}
                     </span>
-                    <span>{mode.name}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate">{mode.name}</span>
+                        {mode.id === 'single' && (
+                          <span className="text-[8px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                            Recomendado
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[9px] text-slate-400 dark:text-slate-500 truncate mt-0.5">
+                        {mode.desc}
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 shrink-0 ml-2">
                     {mode.pages}
                   </span>
                 </button>
@@ -243,7 +343,7 @@ export const PdfExportModal: React.FC<PdfExportModalProps> = ({ mindMap, isOpen,
               <span>Simulación de Hoja de Impresión</span>
             </span>
             <span className="text-[10px] font-mono font-bold bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
-              {gridInfo.paperWidthMm} × {gridInfo.paperHeightMm} mm • {gridInfo.totalPages} {gridInfo.totalPages === 1 ? 'Página' : 'Páginas'}
+              {gridInfo.paperWidthMm} × {gridInfo.paperHeightMm} mm • {gridInfo.totalPages === 1 ? '1 Hoja única' : `${gridInfo.totalPages} Páginas`} ({gridInfo.effectiveOrientation === 'landscape' ? 'Horizontal' : 'Vertical'})
             </span>
           </div>
 

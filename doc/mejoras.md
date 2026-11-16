@@ -209,10 +209,28 @@ Arquitectura modular donde cada objeto posee su propio subpanel e interruptor de
 
 ---
 
+### 1.8. 🖼️ Exportación de Imágenes HD (PNG/JPEG/SVG en 1x/2x/4x) y Esquemas Estructurados (Markdown / OPML 2.0) (Completado)
+* **Ubicación:** Menú *"Archivo"* > *"Exportar Imagen HD (PNG / JPG)..."*, *"Exportar Esquema (Markdown / OPML)..."*, modal `ExportImportModal.tsx`, comando en `CommandPaletteModal.tsx` (`Ctrl+K`) y modal interactivo dedicado `ImageExportModal.tsx`.
+* **Capacidades Principales:**
+  - **Rasterización Vectorial a Canvas de Alta Definición:**
+    - Genera imágenes a partir de SVG vectorial nativo sin pixelación.
+    - **Resoluciones escaladas:** `1x` (Web/Email), `2x Retina HD` (PowerPoint, Keynote, pantallas de alta densidad) y `4x Ultra HD 4K` (murales e impresiones de gran escala).
+    - **Modos de fondo:** `Transparente` (para insertar siluetas limpias sobre diapositivas oscuras o documentos), `Lienzo del Mapa` (color temático o degradado activo) y `Blanco Puro`.
+    - **Copiado Directo al Portapapeles:** Botón integrado para copiar PNG nativo con `ClipboardItem` y pegarlo al instante con `Ctrl+V` en Word, PowerPoint, Notion o Slack sin necesidad de descargar archivos temporales.
+  - **Esquemas Estructurados Multiformato:**
+    - **Markdown Jerárquico (# Encabezados):** Convierte el árbol en encabezados `#`, `##`, `###` para generar documentos navegables en Notion, Obsidian y Logseq.
+    - **Markdown en Viñetas (- Listas):** Resumen jerárquico anidado en texto plano.
+    - **Listas de Tareas (- [ ] Checklist):** Transforma el progreso porcentual del mapa en checklists ejecutables (`[x]` para 100%, `[ ]` para tareas pendientes).
+    - **Estándar OPML 2.0:** Genera XML OPML interoperable con OmniOutliner, Workflowy, MindNode, Dynalist y Scrivener.
+    - **Inclusión granular:** Selector de notas (`> quote`), cuerpos descriptivos, enlaces, etiquetas `#tags`, metadatos y tabla de relaciones libres.
+    - Visor de código en tiempo real con botón *"Copiar Texto"* y descarga de archivo `.md` / `.opml`.
+
+---
+
 ## 📊 2. Estado de Calidad Actual
 
 * **TypeScript (`pnpm lint`):** 0 errores (`tsc --noEmit`).
-* **Cobertura de Pruebas (`pnpm test:regression`):** 40 archivos pasados, **231/231 tests exitosos (100%)**.
-* **Compilación de Producción (`pnpm build`):** Exitosa con Vite (10.13s).
+* **Cobertura de Pruebas (`pnpm test:regression`):** **57 suites pasadas, 379/379 tests exitosos (100%)**.
+* **Compilación de Producción (`pnpm build`):** Exitosa con Vite en 6.76s (0 errores).
 * **Servidor Dev:** Operativo en `http://localhost:3000/`.
 

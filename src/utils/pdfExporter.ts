@@ -1,10 +1,16 @@
 import { MindMap, CalculatedNodeLayout, NodeShape } from '../types/mindmap';
 import { THEMES } from './themes';
-import { computeMindMapLayout, generateEdgePath } from './layoutEngine';
+import { computeMindMapLayout, generateEdgePath, generateRibbonEdgePath } from './layoutEngine';
 import { computeBubbleTailGeometry } from './bubbleTailUtils';
+import { computeArrowPolygonPoints } from './arrowShapeUtils';
+import {
+  isSquareRotated,
+  computeRectangleSvgPath,
+  computeRhombusSvgPath,
+} from './rectangleCornerUtils';
 
 export type PdfPaperSize = 'A4' | 'A3' | 'A2' | 'Letter' | 'Legal' | 'Tabloid' | 'Poster';
-export type PdfOrientation = 'landscape' | 'portrait';
+export type PdfOrientation = 'auto' | 'landscape' | 'portrait';
 export type PdfPaginationMode = 'single' | 'grid-2x1' | 'grid-2x2' | 'grid-3x2' | 'grid-3x3';
 
 export interface PdfExportOptions {
@@ -61,6 +67,7 @@ export interface PaginationGridResult {
   tiles: PageTile[];
   paperWidthMm: number;
   paperHeightMm: number;
+  effectiveOrientation: 'landscape' | 'portrait';
 }
 
 function escapeXML(str: string): string {
@@ -77,7 +84,7 @@ function escapeXML(str: string): string {
  */
 export function computeMapBoundingBox(
   mindMap: MindMap,
-  padding: number = 60
+  padding: number = 24
 ): { box: MapBoundingBox; layoutMap: Map<string, CalculatedNodeLayout>; nodesList: CalculatedNodeLayout[] } {
   const layoutMap = computeMindMapLayout(mindMap, { x: 0, y: 0 });
   const nodesList = Array.from(layoutMap.values());
@@ -125,6 +132,19 @@ export function computeMapBoundingBox(
     });
   }
 
+  // Account for cloud bounds if present
+  nodesList.forEach((layout) => {
+    const node = mindMap.nodes[layout.id];
+    if (node?.cloud?.enabled) {
+      const padX = node.cloud.paddingX || 24;
+      const padY = node.cloud.paddingY || 16;
+      minX = Math.min(minX, layout.x - padX);
+      maxX = Math.max(maxX, layout.x + layout.width + padX);
+      minY = Math.min(minY, layout.y - padY);
+      maxY = Math.max(maxY, layout.y + layout.height + padY);
+    }
+  });
+
   const w = Math.max(200, maxX - minX + padding * 2);
   const h = Math.max(150, maxY - minY + padding * 2);
   const vx = minX - padding;
@@ -147,32 +167,47 @@ export function computeMapBoundingBox(
 }
 
 /**
+ * Resolves effective paper orientation ('landscape' vs 'portrait') based on user choice or aspect ratio
+ */
+export function resolveEffectiveOrientation(
+  box: MapBoundingBox,
+  requestedOrientation: PdfOrientation
+): 'landscape' | 'portrait' {
+  if (requestedOrientation === 'landscape' || requestedOrientation === 'portrait') {
+    return requestedOrientation;
+  }
+  // 'auto' mode: match paper orientation to map dimensions
+  return box.width >= box.height ? 'landscape' : 'portrait';
+}
+
+/**
  * Calculates page grid tiles for single-page or multi-page poster printing
  */
 export function calculatePaginationGrid(
   mindMap: MindMap,
   options: PdfExportOptions
 ): PaginationGridResult {
-  const { box } = computeMapBoundingBox(mindMap, 50);
+  const { box } = computeMapBoundingBox(mindMap, 24);
+  const effectiveOrientation = resolveEffectiveOrientation(box, options.orientation);
   const baseDim = PAPER_SIZES_MM[options.paperSize] || PAPER_SIZES_MM.A4;
 
-  let paperWidthMm = options.orientation === 'landscape'
+  let paperWidthMm = effectiveOrientation === 'landscape'
     ? Math.max(baseDim.widthMm, baseDim.heightMm)
     : Math.min(baseDim.widthMm, baseDim.heightMm);
 
-  let paperHeightMm = options.orientation === 'landscape'
+  let paperHeightMm = effectiveOrientation === 'landscape'
     ? Math.min(baseDim.widthMm, baseDim.heightMm)
     : Math.max(baseDim.widthMm, baseDim.heightMm);
 
   if (options.paperSize === 'Poster') {
     // Continuous aspect-ratio fitting
-    const mapRatio = box.width / box.height;
-    if (options.orientation === 'landscape') {
+    const mapRatio = box.width / Math.max(1, box.height);
+    if (effectiveOrientation === 'landscape') {
       paperWidthMm = 600;
-      paperHeightMm = Math.round(600 / mapRatio);
+      paperHeightMm = Math.max(100, Math.round(600 / mapRatio));
     } else {
       paperHeightMm = 600;
-      paperWidthMm = Math.round(600 * mapRatio);
+      paperWidthMm = Math.max(100, Math.round(600 * mapRatio));
     }
   }
 
@@ -214,7 +249,7 @@ export function calculatePaginationGrid(
         totalCols: cols,
         viewBox: tileBox,
         label: totalPages === 1
-          ? 'Página Única (Póster Completo)'
+          ? '1 Sola Hoja (Ajuste Óptimo)'
           : `Hoja ${pageNum} de ${totalPages} (Fila ${r + 1}, Col. ${c + 1})`,
       });
       pageNum++;
@@ -228,7 +263,115 @@ export function calculatePaginationGrid(
     tiles,
     paperWidthMm,
     paperHeightMm,
+    effectiveOrientation,
   };
+}
+
+/**
+ * Estimates width of characters for SVG text wrapping based on Plus Jakarta Sans proportions
+ */
+export function estimateSvgCharWidth(char: string, fontSize: number): number {
+  if (char === ' ' || char === '\t') return fontSize * 0.28;
+  if ('.,:;!|iIl\'`'.includes(char)) return fontSize * 0.28;
+  if ('frtj()[]{}*"-'.includes(char)) return fontSize * 0.38;
+  if ('mwMW@%#&'.includes(char)) return fontSize * 0.85;
+  if (char >= 'A' && char <= 'Z') return fontSize * 0.68;
+  if (char >= '0' && char <= '9') return fontSize * 0.58;
+  return fontSize * 0.52;
+}
+
+export function measureSvgTextWidth(text: string, fontSize: number): number {
+  let w = 0;
+  for (let i = 0; i < text.length; i++) {
+    w += estimateSvgCharWidth(text[i], fontSize);
+  }
+  return w;
+}
+
+/**
+ * Wraps text into lines that strictly fit within maxWidth.
+ * Respects explicit newlines and breaks long words if necessary.
+ */
+export function wrapSvgTextLines(text: string, maxWidth: number, fontSize: number): string[] {
+  if (!text || text.trim().length === 0) return [''];
+
+  const paragraphs = text.split('\n');
+  const allLines: string[] = [];
+
+  for (const para of paragraphs) {
+    if (para.trim().length === 0) {
+      allLines.push('');
+      continue;
+    }
+
+    const words = para.split(/\s+/);
+    let currentLine = '';
+    let currentLineWidth = 0;
+
+    for (const word of words) {
+      const wordWidth = measureSvgTextWidth(word, fontSize);
+      const spaceWidth = estimateSvgCharWidth(' ', fontSize);
+
+      if (!currentLine) {
+        if (wordWidth > maxWidth) {
+          // Break overly long single word into character chunks
+          let chunk = '';
+          let chunkW = 0;
+          for (const char of word) {
+            const charW = estimateSvgCharWidth(char, fontSize);
+            if (chunkW + charW > maxWidth && chunk.length > 0) {
+              allLines.push(chunk);
+              chunk = char;
+              chunkW = charW;
+            } else {
+              chunk += char;
+              chunkW += charW;
+            }
+          }
+          if (chunk) {
+            currentLine = chunk;
+            currentLineWidth = chunkW;
+          }
+        } else {
+          currentLine = word;
+          currentLineWidth = wordWidth;
+        }
+      } else {
+        if (currentLineWidth + spaceWidth + wordWidth <= maxWidth) {
+          currentLine += ' ' + word;
+          currentLineWidth += spaceWidth + wordWidth;
+        } else {
+          allLines.push(currentLine);
+          if (wordWidth > maxWidth) {
+            let chunk = '';
+            let chunkW = 0;
+            for (const char of word) {
+              const charW = estimateSvgCharWidth(char, fontSize);
+              if (chunkW + charW > maxWidth && chunk.length > 0) {
+                allLines.push(chunk);
+                chunk = char;
+                chunkW = charW;
+              } else {
+                chunk += char;
+                chunkW += charW;
+              }
+            }
+            currentLine = chunk;
+            currentLineWidth = chunkW;
+          } else {
+            currentLine = word;
+            currentLineWidth = wordWidth;
+          }
+        }
+      }
+    }
+
+    if (currentLine) {
+      allLines.push(currentLine);
+    }
+  }
+
+  return allLines.length > 0 ? allLines : [''];
 }
 
 /**
@@ -239,7 +382,7 @@ export function generateMindMapVectorSvg(
   customViewBox?: string,
   options?: Partial<PdfExportOptions>
 ): string {
-  const { box, layoutMap, nodesList } = computeMapBoundingBox(mindMap, 40);
+  const { box, layoutMap, nodesList } = computeMapBoundingBox(mindMap, 24);
   const theme = THEMES[mindMap.themeId] || THEMES.default;
   const viewBox = customViewBox || `${box.minX} ${box.minY} ${box.width} ${box.height}`;
 
@@ -248,7 +391,7 @@ export function generateMindMapVectorSvg(
   const bgColor = includeBg ? (theme.background || '#ffffff') : '#ffffff';
 
   parts.push(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="100%" height="100%" style="background-color: ${bgColor}; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style="background-color: ${bgColor}; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">`
   );
 
   // Defs & Filters (Shadows & Gradients)
@@ -296,20 +439,52 @@ export function generateMindMapVectorSvg(
     const parentLayout = layoutMap.get(childNode.parentId);
     if (!parentLayout) return;
 
-    const edgeStyle = childNode.edgeStyle || mindMap.edgeStyle || 'bezier';
+    const edgeStyle = childNode.edgeStyle || mindMap.edgeStyle || theme.edgeStyle || 'bezier';
+    if (edgeStyle === 'hidden') return;
+
     const branchColor =
       childNode.edgeColor ||
+      mindMap.edgeColor ||
       theme.branchColors[childLayout.branchIndex % theme.branchColors.length] ||
       '#3b82f6';
 
-    const edgeWidth = childNode.edgeWidth || (childLayout.depth === 1 ? 3 : 2);
-    const pathD = generateEdgePath(parentLayout, childLayout, edgeStyle, childNode.shape || 'bubble');
+    const defaultWidth = childLayout.depth === 1 ? 2.5 : 1.75;
+    const edgeWidth = childNode.edgeWidth || mindMap.edgeWidth || defaultWidth;
+    const effectiveDash = childNode.edgeBorderStyle || childNode.edgeDash || mindMap.edgeBorderStyle || mindMap.edgeDash || 'solid';
+    const effectiveProfile = childNode.edgeProfile || mindMap.edgeProfile || 'uniform';
 
+    const hasEdgeShadow = childNode.edgeShadow ?? mindMap.edgeShadow ?? false;
+    const shadowAttr = hasEdgeShadow ? 'filter="url(#pdf-edge-shadow)"' : '';
+
+    let dashAttr = '';
+    if (effectiveDash === 'dashed') {
+      dashAttr = 'stroke-dasharray="8 6"';
+    } else if (effectiveDash === 'dotted') {
+      dashAttr = 'stroke-dasharray="2 4" stroke-linecap="round"';
+    }
+
+    // Ribbon path if variable profile is active and style is solid
+    if (effectiveProfile !== 'uniform' && effectiveDash === 'solid') {
+      const ribbonPath = generateRibbonEdgePath(
+        parentLayout,
+        childLayout,
+        edgeStyle,
+        childNode.shape || 'bubble',
+        effectiveProfile,
+        edgeWidth
+      );
+      if (ribbonPath) {
+        parts.push(
+          `<path d="${ribbonPath}" fill="${branchColor}" fill-opacity="0.95" ${shadowAttr} />`
+        );
+        return;
+      }
+    }
+
+    const pathD = generateEdgePath(parentLayout, childLayout, edgeStyle, childNode.shape || 'bubble');
     if (pathD) {
-      const hasEdgeShadow = childNode.edgeShadow ?? mindMap.edgeShadow ?? false;
-      const shadowAttr = hasEdgeShadow ? 'filter="url(#pdf-edge-shadow)"' : '';
       parts.push(
-        `<path d="${pathD}" fill="none" stroke="${branchColor}" stroke-width="${edgeWidth}" stroke-linecap="round" stroke-linejoin="round" ${shadowAttr} />`
+        `<path d="${pathD}" fill="none" stroke="${branchColor}" stroke-width="${edgeWidth}" stroke-linecap="round" stroke-linejoin="round" ${dashAttr} ${shadowAttr} />`
       );
     }
   });
@@ -375,13 +550,13 @@ export function generateMindMapVectorSvg(
       node.borderColor ||
       (isRoot ? 'transparent' : theme.branchColors[layout.branchIndex % theme.branchColors.length] || '#cbd5e1');
 
-    const borderWidth = node.borderWidth || (isRoot ? 0 : 1.5);
+    const borderWidth = node.borderWidth !== undefined ? node.borderWidth : (isRoot ? 0 : 1.5);
     const hasShadow = node.nodeShadow ?? (isRoot ? true : false);
     const shadowAttr = hasShadow ? 'filter="url(#pdf-node-shadow)"' : '';
 
     // Render Shape Geometry
     if (shape === 'bubble') {
-      const radius = 12;
+      const radius = 14;
       parts.push(
         `<rect x="${layout.x}" y="${layout.y}" width="${layout.width}" height="${layout.height}" rx="${radius}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
       );
@@ -402,7 +577,7 @@ export function generateMindMapVectorSvg(
         }
       }
     } else if (shape === 'pill') {
-      const radius = layout.height / 2;
+      const radius = Math.min(layout.width, layout.height) / 2;
       parts.push(
         `<rect x="${layout.x}" y="${layout.y}" width="${layout.width}" height="${layout.height}" rx="${radius}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
       );
@@ -413,49 +588,202 @@ export function generateMindMapVectorSvg(
       parts.push(
         `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
       );
+    } else if (shape === 'oval') {
+      const cx = layout.x + layout.width / 2;
+      const cy = layout.y + layout.height / 2;
+      const rx = Math.max(10, layout.width / 2 - borderWidth / 2);
+      const ry = Math.max(10, layout.height / 2 - borderWidth / 2);
+      parts.push(
+        `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
+      );
+    } else if (shape === 'square') {
+      if (isSquareRotated(node)) {
+        const pathD = computeRhombusSvgPath(layout.width, layout.height, node, borderWidth);
+        parts.push(
+          `<g transform="translate(${layout.x}, ${layout.y})"><path d="${pathD}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} /></g>`
+        );
+      } else {
+        const side = Math.min(layout.width, layout.height);
+        const ox = layout.x + (layout.width - side) / 2;
+        const oy = layout.y + (layout.height - side) / 2;
+        parts.push(
+          `<rect x="${ox}" y="${oy}" width="${side}" height="${side}" rx="8" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
+        );
+      }
     } else if (shape === 'hexagon') {
       const w = layout.width;
       const h = layout.height;
-      const x = layout.x;
-      const y = layout.y;
-      const p1 = `${x + w * 0.25},${y}`;
-      const p2 = `${x + w * 0.75},${y}`;
-      const p3 = `${x + w},${y + h * 0.5}`;
-      const p4 = `${x + w * 0.75},${y + h}`;
-      const p5 = `${x + w * 0.25},${y + h}`;
-      const p6 = `${x},${y + h * 0.5}`;
+      const inset = Math.min(w * 0.28, Math.max(28, h * 0.58));
+      const pad = Math.max(borderWidth / 2, 1);
+      const p1 = `${layout.x + inset},${layout.y + pad}`;
+      const p2 = `${layout.x + w - inset},${layout.y + pad}`;
+      const p3 = `${layout.x + w - pad},${layout.y + h / 2}`;
+      const p4 = `${layout.x + w - inset},${layout.y + h - pad}`;
+      const p5 = `${layout.x + inset},${layout.y + h - pad}`;
+      const p6 = `${layout.x + pad},${layout.y + h / 2}`;
       parts.push(
         `<polygon points="${p1} ${p2} ${p3} ${p4} ${p5} ${p6}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
       );
+    } else if (shape === 'arrow') {
+      const points = computeArrowPolygonPoints(layout.width, layout.height, node, borderWidth);
+      parts.push(
+        `<g transform="translate(${layout.x}, ${layout.y})"><polygon points="${points}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} /></g>`
+      );
+    } else if (shape === 'star') {
+      const pad = Math.max(borderWidth / 2, 1);
+      const cx = layout.x + layout.width / 2;
+      const cy = layout.y + layout.height / 2;
+      const Rx = Math.max((layout.width - 2 * pad) / 2, 10);
+      const Ry = Math.max((layout.height - 2 * pad) / 2, 10);
+      const rx = Rx * 0.44;
+      const ry = Ry * 0.44;
+      const starPts: string[] = [];
+      for (let i = 0; i < 10; i++) {
+        const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+        const rCurrX = i % 2 === 0 ? Rx : rx;
+        const rCurrY = i % 2 === 0 ? Ry : ry;
+        starPts.push(`${(cx + rCurrX * Math.cos(angle)).toFixed(1)},${(cy + rCurrY * Math.sin(angle)).toFixed(1)}`);
+      }
+      parts.push(
+        `<polygon points="${starPts.join(' ')}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
+      );
     } else if (shape === 'fork') {
       // Underline classic style
-      const lineY = layout.y + layout.height;
+      const lineY = layout.y + layout.height - 2;
       parts.push(
         `<line x1="${layout.x}" y1="${lineY}" x2="${layout.x + layout.width}" y2="${lineY}" stroke="${borderColor}" stroke-width="2.5" />`
       );
-    } else {
-      // Default rounded rectangle
-      const radius = isRoot ? 16 : 8;
+      // Hook accents on ends
       parts.push(
-        `<rect x="${layout.x}" y="${layout.y}" width="${layout.width}" height="${layout.height}" rx="${radius}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} />`
+        `<line x1="${layout.x}" y1="${lineY - 6}" x2="${layout.x}" y2="${lineY}" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round" />`
+      );
+      parts.push(
+        `<line x1="${layout.x + layout.width}" y1="${lineY - 6}" x2="${layout.x + layout.width}" y2="${lineY}" stroke="${borderColor}" stroke-width="2.5" stroke-linecap="round" />`
+      );
+    } else {
+      // Default rounded / rectangle (respecting corner styles)
+      const pathD = computeRectangleSvgPath(layout.width, layout.height, node, borderWidth);
+      parts.push(
+        `<g transform="translate(${layout.x}, ${layout.y})"><path d="${pathD}" fill="${bgColor}" stroke="${borderColor}" stroke-width="${borderWidth}" ${shadowAttr} /></g>`
       );
     }
 
-    // Node Typography / Text
+    // Node Typography / Text Wrapping & Alignment
+    let textMaxWidth = Math.max(30, layout.width - 24);
+    if (shape === 'hexagon') {
+      textMaxWidth = Math.max(30, layout.width * 0.68);
+    } else if (shape === 'circle') {
+      textMaxWidth = Math.max(30, layout.width * 0.72);
+    } else if (shape === 'oval') {
+      textMaxWidth = Math.max(30, layout.width * 0.75);
+    } else if (shape === 'pill') {
+      textMaxWidth = Math.max(30, layout.width - layout.height * 0.5);
+    } else if (shape === 'square' && isSquareRotated(node)) {
+      textMaxWidth = Math.max(30, layout.width * 0.65);
+    } else if (shape === 'star') {
+      textMaxWidth = Math.max(30, layout.width * 0.55);
+    } else if (shape === 'arrow') {
+      textMaxWidth = Math.max(30, layout.width * 0.65);
+    } else if (shape === 'fork') {
+      textMaxWidth = Math.max(30, layout.width - 16);
+    }
+
     const fontSize = node.fontSize || (isRoot ? 16 : 13);
     const fontWeight = isRoot || node.bold ? '700' : '500';
-    const textY = layout.y + (node.body ? fontSize + 10 : layout.height / 2 + fontSize / 3);
+    const fontStyle = node.italic ? 'italic' : 'normal';
+    const fontFamily = node.fontFamily || theme.fontFamily || "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
+    const textAlign = node.textAlign || 'center';
+
+    const titleLines = wrapSvgTextLines(node.text || 'Sin título', textMaxWidth, fontSize);
+    const titleLineHeight = Math.round(fontSize * 1.34);
+    const titleTotalHeight = (titleLines.length - 1) * titleLineHeight + fontSize;
+
+    let bodyLines: string[] = [];
+    let bodyFontSize = 11;
+    let bodyLineHeight = 15;
+    let bodyTotalHeight = 0;
+    const hasVisibleBody = Boolean(node.body && !node.hideBody);
+
+    if (hasVisibleBody) {
+      bodyFontSize = node.bodyFontSize || 11;
+      bodyLineHeight = Math.round(bodyFontSize * 1.36);
+      bodyLines = wrapSvgTextLines(node.body!, textMaxWidth, bodyFontSize);
+      bodyTotalHeight = (bodyLines.length - 1) * bodyLineHeight + bodyFontSize;
+    }
+
+    const hasVisibleTags = Boolean(!node.hideTags && node.tags && node.tags.length > 0);
+    const tagsReservedHeight = hasVisibleTags ? 18 : 0;
+
+    const gapBetween = hasVisibleBody ? 6 : 0;
+    const combinedContentHeight = titleTotalHeight + gapBetween + bodyTotalHeight + tagsReservedHeight;
+
+    // Anchor & X position
+    let anchor = 'middle';
+    let textX = layout.x + layout.width / 2;
+    if (textAlign === 'left') {
+      anchor = 'start';
+      textX = layout.x + (layout.width - textMaxWidth) / 2;
+    } else if (textAlign === 'right') {
+      anchor = 'end';
+      textX = layout.x + layout.width - (layout.width - textMaxWidth) / 2;
+    }
+
+    // Baseline Y calculation
+    let firstLineBaselineY: number;
+    if (shape === 'fork') {
+      firstLineBaselineY = layout.y + layout.height - (combinedContentHeight - titleTotalHeight) - 8;
+    } else {
+      const centerY = layout.y + (layout.height - tagsReservedHeight) / 2;
+      firstLineBaselineY = Math.round(centerY - (titleTotalHeight + gapBetween + bodyTotalHeight) / 2 + fontSize * 0.8);
+    }
+
+    // Title lines
+    const titleTspans = titleLines.map((line, idx) => {
+      const dy = idx === 0 ? 0 : titleLineHeight;
+      return `<tspan x="${textX}" dy="${dy}">${escapeXML(line)}</tspan>`;
+    });
 
     parts.push(
-      `<text x="${layout.x + layout.width / 2}" y="${textY}" font-size="${fontSize}" font-weight="${fontWeight}" fill="${textColor}" text-anchor="middle">${escapeXML(node.text || 'Sin título')}</text>`
+      `<text x="${textX}" y="${firstLineBaselineY}" font-family="${fontFamily}" font-size="${fontSize}" font-weight="${fontWeight}" font-style="${fontStyle}" fill="${textColor}" text-anchor="${anchor}">${titleTspans.join('')}</text>`
     );
 
-    // Optional Body Text
-    if (node.body && !node.hideBody) {
-      const bodyFontSize = node.bodyFontSize || 11;
+    // Body lines
+    if (hasVisibleBody && bodyLines.length > 0) {
+      const bodyStartY = firstLineBaselineY + (titleLines.length - 1) * titleLineHeight + gapBetween + bodyFontSize * 0.85;
+      const bodyTspans = bodyLines.map((line, idx) => {
+        const dy = idx === 0 ? 0 : bodyLineHeight;
+        return `<tspan x="${textX}" dy="${dy}">${escapeXML(line)}</tspan>`;
+      });
       parts.push(
-        `<text x="${layout.x + layout.width / 2}" y="${textY + bodyFontSize + 6}" font-size="${bodyFontSize}" font-weight="400" fill="${textColor}" opacity="0.8" text-anchor="middle">${escapeXML(node.body)}</text>`
+        `<text x="${textX}" y="${bodyStartY}" font-family="${fontFamily}" font-size="${bodyFontSize}" font-weight="400" fill="${textColor}" opacity="0.82" text-anchor="${anchor}">${bodyTspans.join('')}</text>`
       );
+    }
+
+    // Tags rendering
+    if (hasVisibleTags && node.tags) {
+      const tagY = layout.y + layout.height - 18;
+      const tagHeight = 14;
+      const tagBg = isRoot ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.06)';
+      const tagTextColor = isRoot ? '#ffffff' : textColor;
+      
+      const tagPills: { label: string; w: number }[] = node.tags.map(t => ({
+        label: `#${t}`,
+        w: Math.min(80, Math.round(t.length * 5.6 + 12)),
+      }));
+      const totalTagsW = tagPills.reduce((acc, p) => acc + p.w + 4, -4);
+      let tagStartX = layout.x + Math.max(6, (layout.width - totalTagsW) / 2);
+
+      tagPills.forEach(p => {
+        if (tagStartX + p.w <= layout.x + layout.width - 6) {
+          parts.push(
+            `<rect x="${tagStartX}" y="${tagY}" width="${p.w}" height="${tagHeight}" rx="4" fill="${tagBg}" />`
+          );
+          parts.push(
+            `<text x="${tagStartX + p.w / 2}" y="${tagY + 10.5}" font-family="${fontFamily}" font-size="8.5" font-weight="600" fill="${tagTextColor}" text-anchor="middle" opacity="0.9">${escapeXML(p.label)}</text>`
+          );
+          tagStartX += p.w + 4;
+        }
+      });
     }
   });
   parts.push(`</g>`);
@@ -474,6 +802,19 @@ export function generatePrintHtml(mindMap: MindMap, options: PdfExportOptions): 
   const theme = THEMES[mindMap.themeId] || THEMES.default;
   const bgColor = options.includeBackground ? (theme.background || '#ffffff') : '#ffffff';
 
+  // Standard @page size rule:
+  // For standard paper sizes: size: a4 landscape; or size: letter portrait;
+  // For custom or poster: size: <width>mm <height>mm; (WITHOUT orientation suffix to prevent CSS syntax error)
+  const stdSize = options.paperSize.toLowerCase();
+  let pageSizeCss = '';
+  if (['a4', 'a3', 'letter', 'legal'].includes(stdSize)) {
+    pageSizeCss = `${stdSize} ${grid.effectiveOrientation}`;
+  } else {
+    pageSizeCss = `${grid.paperWidthMm}mm ${grid.paperHeightMm}mm`;
+  }
+
+  const marginMm = options.marginMm ?? 6;
+
   const parts: string[] = [];
 
   parts.push(`<!DOCTYPE html>
@@ -486,17 +827,20 @@ export function generatePrintHtml(mindMap: MindMap, options: PdfExportOptions): 
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     @page {
-      size: ${grid.paperWidthMm}mm ${grid.paperHeightMm}mm ${options.orientation};
-      margin: ${options.marginMm ?? 8}mm;
+      size: ${pageSizeCss};
+      margin: 0;
     }
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background: #f1f5f9;
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f8fafc;
       color: #0f172a;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -508,51 +852,91 @@ export function generatePrintHtml(mindMap: MindMap, options: PdfExportOptions): 
       background: ${bgColor};
       overflow: hidden;
       page-break-after: always;
+      break-after: page;
       display: flex;
       flex-direction: column;
-      margin: 12px auto;
+      margin: 16px auto;
+      padding: ${marginMm}mm;
       box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+      box-sizing: border-box;
+    }
+    .page-sheet:last-child {
+      page-break-after: avoid !important;
+      break-after: avoid !important;
     }
     @media print {
-      body {
-        background: transparent;
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: ${bgColor} !important;
+        overflow: hidden !important;
       }
       .page-sheet {
         margin: 0 !important;
         box-shadow: none !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        padding: ${marginMm}mm !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .page-sheet:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
       }
       .no-print {
         display: none !important;
       }
     }
     .sheet-header {
-      padding: 6px 14px;
+      padding: 4px 8px;
       border-bottom: 1px solid rgba(0,0,0,0.08);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
       color: #64748b;
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: rgba(255,255,255,0.7);
+      flex-shrink: 0;
+      margin-bottom: 4px;
+      border-radius: 4px;
     }
     .sheet-body {
-      flex: 1;
-      width: 100%;
-      height: 100%;
+      flex: 1 1 0% !important;
+      min-height: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
       position: relative;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sheet-body svg {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      display: block;
+      object-fit: contain;
     }
     .sheet-footer {
-      padding: 5px 14px;
+      padding: 4px 8px;
       border-top: 1px solid rgba(0,0,0,0.08);
-      font-size: 9px;
+      font-size: 8.5px;
       color: #94a3b8;
       display: flex;
       justify-content: space-between;
       background: rgba(255,255,255,0.7);
+      flex-shrink: 0;
+      margin-top: 4px;
+      border-radius: 4px;
     }
     /* Corner Cut Marks */
     .cut-mark {

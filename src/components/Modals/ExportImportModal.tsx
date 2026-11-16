@@ -4,8 +4,11 @@ import {
   exportToFreeplaneXML,
   importFromFreeplaneXML,
   exportToStandaloneHTML,
-  exportToMarkdown,
 } from '../../utils/freeplaneConverter';
+import {
+  exportToMarkdown as exportRichMarkdown,
+  exportToOPML,
+} from '../../utils/outlineExporter';
 import {
   FileCode,
   Globe,
@@ -14,6 +17,7 @@ import {
   Download,
   Sparkles,
   Printer,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { ModalBackdrop } from '../atoms/ModalBackdrop';
 import { ModalHeader } from '../molecules/ModalHeader';
@@ -24,6 +28,7 @@ interface ExportImportModalProps {
   onClose: () => void;
   onImportMap: (importedMap: MindMap) => void;
   onOpenPdfModal?: () => void;
+  onOpenImageModal?: (initialTab?: 'image' | 'outline') => void;
 }
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
@@ -32,6 +37,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   onClose,
   onImportMap,
   onOpenPdfModal,
+  onOpenImageModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'export' | 'import'>('export');
   const [importError, setImportError] = useState<string | null>(null);
@@ -67,9 +73,22 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   };
 
   const handleExportMarkdown = () => {
-    const md = exportToMarkdown(mindMap);
+    const md = exportRichMarkdown(mindMap, {
+      mode: 'headers',
+      includeNotes: true,
+      includeBody: true,
+      includeLinks: true,
+      includeTags: true,
+      includeConnectors: true,
+    });
     const safeTitle = mindMap.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'mapa_mental';
     downloadFile(md, `${safeTitle}.md`, 'text/markdown');
+  };
+
+  const handleExportOPML = () => {
+    const opml = exportToOPML(mindMap);
+    const safeTitle = mindMap.title.replace(/[^a-zA-Z0-9_-]/g, '_') || 'mapa_mental';
+    downloadFile(opml, `${safeTitle}.opml`, 'text/xml');
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,6 +196,41 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
               </div>
             )}
 
+            {/* 0.5. Imagen HD (PNG / JPEG / SVG) */}
+            {onOpenImageModal && (
+              <div className="p-4 rounded-xl border border-emerald-200/90 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800/60 hover:bg-emerald-50/80 transition-colors flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                    <ImageIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200">
+                        Imagen en Alta Resolución (PNG / JPEG)
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800">
+                        Retina 2x / 4x HD
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Exporta imágenes nítidas con fondo transparente o del lienzo para presentaciones de PowerPoint o Word.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenImageModal('image');
+                  }}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shrink-0"
+                >
+                  <ImageIcon className="w-3.5 h-3.5" />
+                  <span>Configurar Imagen...</span>
+                </button>
+              </div>
+            )}
+
             {/* 1. Freeplane .mm */}
             <div className="p-4 rounded-xl border border-amber-200/80 bg-amber-50/40 dark:bg-amber-950/20 dark:border-amber-800/60 hover:bg-amber-50/70 transition-colors flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -257,14 +311,25 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={handleExportMarkdown}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shrink-0"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Descargar .md</span>
-              </button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleExportOPML}
+                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs shadow-xs flex items-center gap-1 cursor-pointer active:scale-95 transition-all"
+                  title="Descargar esquema en formato estándar OPML 2.0"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>OPML</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportMarkdown}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Descargar .md</span>
+                </button>
+              </div>
             </div>
 
             {/* 4. JSON Backup */}

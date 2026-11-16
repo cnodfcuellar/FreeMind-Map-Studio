@@ -108,4 +108,29 @@ describe('PdfExportModal', () => {
 
     expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('permite cambiar margen de hoja y muestra opciones de margen', () => {
+    render(<PdfExportModal {...defaultProps} />);
+
+    expect(screen.getByText('Mínimo (4 mm)')).toBeDefined();
+    expect(screen.getByText('Estándar (8 mm)')).toBeDefined();
+
+    const minMarginBtn = screen.getByText('Mínimo (4 mm)').closest('button') as HTMLElement;
+    fireEvent.click(minMarginBtn);
+
+    expect(screen.getByText('4 mm')).toBeDefined();
+  });
+
+  it('muestra botón de orientación Auto y permite alternar a Auto', () => {
+    render(<PdfExportModal {...defaultProps} />);
+
+    const autoBtn = screen.getByText('Auto').closest('button') as HTMLElement;
+    expect(autoBtn).toBeDefined();
+
+    const portraitBtn = screen.getByText('Vertical (Retrato)').closest('button') as HTMLElement;
+    fireEvent.click(portraitBtn);
+
+    fireEvent.click(autoBtn);
+    expect(screen.getByText(/detectado/i)).toBeDefined();
+  });
 });

@@ -51,6 +51,7 @@ import {
   ArrowRight,
   Star,
   Check,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export type CommandCategory =
@@ -106,6 +107,7 @@ export interface CommandPaletteModalProps {
   onOpenSavedMaps: () => void;
   onOpenExportModal: () => void;
   onOpenPdfModal?: () => void;
+  onOpenImageModal?: (initialTab?: 'image' | 'outline') => void;
   onOpenImportModal: () => void;
   onOpenShortcuts: () => void;
   onOpenConnectorModal: () => void;
@@ -170,6 +172,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   onOpenSavedMaps,
   onOpenExportModal,
   onOpenPdfModal,
+  onOpenImageModal,
   onOpenImportModal,
   onOpenShortcuts,
   onOpenConnectorModal,
@@ -829,6 +832,28 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         icon: <Printer className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
         keywords: ['pdf', 'imprimir', 'vectorial', 'poster', 'mosaico', 'impresion', 'print'],
         action: () => onOpenPdfModal?.(),
+      },
+      {
+        id: 'file-image-export',
+        title: 'Exportar Imagen HD (PNG / JPEG / SVG)',
+        description: 'Exporta imagen nítida en 1x, 2x Retina o 4x Ultra HD con fondo transparente o del lienzo',
+        category: 'archivo',
+        categoryLabel: 'Archivo',
+        badge: '2x / 4x HD',
+        icon: <ImageIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />,
+        keywords: ['imagen', 'png', 'jpg', 'jpeg', 'svg', 'retina', 'transparente', 'foto', 'screenshot', 'captura'],
+        action: () => onOpenImageModal?.('image'),
+      },
+      {
+        id: 'file-outline-export',
+        title: 'Exportar Esquema de Texto (Markdown / OPML)',
+        description: 'Convierte el mapa en esquema Markdown (Notion / Obsidian) u OPML 2.0 estándar',
+        category: 'archivo',
+        categoryLabel: 'Archivo',
+        badge: 'Markdown / OPML',
+        icon: <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />,
+        keywords: ['markdown', 'opml', 'esquema', 'outline', 'notion', 'obsidian', 'logseq', 'texto', 'checklist', 'tareas'],
+        action: () => onOpenImageModal?.('outline'),
       },
       {
         id: 'file-export',
